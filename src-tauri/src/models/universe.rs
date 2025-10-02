@@ -36,7 +36,7 @@ pub struct Universe {
     pub tags: Option<Vec<String>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/")]
 #[serde(rename_all = "lowercase")]
 pub enum UniverseStatus {
@@ -45,7 +45,7 @@ pub enum UniverseStatus {
     Template,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/")]
 #[serde(rename_all = "kebab-case")]
 pub enum Genre {
@@ -60,7 +60,7 @@ pub enum Genre {
     Other,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/")]
 #[serde(rename_all = "lowercase")]
 pub enum Tone {
@@ -122,4 +122,105 @@ pub struct UpdateUniverseInput {
     pub icon: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_universe_serialization_round_trip() {
+        let universe = Universe {
+            id: "test-id".to_string(),
+            name: "Test Universe".to_string(),
+            description: "A test universe".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+            genre: Some(Genre::Fantasy),
+            tone: Some(Tone::Dark),
+            worldbuilding_notes: Some("Magic system notes".to_string()),
+            themes: Some(vec!["adventure".to_string(), "friendship".to_string()]),
+            status: UniverseStatus::Active,
+            color: Some("#FF5733".to_string()),
+            icon: Some("🌌".to_string()),
+            tags: Some(vec!["epic".to_string(), "series".to_string()]),
+        };
+
+        let json = serde_json::to_string(&universe).unwrap();
+        let deserialized: Universe = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(universe.id, deserialized.id);
+        assert_eq!(universe.name, deserialized.name);
+        assert_eq!(universe.genre, deserialized.genre);
+    }
+
+    #[test]
+    fn test_universe_with_optional_fields_none() {
+        let universe = Universe {
+            id: "test-id".to_string(),
+            name: "Minimal Universe".to_string(),
+            description: "A minimal universe".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+            genre: None,
+            tone: None,
+            worldbuilding_notes: None,
+            themes: None,
+            status: UniverseStatus::Active,
+            color: None,
+            icon: None,
+            tags: None,
+        };
+
+        let json = serde_json::to_string(&universe).unwrap();
+        let deserialized: Universe = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(universe.id, deserialized.id);
+        assert!(deserialized.genre.is_none());
+        assert!(deserialized.tags.is_none());
+    }
+
+    #[test]
+    fn test_genre_serialization() {
+        let genre = Genre::SciFi;
+        let json = serde_json::to_string(&genre).unwrap();
+        assert_eq!(json, "\"sci-fi\"");
+
+        let deserialized: Genre = serde_json::from_str(&json).unwrap();
+        assert!(matches!(deserialized, Genre::SciFi));
+    }
+
+    #[test]
+    fn test_universe_status_serialization() {
+        let status = UniverseStatus::Active;
+        let json = serde_json::to_string(&status).unwrap();
+        assert_eq!(json, "\"active\"");
+
+        let deserialized: UniverseStatus = serde_json::from_str(&json).unwrap();
+        assert!(matches!(deserialized, UniverseStatus::Active));
+    }
+
+    #[test]
+    fn test_universe_json_uses_camel_case() {
+        let universe = Universe {
+            id: "test".to_string(),
+            name: "Test".to_string(),
+            description: "Test".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+            genre: None,
+            tone: None,
+            worldbuilding_notes: Some("notes".to_string()),
+            themes: None,
+            status: UniverseStatus::Active,
+            color: None,
+            icon: None,
+            tags: None,
+        };
+
+        let json = serde_json::to_string(&universe).unwrap();
+        assert!(json.contains("createdAt"));
+        assert!(json.contains("updatedAt"));
+        assert!(json.contains("worldbuildingNotes"));
+    }
 }
