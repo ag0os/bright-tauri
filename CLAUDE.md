@@ -37,6 +37,7 @@ This is a brand new project building a creation app for writers and creators to 
 - **Binary Entry**: `src-tauri/src/main.rs` - Minimal entry point that calls `bright_tauri_lib::run()`
 - **Crate Name**: `bright_tauri_lib` (note the `_lib` suffix to avoid Windows conflicts)
 - **Domain Models**: Located in `src-tauri/src/models/` directory
+- **Database Layer**: SQLite database with migrations in `src-tauri/src/db/`
 
 ### Configuration
 - **Tauri Config**: `src-tauri/tauri.conf.json`
