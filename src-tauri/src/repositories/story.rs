@@ -123,6 +123,78 @@ impl StoryRepository {
         Ok(stories)
     }
 
+    /// Get all children of a parent story, ordered by story_order
+    pub fn list_children(db: &Database, parent_id: &str) -> Result<Vec<Story>> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let mut stmt = conn.prepare(
+            "SELECT id, universe_id, title, description, story_type, status, word_count,
+                    content, variation_group_id, variation_type, parent_variation_id,
+                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    notes, outline, target_word_count, story_order, tags, color, favorite,
+                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+             FROM stories
+             WHERE parent_story_id = ?1
+             ORDER BY story_order ASC, created_at ASC"
+        )?;
+
+        let stories = stmt.query_map(params![parent_id], Self::map_row_to_story)?
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(stories)
+    }
+
+    /// Get a parent story with all its children
+    pub fn get_with_children(db: &Database, id: &str) -> Result<(Story, Vec<Story>)> {
+        let parent = Self::find_by_id(db, id)?;
+        let children = Self::list_children(db, id)?;
+        Ok((parent, children))
+    }
+
+    /// Reorder children by updating their order fields
+    pub fn reorder_children(db: &Database, parent_id: &str, story_ids: Vec<String>) -> Result<()> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        // Start transaction
+        conn.execute("BEGIN TRANSACTION", [])?;
+
+        // Validate that all story_ids belong to the parent
+        for story_id in &story_ids {
+            let parent_check: Result<Option<String>, _> = conn.query_row(
+                "SELECT parent_story_id FROM stories WHERE id = ?1",
+                params![story_id],
+                |row| row.get(0),
+            );
+
+            match parent_check {
+                Ok(Some(pid)) if pid == parent_id => {},
+                Ok(Some(_)) | Ok(None) => {
+                    conn.execute("ROLLBACK", [])?;
+                    return Err(rusqlite::Error::QueryReturnedNoRows);
+                },
+                Err(e) => {
+                    conn.execute("ROLLBACK", [])?;
+                    return Err(e);
+                }
+            }
+        }
+
+        // Update order for each story
+        for (index, story_id) in story_ids.iter().enumerate() {
+            conn.execute(
+                "UPDATE stories SET story_order = ?1 WHERE id = ?2",
+                params![index as u32, story_id],
+            )?;
+        }
+
+        // Commit transaction
+        conn.execute("COMMIT", [])?;
+
+        Ok(())
+    }
+
     /// Update a Story
     pub fn update(db: &Database, id: &str, input: UpdateStoryInput) -> Result<Story> {
         let now = Utc::now().to_rfc3339();
