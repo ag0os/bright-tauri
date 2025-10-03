@@ -65,19 +65,59 @@ pub struct Story {
     pub staged_changes: bool,
 }
 
+impl Story {
+    /// Determine if this story should have its own Git repository
+    ///
+    /// # Rules:
+    /// - Containers (Novel, Screenplay, Collection) always get repos
+    /// - Standalone content (ShortStory, Episode, Poem without parent) get repos
+    /// - Children (Chapter, Scene) never get repos
+    /// - Series (grouping only) never gets repos
+    /// - Planning docs (Outline, Treatment) follow parent logic
+    pub fn should_have_git_repo(&self) -> bool {
+        match self.story_type {
+            // Containers always get repos
+            StoryType::Novel | StoryType::Screenplay | StoryType::Collection => true,
+
+            // Standalone content gets repos only if no parent
+            StoryType::ShortStory | StoryType::Episode | StoryType::Poem => {
+                self.parent_story_id.is_none()
+            },
+
+            // Children never get their own repos
+            StoryType::Chapter | StoryType::Scene => false,
+
+            // Planning docs follow parent logic
+            StoryType::Outline | StoryType::Treatment => {
+                self.parent_story_id.is_none()
+            },
+
+            // Series is just a grouping, no content
+            StoryType::Series => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/")]
 #[serde(rename_all = "kebab-case")]
 pub enum StoryType {
+    // Containers (optional parents for grouping)
     Novel,
-    ShortStory,
-    Script,
+    Series,
     Screenplay,
-    Episode,
+    Collection,
+
+    // Independent content (can exist alone OR have a parent)
     Chapter,
+    ShortStory,
+    Scene,
+    Episode,
     Poem,
-    Article,
-    Other,
+
+    // Planning docs
+    Outline,
+    Treatment,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -285,5 +325,164 @@ mod tests {
         assert!(json.contains("gitRepoPath"));
         assert!(json.contains("currentBranch"));
         assert!(json.contains("stagedChanges"));
+    }
+
+    #[test]
+    fn test_should_have_git_repo_containers() {
+        // Containers always get repos regardless of parent
+        let novel = Story {
+            story_type: StoryType::Novel,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(novel.should_have_git_repo());
+
+        let novel_with_parent = Story {
+            story_type: StoryType::Novel,
+            parent_story_id: Some("parent-123".to_string()),
+            ..create_test_story()
+        };
+        assert!(novel_with_parent.should_have_git_repo());
+
+        let screenplay = Story {
+            story_type: StoryType::Screenplay,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(screenplay.should_have_git_repo());
+
+        let collection = Story {
+            story_type: StoryType::Collection,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(collection.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_should_have_git_repo_standalone_content() {
+        // Standalone content gets repos only without parent
+        let short_story = Story {
+            story_type: StoryType::ShortStory,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(short_story.should_have_git_repo());
+
+        let short_story_with_parent = Story {
+            story_type: StoryType::ShortStory,
+            parent_story_id: Some("parent-123".to_string()),
+            ..create_test_story()
+        };
+        assert!(!short_story_with_parent.should_have_git_repo());
+
+        let episode = Story {
+            story_type: StoryType::Episode,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(episode.should_have_git_repo());
+
+        let poem = Story {
+            story_type: StoryType::Poem,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(poem.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_should_have_git_repo_children() {
+        // Children never get repos
+        let chapter = Story {
+            story_type: StoryType::Chapter,
+            parent_story_id: Some("novel-123".to_string()),
+            ..create_test_story()
+        };
+        assert!(!chapter.should_have_git_repo());
+
+        let scene = Story {
+            story_type: StoryType::Scene,
+            parent_story_id: Some("screenplay-123".to_string()),
+            ..create_test_story()
+        };
+        assert!(!scene.should_have_git_repo());
+
+        // Even without parent (edge case)
+        let orphan_chapter = Story {
+            story_type: StoryType::Chapter,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(!orphan_chapter.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_should_have_git_repo_series() {
+        // Series never gets repos (grouping only)
+        let series = Story {
+            story_type: StoryType::Series,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(!series.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_should_have_git_repo_planning_docs() {
+        // Planning docs follow parent logic
+        let outline = Story {
+            story_type: StoryType::Outline,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(outline.should_have_git_repo());
+
+        let outline_with_parent = Story {
+            story_type: StoryType::Outline,
+            parent_story_id: Some("parent-123".to_string()),
+            ..create_test_story()
+        };
+        assert!(!outline_with_parent.should_have_git_repo());
+
+        let treatment = Story {
+            story_type: StoryType::Treatment,
+            parent_story_id: None,
+            ..create_test_story()
+        };
+        assert!(treatment.should_have_git_repo());
+    }
+
+    fn create_test_story() -> Story {
+        Story {
+            id: "story-1".to_string(),
+            universe_id: "universe-1".to_string(),
+            title: "Test Story".to_string(),
+            description: "Test".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+            story_type: StoryType::Novel,
+            status: StoryStatus::Draft,
+            word_count: 0,
+            target_word_count: None,
+            content: "".to_string(),
+            notes: None,
+            outline: None,
+            order: None,
+            tags: None,
+            color: None,
+            favorite: None,
+            related_element_ids: None,
+            parent_story_id: None,
+            series_name: None,
+            last_edited_at: "2024-01-01T00:00:00Z".to_string(),
+            version: 1,
+            variation_group_id: "var-1".to_string(),
+            variation_type: VariationType::Original,
+            parent_variation_id: None,
+            git_repo_path: "".to_string(),
+            current_branch: "main".to_string(),
+            staged_changes: false,
+        }
     }
 }

@@ -1,9 +1,11 @@
 ---
 id: task-1
 title: Update StoryType enum with new types
-status: To Do
-assignee: []
+status: In Progress
+assignee:
+  - '@claude'
 created_date: '2025-10-03 19:23'
+updated_date: '2025-10-03 20:27'
 labels:
   - backend
   - story-hierarchy
