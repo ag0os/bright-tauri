@@ -42,3 +42,27 @@ pub fn update_story(
 pub fn delete_story(db: State<Database>, id: String) -> Result<(), String> {
     StoryRepository::delete(&db, &id).map_err(|e| e.to_string())
 }
+
+// Story hierarchy commands
+
+#[tauri::command]
+pub fn list_story_children(db: State<Database>, parent_id: String) -> Result<Vec<Story>, String> {
+    StoryRepository::list_children(&db, &parent_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn reorder_story_children(
+    db: State<Database>,
+    parent_id: String,
+    story_ids: Vec<String>,
+) -> Result<(), String> {
+    StoryRepository::reorder_children(&db, &parent_id, story_ids).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_story_with_children(
+    db: State<Database>,
+    id: String,
+) -> Result<(Story, Vec<Story>), String> {
+    StoryRepository::get_with_children(&db, &id).map_err(|e| e.to_string())
+}
