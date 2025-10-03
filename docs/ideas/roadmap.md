@@ -12,14 +12,19 @@ A creation app for writers and creators to build series of books, scripts, or an
 - SQLite database with migrations
 - TypeScript type generation via ts-rs
 
-## Roadmap
-
 ### Backend - Repository Layer
-- [ ] Universe CRUD operations
-- [ ] Story CRUD operations
-- [ ] Element CRUD operations
-- [ ] Element relationship queries (bidirectional)
-- [ ] Story variation queries (get all variations in a group)
+- ✅ Universe CRUD operations
+- ✅ Story CRUD operations
+- ✅ Element CRUD operations
+- ✅ Element relationship queries (bidirectional)
+- ✅ Story variation queries (get all variations in a group)
+
+### Backend - Tauri Commands
+- ✅ Universe management commands (create, get, list, update, delete)
+- ✅ Story management commands (create, get, list, list variations, update, delete)
+- ✅ Element management commands (create, get, list, list by type, get related, update, delete)
+
+## Roadmap
 
 ### Backend - Git Integration
 - [ ] Initialize Git repo for each story/variation group
@@ -35,10 +40,7 @@ A creation app for writers and creators to build series of books, scripts, or an
 - [ ] Universe-wide search (stories, elements)
 - [ ] Export functionality (Universe → various formats)
 
-### Backend - Tauri Commands
-- [ ] Universe management commands
-- [ ] Story management commands
-- [ ] Element management commands
+### Backend - Additional Commands
 - [ ] Git operations commands
 - [ ] Search commands
 
