@@ -1,5 +1,7 @@
+mod commands;
 mod db;
 mod models;
+mod repositories;
 
 use tauri::Manager;
 
@@ -38,7 +40,30 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            // Universe commands
+            commands::create_universe,
+            commands::get_universe,
+            commands::list_universes,
+            commands::update_universe,
+            commands::delete_universe,
+            // Story commands
+            commands::create_story,
+            commands::get_story,
+            commands::list_stories_by_universe,
+            commands::list_story_variations,
+            commands::update_story,
+            commands::delete_story,
+            // Element commands
+            commands::create_element,
+            commands::get_element,
+            commands::list_elements_by_universe,
+            commands::list_elements_by_type,
+            commands::get_related_elements,
+            commands::update_element,
+            commands::delete_element,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
