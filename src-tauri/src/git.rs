@@ -46,6 +46,36 @@ impl From<std::io::Error> for GitServiceError {
 /// Result type alias for Git operations
 pub type GitResult<T> = Result<T, GitServiceError>;
 
+/// Represents a file change in a diff
+#[derive(Debug, Clone)]
+pub struct FileChange {
+    pub path: String,
+    pub status: ChangeStatus,
+    pub diff: Option<String>,
+}
+
+/// Status of a file change
+#[derive(Debug, Clone, PartialEq)]
+pub enum ChangeStatus {
+    Added,
+    Modified,
+    Deleted,
+}
+
+/// Result of a diff operation between two branches
+#[derive(Debug)]
+pub struct DiffResult {
+    pub changes: Vec<FileChange>,
+}
+
+/// Result of a merge operation
+#[derive(Debug)]
+pub struct MergeResult {
+    pub success: bool,
+    pub conflicts: Vec<String>,
+    pub message: String,
+}
+
 /// Service for managing Git operations on story repositories
 pub struct GitService;
 
@@ -293,6 +323,181 @@ impl GitService {
         repo.checkout_tree(commit.as_object(), None)?;
 
         Ok(())
+    }
+
+    /// Get diff between two branches
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `branch_a` - First branch to compare
+    /// * `branch_b` - Second branch to compare
+    ///
+    /// # Returns
+    /// DiffResult with file changes between branches
+    pub fn diff_branches(
+        repo_path: &Path,
+        branch_a: &str,
+        branch_b: &str,
+    ) -> GitResult<DiffResult> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Get branch references
+        let branch_a_ref = repo.find_branch(branch_a, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", branch_a)
+            ))?;
+
+        let branch_b_ref = repo.find_branch(branch_b, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", branch_b)
+            ))?;
+
+        // Get trees from branches
+        let tree_a = branch_a_ref.get().peel_to_tree()?;
+        let tree_b = branch_b_ref.get().peel_to_tree()?;
+
+        // Create diff
+        let diff = repo.diff_tree_to_tree(Some(&tree_a), Some(&tree_b), None)?;
+
+        let mut changes = Vec::new();
+
+        // Iterate over deltas to collect changes
+        for delta in diff.deltas() {
+            let status = match delta.status() {
+                git2::Delta::Added => ChangeStatus::Added,
+                git2::Delta::Modified => ChangeStatus::Modified,
+                git2::Delta::Deleted => ChangeStatus::Deleted,
+                _ => continue, // Skip other statuses
+            };
+
+            let path = delta.new_file().path()
+                .or_else(|| delta.old_file().path())
+                .map(|p| p.to_string_lossy().to_string())
+                .unwrap_or_else(|| "unknown".to_string());
+
+            changes.push(FileChange {
+                path,
+                status,
+                diff: None, // Simplified - not including full diff content
+            });
+        }
+
+        Ok(DiffResult { changes })
+    }
+
+    /// Merge one branch into another
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `from_branch` - Branch to merge from
+    /// * `into_branch` - Branch to merge into
+    ///
+    /// # Returns
+    /// MergeResult indicating success or conflicts
+    pub fn merge_branches(
+        repo_path: &Path,
+        from_branch: &str,
+        into_branch: &str,
+    ) -> GitResult<MergeResult> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Get branch references
+        let from_ref = repo.find_branch(from_branch, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", from_branch)
+            ))?;
+
+        let into_ref = repo.find_branch(into_branch, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", into_branch)
+            ))?;
+
+        // Checkout the into_branch first
+        Self::checkout_branch(repo_path, into_branch)?;
+
+        // Get the annotated commit from the from_branch
+        let from_commit = from_ref.get().peel_to_commit()?;
+        let annotated_commit = repo.find_annotated_commit(from_commit.id())?;
+
+        // Perform merge analysis
+        let (analysis, _) = repo.merge_analysis(&[&annotated_commit])?;
+
+        if analysis.is_up_to_date() {
+            return Ok(MergeResult {
+                success: true,
+                conflicts: vec![],
+                message: "Already up-to-date".to_string(),
+            });
+        }
+
+        if analysis.is_fast_forward() {
+            // Fast-forward merge
+            let into_ref_name = into_ref.get().name().unwrap();
+            let mut reference = repo.find_reference(into_ref_name)?;
+            reference.set_target(from_commit.id(), "Fast-forward merge")?;
+            repo.checkout_head(None)?;
+
+            return Ok(MergeResult {
+                success: true,
+                conflicts: vec![],
+                message: format!("Fast-forward merge of {} into {}", from_branch, into_branch),
+            });
+        }
+
+        // Normal merge
+        repo.merge(&[&annotated_commit], None, None)?;
+
+        // Check for conflicts
+        let index = repo.index()?;
+        if index.has_conflicts() {
+            let mut conflicts = Vec::new();
+            for entry in index.conflicts()? {
+                if let Ok(conflict) = entry {
+                    if let Some(our) = conflict.our {
+                        if let Some(path) = std::str::from_utf8(&our.path).ok() {
+                            conflicts.push(path.to_string());
+                        }
+                    }
+                }
+            }
+
+            return Ok(MergeResult {
+                success: false,
+                conflicts,
+                message: "Merge has conflicts".to_string(),
+            });
+        }
+
+        // Create merge commit
+        let mut index = repo.index()?;
+        let tree_id = index.write_tree()?;
+        let tree = repo.find_tree(tree_id)?;
+        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let into_commit = into_ref.get().peel_to_commit()?;
+
+        repo.commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            &format!("Merge {} into {}", from_branch, into_branch),
+            &tree,
+            &[&into_commit, &from_commit],
+        )?;
+
+        // Clean up merge state
+        repo.cleanup_state()?;
+
+        Ok(MergeResult {
+            success: true,
+            conflicts: vec![],
+            message: format!("Successfully merged {} into {}", from_branch, into_branch),
+        })
     }
 }
 
@@ -649,5 +854,137 @@ mod tests {
             }
             _ => panic!("Expected InvalidOperation error"),
         }
+    }
+
+    #[test]
+    fn test_diff_branches_shows_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-diff";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Commit a file on current branch
+        GitService::commit_file(&repo_path, "file1.txt", "Content A", "Add file1").unwrap();
+
+        // Create feature branch
+        GitService::create_branch(&repo_path, &current_branch, "feature").unwrap();
+        GitService::checkout_branch(&repo_path, "feature").unwrap();
+
+        // Make changes on feature branch
+        GitService::commit_file(&repo_path, "file2.txt", "Content B", "Add file2").unwrap();
+        GitService::commit_file(&repo_path, "file1.txt", "Content A Modified", "Modify file1").unwrap();
+
+        // Get diff
+        let diff = GitService::diff_branches(&repo_path, &current_branch, "feature").unwrap();
+
+        // Verify changes
+        assert_eq!(diff.changes.len(), 2);
+        let has_added = diff.changes.iter().any(|c| c.path == "file2.txt" && c.status == ChangeStatus::Added);
+        let has_modified = diff.changes.iter().any(|c| c.path == "file1.txt" && c.status == ChangeStatus::Modified);
+        assert!(has_added);
+        assert!(has_modified);
+    }
+
+    #[test]
+    fn test_merge_branches_fast_forward() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-merge-ff";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Create feature branch and add commits
+        GitService::create_branch(&repo_path, &current_branch, "feature").unwrap();
+        GitService::checkout_branch(&repo_path, "feature").unwrap();
+        GitService::commit_file(&repo_path, "feature.txt", "Feature content", "Add feature").unwrap();
+
+        // Merge feature into main (fast-forward)
+        let result = GitService::merge_branches(&repo_path, "feature", &current_branch).unwrap();
+
+        assert!(result.success);
+        assert!(result.conflicts.is_empty());
+        assert!(result.message.contains("Fast-forward"));
+    }
+
+    #[test]
+    fn test_merge_branches_already_up_to_date() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-merge-uptodate";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Create feature branch (no new commits)
+        GitService::create_branch(&repo_path, &current_branch, "feature").unwrap();
+
+        // Try to merge feature into main (already up-to-date)
+        let result = GitService::merge_branches(&repo_path, "feature", &current_branch).unwrap();
+
+        assert!(result.success);
+        assert!(result.message.contains("up-to-date"));
+    }
+
+    #[test]
+    fn test_diff_branches_fails_if_branch_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-diff-invalid";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Try to diff with nonexistent branch
+        let result = GitService::diff_branches(&repo_path, &current_branch, "nonexistent");
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_merge_branches_fails_if_branch_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-merge-invalid";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Try to merge from nonexistent branch
+        let result = GitService::merge_branches(&repo_path, "nonexistent", &current_branch);
+
+        assert!(result.is_err());
     }
 }
