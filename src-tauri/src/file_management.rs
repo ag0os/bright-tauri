@@ -6,6 +6,8 @@
 
 use crate::file_naming;
 use crate::git::{GitResult, GitService};
+use crate::models::Story;
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -207,6 +209,103 @@ pub fn reorder_story_files(
     GitService::commit_all(repo_path, &commit_message)?;
 
     Ok(renames)
+}
+
+/// Story metadata for storage in Git repository
+///
+/// This struct contains key story information that is stored as metadata.json
+/// in each story's Git repository. It provides context about the story without
+/// including the full content.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct StoryMetadata {
+    pub id: String,
+    pub universe_id: String,
+    pub title: String,
+    pub description: String,
+    pub story_type: String,
+    pub status: String,
+    pub created_at: String,
+    pub updated_at: String,
+    pub word_count: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_word_count: Option<u32>,
+}
+
+impl StoryMetadata {
+    /// Create metadata from a Story
+    pub fn from_story(story: &Story) -> Self {
+        StoryMetadata {
+            id: story.id.clone(),
+            universe_id: story.universe_id.clone(),
+            title: story.title.clone(),
+            description: story.description.clone(),
+            story_type: format!("{:?}", story.story_type),
+            status: format!("{:?}", story.status),
+            created_at: story.created_at.clone(),
+            updated_at: story.updated_at.clone(),
+            word_count: story.word_count,
+            target_word_count: story.target_word_count,
+        }
+    }
+}
+
+/// Write metadata.json file to a Git repository
+///
+/// Creates or updates the metadata.json file in the repository root with
+/// story information. The file is formatted as pretty-printed JSON for
+/// human readability and committed to Git.
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `story` - The story to generate metadata from
+///
+/// # Returns
+/// The relative path to the metadata file ("metadata.json")
+///
+/// # Errors
+/// Returns an error if:
+/// - JSON serialization fails
+/// - File write fails
+/// - Git commit fails
+pub fn write_metadata_file(
+    repo_path: &Path,
+    story: &Story,
+) -> FileManagementResult<String> {
+    let metadata = StoryMetadata::from_story(story);
+
+    // Serialize to pretty JSON
+    let json = serde_json::to_string_pretty(&metadata)
+        .map_err(|e| FileManagementError::Io(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to serialize metadata: {}", e),
+        )))?;
+
+    let metadata_path = repo_path.join("metadata.json");
+    fs::write(&metadata_path, &json)?;
+
+    // Commit to Git
+    let commit_message = format!("Update metadata for story: {}", story.title);
+    GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
+
+    Ok("metadata.json".to_string())
+}
+
+/// Update metadata.json file in a Git repository
+///
+/// This is an alias for write_metadata_file, as the operation is the same
+/// whether creating or updating the metadata file.
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `story` - The story with updated metadata
+///
+/// # Returns
+/// The relative path to the metadata file ("metadata.json")
+pub fn update_metadata_file(
+    repo_path: &Path,
+    story: &Story,
+) -> FileManagementResult<String> {
+    write_metadata_file(repo_path, story)
 }
 
 #[cfg(test)]
@@ -509,5 +608,165 @@ mod tests {
 
         let content5 = fs::read_to_string(repo_path.join("005-chapter-1.md")).unwrap();
         assert_eq!(content5, "Content 1");
+    }
+
+    // Helper function to create a test Story
+    fn create_test_story() -> Story {
+        use crate::models::{StoryStatus, StoryType, VariationType};
+        Story {
+            id: "test-story-123".to_string(),
+            universe_id: "universe-456".to_string(),
+            title: "Test Story".to_string(),
+            description: "A test story description".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            story_type: StoryType::Novel,
+            status: StoryStatus::InProgress,
+            word_count: 1000,
+            target_word_count: Some(50000),
+            content: "Story content".to_string(),
+            notes: Some("Story notes".to_string()),
+            outline: None,
+            order: None,
+            tags: None,
+            color: None,
+            favorite: None,
+            related_element_ids: None,
+            parent_story_id: None,
+            series_name: None,
+            last_edited_at: "2024-01-02T00:00:00Z".to_string(),
+            version: 1,
+            variation_group_id: "var-group-789".to_string(),
+            variation_type: VariationType::Original,
+            parent_variation_id: None,
+            git_repo_path: String::new(),
+            current_branch: "main".to_string(),
+            staged_changes: false,
+        }
+    }
+
+    #[test]
+    fn test_write_metadata_file_creates_json() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        let filename = write_metadata_file(&repo_path, &story).unwrap();
+
+        assert_eq!(filename, "metadata.json");
+
+        // Verify file exists
+        let metadata_path = repo_path.join("metadata.json");
+        assert!(metadata_path.exists());
+
+        // Verify content is valid JSON
+        let json_content = fs::read_to_string(&metadata_path).unwrap();
+        let metadata: StoryMetadata = serde_json::from_str(&json_content).unwrap();
+
+        assert_eq!(metadata.id, "test-story-123");
+        assert_eq!(metadata.title, "Test Story");
+        assert_eq!(metadata.universe_id, "universe-456");
+        assert_eq!(metadata.word_count, 1000);
+        assert_eq!(metadata.target_word_count, Some(50000));
+    }
+
+    #[test]
+    fn test_write_metadata_file_pretty_printed() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Read the file content
+        let metadata_path = repo_path.join("metadata.json");
+        let json_content = fs::read_to_string(&metadata_path).unwrap();
+
+        // Verify it's pretty-printed (has newlines and indentation)
+        assert!(json_content.contains('\n'));
+        assert!(json_content.contains("  ")); // Has indentation
+
+        // Verify it's valid JSON
+        let _metadata: StoryMetadata = serde_json::from_str(&json_content).unwrap();
+    }
+
+    #[test]
+    fn test_write_metadata_file_committed_to_git() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Get git history and verify commit was created
+        let history = {
+            let repo = git2::Repository::open(&repo_path).unwrap();
+            let head_name = repo.head().unwrap().shorthand().unwrap().to_string();
+            GitService::get_history(&repo_path, &head_name).unwrap()
+        };
+
+        // Should have 2 commits: initial + metadata
+        assert_eq!(history.len(), 2);
+        assert!(history[0].message.contains("Update metadata"));
+        assert!(history[0].message.contains("Test Story"));
+    }
+
+    #[test]
+    fn test_update_metadata_file_updates_existing() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let mut story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Update story
+        story.title = "Updated Title".to_string();
+        story.word_count = 2000;
+        update_metadata_file(&repo_path, &story).unwrap();
+
+        // Read metadata and verify it's updated
+        let metadata_path = repo_path.join("metadata.json");
+        let json_content = fs::read_to_string(&metadata_path).unwrap();
+        let metadata: StoryMetadata = serde_json::from_str(&json_content).unwrap();
+
+        assert_eq!(metadata.title, "Updated Title");
+        assert_eq!(metadata.word_count, 2000);
+    }
+
+    #[test]
+    fn test_story_metadata_from_story() {
+        let story = create_test_story();
+        let metadata = StoryMetadata::from_story(&story);
+
+        assert_eq!(metadata.id, story.id);
+        assert_eq!(metadata.universe_id, story.universe_id);
+        assert_eq!(metadata.title, story.title);
+        assert_eq!(metadata.description, story.description);
+        assert_eq!(metadata.created_at, story.created_at);
+        assert_eq!(metadata.updated_at, story.updated_at);
+        assert_eq!(metadata.word_count, story.word_count);
+        assert_eq!(metadata.target_word_count, story.target_word_count);
+    }
+
+    #[test]
+    fn test_story_metadata_serialization() {
+        let metadata = StoryMetadata {
+            id: "test-123".to_string(),
+            universe_id: "uni-456".to_string(),
+            title: "Test".to_string(),
+            description: "Desc".to_string(),
+            story_type: "Book".to_string(),
+            status: "InProgress".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            word_count: 1000,
+            target_word_count: Some(50000),
+        };
+
+        // Serialize and deserialize
+        let json = serde_json::to_string_pretty(&metadata).unwrap();
+        let deserialized: StoryMetadata = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(metadata, deserialized);
     }
 }
