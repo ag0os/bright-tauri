@@ -1,9 +1,10 @@
 ---
 id: task-11
 title: Implement commit_file and commit_all methods
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-10-03 19:24'
+updated_date: '2025-10-06 20:21'
 labels:
   - backend
   - git

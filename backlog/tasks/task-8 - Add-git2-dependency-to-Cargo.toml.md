@@ -1,9 +1,10 @@
 ---
 id: task-8
 title: Add git2 dependency to Cargo.toml
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-10-03 19:23'
+updated_date: '2025-10-06 20:21'
 labels:
   - backend
   - git

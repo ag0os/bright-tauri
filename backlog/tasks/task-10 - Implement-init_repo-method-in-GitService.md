@@ -1,9 +1,10 @@
 ---
 id: task-10
 title: Implement init_repo method in GitService
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-10-03 19:23'
+updated_date: '2025-10-06 20:21'
 labels:
   - backend
   - git
