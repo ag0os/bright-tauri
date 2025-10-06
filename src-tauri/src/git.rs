@@ -1,7 +1,9 @@
 use git2::{Repository, Oid, Signature, Error as GitError};
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use std::fmt;
 use std::fs;
+use ts_rs::TS;
 
 /// Custom error type for Git operations
 #[derive(Debug)]
@@ -47,7 +49,8 @@ impl From<std::io::Error> for GitServiceError {
 pub type GitResult<T> = Result<T, GitServiceError>;
 
 /// Represents a file change in a diff
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
 pub struct FileChange {
     pub path: String,
     pub status: ChangeStatus,
@@ -55,7 +58,8 @@ pub struct FileChange {
 }
 
 /// Status of a file change
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
 pub enum ChangeStatus {
     Added,
     Modified,
@@ -63,13 +67,15 @@ pub enum ChangeStatus {
 }
 
 /// Result of a diff operation between two branches
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
 pub struct DiffResult {
     pub changes: Vec<FileChange>,
 }
 
 /// Result of a merge operation
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
 pub struct MergeResult {
     pub success: bool,
     pub conflicts: Vec<String>,
@@ -77,7 +83,8 @@ pub struct MergeResult {
 }
 
 /// Information about a commit in the history
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
 pub struct CommitInfo {
     pub hash: String,
     pub message: String,

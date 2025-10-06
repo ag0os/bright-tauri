@@ -68,6 +68,16 @@ pub fn run() {
             commands::get_related_elements,
             commands::update_element,
             commands::delete_element,
+            // Git commands
+            commands::git_init_repo,
+            commands::git_commit_file,
+            commands::git_commit_all,
+            commands::git_create_branch,
+            commands::git_checkout_branch,
+            commands::git_diff_branches,
+            commands::git_merge_branches,
+            commands::git_get_history,
+            commands::git_restore_commit,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
