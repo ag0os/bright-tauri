@@ -1,9 +1,10 @@
 ---
 id: task-7
 title: Update TypeScript types for story hierarchy
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-10-03 19:23'
+updated_date: '2025-10-06 16:00'
 labels:
   - frontend
   - typescript

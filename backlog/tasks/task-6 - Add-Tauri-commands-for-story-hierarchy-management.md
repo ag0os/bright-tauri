@@ -1,9 +1,10 @@
 ---
 id: task-6
 title: Add Tauri commands for story hierarchy management
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-10-03 19:23'
+updated_date: '2025-10-06 16:00'
 labels:
   - backend
   - story-hierarchy
