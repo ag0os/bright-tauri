@@ -3,6 +3,37 @@ id: doc-1
 title: Story Hierarchy and Git Integration Design
 type: design
 created_date: '2025-10-03 19:08'
+updated_date: '2025-10-06 20:56'
+---
+
+## Implementation Status
+
+**Last Updated:** 2025-10-06
+
+### Summary
+- ✅ **Phase 1: Story Hierarchy** - COMPLETE (7/7 tasks)
+- ✅ **Phase 2: Git Integration** - COMPLETE (8/8 tasks)
+- 🚧 **Phase 3: File Management** - IN PROGRESS (4/5 tasks)
+- ⏳ **Phase 4: Frontend UI** - NOT STARTED (0/6 tasks)
+
+### What's Working
+- Full story hierarchy support (parent/child relationships, ordering)
+- Complete Git service (init, commit, branch, merge, diff, history)
+- File naming strategy with order-based prefixes
+- File creation and management in Git repos
+- File reordering with conflict-free two-phase rename
+- Metadata.json generation and updates
+- All backend Tauri commands registered and functional
+- TypeScript types auto-generated from Rust
+
+### What's Left
+- **Phase 3:** Auto-commit on save with debouncing (task-20, LOW priority)
+- **Phase 4:** All frontend UI components (tasks 21-26)
+
+### Branch Status
+- `main` - Contains Phase 1 & 2 (Story Hierarchy + Git Integration)
+- `feature/file-management` - Contains Phase 3 (4/5 tasks complete)
+
 ---
 
 ## Overview
@@ -402,44 +433,67 @@ impl GitService {
 
 ## Implementation Checklist
 
-### Phase 1: Story Hierarchy
-- [ ] Update StoryType enum with new types
-- [ ] Add `should_have_git_repo()` logic
-- [ ] Implement `list_children()` repository method
-- [ ] Implement `reorder_children()` repository method
-- [ ] Implement `get_with_children()` repository method
-- [ ] Add Tauri commands for chapter management
-- [ ] Update TypeScript types
+### Phase 1: Story Hierarchy ✅ COMPLETE
+- [x] Update StoryType enum with new types (task-1)
+- [x] Add `should_have_git_repo()` logic (task-2)
+- [x] Implement `list_children()` repository method (task-3)
+- [x] Implement `reorder_children()` repository method (task-4)
+- [x] Implement `get_with_children()` repository method (task-5)
+- [x] Add Tauri commands for chapter management (tasks 6-7)
+- [x] Update TypeScript types (auto-generated via ts-rs)
 
-### Phase 2: Git Integration
-- [ ] Add git2 dependency
-- [ ] Create GitService module
-- [ ] Implement `init_repo()`
-- [ ] Implement `commit_file()` and `commit_all()`
-- [ ] Implement branch operations
-- [ ] Implement diff/merge operations
-- [ ] Implement history browsing
-- [ ] Add Tauri commands for Git operations
+### Phase 2: Git Integration ✅ COMPLETE
+- [x] Add git2 dependency (task-8)
+- [x] Create GitService module (task-9)
+- [x] Implement `init_repo()` (task-10)
+- [x] Implement `commit_file()` and `commit_all()` (task-11)
+- [x] Implement branch operations (task-12)
+- [x] Implement diff/merge operations (task-13)
+- [x] Implement history browsing (task-14)
+- [x] Add Tauri commands for Git operations (task-15)
 
-### Phase 3: File Management
-- [ ] Implement file naming strategy (001-chapter.md)
-- [ ] Implement file creation in Git repos
-- [ ] Implement file reordering/renaming
-- [ ] Implement metadata.json handling
-- [ ] Add auto-commit on save (debounced)
+### Phase 3: File Management 🚧 IN PROGRESS (4/5)
+- [x] Implement file naming strategy (001-chapter.md) (task-16)
+- [x] Implement file creation in Git repos (task-17)
+- [x] Implement file reordering/renaming (task-18)
+- [x] Implement metadata.json handling (task-19)
+- [ ] Add auto-commit on save (debounced) (task-20, LOW priority)
 
-### Phase 4: Frontend
-- [ ] Chapter/child story management UI
-- [ ] Reordering interface (drag-and-drop)
-- [ ] Branch management UI
-- [ ] Diff viewer
-- [ ] Merge conflict resolution UI
-- [ ] History timeline viewer
+### Phase 4: Frontend ⏳ NOT STARTED (0/6)
+- [ ] Chapter/child story management UI (task-21)
+- [ ] Reordering interface (drag-and-drop) (task-22)
+- [ ] Branch management UI (task-23)
+- [ ] Diff viewer (task-24)
+- [ ] Merge conflict resolution UI (task-25)
+- [ ] History timeline viewer (task-26)
 
-## Open Questions
+## Implementation Decisions Made
 
-1. **Commit Frequency**: Auto-commit every N seconds when changed, or only on manual save?
-2. **File Naming**: Use order-based names (001-chapter.md) or slug-based (the-beginning.md)?
-3. **Merge Conflicts**: Auto-resolve (take newer), or show UI for manual resolution?
-4. **History Depth**: Keep all history forever, or prune old commits after some time?
+### ✅ Resolved Questions
+
+1. **File Naming**: ✅ **Order-based with slugified titles** - Format: `{order:03}-{slugified-title}.md`
+   - Example: `001-the-beginning.md`, `042-the-final-battle.md`
+   - Implemented in `file_naming.rs` with slugify function
+   - Supports reordering with two-phase rename strategy
+
+2. **Commit Strategy**: ✅ **Manual commits for now**
+   - Task-20 (auto-commit with debouncing) deferred as LOW priority
+   - Can be added later when frontend integration is ready
+
+3. **Metadata Storage**: ✅ **Pretty-printed JSON in repo root**
+   - `metadata.json` contains story id, title, type, status, dates, word counts
+   - Human-readable formatting for manual inspection
+   - Committed to Git with story changes
+
+### ⏳ Open Questions
+
+1. **Merge Conflicts**: Auto-resolve (take newer), or show UI for manual resolution?
+   - UI components planned (task-25) but not implemented yet
+
+2. **History Depth**: Keep all history forever, or prune old commits after some time?
+   - Keeping all history for now (Git is efficient with storage)
+   - Can add pruning later if needed
+
+3. **Commit Frequency** (task-20): Auto-commit every N seconds when changed, or only on manual save?
+   - Deferred to later phase when frontend integration is ready
 
