@@ -76,6 +76,15 @@ pub struct MergeResult {
     pub message: String,
 }
 
+/// Information about a commit in the history
+#[derive(Debug, Clone)]
+pub struct CommitInfo {
+    pub hash: String,
+    pub message: String,
+    pub author: String,
+    pub timestamp: String,
+}
+
 /// Service for managing Git operations on story repositories
 pub struct GitService;
 
@@ -498,6 +507,92 @@ impl GitService {
             conflicts: vec![],
             message: format!("Successfully merged {} into {}", from_branch, into_branch),
         })
+    }
+
+    /// Get commit history for a branch
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `branch` - Branch to get history from
+    ///
+    /// # Returns
+    /// Vec of CommitInfo ordered from newest to oldest
+    pub fn get_history(repo_path: &Path, branch: &str) -> GitResult<Vec<CommitInfo>> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Get branch reference
+        let branch_ref = repo.find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", branch)
+            ))?;
+
+        // Get the commit the branch points to
+        let commit = branch_ref.get().peel_to_commit()?;
+
+        let mut commits = Vec::new();
+        let mut revwalk = repo.revwalk()?;
+        revwalk.push(commit.id())?;
+
+        // Walk through commits
+        for oid in revwalk {
+            let oid = oid?;
+            let commit = repo.find_commit(oid)?;
+
+            commits.push(CommitInfo {
+                hash: oid.to_string(),
+                message: commit.message().unwrap_or("").to_string(),
+                author: commit.author().name().unwrap_or("Unknown").to_string(),
+                timestamp: commit.time().seconds().to_string(),
+            });
+        }
+
+        Ok(commits)
+    }
+
+    /// Restore repository to a specific commit
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `commit_hash` - Hash of the commit to restore
+    ///
+    /// # Returns
+    /// Success or error
+    pub fn restore_commit(repo_path: &Path, commit_hash: &str) -> GitResult<()> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Check for uncommitted changes
+        let statuses = repo.statuses(None)?;
+        if !statuses.is_empty() {
+            return Err(GitServiceError::InvalidOperation(
+                "Cannot restore commit: uncommitted changes exist".to_string()
+            ));
+        }
+
+        // Parse commit hash
+        let oid = Oid::from_str(commit_hash)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Invalid commit hash: {}", commit_hash)
+            ))?;
+
+        // Find the commit
+        let commit = repo.find_commit(oid)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Commit not found: {}", commit_hash)
+            ))?;
+
+        // Checkout the commit
+        repo.checkout_tree(commit.as_object(), None)?;
+
+        // Update HEAD to point to the commit (detached HEAD state)
+        repo.set_head_detached(oid)?;
+
+        Ok(())
     }
 }
 
@@ -984,6 +1079,148 @@ mod tests {
 
         // Try to merge from nonexistent branch
         let result = GitService::merge_branches(&repo_path, "nonexistent", &current_branch);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_get_history_returns_commits() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-history";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Add some commits
+        GitService::commit_file(&repo_path, "file1.txt", "Content 1", "First commit").unwrap();
+        GitService::commit_file(&repo_path, "file2.txt", "Content 2", "Second commit").unwrap();
+        GitService::commit_file(&repo_path, "file3.txt", "Content 3", "Third commit").unwrap();
+
+        // Get history
+        let history = GitService::get_history(&repo_path, &current_branch).unwrap();
+
+        // Should have 4 commits (initial + 3 new)
+        assert_eq!(history.len(), 4);
+
+        // Verify order (newest first)
+        assert!(history[0].message.contains("Third commit"));
+        assert!(history[1].message.contains("Second commit"));
+        assert!(history[2].message.contains("First commit"));
+        assert!(history[3].message.contains("Initial commit"));
+
+        // Verify commit info structure
+        assert!(!history[0].hash.is_empty());
+        assert!(!history[0].author.is_empty());
+        assert!(!history[0].timestamp.is_empty());
+    }
+
+    #[test]
+    fn test_restore_commit_restores_to_previous_state() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-restore";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Add commits
+        GitService::commit_file(&repo_path, "file.txt", "Version 1", "Add file").unwrap();
+        let history = GitService::get_history(&repo_path, &current_branch).unwrap();
+        let commit_hash = history[0].hash.clone();
+
+        GitService::commit_file(&repo_path, "file.txt", "Version 2", "Update file").unwrap();
+
+        // Verify current content
+        let content = fs::read_to_string(repo_path.join("file.txt")).unwrap();
+        assert_eq!(content, "Version 2");
+
+        // Restore to previous commit
+        GitService::restore_commit(&repo_path, &commit_hash).unwrap();
+
+        // Verify restored content
+        let content = fs::read_to_string(repo_path.join("file.txt")).unwrap();
+        assert_eq!(content, "Version 1");
+    }
+
+    #[test]
+    fn test_restore_commit_fails_with_invalid_hash() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-restore-invalid";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Try to restore with invalid hash
+        let result = GitService::restore_commit(&repo_path, "invalid_hash");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("Invalid commit hash"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_restore_commit_fails_with_uncommitted_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-restore-dirty";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let x = repo.head().unwrap().shorthand().unwrap().to_string();
+            x
+        };
+
+        // Add a commit
+        GitService::commit_file(&repo_path, "file.txt", "Content", "Add file").unwrap();
+
+        let history = GitService::get_history(&repo_path, &current_branch).unwrap();
+        let commit_hash = history[0].hash.clone();
+
+        // Create uncommitted changes
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted").unwrap();
+
+        // Try to restore - should fail
+        let result = GitService::restore_commit(&repo_path, &commit_hash);
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("uncommitted changes"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_get_history_fails_if_branch_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-history-invalid";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Try to get history from nonexistent branch
+        let result = GitService::get_history(&repo_path, "nonexistent");
 
         assert!(result.is_err());
     }
