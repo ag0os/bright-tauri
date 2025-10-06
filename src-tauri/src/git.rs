@@ -214,6 +214,86 @@ impl GitService {
 
         Ok(oid.to_string())
     }
+
+    /// Create a new branch from a parent branch
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `parent_branch` - Name of the parent branch to branch from
+    /// * `new_branch` - Name of the new branch to create
+    ///
+    /// # Returns
+    /// Success or error
+    pub fn create_branch(
+        repo_path: &Path,
+        parent_branch: &str,
+        new_branch: &str,
+    ) -> GitResult<()> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Check if new branch already exists
+        if repo.find_branch(new_branch, git2::BranchType::Local).is_ok() {
+            return Err(GitServiceError::InvalidOperation(
+                format!("Branch '{}' already exists", new_branch)
+            ));
+        }
+
+        // Find parent branch reference
+        let parent_ref = repo.find_branch(parent_branch, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Parent branch '{}' not found", parent_branch)
+            ))?;
+
+        let parent_commit = parent_ref.get().peel_to_commit()?;
+
+        // Create new branch
+        repo.branch(new_branch, &parent_commit, false)?;
+
+        Ok(())
+    }
+
+    /// Checkout (switch to) a different branch
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `branch` - Name of the branch to checkout
+    ///
+    /// # Returns
+    /// Success or error
+    pub fn checkout_branch(repo_path: &Path, branch: &str) -> GitResult<()> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Check for uncommitted changes
+        let statuses = repo.statuses(None)?;
+        if !statuses.is_empty() {
+            return Err(GitServiceError::InvalidOperation(
+                "Cannot checkout branch: uncommitted changes exist".to_string()
+            ));
+        }
+
+        // Find the branch
+        let branch_ref = repo.find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| GitServiceError::InvalidOperation(
+                format!("Branch '{}' not found", branch)
+            ))?;
+
+        let reference = branch_ref.get();
+        let commit = reference.peel_to_commit()?;
+
+        // Set HEAD to the branch
+        repo.set_head(reference.name().unwrap())?;
+
+        // Checkout the tree
+        repo.checkout_tree(commit.as_object(), None)?;
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -418,6 +498,156 @@ mod tests {
         match result {
             Err(GitServiceError::RepositoryNotFound(_)) => {},
             _ => panic!("Expected RepositoryNotFound error"),
+        }
+    }
+
+    #[test]
+    fn test_create_branch_from_main() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-branch-create";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get the current branch name (might be "master" or "main")
+        let repo = Repository::open(&repo_path).unwrap();
+        let head = repo.head().unwrap();
+        let current_branch = head.shorthand().unwrap();
+
+        // Create a new branch from current branch
+        GitService::create_branch(&repo_path, current_branch, "feature-branch").unwrap();
+
+        // Verify branch was created
+        let branch = repo.find_branch("feature-branch", git2::BranchType::Local).unwrap();
+        assert!(branch.is_head() == false); // Not checked out yet
+    }
+
+    #[test]
+    fn test_create_branch_fails_if_already_exists() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-branch-duplicate";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch name
+        let repo = Repository::open(&repo_path).unwrap();
+        let head = repo.head().unwrap();
+        let current_branch = head.shorthand().unwrap();
+
+        // Create branch
+        GitService::create_branch(&repo_path, current_branch, "feature").unwrap();
+
+        // Try to create again
+        let result = GitService::create_branch(&repo_path, current_branch, "feature");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("already exists"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_create_branch_fails_if_parent_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-branch-invalid-parent";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Try to create branch from nonexistent parent
+        let result = GitService::create_branch(&repo_path, "nonexistent", "feature");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("not found"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_checkout_branch_switches_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-branch-checkout";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch name
+        let current_branch = {
+            let repo = Repository::open(&repo_path).unwrap();
+            let head = repo.head().unwrap();
+            head.shorthand().unwrap().to_string()
+        };
+
+        // Create and commit a file on current branch
+        GitService::commit_file(&repo_path, "main.txt", "Main branch", "Add main file").unwrap();
+
+        // Create a new branch
+        GitService::create_branch(&repo_path, &current_branch, "feature").unwrap();
+
+        // Checkout the new branch
+        GitService::checkout_branch(&repo_path, "feature").unwrap();
+
+        // Verify we're on the feature branch
+        let repo = Repository::open(&repo_path).unwrap();
+        let head = repo.head().unwrap();
+        assert!(head.shorthand().unwrap() == "feature");
+    }
+
+    #[test]
+    fn test_checkout_branch_fails_with_uncommitted_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-checkout-dirty";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch name
+        let repo = Repository::open(&repo_path).unwrap();
+        let head = repo.head().unwrap();
+        let current_branch = head.shorthand().unwrap();
+
+        // Create a branch
+        GitService::create_branch(&repo_path, current_branch, "feature").unwrap();
+
+        // Create an uncommitted file
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted").unwrap();
+
+        // Try to checkout - should fail
+        let result = GitService::checkout_branch(&repo_path, "feature");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("uncommitted changes"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_checkout_branch_fails_if_branch_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-checkout-invalid";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Try to checkout nonexistent branch
+        let result = GitService::checkout_branch(&repo_path, "nonexistent");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("not found"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
         }
     }
 }
