@@ -117,6 +117,103 @@ impl GitService {
 
         Ok(repo_path)
     }
+
+    /// Commit a specific file with content to the repository
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `file_path` - Relative path of the file within the repository
+    /// * `content` - Content to write to the file
+    /// * `message` - Commit message
+    ///
+    /// # Returns
+    /// Commit hash (OID as string)
+    pub fn commit_file(
+        repo_path: &Path,
+        file_path: &str,
+        content: &str,
+        message: &str,
+    ) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Write content to file
+        let full_file_path = repo_path.join(file_path);
+
+        // Create parent directories if needed
+        if let Some(parent) = full_file_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+
+        fs::write(&full_file_path, content)?;
+
+        // Stage the file
+        let mut index = repo.index()?;
+        index.add_path(Path::new(file_path))?;
+        index.write()?;
+
+        // Create commit
+        let tree_id = index.write_tree()?;
+        let tree = repo.find_tree(tree_id)?;
+
+        let signature = Signature::now("Bright", "noreply@bright.app")?;
+
+        // Get parent commit (HEAD)
+        let parent_commit = repo.head()?.peel_to_commit()?;
+
+        let oid = repo.commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            message,
+            &tree,
+            &[&parent_commit],
+        )?;
+
+        Ok(oid.to_string())
+    }
+
+    /// Commit all changes in the repository
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `message` - Commit message
+    ///
+    /// # Returns
+    /// Commit hash (OID as string)
+    pub fn commit_all(repo_path: &Path, message: &str) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path).map_err(|_| {
+            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
+        })?;
+
+        // Stage all changes (modified, new, deleted files)
+        let mut index = repo.index()?;
+        index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None)?;
+        index.write()?;
+
+        // Create commit
+        let tree_id = index.write_tree()?;
+        let tree = repo.find_tree(tree_id)?;
+
+        let signature = Signature::now("Bright", "noreply@bright.app")?;
+
+        // Get parent commit (HEAD)
+        let parent_commit = repo.head()?.peel_to_commit()?;
+
+        let oid = repo.commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            message,
+            &tree,
+            &[&parent_commit],
+        )?;
+
+        Ok(oid.to_string())
+    }
 }
 
 #[cfg(test)]
@@ -206,5 +303,121 @@ mod tests {
 
         // Verify path structure: {base}/git-repos/{story_id}
         assert!(repo_path.ends_with(format!("git-repos/{}", story_id)));
+    }
+
+    #[test]
+    fn test_commit_file_creates_file_and_commits() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-commit-file";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Commit a file
+        let file_content = "# Chapter 1\n\nThis is the first chapter.";
+        let commit_hash = GitService::commit_file(
+            &repo_path,
+            "chapter1.md",
+            file_content,
+            "Add chapter 1"
+        ).unwrap();
+
+        // Verify file was created
+        let file_path = repo_path.join("chapter1.md");
+        assert!(file_path.exists());
+
+        let content = fs::read_to_string(&file_path).unwrap();
+        assert_eq!(content, file_content);
+
+        // Verify commit was created
+        assert!(!commit_hash.is_empty());
+
+        let repo = Repository::open(&repo_path).unwrap();
+        let commit = repo.find_commit(Oid::from_str(&commit_hash).unwrap()).unwrap();
+        assert_eq!(commit.message().unwrap(), "Add chapter 1");
+    }
+
+    #[test]
+    fn test_commit_file_creates_subdirectories() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-commit-nested";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Commit a file in a nested directory
+        let commit_hash = GitService::commit_file(
+            &repo_path,
+            "chapters/part1/chapter1.md",
+            "Content",
+            "Add nested file"
+        ).unwrap();
+
+        // Verify nested directory and file were created
+        assert!(repo_path.join("chapters/part1/chapter1.md").exists());
+        assert!(!commit_hash.is_empty());
+    }
+
+    #[test]
+    fn test_commit_all_stages_multiple_files() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-commit-all";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Create multiple files
+        fs::write(repo_path.join("file1.txt"), "Content 1").unwrap();
+        fs::write(repo_path.join("file2.txt"), "Content 2").unwrap();
+        fs::write(repo_path.join("file3.txt"), "Content 3").unwrap();
+
+        // Commit all files
+        let commit_hash = GitService::commit_all(&repo_path, "Add three files").unwrap();
+
+        // Verify commit was created
+        assert!(!commit_hash.is_empty());
+
+        let repo = Repository::open(&repo_path).unwrap();
+        let commit = repo.find_commit(Oid::from_str(&commit_hash).unwrap()).unwrap();
+        assert_eq!(commit.message().unwrap(), "Add three files");
+
+        // Verify all files are in the commit
+        let tree = commit.tree().unwrap();
+        assert!(tree.get_name("file1.txt").is_some());
+        assert!(tree.get_name("file2.txt").is_some());
+        assert!(tree.get_name("file3.txt").is_some());
+    }
+
+    #[test]
+    fn test_commit_file_returns_error_for_invalid_repo() {
+        let temp_dir = TempDir::new().unwrap();
+        let invalid_path = temp_dir.path().join("nonexistent");
+
+        let result = GitService::commit_file(
+            &invalid_path,
+            "file.txt",
+            "content",
+            "message"
+        );
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryNotFound(_)) => {},
+            _ => panic!("Expected RepositoryNotFound error"),
+        }
+    }
+
+    #[test]
+    fn test_commit_all_returns_error_for_invalid_repo() {
+        let temp_dir = TempDir::new().unwrap();
+        let invalid_path = temp_dir.path().join("nonexistent");
+
+        let result = GitService::commit_all(&invalid_path, "message");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryNotFound(_)) => {},
+            _ => panic!("Expected RepositoryNotFound error"),
+        }
     }
 }
