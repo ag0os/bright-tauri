@@ -1,5 +1,6 @@
 mod commands;
 mod db;
+mod file_naming;
 mod git;
 mod models;
 mod repositories;
