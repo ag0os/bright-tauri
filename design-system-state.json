@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "2.2",
+  "currentPhase": "3.1",
   "selections": {
     "phase1": {
       "colors": {
@@ -123,7 +123,64 @@
           }
         ]
       },
-      "inputs": null
+      "inputs": {
+        "selected": {
+          "name": "Filled Background",
+          "file": "option5-filled-background.css",
+          "className": "input-5",
+          "style": "Filled background",
+          "layout": "Label above",
+          "characteristics": "No border, gray fill, border appears on focus",
+          "description": "Material Design inspired with solid background and no border"
+        },
+        "rejected": [
+          {
+            "name": "Classic Outlined",
+            "file": "option1-classic-outlined.css",
+            "className": "input-1",
+            "style": "Full border",
+            "layout": "Label above",
+            "characteristics": "1px solid, 2px ring focus",
+            "description": "Traditional input with full border and clear label separation"
+          },
+          {
+            "name": "Modern Floating Label",
+            "file": "option2-modern-floating.css",
+            "className": "input-2",
+            "style": "Floating label",
+            "layout": "Inside input (floats up)",
+            "characteristics": "Animated label, 2px focus border",
+            "description": "Input with animated floating label for a clean, modern feel"
+          },
+          {
+            "name": "Underline Minimal",
+            "file": "option3-underline-minimal.css",
+            "className": "input-3",
+            "style": "Bottom border only",
+            "layout": "Label above",
+            "characteristics": "2px bottom, 3px on focus",
+            "description": "Minimal input with bottom border only for clean, minimal interfaces"
+          },
+          {
+            "name": "Simple Bordered",
+            "file": "option4-simple-bordered.css",
+            "className": "input-4",
+            "style": "Full border (1.5px)",
+            "layout": "Label above",
+            "characteristics": "6px radius, semibold label, simple focus",
+            "description": "Clean, straightforward input with consistent border and no fancy effects"
+          },
+          {
+            "name": "Inline Label",
+            "file": "option6-inline-label.css",
+            "className": "input-6",
+            "style": "Inline horizontal",
+            "layout": "Label left, input right",
+            "characteristics": "Horizontal layout, compact, admin-style",
+            "description": "Label and input on same horizontal line for compact, space-efficient forms"
+          }
+        ]
+      }
     },
     "phase3": {
       "cards": null,
@@ -166,6 +223,14 @@
       "option": "Minimal Squared",
       "timestamp": "2025-10-08T15:13:00.000Z",
       "userFeedback": ""
+    },
+    {
+      "phase": "2.2",
+      "component": "inputs",
+      "action": "selected",
+      "option": "Filled Background",
+      "timestamp": "2025-10-08T15:54:00.000Z",
+      "userFeedback": "Selected from V2 clean options set"
     }
   ]
 }

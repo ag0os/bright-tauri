@@ -1,0 +1,205 @@
+/**
+ * Option 5: Filled Background
+ * Material Design inspired with solid background
+ * Style: No border, filled background, clean and modern
+ * Best for: Modern interfaces, reduced visual clutter
+ */
+
+.input-5 {
+  /* Input Container */
+  --input-gap: 8px;
+
+  /* Label */
+  --input-label-font-size: var(--font-size-sm);
+  --input-label-font-weight: var(--font-weight-semibold);
+  --input-label-color: var(--color-text-primary);
+  --input-label-margin-bottom: 8px;
+
+  /* Required Indicator */
+  --input-required-color: #dc2626;
+
+  /* Input Field */
+  --input-border-radius: 6px;
+  --input-border-width: 0;
+  --input-border-color: transparent;
+  --input-background: #f3f4f6;  /* Light gray fill */
+  --input-text-color: var(--color-text-primary);
+  --input-font-size: var(--font-size-base);
+  --input-font-family: var(--typography-body-font);
+
+  /* Input Sizes - Padding */
+  --input-padding-sm: 8px 12px;
+  --input-padding-base: 12px 16px;
+  --input-padding-lg: 14px 18px;
+
+  /* Input Min Height */
+  --input-min-height-sm: 36px;
+  --input-min-height-base: 44px;
+  --input-min-height-lg: 52px;
+
+  /* Placeholder */
+  --input-placeholder-color: var(--color-text-secondary);
+  --input-placeholder-opacity: 0.6;
+
+  /* Focus State */
+  --input-focus-bg: #e5e7eb;  /* Darker gray on focus */
+  --input-focus-border-width: 2px;
+  --input-focus-border-color: var(--color-primary);
+
+  /* Error State */
+  --input-error-bg: #fee2e2;  /* Light red background */
+  --input-error-border-color: #dc2626;
+  --input-error-text-color: #dc2626;
+
+  /* Disabled State */
+  --input-disabled-bg: #e5e7eb;
+  --input-disabled-text-color: var(--color-text-secondary);
+  --input-disabled-opacity: 0.7;
+  --input-disabled-cursor: not-allowed;
+
+  /* Helper Text */
+  --input-helper-font-size: var(--font-size-sm);
+  --input-helper-color: var(--color-text-secondary);
+  --input-helper-margin-top: 6px;
+
+  /* Icon */
+  --input-icon-size: 20px;
+  --input-icon-color: var(--color-text-secondary);
+  --input-icon-gap: 10px;
+
+  /* Transition */
+  --input-transition: background-color 0.2s ease, border 0.2s ease;
+}
+
+/* Input Group Container */
+.input-5 .input-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Label */
+.input-5 .input-label {
+  font-family: var(--input-font-family);
+  font-size: var(--input-label-font-size);
+  font-weight: var(--input-label-font-weight);
+  color: var(--input-label-color);
+  margin-bottom: var(--input-label-margin-bottom);
+  display: block;
+}
+
+.input-5 .input-label .required {
+  color: var(--input-required-color);
+  margin-left: 2px;
+}
+
+/* Input Wrapper */
+.input-5 .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Input Field */
+.input-5 .input-field {
+  width: 100%;
+  font-family: var(--input-font-family);
+  font-size: var(--input-font-size);
+  color: var(--input-text-color);
+  background-color: var(--input-background);
+  border: var(--input-border-width) solid var(--input-border-color);
+  border-radius: var(--input-border-radius);
+  transition: var(--input-transition);
+  outline: none;
+}
+
+.input-5 .input-field::placeholder {
+  color: var(--input-placeholder-color);
+  opacity: var(--input-placeholder-opacity);
+}
+
+.input-5 .input-field:focus {
+  background-color: var(--input-focus-bg);
+  border: var(--input-focus-border-width) solid var(--input-focus-border-color);
+  padding-left: calc(var(--input-padding-base) - var(--input-focus-border-width) + 2px);
+  padding-right: calc(var(--input-padding-base) - var(--input-focus-border-width) + 2px);
+}
+
+/* Size Variants */
+.input-5 .input-field.input-sm {
+  padding: var(--input-padding-sm);
+  min-height: var(--input-min-height-sm);
+}
+
+.input-5 .input-field.input-base {
+  padding: var(--input-padding-base);
+  min-height: var(--input-min-height-base);
+}
+
+.input-5 .input-field.input-lg {
+  padding: var(--input-padding-lg);
+  min-height: var(--input-min-height-lg);
+}
+
+/* With Prefix Icon */
+.input-5 .input-field.has-prefix {
+  padding-left: calc(var(--input-icon-size) + var(--input-icon-gap) * 2);
+}
+
+.input-5 .input-field.has-prefix:focus {
+  padding-left: calc(var(--input-icon-size) + var(--input-icon-gap) * 2 - var(--input-focus-border-width) + 2px);
+}
+
+/* With Suffix Icon */
+.input-5 .input-field.has-suffix {
+  padding-right: calc(var(--input-icon-size) + var(--input-icon-gap) * 2);
+}
+
+.input-5 .input-field.has-suffix:focus {
+  padding-right: calc(var(--input-icon-size) + var(--input-icon-gap) * 2 - var(--input-focus-border-width) + 2px);
+}
+
+/* Icon Styles */
+.input-5 .input-icon-prefix,
+.input-5 .input-icon-suffix {
+  position: absolute;
+  width: var(--input-icon-size);
+  height: var(--input-icon-size);
+  color: var(--input-icon-color);
+  pointer-events: none;
+}
+
+.input-5 .input-icon-prefix {
+  left: var(--input-icon-gap);
+}
+
+.input-5 .input-icon-suffix {
+  right: var(--input-icon-gap);
+}
+
+/* Error State */
+.input-5 .input-group.has-error .input-field {
+  background-color: var(--input-error-bg);
+  border: var(--input-focus-border-width) solid var(--input-error-border-color);
+}
+
+/* Disabled State */
+.input-5 .input-field:disabled {
+  background-color: var(--input-disabled-bg);
+  color: var(--input-disabled-text-color);
+  opacity: var(--input-disabled-opacity);
+  cursor: var(--input-disabled-cursor);
+}
+
+/* Helper Text */
+.input-5 .input-helper {
+  font-family: var(--input-font-family);
+  font-size: var(--input-helper-font-size);
+  color: var(--input-helper-color);
+  margin-top: var(--input-helper-margin-top);
+  line-height: 1.4;
+}
+
+.input-5 .input-group.has-error .input-helper {
+  color: var(--input-error-text-color);
+}
