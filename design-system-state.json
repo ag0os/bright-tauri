@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "1.2",
+  "currentPhase": "1.3",
   "selections": {
     "phase1": {
       "colors": {
@@ -31,7 +31,37 @@
           }
         ]
       },
-      "typography": null,
+      "typography": {
+        "selected": {
+          "name": "Classic Serif",
+          "file": "option1-classic-serif.css",
+          "className": "typo-1",
+          "displayFont": "Playfair Display",
+          "bodyFont": "System Sans-Serif",
+          "scale": "1.250 (Major Third)",
+          "description": "Traditional literary feel with modern serif headings and clean sans-serif body text"
+        },
+        "rejected": [
+          {
+            "name": "Modern Sans",
+            "file": "option2-modern-sans.css",
+            "className": "typo-2",
+            "displayFont": "Inter",
+            "bodyFont": "Inter",
+            "scale": "1.200 (Minor Third)",
+            "description": "Clean, contemporary system with geometric sans-serif throughout"
+          },
+          {
+            "name": "Humanist Hybrid",
+            "file": "option3-humanist-hybrid.css",
+            "className": "typo-3",
+            "displayFont": "Fraunces",
+            "bodyFont": "Source Sans 3",
+            "scale": "1.333 (Perfect Fourth)",
+            "description": "Warm, readable humanist sans-serif with expressive display font"
+          }
+        ]
+      },
       "icons": null
     },
     "phase2": {
@@ -54,6 +84,14 @@
       "action": "selected",
       "option": "Modern Indigo",
       "timestamp": "2025-10-08T14:30:00.000Z",
+      "userFeedback": ""
+    },
+    {
+      "phase": "1.2",
+      "component": "typography",
+      "action": "selected",
+      "option": "Classic Serif",
+      "timestamp": "2025-10-08T14:52:00.000Z",
       "userFeedback": ""
     }
   ]

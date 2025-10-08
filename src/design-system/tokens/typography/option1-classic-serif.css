@@ -1,0 +1,89 @@
+/**
+ * Option 1: Classic Serif
+ * Traditional literary feel with modern serif headings and clean sans-serif body text
+ * Ideal for: Creative writing, storytelling, publishing platforms
+ */
+
+.typo-1 {
+  /* Font Families */
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Source Code Pro", Menlo, "Courier New", monospace;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Font Sizes - Type Scale (1.250 - Major Third) */
+  --font-size-xs: 0.8rem;      /* 12.8px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.563rem;   /* 25px */
+  --font-size-3xl: 1.953rem;   /* 31.25px */
+  --font-size-4xl: 2.441rem;   /* 39px */
+  --font-size-5xl: 3.052rem;   /* 48.8px */
+
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+
+  /* Semantic Typography Tokens */
+  --typography-heading-font: var(--font-display);
+  --typography-body-font: var(--font-body);
+  --typography-code-font: var(--font-mono);
+
+  /* Heading Styles */
+  --typography-h1-size: var(--font-size-5xl);
+  --typography-h1-weight: var(--font-weight-bold);
+  --typography-h1-line-height: var(--line-height-tight);
+  --typography-h1-letter-spacing: var(--letter-spacing-tight);
+
+  --typography-h2-size: var(--font-size-4xl);
+  --typography-h2-weight: var(--font-weight-bold);
+  --typography-h2-line-height: var(--line-height-tight);
+  --typography-h2-letter-spacing: var(--letter-spacing-tight);
+
+  --typography-h3-size: var(--font-size-3xl);
+  --typography-h3-weight: var(--font-weight-semibold);
+  --typography-h3-line-height: var(--line-height-snug);
+  --typography-h3-letter-spacing: var(--letter-spacing-normal);
+
+  --typography-h4-size: var(--font-size-2xl);
+  --typography-h4-weight: var(--font-weight-semibold);
+  --typography-h4-line-height: var(--line-height-snug);
+  --typography-h4-letter-spacing: var(--letter-spacing-normal);
+
+  /* Body Text */
+  --typography-body-size: var(--font-size-base);
+  --typography-body-weight: var(--font-weight-normal);
+  --typography-body-line-height: var(--line-height-relaxed);
+  --typography-body-letter-spacing: var(--letter-spacing-normal);
+
+  --typography-body-large-size: var(--font-size-lg);
+  --typography-body-large-line-height: var(--line-height-relaxed);
+
+  --typography-body-small-size: var(--font-size-sm);
+  --typography-body-small-line-height: var(--line-height-normal);
+
+  /* UI Text */
+  --typography-caption-size: var(--font-size-xs);
+  --typography-caption-weight: var(--font-weight-normal);
+  --typography-caption-line-height: var(--line-height-normal);
+
+  --typography-button-size: var(--font-size-base);
+  --typography-button-weight: var(--font-weight-medium);
+  --typography-button-line-height: var(--line-height-normal);
+  --typography-button-letter-spacing: var(--letter-spacing-wide);
+}

@@ -1,0 +1,90 @@
+/**
+ * Option 3: Humanist Hybrid
+ * Warm, readable humanist sans-serif with expressive display font
+ * Ideal for: Creative platforms, storytelling, human-centered apps
+ */
+
+.typo-3 {
+  /* Font Families */
+  --font-display: "Fraunces", "Georgia", serif;
+  --font-body: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Source Code Pro", Menlo, "Courier New", monospace;
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* Font Sizes - Type Scale (1.333 - Perfect Fourth) */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.333rem;    /* 21.33px */
+  --font-size-2xl: 1.777rem;   /* 28.43px */
+  --font-size-3xl: 2.369rem;   /* 37.9px */
+  --font-size-4xl: 3.157rem;   /* 50.51px */
+  --font-size-5xl: 4.209rem;   /* 67.35px */
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.35;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+  --line-height-loose: 1.8;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.03em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.03em;
+
+  /* Semantic Typography Tokens */
+  --typography-heading-font: var(--font-display);
+  --typography-body-font: var(--font-body);
+  --typography-code-font: var(--font-mono);
+
+  /* Heading Styles */
+  --typography-h1-size: var(--font-size-5xl);
+  --typography-h1-weight: var(--font-weight-black);
+  --typography-h1-line-height: var(--line-height-tight);
+  --typography-h1-letter-spacing: var(--letter-spacing-tight);
+
+  --typography-h2-size: var(--font-size-4xl);
+  --typography-h2-weight: var(--font-weight-bold);
+  --typography-h2-line-height: var(--line-height-tight);
+  --typography-h2-letter-spacing: var(--letter-spacing-tight);
+
+  --typography-h3-size: var(--font-size-3xl);
+  --typography-h3-weight: var(--font-weight-bold);
+  --typography-h3-line-height: var(--line-height-snug);
+  --typography-h3-letter-spacing: var(--letter-spacing-normal);
+
+  --typography-h4-size: var(--font-size-2xl);
+  --typography-h4-weight: var(--font-weight-semibold);
+  --typography-h4-line-height: var(--line-height-snug);
+  --typography-h4-letter-spacing: var(--letter-spacing-normal);
+
+  /* Body Text */
+  --typography-body-size: var(--font-size-base);
+  --typography-body-weight: var(--font-weight-normal);
+  --typography-body-line-height: var(--line-height-loose);
+  --typography-body-letter-spacing: var(--letter-spacing-normal);
+
+  --typography-body-large-size: var(--font-size-lg);
+  --typography-body-large-line-height: var(--line-height-loose);
+
+  --typography-body-small-size: var(--font-size-sm);
+  --typography-body-small-line-height: var(--line-height-relaxed);
+
+  /* UI Text */
+  --typography-caption-size: var(--font-size-xs);
+  --typography-caption-weight: var(--font-weight-normal);
+  --typography-caption-line-height: var(--line-height-normal);
+
+  --typography-button-size: var(--font-size-base);
+  --typography-button-weight: var(--font-weight-semibold);
+  --typography-button-line-height: var(--line-height-normal);
+  --typography-button-letter-spacing: var(--letter-spacing-wide);
+}
