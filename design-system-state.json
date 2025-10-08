@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "3.1",
+  "currentPhase": "3.2",
   "selections": {
     "phase1": {
       "colors": {
@@ -183,7 +183,37 @@
       }
     },
     "phase3": {
-      "cards": null,
+      "cards": {
+        "selected": {
+          "name": "Elevated Shadow",
+          "file": "option1-elevated-shadow.css",
+          "className": "card-1",
+          "style": "Soft shadow, no border",
+          "elevation": "Shadow-based depth",
+          "characteristics": "8px radius, multiple shadow levels, hover lift",
+          "description": "Clean cards with subtle shadows for depth and floating appearance"
+        },
+        "rejected": [
+          {
+            "name": "Bordered Flat",
+            "file": "option2-bordered-flat.css",
+            "className": "card-2",
+            "style": "Border-based, flat",
+            "elevation": "No shadows",
+            "characteristics": "6px radius, 1px border, border color change on hover",
+            "description": "Clean cards with borders and no shadows for minimal, flat design"
+          },
+          {
+            "name": "Subtle Background",
+            "file": "option3-subtle-background.css",
+            "className": "card-3",
+            "style": "Light background",
+            "elevation": "Subtle shadow on hover",
+            "characteristics": "8px radius, light gray fill, subtle border",
+            "description": "Soft background with minimal border for gentle visual hierarchy"
+          }
+        ]
+      },
       "navigation": null
     },
     "phase4": {
@@ -231,6 +261,14 @@
       "option": "Filled Background",
       "timestamp": "2025-10-08T15:54:00.000Z",
       "userFeedback": "Selected from V2 clean options set"
+    },
+    {
+      "phase": "3.1",
+      "component": "cards",
+      "action": "selected",
+      "option": "Elevated Shadow",
+      "timestamp": "2025-10-08T16:05:00.000Z",
+      "userFeedback": ""
     }
   ]
 }
