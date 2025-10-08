@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/colors/option2-nature-green.css';
-import '../tokens/colors/option3-sunset-purple.css';
+import '../tokens/colors/modern-indigo.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 1.1 - Color Tokens',
@@ -22,22 +20,10 @@ type ColorOption = {
 
 const colorOptions: ColorOption[] = [
   {
-    name: 'Option 1: Modern Indigo',
+    name: 'Modern Indigo',
     description: 'Professional blue/indigo palette with warm amber accents. Creates a trustworthy, corporate feel.',
-    cssFile: 'option1-modern-indigo.css',
+    cssFile: 'modern-indigo.css',
     className: 'option-1',
-  },
-  {
-    name: 'Option 2: Nature Green',
-    description: 'Green-based palette with earth tones. Conveys growth, creativity, and natural harmony.',
-    cssFile: 'option2-nature-green.css',
-    className: 'option-2',
-  },
-  {
-    name: 'Option 3: Sunset Purple',
-    description: 'Purple/violet with warm rose tones. Evokes creativity, imagination, and artistic expression.',
-    cssFile: 'option3-sunset-purple.css',
-    className: 'option-3',
   },
 ];
 

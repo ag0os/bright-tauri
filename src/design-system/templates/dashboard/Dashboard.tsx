@@ -1,9 +1,7 @@
 import React from 'react';
 import { FileText, Users, Star, TrendingUp, Plus, Clock, Target, BookOpen, Zap, Calendar } from 'lucide-react';
 import { MinimalTopBar } from '../../organisms/navigation/Navigation';
-import './option1-stats-grid.css';
-import './option2-focus-mode.css';
-import './option3-timeline-activity.css';
+import './stats-grid.css';
 
 export interface DashboardProps {
   variant: 'option1' | 'option2' | 'option3';

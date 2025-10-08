@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/icons/option1-lucide.css';
-import '../tokens/atoms/button/option2-minimal-squared.css';
-import '../tokens/atoms/input/option1-classic-outlined.css';
-import '../tokens/atoms/input/option2-modern-floating.css';
-import '../tokens/atoms/input/option3-underline-minimal.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
+import '../tokens/icons/lucide.css';
+import '../tokens/atoms/button/minimal-squared.css';
+import '../tokens/atoms/input/filled-background.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 2.2 - Input Tokens',
@@ -30,34 +28,14 @@ type InputOption = {
 
 const inputOptions: InputOption[] = [
   {
-    name: 'Option 1: Classic Outlined',
-    description: 'Traditional input with full border and clear label separation.',
-    cssFile: 'option1-classic-outlined.css',
-    className: 'input-1',
-    style: 'Full border',
-    labelPosition: 'Above input',
-    border: '1px solid, focus: 2px ring',
-    strengths: ['Familiar UX pattern', 'Clear label separation', 'Easy to scan', 'Good for forms'],
-  },
-  {
-    name: 'Option 2: Modern Floating Label',
-    description: 'Input with animated floating label for a clean, modern feel.',
-    cssFile: 'option2-modern-floating.css',
-    className: 'input-2',
-    style: 'Floating label',
-    labelPosition: 'Inside input (floats up)',
-    border: '1px solid, focus: 2px solid',
-    strengths: ['Space efficient', 'Modern aesthetic', 'Smooth animation', 'Reduced clutter'],
-  },
-  {
-    name: 'Option 3: Underline Minimal',
-    description: 'Minimal input with bottom border only for clean, minimal interfaces.',
-    cssFile: 'option3-underline-minimal.css',
-    className: 'input-3',
-    style: 'Bottom border only',
-    labelPosition: 'Above input',
-    border: '2px bottom, focus: 3px bottom',
-    strengths: ['Minimal visual noise', 'Clean aesthetic', 'Modern feel', 'Reduces borders'],
+    name: 'Filled Background',
+    description: 'Material Design inspired with solid background and no border.',
+    cssFile: 'filled-background.css',
+    className: 'input-5',
+    style: 'Filled background',
+    labelPosition: 'Label above',
+    border: 'No border, gray fill, border appears on focus',
+    strengths: ['Clean modern look', 'Reduced visual clutter', 'Clear input area', 'Less borders'],
   },
 ];
 

@@ -1,9 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/typography/option2-modern-sans.css';
-import '../tokens/typography/option3-humanist-hybrid.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 1.2 - Typography Tokens',
@@ -26,31 +24,13 @@ type TypographyOption = {
 
 const typographyOptions: TypographyOption[] = [
   {
-    name: 'Option 1: Classic Serif',
+    name: 'Classic Serif',
     description: 'Traditional literary feel with modern serif headings and clean sans-serif body text.',
-    cssFile: 'option1-classic-serif.css',
+    cssFile: 'classic-serif.css',
     className: 'typo-1',
     displayFont: 'Playfair Display (serif)',
     bodyFont: 'System Sans-Serif',
     scale: '1.250 (Major Third)',
-  },
-  {
-    name: 'Option 2: Modern Sans',
-    description: 'Clean, contemporary system with geometric sans-serif throughout.',
-    cssFile: 'option2-modern-sans.css',
-    className: 'typo-2',
-    displayFont: 'Inter (sans-serif)',
-    bodyFont: 'Inter (sans-serif)',
-    scale: '1.200 (Minor Third)',
-  },
-  {
-    name: 'Option 3: Humanist Hybrid',
-    description: 'Warm, readable humanist sans-serif with expressive display font.',
-    cssFile: 'option3-humanist-hybrid.css',
-    className: 'typo-3',
-    displayFont: 'Fraunces (serif)',
-    bodyFont: 'Source Sans 3 (sans-serif)',
-    scale: '1.333 (Perfect Fourth)',
   },
 ];
 

@@ -1,11 +1,9 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/icons/option1-lucide.css';
-import '../tokens/atoms/button/option1-modern-rounded.css';
-import '../tokens/atoms/button/option2-minimal-squared.css';
-import '../tokens/atoms/button/option3-pill-comfort.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
+import '../tokens/icons/lucide.css';
+import '../tokens/atoms/button/minimal-squared.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 2.1 - Button Tokens',
@@ -29,34 +27,14 @@ type ButtonOption = {
 
 const buttonOptions: ButtonOption[] = [
   {
-    name: 'Option 1: Modern Rounded',
-    description: 'Medium border radius with balanced spacing for contemporary interfaces.',
-    cssFile: 'option1-modern-rounded.css',
-    className: 'button-1',
-    shape: '8px border radius',
-    density: 'Spacious (12px/24px base padding)',
-    focus: 'Prominent 3px ring',
-    strengths: ['Balanced visual weight', 'Clear focus states', 'Good for mixed content', 'Modern aesthetic'],
-  },
-  {
-    name: 'Option 2: Minimal Squared',
+    name: 'Minimal Squared',
     description: 'Small border radius with compact spacing for dense, data-heavy applications.',
-    cssFile: 'option2-minimal-squared.css',
+    cssFile: 'minimal-squared.css',
     className: 'button-2',
     shape: '4px border radius',
     density: 'Compact (8px/16px base padding)',
     focus: 'Subtle 2px ring',
     strengths: ['Space efficient', 'Clean minimal look', 'Dense interfaces', 'Fast scanning'],
-  },
-  {
-    name: 'Option 3: Pill Comfort',
-    description: 'Full rounded corners with generous spacing for friendly, consumer-facing applications.',
-    cssFile: 'option3-pill-comfort.css',
-    className: 'button-3',
-    shape: 'Full pill (999px)',
-    density: 'Generous (14px/28px base padding)',
-    focus: 'Soft glow shadow',
-    strengths: ['Friendly appearance', 'Soft visual feel', 'Consumer apps', 'Hover animations'],
   },
 ];
 

@@ -1,13 +1,11 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/icons/option1-lucide.css';
-import '../tokens/atoms/button/option2-minimal-squared.css';
-import '../tokens/atoms/input/option5-filled-background.css';
-import '../tokens/organisms/card/option1-elevated-shadow.css';
-import '../tokens/organisms/card/option2-bordered-flat.css';
-import '../tokens/organisms/card/option3-subtle-background.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
+import '../tokens/icons/lucide.css';
+import '../tokens/atoms/button/minimal-squared.css';
+import '../tokens/atoms/input/filled-background.css';
+import '../tokens/organisms/card/elevated-shadow.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 3.1 - Card Tokens',
@@ -31,34 +29,14 @@ type CardOption = {
 
 const cardOptions: CardOption[] = [
   {
-    name: 'Option 1: Elevated Shadow',
+    name: 'Elevated Shadow',
     description: 'Clean cards with subtle shadows for depth and floating appearance.',
-    cssFile: 'option1-elevated-shadow.css',
+    cssFile: 'elevated-shadow.css',
     className: 'card-1',
     style: 'Soft shadow, no border',
     elevation: 'Shadow-based depth',
     characteristics: '8px radius, multiple shadow levels, hover lift',
     strengths: ['Clear depth hierarchy', 'Modern appearance', 'Floating feel', 'Smooth interactions'],
-  },
-  {
-    name: 'Option 2: Bordered Flat',
-    description: 'Clean cards with borders and no shadows for minimal, flat design.',
-    cssFile: 'option2-bordered-flat.css',
-    className: 'card-2',
-    style: 'Border-based, flat',
-    elevation: 'No shadows',
-    characteristics: '6px radius, 1px border, border color change on hover',
-    strengths: ['Minimal visual weight', 'Content focus', 'Clean lines', 'Reduced depth'],
-  },
-  {
-    name: 'Option 3: Subtle Background',
-    description: 'Soft background with minimal border for gentle visual hierarchy.',
-    cssFile: 'option3-subtle-background.css',
-    className: 'card-3',
-    style: 'Light background',
-    elevation: 'Subtle shadow on hover',
-    characteristics: '8px radius, light gray fill, subtle border',
-    strengths: ['Soft contrast', 'Gentle hierarchy', 'Easy on eyes', 'Grouped content'],
   },
 ];
 

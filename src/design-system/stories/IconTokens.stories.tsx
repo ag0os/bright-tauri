@@ -1,10 +1,8 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/icons/option1-lucide.css';
-import '../tokens/icons/option2-heroicons.css';
-import '../tokens/icons/option3-phosphor.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
+import '../tokens/icons/lucide.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 1.3 - Icon Tokens',
@@ -27,31 +25,13 @@ type IconOption = {
 
 const iconOptions: IconOption[] = [
   {
-    name: 'Option 1: Lucide Icons',
+    name: 'Lucide Icons',
     description: 'Modern, consistent line-based icons with customizable stroke width.',
-    cssFile: 'option1-lucide.css',
+    cssFile: 'lucide.css',
     className: 'icons-1',
     library: 'lucide-react',
     style: 'Outline with adjustable stroke (1px - 2.5px)',
     strengths: ['Flexible stroke customization', 'Consistent line weight', 'Modern aesthetic', '1000+ icons'],
-  },
-  {
-    name: 'Option 2: Heroicons',
-    description: 'Clean outlined icons from the Tailwind CSS team with dual variants.',
-    cssFile: 'option2-heroicons.css',
-    className: 'icons-2',
-    library: '@heroicons/react',
-    style: 'Outline (24px) & Solid (20px) variants',
-    strengths: ['Tailwind ecosystem', 'Dual style system', 'Clean outlines', 'Well-tested in production'],
-  },
-  {
-    name: 'Option 3: Phosphor Icons',
-    description: 'Flexible icon family with six weights plus duotone support.',
-    cssFile: 'option3-phosphor.css',
-    className: 'icons-3',
-    library: 'phosphor-react',
-    style: 'Six weights (thin → fill) + duotone',
-    strengths: ['Most weight options', 'Duotone support', 'Expressive range', '6000+ icons'],
   },
 ];
 

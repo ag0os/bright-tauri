@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Home, FileText, Users, Settings, Bell, Search, ChevronLeft, ChevronRight, Menu, Plus, Command, Folder, Star, Clock, X } from 'lucide-react';
-import './option1-vertical-sidebar.css';
-import './option2-top-toolbar.css';
-import './option3-minimal-topbar.css';
+import './minimal-topbar.css';
 
 export interface NavigationProps {
   variant: 'option1' | 'option2' | 'option3';

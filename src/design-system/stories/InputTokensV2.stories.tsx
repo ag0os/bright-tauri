@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import '../tokens/colors/option1-modern-indigo.css';
-import '../tokens/typography/option1-classic-serif.css';
-import '../tokens/icons/option1-lucide.css';
-import '../tokens/atoms/button/option2-minimal-squared.css';
-import '../tokens/atoms/input/option4-simple-bordered.css';
-import '../tokens/atoms/input/option5-filled-background.css';
-import '../tokens/atoms/input/option6-inline-label.css';
+import '../tokens/colors/modern-indigo.css';
+import '../tokens/typography/classic-serif.css';
+import '../tokens/icons/lucide.css';
+import '../tokens/atoms/button/minimal-squared.css';
+import '../tokens/atoms/input/filled-background.css';
 
 const meta: Meta = {
   title: 'Design System/Phase 2.2 - Input Tokens V2 (Clean)',
@@ -30,34 +28,14 @@ type InputOption = {
 
 const inputOptions: InputOption[] = [
   {
-    name: 'Option 4: Simple Bordered',
-    description: 'Clean, straightforward input with consistent border and no fancy effects.',
-    cssFile: 'option4-simple-bordered.css',
-    className: 'input-4',
-    style: 'Full border (1.5px)',
-    layout: 'Label above',
-    characteristics: '6px radius, semibold label, simple focus',
-    strengths: ['Very clear and readable', 'No distractions', 'Familiar pattern', 'Fast to understand'],
-  },
-  {
-    name: 'Option 5: Filled Background',
+    name: 'Filled Background',
     description: 'Material Design inspired with solid background and no border.',
-    cssFile: 'option5-filled-background.css',
+    cssFile: 'filled-background.css',
     className: 'input-5',
     style: 'Filled background',
     layout: 'Label above',
     characteristics: 'No border, gray fill, border appears on focus',
     strengths: ['Clean modern look', 'Reduced visual clutter', 'Clear input area', 'Less borders'],
-  },
-  {
-    name: 'Option 6: Inline Label',
-    description: 'Label and input on same horizontal line for compact, space-efficient forms.',
-    cssFile: 'option6-inline-label.css',
-    className: 'input-6',
-    style: 'Inline horizontal',
-    layout: 'Label left, input right',
-    characteristics: 'Horizontal layout, compact, admin-style',
-    strengths: ['Space efficient', 'Quick scanning', 'Good for settings', 'Compact forms'],
   },
 ];
 

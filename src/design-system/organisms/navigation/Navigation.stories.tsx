@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Navigation } from './Navigation';
-import '../../tokens/colors/option1-modern-indigo.css';
-import '../../tokens/typography/option1-classic-serif.css';
+import '../../tokens/colors/modern-indigo.css';
+import '../../tokens/typography/classic-serif.css';
 
 const meta = {
   title: 'Phase 3.2 - Navigation Options',
