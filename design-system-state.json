@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "3.2",
+  "currentPhase": "4.1",
   "selections": {
     "phase1": {
       "colors": {
@@ -214,7 +214,37 @@
           }
         ]
       },
-      "navigation": null
+      "navigation": {
+        "selected": {
+          "name": "Minimal Top Bar",
+          "file": "option3-minimal-topbar.css",
+          "className": "nav-3",
+          "pattern": "Single top bar (48px)",
+          "style": "Minimal, distraction-free",
+          "characteristics": "Centered breadcrumb, essential actions, auto-save indicator",
+          "description": "Slim single bar perfect for content-focused writing applications"
+        },
+        "rejected": [
+          {
+            "name": "Vertical Sidebar",
+            "file": "option1-vertical-sidebar.css",
+            "className": "nav-1",
+            "pattern": "Fixed sidebar (240px expanded, 64px collapsed)",
+            "style": "Classic desktop navigation",
+            "characteristics": "Hierarchical sections, collapsible, icon + label items",
+            "description": "Traditional desktop sidebar similar to VS Code and Slack"
+          },
+          {
+            "name": "Top Toolbar + Secondary",
+            "file": "option2-top-toolbar.css",
+            "className": "nav-2",
+            "pattern": "Dual-layer horizontal (56px + 48px)",
+            "style": "Productivity suite navigation",
+            "characteristics": "Primary tabs, contextual secondary toolbar, breadcrumbs",
+            "description": "Complex navigation for multi-mode apps like Figma and Adobe apps"
+          }
+        ]
+      }
     },
     "phase4": {
       "dashboard": null,
@@ -269,6 +299,14 @@
       "option": "Elevated Shadow",
       "timestamp": "2025-10-08T16:05:00.000Z",
       "userFeedback": ""
+    },
+    {
+      "phase": "3.2",
+      "component": "navigation",
+      "action": "selected",
+      "option": "Minimal Top Bar",
+      "timestamp": "2025-10-08T16:20:00.000Z",
+      "userFeedback": "Perfect for desktop writing app - distraction-free and content-focused"
     }
   ]
 }
