@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "2.1",
+  "currentPhase": "2.2",
   "selections": {
     "phase1": {
       "colors": {
@@ -92,7 +92,37 @@
       }
     },
     "phase2": {
-      "buttons": null,
+      "buttons": {
+        "selected": {
+          "name": "Minimal Squared",
+          "file": "option2-minimal-squared.css",
+          "className": "button-2",
+          "shape": "4px border radius",
+          "density": "Compact (8px/16px base padding)",
+          "focus": "Subtle 2px ring",
+          "description": "Small border radius with compact spacing for dense, data-heavy applications"
+        },
+        "rejected": [
+          {
+            "name": "Modern Rounded",
+            "file": "option1-modern-rounded.css",
+            "className": "button-1",
+            "shape": "8px border radius",
+            "density": "Spacious (12px/24px base padding)",
+            "focus": "Prominent 3px ring",
+            "description": "Medium border radius with balanced spacing for contemporary interfaces"
+          },
+          {
+            "name": "Pill Comfort",
+            "file": "option3-pill-comfort.css",
+            "className": "button-3",
+            "shape": "Full pill (999px)",
+            "density": "Generous (14px/28px base padding)",
+            "focus": "Soft glow shadow",
+            "description": "Full rounded corners with generous spacing for friendly, consumer-facing applications"
+          }
+        ]
+      },
       "inputs": null
     },
     "phase3": {
@@ -127,6 +157,14 @@
       "action": "selected",
       "option": "Lucide Icons",
       "timestamp": "2025-10-08T15:01:00.000Z",
+      "userFeedback": ""
+    },
+    {
+      "phase": "2.1",
+      "component": "buttons",
+      "action": "selected",
+      "option": "Minimal Squared",
+      "timestamp": "2025-10-08T15:13:00.000Z",
       "userFeedback": ""
     }
   ]
