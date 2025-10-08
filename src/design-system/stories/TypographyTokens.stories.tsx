@@ -4,35 +4,13 @@ import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
 
 const meta: Meta = {
-  title: 'Design System/Phase 1.2 - Typography Tokens',
+  title: 'Design System/1. Foundations/Typography',
   parameters: {
     layout: 'fullscreen',
   },
 };
 
 export default meta;
-
-type TypographyOption = {
-  name: string;
-  description: string;
-  cssFile: string;
-  className: string;
-  displayFont: string;
-  bodyFont: string;
-  scale: string;
-};
-
-const typographyOptions: TypographyOption[] = [
-  {
-    name: 'Classic Serif',
-    description: 'Traditional literary feel with modern serif headings and clean sans-serif body text.',
-    cssFile: 'classic-serif.css',
-    className: 'typo-1',
-    displayFont: 'Playfair Display (serif)',
-    bodyFont: 'System Sans-Serif',
-    scale: '1.250 (Major Third)',
-  },
-];
 
 const TypographyScale: React.FC<{ className: string }> = ({ className }) => (
   <div className={className} style={{ marginBottom: '32px' }}>
@@ -85,41 +63,42 @@ const TypographyScale: React.FC<{ className: string }> = ({ className }) => (
   </div>
 );
 
-const TypographyOptionDisplay: React.FC<{ option: TypographyOption }> = ({ option }) => {
-  return (
-    <div className={`option-1 ${option.className}`} style={{
-      padding: '32px',
-      backgroundColor: 'var(--color-background)',
-      minHeight: '100vh',
-    }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{
-          fontFamily: 'var(--typography-body-font)',
-          fontSize: 'var(--typography-h3-size)',
-          fontWeight: 'var(--typography-h3-weight)',
-          marginBottom: '8px',
-          color: 'var(--color-text-primary)',
-        }}>
-          {option.name}
-        </h2>
-        <p style={{
-          fontFamily: 'var(--typography-body-font)',
-          fontSize: 'var(--typography-body-size)',
-          color: 'var(--color-text-secondary)',
-          marginBottom: '8px',
-        }}>
-          {option.description}
-        </p>
-        <div style={{
-          fontSize: 'var(--font-size-sm)',
-          color: 'var(--color-text-secondary)',
-          fontFamily: 'var(--font-mono)',
-        }}>
-          <div>Display: {option.displayFont}</div>
-          <div>Body: {option.bodyFont}</div>
-          <div>Scale: {option.scale}</div>
+export const ClassicSerif: StoryObj = {
+  render: () => {
+    return (
+      <div className="option-1 typo-1" style={{
+        padding: '32px',
+        backgroundColor: 'var(--color-background)',
+        minHeight: '100vh',
+      }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontFamily: 'var(--typography-heading-font)',
+            fontSize: 'var(--typography-h2-size)',
+            fontWeight: 'var(--typography-h2-weight)',
+            marginBottom: '8px',
+            color: 'var(--color-text-primary)',
+          }}>
+            Classic Serif
+          </h1>
+          <p style={{
+            fontFamily: 'var(--typography-body-font)',
+            fontSize: 'var(--typography-body-size)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '8px',
+          }}>
+            Traditional literary feel with modern serif headings and clean sans-serif body text.
+          </p>
+          <div style={{
+            fontSize: 'var(--font-size-sm)',
+            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-mono)',
+          }}>
+            <div>Display: Playfair Display (serif)</div>
+            <div>Body: System Sans-Serif</div>
+            <div>Scale: 1.250 (Major Third)</div>
+          </div>
         </div>
-      </div>
 
       {/* Headings Example */}
       <div style={{
@@ -257,7 +236,7 @@ const TypographyOptionDisplay: React.FC<{ option: TypographyOption }> = ({ optio
         borderRadius: '8px',
         border: '1px solid var(--color-border)',
       }}>
-        <TypographyScale className={option.className} />
+        <TypographyScale className="typo-1" />
       </div>
 
       {/* UI Elements */}
@@ -321,70 +300,26 @@ const TypographyOptionDisplay: React.FC<{ option: TypographyOption }> = ({ optio
             code snippet
           </code>
         </div>
-      </div>
-    </div>
-  );
-};
-
-export const Comparison: StoryObj = {
-  render: () => {
-    return (
-      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: '#ffffff',
-          borderBottom: '2px solid #e5e7eb',
-          padding: '16px 32px',
-          zIndex: 1000,
-        }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>
-            Phase 1.2: Typography Tokens
-          </h1>
-          <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Choose 1, 2, or 3 • Using Modern Indigo colors
-          </p>
-        </div>
-
-        {typographyOptions.map((option, index) => (
-          <div key={option.name}>
-            <div style={{
-              backgroundColor: '#f3f4f6',
-              padding: '16px 32px',
-              borderBottom: '1px solid #e5e7eb',
-            }}>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#111827',
-              }}>
-                {option.name}
-              </h2>
-            </div>
-            <TypographyOptionDisplay option={option} />
-            {index < typographyOptions.length - 1 && (
-              <div style={{ height: '2px', backgroundColor: '#e5e7eb' }} />
-            )}
-          </div>
-        ))}
 
         <div style={{
-          backgroundColor: '#f9fafb',
-          padding: '32px',
-          borderTop: '2px solid #e5e7eb',
+          marginTop: '32px',
+          padding: '24px',
+          backgroundColor: 'var(--color-surface-secondary)',
+          borderRadius: '8px',
         }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
+          <h4 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px', color: 'var(--color-text-primary)' }}>
             Typography Considerations
-          </h3>
-          <ul style={{ listStyle: 'disc', paddingLeft: '24px', color: '#4b5563', lineHeight: '1.6' }}>
-            <li>All options use system fonts for optimal performance and consistency across platforms</li>
+          </h4>
+          <ul style={{ listStyle: 'disc', paddingLeft: '24px', color: 'var(--color-text-secondary)', lineHeight: '1.8' }}>
+            <li>System fonts provide optimal performance and consistency across platforms</li>
             <li>Type scales ensure harmonious size relationships throughout the interface</li>
             <li>Line heights optimized for readability in body text (1.625-1.8)</li>
-            <li>Font weights carefully selected to work with the Modern Indigo color palette</li>
+            <li>Font weights carefully selected to work with the color palette</li>
             <li>Letter spacing adjusted for display sizes to improve legibility</li>
           </ul>
         </div>
       </div>
+    </div>
     );
   },
 };

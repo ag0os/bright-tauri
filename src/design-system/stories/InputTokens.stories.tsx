@@ -7,7 +7,7 @@ import '../tokens/atoms/button/minimal-squared.css';
 import '../tokens/atoms/input/filled-background.css';
 
 const meta: Meta = {
-  title: 'Design System/Phase 2.2 - Input Tokens',
+  title: 'Design System/2. Atoms/Inputs',
   parameters: {
     layout: 'fullscreen',
   },
@@ -25,19 +25,6 @@ type InputOption = {
   border: string;
   strengths: string[];
 };
-
-const inputOptions: InputOption[] = [
-  {
-    name: 'Filled Background',
-    description: 'Material Design inspired with solid background and no border.',
-    cssFile: 'filled-background.css',
-    className: 'input-5',
-    style: 'Filled background',
-    labelPosition: 'Label above',
-    border: 'No border, gray fill, border appears on focus',
-    strengths: ['Clean modern look', 'Reduced visual clutter', 'Clear input area', 'Less borders'],
-  },
-];
 
 // Mock icon component
 const MockIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -105,7 +92,6 @@ const FloatingInput: React.FC<{ className: string }> = ({ className }) => {
 const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
   const [errorValue, setErrorValue] = useState('invalid@');
   const [iconValue, setIconValue] = useState('');
-  const [floatFocused, setFloatFocused] = useState(false);
 
   const isFloating = option.className === 'input-2';
 
@@ -361,44 +347,45 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
   );
 };
 
-const InputOptionDisplay: React.FC<{ option: InputOption }> = ({ option }) => {
-  return (
-    <div className={`option-1 typo-1 icons-1 button-2 ${option.className}`} style={{
-      padding: '32px',
-      backgroundColor: 'var(--color-background)',
-      minHeight: '100vh',
-    }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{
-          fontFamily: 'var(--typography-heading-font)',
-          fontSize: 'var(--typography-h3-size)',
-          fontWeight: 'var(--typography-h3-weight)',
-          marginBottom: '8px',
-          color: 'var(--color-text-primary)',
-        }}>
-          {option.name}
-        </h2>
-        <p style={{
-          fontFamily: 'var(--typography-body-font)',
-          fontSize: 'var(--typography-body-size)',
-          color: 'var(--color-text-secondary)',
-          marginBottom: '12px',
-        }}>
-          {option.description}
-        </p>
-        <div style={{
-          display: 'flex',
-          gap: '24px',
-          fontSize: 'var(--font-size-sm)',
-          color: 'var(--color-text-secondary)',
-          fontFamily: 'var(--font-mono)',
-          flexWrap: 'wrap',
-        }}>
-          <div><strong>Style:</strong> {option.style}</div>
-          <div><strong>Label:</strong> {option.labelPosition}</div>
-          <div><strong>Border:</strong> {option.border}</div>
+export const FilledBackground: StoryObj = {
+  render: () => {
+    return (
+      <div className="option-1 typo-1 icons-1 button-2 input-5" style={{
+        padding: '32px',
+        backgroundColor: 'var(--color-background)',
+        minHeight: '100vh',
+      }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontFamily: 'var(--typography-heading-font)',
+            fontSize: 'var(--typography-h2-size)',
+            fontWeight: 'var(--typography-h2-weight)',
+            marginBottom: '8px',
+            color: 'var(--color-text-primary)',
+          }}>
+            Filled Background
+          </h1>
+          <p style={{
+            fontFamily: 'var(--typography-body-font)',
+            fontSize: 'var(--typography-body-size)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '12px',
+          }}>
+            Material Design inspired with solid background and no border.
+          </p>
+          <div style={{
+            display: 'flex',
+            gap: '24px',
+            fontSize: 'var(--font-size-sm)',
+            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-mono)',
+            flexWrap: 'wrap',
+          }}>
+            <div><strong>Style:</strong> Filled background</div>
+            <div><strong>Label:</strong> Label above</div>
+            <div><strong>Border:</strong> No border, gray fill, border appears on focus</div>
+          </div>
         </div>
-      </div>
 
       {/* Input Showcase */}
       <div style={{
@@ -417,10 +404,19 @@ const InputOptionDisplay: React.FC<{ option: InputOption }> = ({ option }) => {
         }}>
           Input Showcase
         </h3>
-        <InputShowcase option={option} />
+        <InputShowcase option={{
+          name: 'Filled Background',
+          description: 'Material Design inspired with solid background and no border.',
+          cssFile: 'filled-background.css',
+          className: 'input-5',
+          style: 'Filled background',
+          labelPosition: 'Label above',
+          border: 'No border, gray fill, border appears on focus',
+          strengths: ['Clean modern look', 'Reduced visual clutter', 'Clear input area', 'Less borders'],
+        }} />
       </div>
 
-      {/* Strengths */}
+      {/* Strengths & Considerations */}
       <div style={{
         padding: '24px',
         backgroundColor: 'var(--color-surface)',
@@ -443,79 +439,41 @@ const InputOptionDisplay: React.FC<{ option: InputOption }> = ({ option }) => {
           lineHeight: 'var(--typography-body-line-height)',
           listStyle: 'disc',
           paddingLeft: '24px',
+          marginBottom: '24px',
         }}>
-          {option.strengths.map((strength, index) => (
-            <li key={index}>{strength}</li>
-          ))}
+          <li>Clean modern look</li>
+          <li>Reduced visual clutter</li>
+          <li>Clear input area</li>
+          <li>Less borders</li>
+        </ul>
+
+        <h4 style={{
+          fontFamily: 'var(--typography-body-font)',
+          fontSize: 'var(--font-size-base)',
+          fontWeight: 'var(--font-weight-semibold)',
+          marginBottom: '12px',
+          color: 'var(--color-text-primary)',
+        }}>
+          Input Design Considerations
+        </h4>
+        <ul style={{
+          fontFamily: 'var(--typography-body-font)',
+          fontSize: 'var(--typography-body-size)',
+          color: 'var(--color-text-secondary)',
+          lineHeight: 'var(--typography-body-line-height)',
+          listStyle: 'disc',
+          paddingLeft: '24px',
+        }}>
+          <li>Focus states must be clearly visible for accessibility (WCAG 2.4.7)</li>
+          <li>Helper text provides context and reduces errors</li>
+          <li>Error states must be visually distinct with clear messaging</li>
+          <li>Disabled states should be obvious but not alarming</li>
+          <li>Icon support enhances usability for search, validation, and actions</li>
+          <li>All inputs maintain 44px minimum height for touch targets</li>
+          <li>Required field indicators must be consistent and visible</li>
         </ul>
       </div>
     </div>
-  );
-};
-
-export const Comparison: StoryObj = {
-  render: () => {
-    return (
-      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: '#ffffff',
-          borderBottom: '2px solid #e5e7eb',
-          padding: '16px 32px',
-          zIndex: 1000,
-        }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>
-            Phase 2.2: Input Tokens
-          </h1>
-          <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Choose 1, 2, or 3 • Using Modern Indigo + Classic Serif + Lucide Icons + Minimal Squared Buttons
-          </p>
-        </div>
-
-        {inputOptions.map((option, index) => (
-          <div key={option.name}>
-            <div style={{
-              backgroundColor: '#f3f4f6',
-              padding: '16px 32px',
-              borderBottom: '1px solid #e5e7eb',
-            }}>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#111827',
-              }}>
-                {option.name}
-              </h2>
-            </div>
-            <InputOptionDisplay option={option} />
-            {index < inputOptions.length - 1 && (
-              <div style={{ height: '2px', backgroundColor: '#e5e7eb' }} />
-            )}
-          </div>
-        ))}
-
-        <div style={{
-          backgroundColor: '#f9fafb',
-          padding: '32px',
-          borderTop: '2px solid #e5e7eb',
-        }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
-            Input Design Considerations
-          </h3>
-          <ul style={{ listStyle: 'disc', paddingLeft: '24px', color: '#4b5563', lineHeight: '1.6' }}>
-            <li>Label positioning affects form density and scanning patterns</li>
-            <li>Border style impacts visual hierarchy and perceived formality</li>
-            <li>Focus states must be clearly visible for accessibility (WCAG 2.4.7)</li>
-            <li>Helper text provides context and reduces errors</li>
-            <li>Error states must be visually distinct with clear messaging</li>
-            <li>Disabled states should be obvious but not alarming</li>
-            <li>Icon support enhances usability for search, validation, and actions</li>
-            <li>All inputs maintain 44px minimum height for touch targets</li>
-            <li>Required field indicators must be consistent and visible</li>
-          </ul>
-        </div>
-      </div>
     );
   },
 };

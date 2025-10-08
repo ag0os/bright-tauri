@@ -8,37 +8,13 @@ import '../tokens/atoms/input/filled-background.css';
 import '../tokens/organisms/card/elevated-shadow.css';
 
 const meta: Meta = {
-  title: 'Design System/Phase 3.1 - Card Tokens',
+  title: 'Design System/3. Organisms/Cards',
   parameters: {
     layout: 'fullscreen',
   },
 };
 
 export default meta;
-
-type CardOption = {
-  name: string;
-  description: string;
-  cssFile: string;
-  className: string;
-  style: string;
-  elevation: string;
-  characteristics: string;
-  strengths: string[];
-};
-
-const cardOptions: CardOption[] = [
-  {
-    name: 'Elevated Shadow',
-    description: 'Clean cards with subtle shadows for depth and floating appearance.',
-    cssFile: 'elevated-shadow.css',
-    className: 'card-1',
-    style: 'Soft shadow, no border',
-    elevation: 'Shadow-based depth',
-    characteristics: '8px radius, multiple shadow levels, hover lift',
-    strengths: ['Clear depth hierarchy', 'Modern appearance', 'Floating feel', 'Smooth interactions'],
-  },
-];
 
 // Mock icon component
 const MockIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
@@ -344,44 +320,45 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
   );
 };
 
-const CardOptionDisplay: React.FC<{ option: CardOption }> = ({ option }) => {
-  return (
-    <div className={`option-1 typo-1 icons-1 button-2 input-5 ${option.className}`} style={{
-      padding: '32px',
-      backgroundColor: 'var(--color-background)',
-      minHeight: '100vh',
-    }}>
-      <div style={{ marginBottom: '32px' }}>
-        <h2 style={{
-          fontFamily: 'var(--typography-heading-font)',
-          fontSize: 'var(--typography-h3-size)',
-          fontWeight: 'var(--typography-h3-weight)',
-          marginBottom: '8px',
-          color: 'var(--color-text-primary)',
-        }}>
-          {option.name}
-        </h2>
-        <p style={{
-          fontFamily: 'var(--typography-body-font)',
-          fontSize: 'var(--typography-body-size)',
-          color: 'var(--color-text-secondary)',
-          marginBottom: '12px',
-        }}>
-          {option.description}
-        </p>
-        <div style={{
-          display: 'flex',
-          gap: '24px',
-          fontSize: 'var(--font-size-sm)',
-          color: 'var(--color-text-secondary)',
-          fontFamily: 'var(--font-mono)',
-          flexWrap: 'wrap',
-        }}>
-          <div><strong>Style:</strong> {option.style}</div>
-          <div><strong>Elevation:</strong> {option.elevation}</div>
-          <div><strong>Details:</strong> {option.characteristics}</div>
+export const ElevatedShadow: StoryObj = {
+  render: () => {
+    return (
+      <div className="option-1 typo-1 icons-1 button-2 input-5 card-1" style={{
+        padding: '32px',
+        backgroundColor: 'var(--color-background)',
+        minHeight: '100vh',
+      }}>
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{
+            fontFamily: 'var(--typography-heading-font)',
+            fontSize: 'var(--typography-h2-size)',
+            fontWeight: 'var(--typography-h2-weight)',
+            marginBottom: '8px',
+            color: 'var(--color-text-primary)',
+          }}>
+            Elevated Shadow
+          </h1>
+          <p style={{
+            fontFamily: 'var(--typography-body-font)',
+            fontSize: 'var(--typography-body-size)',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '12px',
+          }}>
+            Clean cards with subtle shadows for depth and floating appearance.
+          </p>
+          <div style={{
+            display: 'flex',
+            gap: '24px',
+            fontSize: 'var(--font-size-sm)',
+            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-mono)',
+            flexWrap: 'wrap',
+          }}>
+            <div><strong>Style:</strong> Soft shadow, no border</div>
+            <div><strong>Elevation:</strong> Shadow-based depth</div>
+            <div><strong>Details:</strong> 8px radius, multiple shadow levels, hover lift</div>
+          </div>
         </div>
-      </div>
 
       {/* Card Showcase */}
       <div style={{
@@ -400,10 +377,10 @@ const CardOptionDisplay: React.FC<{ option: CardOption }> = ({ option }) => {
         }}>
           Card Showcase
         </h3>
-        <CardShowcase className={option.className} />
+        <CardShowcase className="card-1" />
       </div>
 
-      {/* Strengths */}
+      {/* Strengths & Considerations */}
       <div style={{
         padding: '24px',
         backgroundColor: 'var(--color-surface)',
@@ -426,77 +403,40 @@ const CardOptionDisplay: React.FC<{ option: CardOption }> = ({ option }) => {
           lineHeight: 'var(--typography-body-line-height)',
           listStyle: 'disc',
           paddingLeft: '24px',
+          marginBottom: '24px',
         }}>
-          {option.strengths.map((strength, index) => (
-            <li key={index}>{strength}</li>
-          ))}
+          <li>Clear depth hierarchy</li>
+          <li>Modern appearance</li>
+          <li>Floating feel</li>
+          <li>Smooth interactions</li>
+        </ul>
+
+        <h4 style={{
+          fontFamily: 'var(--typography-body-font)',
+          fontSize: 'var(--font-size-base)',
+          fontWeight: 'var(--font-weight-semibold)',
+          marginBottom: '12px',
+          color: 'var(--color-text-primary)',
+        }}>
+          Card Design Considerations
+        </h4>
+        <ul style={{
+          fontFamily: 'var(--typography-body-font)',
+          fontSize: 'var(--typography-body-size)',
+          color: 'var(--color-text-secondary)',
+          lineHeight: 'var(--typography-body-line-height)',
+          listStyle: 'disc',
+          paddingLeft: '24px',
+        }}>
+          <li>Interactive cards should have clear hover states for affordance</li>
+          <li>Card headers help organize content and provide context</li>
+          <li>Card footers are ideal for actions related to card content</li>
+          <li>Consistent padding creates rhythm across the interface</li>
+          <li>Border radius matches button radius for visual consistency</li>
+          <li>Supports structured content: header, body, footer</li>
         </ul>
       </div>
     </div>
-  );
-};
-
-export const Comparison: StoryObj = {
-  render: () => {
-    return (
-      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          backgroundColor: '#ffffff',
-          borderBottom: '2px solid #e5e7eb',
-          padding: '16px 32px',
-          zIndex: 1000,
-        }}>
-          <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '4px' }}>
-            Phase 3.1: Card Tokens
-          </h1>
-          <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Choose 1, 2, or 3 • Using Modern Indigo + Classic Serif + Lucide + Minimal Squared Buttons + Filled Inputs
-          </p>
-        </div>
-
-        {cardOptions.map((option, index) => (
-          <div key={option.name}>
-            <div style={{
-              backgroundColor: '#f3f4f6',
-              padding: '16px 32px',
-              borderBottom: '1px solid #e5e7eb',
-            }}>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#111827',
-              }}>
-                {option.name}
-              </h2>
-            </div>
-            <CardOptionDisplay option={option} />
-            {index < cardOptions.length - 1 && (
-              <div style={{ height: '2px', backgroundColor: '#e5e7eb' }} />
-            )}
-          </div>
-        ))}
-
-        <div style={{
-          backgroundColor: '#f9fafb',
-          padding: '32px',
-          borderTop: '2px solid #e5e7eb',
-        }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
-            Card Design Considerations
-          </h3>
-          <ul style={{ listStyle: 'disc', paddingLeft: '24px', color: '#4b5563', lineHeight: '1.6' }}>
-            <li>Elevation strategy affects visual hierarchy (shadows vs borders vs background)</li>
-            <li>Interactive cards should have clear hover states for affordance</li>
-            <li>Card headers help organize content and provide context</li>
-            <li>Card footers are ideal for actions related to card content</li>
-            <li>Consistent padding creates rhythm across the interface</li>
-            <li>Border radius should match button radius for visual consistency</li>
-            <li>All cards support structured content: header, body, footer</li>
-          </ul>
-        </div>
-      </div>
     );
   },
 };
