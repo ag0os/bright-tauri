@@ -1,0 +1,78 @@
+/**
+ * Option 3: Phosphor Icons
+ * Flexible icon family with multiple weights and styles
+ * Library: phosphor-react (https://phosphoricons.com)
+ * Style: Six weights from thin to fill, plus duotone
+ * Best for: Expressive designs, weight variation, duotone support
+ */
+
+.icons-3 {
+  /* Icon Library */
+  --icon-library: "phosphor";
+
+  /* Icon Sizes (Phosphor uses consistent sizing) */
+  --icon-size-xs: 14px;
+  --icon-size-sm: 18px;
+  --icon-size-base: 24px;
+  --icon-size-lg: 32px;
+  --icon-size-xl: 40px;
+  --icon-size-2xl: 56px;
+
+  /* Stroke Width (Phosphor weights) */
+  --icon-stroke-thin: 1px;
+  --icon-stroke-light: 1.25px;
+  --icon-stroke-regular: 1.5px;
+  --icon-stroke-bold: 2px;
+  --icon-stroke-heavy: 2.5px;
+
+  /* Default Stroke */
+  --icon-stroke-default: var(--icon-stroke-regular);
+
+  /* Contextual Icon Sizes */
+  --icon-button-size: var(--icon-size-base);        /* 24px - icons in buttons */
+  --icon-inline-size: var(--icon-size-sm);          /* 18px - icons inline with text */
+  --icon-standalone-size: var(--icon-size-lg);      /* 32px - standalone icons */
+  --icon-feature-size: var(--icon-size-2xl);        /* 56px - feature/hero icons */
+  --icon-decorative-size: var(--icon-size-xl);      /* 40px - decorative icons */
+
+  /* Icon Colors */
+  --icon-color-default: currentColor;
+  --icon-color-muted: var(--color-text-secondary);
+  --icon-color-primary: var(--color-primary);
+  --icon-color-accent: var(--color-accent);
+
+  /* Duotone Colors */
+  --icon-duotone-primary: var(--color-primary);
+  --icon-duotone-secondary: var(--color-primary-subtle);
+
+  /* Icon Spacing */
+  --icon-gap-inline: 0.5rem;   /* 8px - gap between icon and text */
+  --icon-gap-stack: 0.875rem;  /* 14px - gap when stacked vertically */
+}
+
+/* Icon utility classes */
+.icons-3 .icon {
+  width: var(--icon-size-base);
+  height: var(--icon-size-base);
+  stroke-width: var(--icon-stroke-default);
+  color: var(--icon-color-default);
+}
+
+.icons-3 .icon-xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
+.icons-3 .icon-sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
+.icons-3 .icon-base { width: var(--icon-size-base); height: var(--icon-size-base); }
+.icons-3 .icon-lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
+.icons-3 .icon-xl { width: var(--icon-size-xl); height: var(--icon-size-xl); }
+.icons-3 .icon-2xl { width: var(--icon-size-2xl); height: var(--icon-size-2xl); }
+
+.icons-3 .icon-button { width: var(--icon-button-size); height: var(--icon-button-size); }
+.icons-3 .icon-inline { width: var(--icon-inline-size); height: var(--icon-inline-size); }
+.icons-3 .icon-standalone { width: var(--icon-standalone-size); height: var(--icon-standalone-size); }
+
+/* Phosphor weight variants */
+.icons-3 .icon-thin { stroke-width: var(--icon-stroke-thin); }
+.icons-3 .icon-light { stroke-width: var(--icon-stroke-light); }
+.icons-3 .icon-regular { stroke-width: var(--icon-stroke-regular); }
+.icons-3 .icon-bold { stroke-width: var(--icon-stroke-bold); }
+.icons-3 .icon-heavy { stroke-width: var(--icon-stroke-heavy); }
+.icons-3 .icon-fill { fill: currentColor; stroke: none; }

@@ -1,0 +1,68 @@
+/**
+ * Option 1: Lucide Icons
+ * Modern, consistent line-based icons with customizable stroke
+ * Library: lucide-react (https://lucide.dev)
+ * Style: Outline with adjustable stroke width
+ * Best for: Modern apps, flexible customization, consistent line weight
+ */
+
+.icons-1 {
+  /* Icon Library */
+  --icon-library: "lucide";
+
+  /* Icon Sizes */
+  --icon-size-xs: 12px;
+  --icon-size-sm: 16px;
+  --icon-size-base: 20px;
+  --icon-size-lg: 24px;
+  --icon-size-xl: 32px;
+  --icon-size-2xl: 48px;
+
+  /* Stroke Width */
+  --icon-stroke-thin: 1px;
+  --icon-stroke-regular: 2px;
+  --icon-stroke-bold: 2.5px;
+
+  /* Default Stroke */
+  --icon-stroke-default: var(--icon-stroke-regular);
+
+  /* Contextual Icon Sizes */
+  --icon-button-size: var(--icon-size-base);        /* 20px - icons in buttons */
+  --icon-inline-size: var(--icon-size-sm);          /* 16px - icons inline with text */
+  --icon-standalone-size: var(--icon-size-lg);      /* 24px - standalone icons */
+  --icon-feature-size: var(--icon-size-2xl);        /* 48px - feature/hero icons */
+  --icon-decorative-size: var(--icon-size-xl);      /* 32px - decorative icons */
+
+  /* Icon Colors */
+  --icon-color-default: currentColor;
+  --icon-color-muted: var(--color-text-secondary);
+  --icon-color-primary: var(--color-primary);
+  --icon-color-accent: var(--color-accent);
+
+  /* Icon Spacing */
+  --icon-gap-inline: 0.5rem;   /* 8px - gap between icon and text */
+  --icon-gap-stack: 0.75rem;   /* 12px - gap when stacked vertically */
+}
+
+/* Icon utility classes */
+.icons-1 .icon {
+  width: var(--icon-size-base);
+  height: var(--icon-size-base);
+  stroke-width: var(--icon-stroke-default);
+  color: var(--icon-color-default);
+}
+
+.icons-1 .icon-xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
+.icons-1 .icon-sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
+.icons-1 .icon-base { width: var(--icon-size-base); height: var(--icon-size-base); }
+.icons-1 .icon-lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
+.icons-1 .icon-xl { width: var(--icon-size-xl); height: var(--icon-size-xl); }
+.icons-1 .icon-2xl { width: var(--icon-size-2xl); height: var(--icon-size-2xl); }
+
+.icons-1 .icon-button { width: var(--icon-button-size); height: var(--icon-button-size); }
+.icons-1 .icon-inline { width: var(--icon-inline-size); height: var(--icon-inline-size); }
+.icons-1 .icon-standalone { width: var(--icon-standalone-size); height: var(--icon-standalone-size); }
+
+.icons-1 .icon-thin { stroke-width: var(--icon-stroke-thin); }
+.icons-1 .icon-regular { stroke-width: var(--icon-stroke-regular); }
+.icons-1 .icon-bold { stroke-width: var(--icon-stroke-bold); }

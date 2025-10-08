@@ -1,0 +1,66 @@
+/**
+ * Option 2: Heroicons
+ * Clean outlined icons from the Tailwind CSS team
+ * Library: @heroicons/react (https://heroicons.com)
+ * Style: Outline (24px) and Solid (20px) variants
+ * Best for: Tailwind ecosystem, clean outlines, dual styles
+ */
+
+.icons-2 {
+  /* Icon Library */
+  --icon-library: "heroicons";
+
+  /* Icon Sizes (Heroicons uses specific sizes) */
+  --icon-size-xs: 16px;   /* Mini variant */
+  --icon-size-sm: 20px;   /* Solid variant base */
+  --icon-size-base: 24px; /* Outline variant base */
+  --icon-size-lg: 28px;
+  --icon-size-xl: 36px;
+  --icon-size-2xl: 48px;
+
+  /* Stroke Width (Heroicons outline is fixed at 1.5px) */
+  --icon-stroke-outline: 1.5px;
+
+  /* Default Stroke */
+  --icon-stroke-default: var(--icon-stroke-outline);
+
+  /* Contextual Icon Sizes */
+  --icon-button-size: var(--icon-size-sm);          /* 20px - solid icons in buttons */
+  --icon-inline-size: var(--icon-size-xs);          /* 16px - mini icons inline */
+  --icon-standalone-size: var(--icon-size-base);    /* 24px - outline standalone */
+  --icon-feature-size: var(--icon-size-2xl);        /* 48px - feature/hero icons */
+  --icon-decorative-size: var(--icon-size-xl);      /* 36px - decorative icons */
+
+  /* Icon Colors */
+  --icon-color-default: currentColor;
+  --icon-color-muted: var(--color-text-secondary);
+  --icon-color-primary: var(--color-primary);
+  --icon-color-accent: var(--color-accent);
+
+  /* Icon Spacing */
+  --icon-gap-inline: 0.5rem;   /* 8px - gap between icon and text */
+  --icon-gap-stack: 0.75rem;   /* 12px - gap when stacked vertically */
+}
+
+/* Icon utility classes */
+.icons-2 .icon {
+  width: var(--icon-size-base);
+  height: var(--icon-size-base);
+  stroke-width: var(--icon-stroke-default);
+  color: var(--icon-color-default);
+}
+
+.icons-2 .icon-xs { width: var(--icon-size-xs); height: var(--icon-size-xs); }
+.icons-2 .icon-sm { width: var(--icon-size-sm); height: var(--icon-size-sm); }
+.icons-2 .icon-base { width: var(--icon-size-base); height: var(--icon-size-base); }
+.icons-2 .icon-lg { width: var(--icon-size-lg); height: var(--icon-size-lg); }
+.icons-2 .icon-xl { width: var(--icon-size-xl); height: var(--icon-size-xl); }
+.icons-2 .icon-2xl { width: var(--icon-size-2xl); height: var(--icon-size-2xl); }
+
+.icons-2 .icon-button { width: var(--icon-button-size); height: var(--icon-button-size); }
+.icons-2 .icon-inline { width: var(--icon-inline-size); height: var(--icon-inline-size); }
+.icons-2 .icon-standalone { width: var(--icon-standalone-size); height: var(--icon-standalone-size); }
+
+/* Heroicons style variants */
+.icons-2 .icon-outline { stroke-width: var(--icon-stroke-outline); }
+.icons-2 .icon-solid { fill: currentColor; stroke: none; }

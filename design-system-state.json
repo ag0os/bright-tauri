@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "currentPhase": "1.3",
+  "currentPhase": "2.1",
   "selections": {
     "phase1": {
       "colors": {
@@ -62,7 +62,34 @@
           }
         ]
       },
-      "icons": null
+      "icons": {
+        "selected": {
+          "name": "Lucide Icons",
+          "file": "option1-lucide.css",
+          "className": "icons-1",
+          "library": "lucide-react",
+          "style": "Outline with adjustable stroke (1px - 2.5px)",
+          "description": "Modern, consistent line-based icons with customizable stroke width"
+        },
+        "rejected": [
+          {
+            "name": "Heroicons",
+            "file": "option2-heroicons.css",
+            "className": "icons-2",
+            "library": "@heroicons/react",
+            "style": "Outline (24px) & Solid (20px) variants",
+            "description": "Clean outlined icons from the Tailwind CSS team with dual variants"
+          },
+          {
+            "name": "Phosphor Icons",
+            "file": "option3-phosphor.css",
+            "className": "icons-3",
+            "library": "phosphor-react",
+            "style": "Six weights (thin → fill) + duotone",
+            "description": "Flexible icon family with six weights plus duotone support"
+          }
+        ]
+      }
     },
     "phase2": {
       "buttons": null,
@@ -92,6 +119,14 @@
       "action": "selected",
       "option": "Classic Serif",
       "timestamp": "2025-10-08T14:52:00.000Z",
+      "userFeedback": ""
+    },
+    {
+      "phase": "1.3",
+      "component": "icons",
+      "action": "selected",
+      "option": "Lucide Icons",
+      "timestamp": "2025-10-08T15:01:00.000Z",
       "userFeedback": ""
     }
   ]
