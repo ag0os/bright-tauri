@@ -47,6 +47,49 @@ This is a brand new project building a creation app for writers and creators to 
 - **Package Config**: Root `package.json` for npm dependencies
 - **Cargo Config**: `src-tauri/Cargo.toml` for Rust dependencies
 
+## Design System
+
+The project uses a comprehensive token-first design system built with React, TypeScript, and CSS custom properties.
+
+### Location & Documentation
+- **Components**: `src/design-system/`
+- **Documentation**: `docs/design-system.md` (comprehensive guide)
+- **Storybook**: Run `npm run storybook` to view at `http://localhost:6006`
+
+### Design Decisions
+- **Colors**: Modern Indigo (professional blue/indigo with warm amber accents)
+- **Typography**: Classic Serif (Playfair Display headings + system sans body, 1.250 scale)
+- **Icons**: Lucide Icons (modern line-based, adjustable stroke)
+- **Buttons**: Minimal Squared (4px radius, compact spacing)
+- **Inputs**: Filled Background (Material Design inspired)
+- **Cards**: Elevated Shadow (shadow-based depth, no borders)
+- **Navigation**: Minimal Top Bar (48px, distraction-free)
+- **Dashboard**: Stats Grid (analytics-focused layout)
+
+### Structure
+```
+src/design-system/
+├── tokens/           # Design tokens (colors, typography, icons, atoms)
+├── organisms/        # Complex components (cards, navigation)
+├── templates/        # Page layouts (dashboard)
+└── stories/          # Storybook stories for each component
+```
+
+### Usage
+1. Import design tokens: `import '../tokens/colors/modern-indigo.css'`
+2. Use CSS variables: `color: var(--color-primary)`
+3. Apply utility classes: `<button className="btn btn-primary btn-base">`
+4. Import components: `import { MinimalTopBar } from '@/design-system/organisms/navigation/Navigation'`
+
+### Key Principles
+- Token-first architecture (foundations → atoms → organisms → templates)
+- WCAG AA accessibility compliance (4.5:1 contrast for text)
+- Desktop-optimized for writing applications
+- Distraction-free, minimal chrome design
+- Consistent use of design tokens across all components
+
+See `docs/design-system.md` for complete documentation.
+
 ## Common Commands
 
 ### Development
@@ -56,6 +99,9 @@ npm run tauri dev
 
 # Frontend only (for UI development)
 npm run dev
+
+# Start Storybook (component development and documentation)
+npm run storybook
 ```
 
 ### Building
