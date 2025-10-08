@@ -11,25 +11,7 @@
           "primary": "#4f46e5",
           "accent": "#f59e0b",
           "description": "Professional blue/indigo palette with warm amber accents"
-        },
-        "rejected": [
-          {
-            "name": "Nature Green",
-            "file": "option2-nature-green.css",
-            "className": "option-2",
-            "primary": "#059669",
-            "accent": "#f97316",
-            "description": "Green-based palette with earth tones"
-          },
-          {
-            "name": "Sunset Purple",
-            "file": "option3-sunset-purple.css",
-            "className": "option-3",
-            "primary": "#9333ea",
-            "accent": "#f43f5e",
-            "description": "Purple/violet with warm rose tones"
-          }
-        ]
+        }
       },
       "typography": {
         "selected": {
@@ -40,27 +22,7 @@
           "bodyFont": "System Sans-Serif",
           "scale": "1.250 (Major Third)",
           "description": "Traditional literary feel with modern serif headings and clean sans-serif body text"
-        },
-        "rejected": [
-          {
-            "name": "Modern Sans",
-            "file": "option2-modern-sans.css",
-            "className": "typo-2",
-            "displayFont": "Inter",
-            "bodyFont": "Inter",
-            "scale": "1.200 (Minor Third)",
-            "description": "Clean, contemporary system with geometric sans-serif throughout"
-          },
-          {
-            "name": "Humanist Hybrid",
-            "file": "option3-humanist-hybrid.css",
-            "className": "typo-3",
-            "displayFont": "Fraunces",
-            "bodyFont": "Source Sans 3",
-            "scale": "1.333 (Perfect Fourth)",
-            "description": "Warm, readable humanist sans-serif with expressive display font"
-          }
-        ]
+        }
       },
       "icons": {
         "selected": {
@@ -70,25 +32,7 @@
           "library": "lucide-react",
           "style": "Outline with adjustable stroke (1px - 2.5px)",
           "description": "Modern, consistent line-based icons with customizable stroke width"
-        },
-        "rejected": [
-          {
-            "name": "Heroicons",
-            "file": "option2-heroicons.css",
-            "className": "icons-2",
-            "library": "@heroicons/react",
-            "style": "Outline (24px) & Solid (20px) variants",
-            "description": "Clean outlined icons from the Tailwind CSS team with dual variants"
-          },
-          {
-            "name": "Phosphor Icons",
-            "file": "option3-phosphor.css",
-            "className": "icons-3",
-            "library": "phosphor-react",
-            "style": "Six weights (thin → fill) + duotone",
-            "description": "Flexible icon family with six weights plus duotone support"
-          }
-        ]
+        }
       }
     },
     "phase2": {
@@ -101,27 +45,7 @@
           "density": "Compact (8px/16px base padding)",
           "focus": "Subtle 2px ring",
           "description": "Small border radius with compact spacing for dense, data-heavy applications"
-        },
-        "rejected": [
-          {
-            "name": "Modern Rounded",
-            "file": "option1-modern-rounded.css",
-            "className": "button-1",
-            "shape": "8px border radius",
-            "density": "Spacious (12px/24px base padding)",
-            "focus": "Prominent 3px ring",
-            "description": "Medium border radius with balanced spacing for contemporary interfaces"
-          },
-          {
-            "name": "Pill Comfort",
-            "file": "option3-pill-comfort.css",
-            "className": "button-3",
-            "shape": "Full pill (999px)",
-            "density": "Generous (14px/28px base padding)",
-            "focus": "Soft glow shadow",
-            "description": "Full rounded corners with generous spacing for friendly, consumer-facing applications"
-          }
-        ]
+        }
       },
       "inputs": {
         "selected": {
@@ -132,54 +56,7 @@
           "layout": "Label above",
           "characteristics": "No border, gray fill, border appears on focus",
           "description": "Material Design inspired with solid background and no border"
-        },
-        "rejected": [
-          {
-            "name": "Classic Outlined",
-            "file": "option1-classic-outlined.css",
-            "className": "input-1",
-            "style": "Full border",
-            "layout": "Label above",
-            "characteristics": "1px solid, 2px ring focus",
-            "description": "Traditional input with full border and clear label separation"
-          },
-          {
-            "name": "Modern Floating Label",
-            "file": "option2-modern-floating.css",
-            "className": "input-2",
-            "style": "Floating label",
-            "layout": "Inside input (floats up)",
-            "characteristics": "Animated label, 2px focus border",
-            "description": "Input with animated floating label for a clean, modern feel"
-          },
-          {
-            "name": "Underline Minimal",
-            "file": "option3-underline-minimal.css",
-            "className": "input-3",
-            "style": "Bottom border only",
-            "layout": "Label above",
-            "characteristics": "2px bottom, 3px on focus",
-            "description": "Minimal input with bottom border only for clean, minimal interfaces"
-          },
-          {
-            "name": "Simple Bordered",
-            "file": "option4-simple-bordered.css",
-            "className": "input-4",
-            "style": "Full border (1.5px)",
-            "layout": "Label above",
-            "characteristics": "6px radius, semibold label, simple focus",
-            "description": "Clean, straightforward input with consistent border and no fancy effects"
-          },
-          {
-            "name": "Inline Label",
-            "file": "option6-inline-label.css",
-            "className": "input-6",
-            "style": "Inline horizontal",
-            "layout": "Label left, input right",
-            "characteristics": "Horizontal layout, compact, admin-style",
-            "description": "Label and input on same horizontal line for compact, space-efficient forms"
-          }
-        ]
+        }
       }
     },
     "phase3": {
@@ -192,27 +69,7 @@
           "elevation": "Shadow-based depth",
           "characteristics": "8px radius, multiple shadow levels, hover lift",
           "description": "Clean cards with subtle shadows for depth and floating appearance"
-        },
-        "rejected": [
-          {
-            "name": "Bordered Flat",
-            "file": "option2-bordered-flat.css",
-            "className": "card-2",
-            "style": "Border-based, flat",
-            "elevation": "No shadows",
-            "characteristics": "6px radius, 1px border, border color change on hover",
-            "description": "Clean cards with borders and no shadows for minimal, flat design"
-          },
-          {
-            "name": "Subtle Background",
-            "file": "option3-subtle-background.css",
-            "className": "card-3",
-            "style": "Light background",
-            "elevation": "Subtle shadow on hover",
-            "characteristics": "8px radius, light gray fill, subtle border",
-            "description": "Soft background with minimal border for gentle visual hierarchy"
-          }
-        ]
+        }
       },
       "navigation": {
         "selected": {
@@ -223,27 +80,7 @@
           "style": "Minimal, distraction-free",
           "characteristics": "Centered breadcrumb, essential actions, auto-save indicator",
           "description": "Slim single bar perfect for content-focused writing applications"
-        },
-        "rejected": [
-          {
-            "name": "Vertical Sidebar",
-            "file": "option1-vertical-sidebar.css",
-            "className": "nav-1",
-            "pattern": "Fixed sidebar (240px expanded, 64px collapsed)",
-            "style": "Classic desktop navigation",
-            "characteristics": "Hierarchical sections, collapsible, icon + label items",
-            "description": "Traditional desktop sidebar similar to VS Code and Slack"
-          },
-          {
-            "name": "Top Toolbar + Secondary",
-            "file": "option2-top-toolbar.css",
-            "className": "nav-2",
-            "pattern": "Dual-layer horizontal (56px + 48px)",
-            "style": "Productivity suite navigation",
-            "characteristics": "Primary tabs, contextual secondary toolbar, breadcrumbs",
-            "description": "Complex navigation for multi-mode apps like Figma and Adobe apps"
-          }
-        ]
+        }
       }
     },
     "phase4": {
@@ -256,27 +93,7 @@
           "style": "Traditional dashboard with metrics at top",
           "characteristics": "Stats grid, two-column layout, high information density, card-based sections",
           "description": "Comprehensive dashboard with prominent stats cards and organized content sections for data visibility"
-        },
-        "rejected": [
-          {
-            "name": "Focus Mode",
-            "file": "option2-focus-mode.css",
-            "className": "dashboard-2",
-            "pattern": "Creator-first with hero card",
-            "style": "Focus on current work with gradient hero",
-            "characteristics": "Compact stats bar, large 'Continue Writing' card, medium density, visual hierarchy",
-            "description": "Creator-focused dashboard emphasizing active work with eye-catching gradient card"
-          },
-          {
-            "name": "Timeline Activity",
-            "file": "option3-timeline-activity.css",
-            "className": "dashboard-3",
-            "pattern": "Progress tracking with timeline",
-            "style": "Activity-based with streak visualization",
-            "characteristics": "Vertical timeline, streak cards, goal tracking, medium-high density, gamification",
-            "description": "Timeline-based dashboard for users motivated by progress tracking and consistency"
-          }
-        ]
+        }
       },
       "homepage": {
         "status": "skipped",

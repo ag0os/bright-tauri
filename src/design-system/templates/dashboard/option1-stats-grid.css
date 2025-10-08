@@ -1,0 +1,319 @@
+/**
+ * Option 1: Stats Grid Dashboard (Analytics Focus)
+ *
+ * Traditional dashboard with stats cards at top and content grid below.
+ * - Stats overview in grid at top
+ * - Main content area with cards in responsive grid
+ * - Quick actions sidebar
+ * - Optimized for data and metrics viewing
+ */
+
+.dashboard-1 {
+  --dashboard-padding: 32px;
+  --dashboard-gap: 24px;
+  --stat-card-height: 120px;
+  --sidebar-width: 280px;
+}
+
+/* Main Dashboard Container */
+.dashboard-1__container {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+/* Main Content Area */
+.dashboard-1__main {
+  flex: 1;
+  padding: var(--dashboard-padding);
+  margin-top: 48px; /* Account for nav bar */
+}
+
+.dashboard-1__header {
+  margin-bottom: 32px;
+}
+
+.dashboard-1__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.dashboard-1__subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+/* Stats Grid */
+.dashboard-1__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--dashboard-gap);
+  margin-bottom: 32px;
+}
+
+.dashboard-1__stat-card {
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 200ms ease;
+  min-height: var(--stat-card-height);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dashboard-1__stat-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.dashboard-1__stat-label {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.dashboard-1__stat-value {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.dashboard-1__stat-change {
+  font-size: var(--font-size-sm);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dashboard-1__stat-change--positive {
+  color: var(--color-success);
+}
+
+.dashboard-1__stat-change--negative {
+  color: var(--color-error);
+}
+
+/* Content Grid */
+.dashboard-1__content {
+  display: grid;
+  grid-template-columns: 1fr var(--sidebar-width);
+  gap: var(--dashboard-gap);
+}
+
+.dashboard-1__primary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dashboard-gap);
+}
+
+/* Section */
+.dashboard-1__section {
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-1__section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard-1__section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.dashboard-1__section-action {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 120ms ease;
+}
+
+.dashboard-1__section-action:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Recent Documents List */
+.dashboard-1__document-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-1__document-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  transition: background 120ms ease;
+  cursor: pointer;
+}
+
+.dashboard-1__document-item:hover {
+  background: var(--color-background-hover);
+}
+
+.dashboard-1__document-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.dashboard-1__document-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-1__document-title {
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-1__document-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.dashboard-1__document-status {
+  font-size: var(--font-size-xs);
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--color-background);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* Sidebar */
+.dashboard-1__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dashboard-gap);
+}
+
+/* Quick Actions */
+.dashboard-1__quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-1__action-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 120ms ease;
+  text-align: left;
+}
+
+.dashboard-1__action-button:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-1__action-button--secondary {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.dashboard-1__action-button--secondary:hover {
+  background: var(--color-background-hover);
+  border-color: var(--color-border-emphasis);
+}
+
+.dashboard-1__action-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.dashboard-1__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.dashboard-1__empty-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 16px;
+}
+
+.dashboard-1__empty-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+.dashboard-1__empty-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+/* Loading State */
+.dashboard-1__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.dashboard-1__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
