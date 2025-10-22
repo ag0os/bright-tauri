@@ -20,6 +20,42 @@ This is a brand new project building a creation app for writers and creators to 
   - Any custom entities that serve as context for their stories
 - **Contextual Writing**: The universe elements provide context to enhance AI assistance and maintain consistency across stories
 
+## Project Status
+
+**Current Phase**: Foundation Complete → Frontend Development
+
+### What's Implemented ✅
+
+**Backend (95% Complete)**:
+- Domain models: Universe, Story (with hierarchy & variations), Element
+- Full CRUD operations via repository layer
+- Story hierarchy support: chapters, child stories, reordering (`list_children`, `reorder_children`, `get_with_children`)
+- Git integration complete: init, commit, branch, diff, merge, history
+- File management: naming strategy (001-title.md), creation, reordering, metadata.json
+- All features exposed via Tauri commands to frontend
+
+**Design System (100% Complete)**:
+- Token-first design system ready to use (`src/design-system/`)
+- All phases complete: Foundations → Atoms → Organisms → Templates
+- Storybook documentation with 100+ component variants
+- See Design System section below for details
+
+**What's Next**: Frontend UI implementation (tasks 20-26)
+- Chapter/child story management UI (task-21, MEDIUM priority)
+- Auto-save with debouncing (task-20)
+- Git UI: branch management, diff viewer, merge conflict resolution, history timeline (tasks 23-26)
+
+**Not Yet Started**: AI integration, Voice dictation
+
+### Key Architectural Decisions
+
+- **Git Backend**: Using `git2` Rust library for version control
+- **Story Hierarchy**: Stories can have child stories (chapters) stored as numbered markdown files (001-title.md)
+- **Metadata Sync**: metadata.json in each story's Git repo keeps SQLite and filesystem in sync
+- **Design System**: Custom token-first system (not using external component libraries)
+
+**Full Roadmap**: See `docs/ideas/roadmap.md` for complete feature list and progress tracking.
+
 ## Architecture
 
 ### Frontend (React + Vite)
@@ -87,6 +123,29 @@ src/design-system/
 - Desktop-optimized for writing applications
 - Distraction-free, minimal chrome design
 - Consistent use of design tokens across all components
+
+### UI Philosophy: Minimalism Over Feature Density
+
+**Core Principle**: Prefer multiple clean, focused screens over single bloated views.
+
+**Guidelines**:
+- Each view should have a single, clear purpose
+- Avoid cramming multiple features into one screen
+- Use navigation to separate concerns (e.g., separate screens for editing, settings, history)
+- Embrace whitespace and breathing room
+- Show only what's essential for the current task
+- Progressive disclosure: reveal complexity only when needed
+- When in doubt, split into separate views
+
+**Examples**:
+- ✅ Separate screens: Story editor, Story settings, Story history
+- ❌ Single screen with tabs/panels for all story features
+- ✅ Dedicated diff viewer page for comparing versions
+- ❌ Inline diff panel squished next to editor
+- ✅ Fullscreen writing mode with minimal UI
+- ❌ Editor with visible sidebars, toolbars, and panels
+
+**Rationale**: This is a focused writing application. Writers need clarity and freedom from distraction. Clean, purpose-driven screens help users focus on one task at a time without cognitive overload.
 
 See `docs/design-system.md` for complete documentation.
 
