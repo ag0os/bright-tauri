@@ -22,11 +22,11 @@ impl Database {
 
         let conn = Connection::open(&db_path)?;
 
-        // Enable foreign keys
+        // Enable foreign keys (this pragma doesn't return results)
         conn.execute("PRAGMA foreign_keys = ON", [])?;
 
-        // Enable WAL mode for better concurrency
-        conn.execute("PRAGMA journal_mode = WAL", [])?;
+        // Enable WAL mode for better concurrency (use pragma_update since it returns a value)
+        conn.pragma_update(None, "journal_mode", "WAL")?;
 
         Ok(Self {
             conn: Arc::new(Mutex::new(conn)),

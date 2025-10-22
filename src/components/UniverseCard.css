@@ -1,0 +1,90 @@
+/* Import design system tokens */
+@import '../design-system/tokens/colors/modern-indigo.css';
+@import '../design-system/tokens/typography/classic-serif.css';
+
+.universe-card {
+  /* Size */
+  width: 240px;
+  height: 180px;
+
+  /* Rounded square */
+  border-radius: 12px;
+
+  /* Elevated shadow (from design system) */
+  background: white;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  /* Cursor */
+  cursor: pointer;
+
+  /* Transition for hover and focus */
+  transition: all 0.2s ease;
+
+  /* Remove button default styles */
+  border: 2px solid transparent;
+  outline: none;
+
+  /* Content positioning */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.universe-card__content {
+  text-align: center;
+  width: 100%;
+}
+
+.universe-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Hover effect - slight lift */
+.universe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Focus state - visible border for keyboard navigation */
+.universe-card--focused {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1),
+    0 0 0 3px var(--color-primary-light);
+}
+
+/* Active/pressed state */
+.universe-card:active {
+  transform: translateY(-2px);
+}
+
+/* Create new card variant */
+.universe-card--create {
+  border: 2px dashed var(--color-border);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.universe-card--create:hover {
+  border-color: var(--color-primary);
+  background: white;
+}
+
+.universe-card--create.universe-card--focused {
+  border-color: var(--color-primary);
+  border-style: solid;
+}
+
+.universe-card__icon {
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+  line-height: 1;
+}
