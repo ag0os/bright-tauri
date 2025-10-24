@@ -1,0 +1,43 @@
+/**
+ * Purple Gradient Tokens
+ * Special gradient background for Universe Selection
+ * Uses existing indigo colors from design system
+ */
+
+@import './modern-indigo.css';
+
+:root {
+  /* Gradient variations using design system indigo colors - lighter for better contrast */
+  --gradient-purple-radial: radial-gradient(
+    circle at top right,
+    var(--color-indigo-600) 0%,
+    var(--color-indigo-500) 50%,
+    var(--color-indigo-400) 100%
+  );
+
+  --gradient-purple-diagonal: linear-gradient(
+    135deg,
+    var(--color-indigo-600) 0%,
+    var(--color-indigo-500) 50%,
+    var(--color-indigo-400) 100%
+  );
+
+  --gradient-purple-vertical: linear-gradient(
+    180deg,
+    var(--color-indigo-600) 0%,
+    var(--color-indigo-500) 100%
+  );
+}
+
+/* Utility class for full-screen purple gradient background */
+.bg-purple-gradient {
+  background: var(--gradient-purple-diagonal);
+  min-height: 100vh;
+  width: 100%;
+}
+
+.bg-purple-gradient-radial {
+  background: var(--gradient-purple-radial);
+  min-height: 100vh;
+  width: 100%;
+}

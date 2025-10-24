@@ -25,6 +25,10 @@ pub fn run() {
                 .app_data_dir()
                 .expect("Failed to get app data directory");
 
+            // Ensure the app data directory exists
+            std::fs::create_dir_all(&app_data_dir)
+                .expect("Failed to create app data directory");
+
             // Create database path
             let db_path = app_data_dir.join("bright.db");
 

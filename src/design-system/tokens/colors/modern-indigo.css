@@ -4,6 +4,7 @@
  * WCAG AA compliant for text and interactive elements
  */
 
+:root,
 .option-1 {
   /* Base Color Primitives - Light Mode */
   --color-indigo-50: #eef2ff;
@@ -81,6 +82,7 @@
 }
 
 /* Dark Mode */
+:root[data-theme="dark"],
 .option-1[data-theme="dark"] {
   --color-background: var(--color-gray-950);
   --color-surface: var(--color-gray-900);

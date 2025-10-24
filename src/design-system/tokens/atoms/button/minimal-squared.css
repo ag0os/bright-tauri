@@ -5,6 +5,7 @@
  * Best for: Dense interfaces, data-heavy applications
  */
 
+:root,
 .button-2 {
   /* Button Shape */
   --button-border-radius: 4px;
@@ -75,7 +76,7 @@
 }
 
 /* Button Base Styles */
-.button-2 .btn {
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -91,81 +92,81 @@
   white-space: nowrap;
 }
 
-.button-2 .btn:focus-visible {
+.btn:focus-visible {
   outline: var(--button-focus-ring-width) solid var(--button-focus-ring-color);
   outline-offset: var(--button-focus-ring-offset);
   opacity: var(--button-focus-ring-opacity);
 }
 
-.button-2 .btn:disabled {
+.btn:disabled {
   opacity: var(--button-disabled-opacity);
   cursor: var(--button-disabled-cursor);
 }
 
 /* Size Variants */
-.button-2 .btn-sm {
+.btn-sm {
   padding: var(--button-padding-sm);
   font-size: var(--button-font-size-sm);
   min-height: var(--button-min-height-sm);
 }
 
-.button-2 .btn-base {
+.btn-base {
   padding: var(--button-padding-base);
   font-size: var(--button-font-size-base);
   min-height: var(--button-min-height-base);
 }
 
-.button-2 .btn-lg {
+.btn-lg {
   padding: var(--button-padding-lg);
   font-size: var(--button-font-size-lg);
   min-height: var(--button-min-height-lg);
 }
 
 /* Style Variants */
-.button-2 .btn-primary {
+.btn-primary {
   background-color: var(--button-primary-bg);
   color: var(--button-primary-text);
   border-color: var(--button-primary-border);
 }
 
-.button-2 .btn-primary:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background-color: var(--button-primary-hover-bg);
   border-color: var(--button-primary-hover-border);
 }
 
-.button-2 .btn-primary:active:not(:disabled) {
+.btn-primary:active:not(:disabled) {
   background-color: var(--button-primary-active-bg);
 }
 
-.button-2 .btn-secondary {
+.btn-secondary {
   background-color: var(--button-secondary-bg);
   color: var(--button-secondary-text);
   border-color: var(--button-secondary-border);
 }
 
-.button-2 .btn-secondary:hover:not(:disabled) {
+.btn-secondary:hover:not(:disabled) {
   background-color: var(--button-secondary-hover-bg);
   border-color: var(--button-secondary-hover-border);
 }
 
-.button-2 .btn-outline {
+.btn-outline {
   background-color: var(--button-outline-bg);
   color: var(--button-outline-text);
   border-color: var(--button-outline-border);
 }
 
-.button-2 .btn-outline:hover:not(:disabled) {
+.btn-outline:hover:not(:disabled) {
   background-color: var(--button-outline-hover-bg);
   border-color: var(--button-outline-hover-border);
 }
 
-.button-2 .btn-ghost {
+.btn-ghost {
   background-color: var(--button-ghost-bg);
   color: var(--button-ghost-text);
   border-color: var(--button-ghost-border);
 }
 
-.button-2 .btn-ghost:hover:not(:disabled) {
+.btn-ghost:hover:not(:disabled) {
   background-color: var(--button-ghost-hover-bg);
   color: var(--button-ghost-hover-text);
 }
