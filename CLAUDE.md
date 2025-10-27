@@ -20,6 +20,35 @@ This is a brand new project building a creation app for writers and creators to 
   - Any custom entities that serve as context for their stories
 - **Contextual Writing**: The universe elements provide context to enhance AI assistance and maintain consistency across stories
 
+## Element Templates
+
+The app provides pre-configured templates for common element types to help writers get started quickly. Templates suggest optional attributes that can be used, customized, or ignored.
+
+**Core Fields** (always present for every element):
+- `name` - Element name (required)
+- `description` - Brief description (required)
+- `details` - Longer-form text content (optional)
+
+**Template Configuration**: `src/config/element-templates.json`
+
+**Available Templates**:
+1. **Character** (👤): age, gender, occupation, personality, physical_description, backstory, motivation, strengths, weaknesses, affiliation
+2. **Location** (📍): type, population, climate, geography, culture, government, economy, history, notable_features
+3. **Vehicle** (🚗): type, manufacturer, model, crew_capacity, passenger_capacity, dimensions, speed, armament, special_features
+4. **Item** (📦): type, rarity, origin, powers, appearance, owner, history, condition
+5. **Organization** (🏛️): type, size, founded, headquarters, purpose, leadership, membership, reputation, resources
+6. **Creature** (🐉): species, habitat, diet, size, intelligence, behavior, abilities, lifespan, rarity
+7. **Event** (📅): date, location, participants, duration, cause, outcome, significance
+8. **Concept** (💡): type, origin, principles, practitioners, limitations, applications, history
+
+**Philosophy**: Templates are suggestions, not requirements. Writers can:
+- Use suggested attributes that fit their element
+- Skip attributes that don't apply (e.g., a comic vehicle doesn't need "manufacturer" or "model")
+- Add custom attributes not in the template
+- Rely on core fields (name, description, details) for simple elements
+
+**Example**: A fantasy sword might only use `name: "Excalibur"`, `description: "Legendary sword"`, and template attributes `origin: "Lady of the Lake"` and `powers: "Unbreakable"`, skipping rarity, owner, history, etc.
+
 ## Project Status
 
 **Current Phase**: Foundation Complete → Frontend Development

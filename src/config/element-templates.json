@@ -1,0 +1,468 @@
+{
+  "templates": {
+    "character": {
+      "name": "Character",
+      "description": "A person, being, or entity in your story",
+      "icon": "👤",
+      "suggestedAttributes": [
+        {
+          "key": "age",
+          "label": "Age",
+          "placeholder": "e.g., 32, immortal, ageless",
+          "description": "Character's age or age appearance"
+        },
+        {
+          "key": "gender",
+          "label": "Gender",
+          "placeholder": "e.g., male, female, non-binary",
+          "description": "Gender identity"
+        },
+        {
+          "key": "occupation",
+          "label": "Occupation",
+          "placeholder": "e.g., detective, wizard, student",
+          "description": "What they do for a living"
+        },
+        {
+          "key": "personality",
+          "label": "Personality",
+          "placeholder": "e.g., brave, curious, cynical",
+          "description": "Key personality traits"
+        },
+        {
+          "key": "physical_description",
+          "label": "Physical Description",
+          "placeholder": "e.g., tall, dark hair, green eyes",
+          "description": "Appearance details"
+        },
+        {
+          "key": "backstory",
+          "label": "Backstory",
+          "placeholder": "Brief history...",
+          "description": "Character's past and origin"
+        },
+        {
+          "key": "motivation",
+          "label": "Motivation",
+          "placeholder": "e.g., seeking revenge, protecting family",
+          "description": "What drives them"
+        },
+        {
+          "key": "strengths",
+          "label": "Strengths",
+          "placeholder": "e.g., skilled fighter, quick thinker",
+          "description": "Key abilities and positive traits"
+        },
+        {
+          "key": "weaknesses",
+          "label": "Weaknesses",
+          "placeholder": "e.g., impulsive, afraid of heights",
+          "description": "Flaws and limitations"
+        },
+        {
+          "key": "affiliation",
+          "label": "Affiliation",
+          "placeholder": "e.g., Rebel Alliance, Hogwarts",
+          "description": "Group or organization membership"
+        }
+      ]
+    },
+    "location": {
+      "name": "Location",
+      "description": "A place, setting, or geographical area",
+      "icon": "📍",
+      "suggestedAttributes": [
+        {
+          "key": "type",
+          "label": "Type",
+          "placeholder": "e.g., city, forest, planet, building",
+          "description": "Kind of location"
+        },
+        {
+          "key": "population",
+          "label": "Population",
+          "placeholder": "e.g., 1 million, uninhabited",
+          "description": "Number of inhabitants"
+        },
+        {
+          "key": "climate",
+          "label": "Climate",
+          "placeholder": "e.g., tropical, arctic, temperate",
+          "description": "Weather and environmental conditions"
+        },
+        {
+          "key": "geography",
+          "label": "Geography",
+          "placeholder": "e.g., mountainous, coastal, urban",
+          "description": "Physical features and terrain"
+        },
+        {
+          "key": "culture",
+          "label": "Culture",
+          "placeholder": "Cultural characteristics...",
+          "description": "Social norms and traditions"
+        },
+        {
+          "key": "government",
+          "label": "Government",
+          "placeholder": "e.g., democracy, monarchy, tribal",
+          "description": "Political system or leadership"
+        },
+        {
+          "key": "economy",
+          "label": "Economy",
+          "placeholder": "e.g., trade-based, agricultural",
+          "description": "Economic system and resources"
+        },
+        {
+          "key": "history",
+          "label": "History",
+          "placeholder": "Notable historical events...",
+          "description": "Location's past and origins"
+        },
+        {
+          "key": "notable_features",
+          "label": "Notable Features",
+          "placeholder": "e.g., ancient temple, magical barrier",
+          "description": "Landmarks or unique characteristics"
+        }
+      ]
+    },
+    "vehicle": {
+      "name": "Vehicle",
+      "description": "A mode of transportation or mobile craft",
+      "icon": "🚗",
+      "suggestedAttributes": [
+        {
+          "key": "type",
+          "label": "Type",
+          "placeholder": "e.g., spaceship, car, dragon, boat",
+          "description": "Kind of vehicle or transport"
+        },
+        {
+          "key": "manufacturer",
+          "label": "Manufacturer",
+          "placeholder": "e.g., Corellian Engineering",
+          "description": "Who or what created it"
+        },
+        {
+          "key": "model",
+          "label": "Model",
+          "placeholder": "e.g., YT-1300, Model T",
+          "description": "Model designation or name"
+        },
+        {
+          "key": "crew_capacity",
+          "label": "Crew Capacity",
+          "placeholder": "e.g., 2-4 people",
+          "description": "Number of crew members needed"
+        },
+        {
+          "key": "passenger_capacity",
+          "label": "Passenger Capacity",
+          "placeholder": "e.g., 6 passengers",
+          "description": "Maximum passenger count"
+        },
+        {
+          "key": "dimensions",
+          "label": "Dimensions",
+          "placeholder": "e.g., 35 meters long, huge",
+          "description": "Size and physical measurements"
+        },
+        {
+          "key": "speed",
+          "label": "Speed/Performance",
+          "placeholder": "e.g., Mach 2, very fast",
+          "description": "Maximum speed or capabilities"
+        },
+        {
+          "key": "armament",
+          "label": "Armament",
+          "placeholder": "e.g., laser cannons, unarmed",
+          "description": "Weapons and defensive systems"
+        },
+        {
+          "key": "special_features",
+          "label": "Special Features",
+          "placeholder": "e.g., cloaking device, AI pilot",
+          "description": "Unique capabilities or technology"
+        }
+      ]
+    },
+    "item": {
+      "name": "Item",
+      "description": "An object, artifact, or piece of equipment",
+      "icon": "📦",
+      "suggestedAttributes": [
+        {
+          "key": "type",
+          "label": "Type",
+          "placeholder": "e.g., weapon, artifact, tool, jewelry",
+          "description": "Category of item"
+        },
+        {
+          "key": "rarity",
+          "label": "Rarity",
+          "placeholder": "e.g., common, rare, legendary, unique",
+          "description": "How rare or common it is"
+        },
+        {
+          "key": "origin",
+          "label": "Origin",
+          "placeholder": "e.g., Ancient Egypt, forged by elves",
+          "description": "Where or how it was created"
+        },
+        {
+          "key": "powers",
+          "label": "Powers/Abilities",
+          "placeholder": "e.g., grants invisibility, indestructible",
+          "description": "Special abilities or properties"
+        },
+        {
+          "key": "appearance",
+          "label": "Appearance",
+          "placeholder": "Physical description...",
+          "description": "What it looks like"
+        },
+        {
+          "key": "owner",
+          "label": "Current Owner",
+          "placeholder": "e.g., Gandalf, lost",
+          "description": "Who possesses it now"
+        },
+        {
+          "key": "history",
+          "label": "History",
+          "placeholder": "Item's backstory...",
+          "description": "Notable events involving this item"
+        },
+        {
+          "key": "condition",
+          "label": "Condition",
+          "placeholder": "e.g., pristine, damaged, ancient",
+          "description": "Current physical state"
+        }
+      ]
+    },
+    "organization": {
+      "name": "Organization",
+      "description": "A group, faction, company, or institution",
+      "icon": "🏛️",
+      "suggestedAttributes": [
+        {
+          "key": "type",
+          "label": "Type",
+          "placeholder": "e.g., government, guild, corporation",
+          "description": "Kind of organization"
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "placeholder": "e.g., 500 members, galactic",
+          "description": "Number of members or scope"
+        },
+        {
+          "key": "founded",
+          "label": "Founded",
+          "placeholder": "e.g., 1985, ancient times",
+          "description": "When it was established"
+        },
+        {
+          "key": "headquarters",
+          "label": "Headquarters",
+          "placeholder": "e.g., New York, secret location",
+          "description": "Main base of operations"
+        },
+        {
+          "key": "purpose",
+          "label": "Purpose/Mission",
+          "placeholder": "Organization's goals...",
+          "description": "What they aim to achieve"
+        },
+        {
+          "key": "leadership",
+          "label": "Leadership",
+          "placeholder": "e.g., council of elders, CEO",
+          "description": "Who leads or governs"
+        },
+        {
+          "key": "membership",
+          "label": "Membership",
+          "placeholder": "e.g., invitation only, open to all",
+          "description": "Who can join and how"
+        },
+        {
+          "key": "reputation",
+          "label": "Reputation",
+          "placeholder": "e.g., feared, respected, mysterious",
+          "description": "How it's perceived by others"
+        },
+        {
+          "key": "resources",
+          "label": "Resources",
+          "placeholder": "e.g., vast wealth, magical artifacts",
+          "description": "Assets and capabilities"
+        }
+      ]
+    },
+    "creature": {
+      "name": "Creature",
+      "description": "An animal, beast, or non-human entity",
+      "icon": "🐉",
+      "suggestedAttributes": [
+        {
+          "key": "species",
+          "label": "Species",
+          "placeholder": "e.g., dragon, dire wolf, alien",
+          "description": "Type or species name"
+        },
+        {
+          "key": "habitat",
+          "label": "Habitat",
+          "placeholder": "e.g., mountains, deep space, forests",
+          "description": "Where it lives"
+        },
+        {
+          "key": "diet",
+          "label": "Diet",
+          "placeholder": "e.g., carnivore, energy-based",
+          "description": "What it eats or consumes"
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "placeholder": "e.g., horse-sized, massive, tiny",
+          "description": "Physical dimensions"
+        },
+        {
+          "key": "intelligence",
+          "label": "Intelligence",
+          "placeholder": "e.g., sentient, animal-level, genius",
+          "description": "Cognitive abilities"
+        },
+        {
+          "key": "behavior",
+          "label": "Behavior",
+          "placeholder": "e.g., aggressive, docile, curious",
+          "description": "Typical actions and temperament"
+        },
+        {
+          "key": "abilities",
+          "label": "Abilities",
+          "placeholder": "e.g., breathes fire, telepathic",
+          "description": "Special powers or capabilities"
+        },
+        {
+          "key": "lifespan",
+          "label": "Lifespan",
+          "placeholder": "e.g., 100 years, immortal",
+          "description": "How long they typically live"
+        },
+        {
+          "key": "rarity",
+          "label": "Rarity",
+          "placeholder": "e.g., extinct, common, mythical",
+          "description": "How common or rare they are"
+        }
+      ]
+    },
+    "event": {
+      "name": "Event",
+      "description": "A significant happening, incident, or occurrence",
+      "icon": "📅",
+      "suggestedAttributes": [
+        {
+          "key": "date",
+          "label": "Date/Time",
+          "placeholder": "e.g., Year 2050, ancient past",
+          "description": "When it occurred"
+        },
+        {
+          "key": "location",
+          "label": "Location",
+          "placeholder": "e.g., Paris, the moon",
+          "description": "Where it happened"
+        },
+        {
+          "key": "participants",
+          "label": "Participants",
+          "placeholder": "e.g., entire kingdom, three heroes",
+          "description": "Who was involved"
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "placeholder": "e.g., 3 days, instant, years",
+          "description": "How long it lasted"
+        },
+        {
+          "key": "cause",
+          "label": "Cause",
+          "placeholder": "What triggered it...",
+          "description": "Why it happened"
+        },
+        {
+          "key": "outcome",
+          "label": "Outcome",
+          "placeholder": "Results and consequences...",
+          "description": "What resulted from it"
+        },
+        {
+          "key": "significance",
+          "label": "Significance",
+          "placeholder": "e.g., changed the world, minor incident",
+          "description": "Historical or narrative importance"
+        }
+      ]
+    },
+    "concept": {
+      "name": "Concept",
+      "description": "An abstract idea, system, or philosophy",
+      "icon": "💡",
+      "suggestedAttributes": [
+        {
+          "key": "type",
+          "label": "Type",
+          "placeholder": "e.g., magic system, technology, religion",
+          "description": "Category of concept"
+        },
+        {
+          "key": "origin",
+          "label": "Origin",
+          "placeholder": "e.g., discovered in ancient times",
+          "description": "Where it came from"
+        },
+        {
+          "key": "principles",
+          "label": "Core Principles",
+          "placeholder": "Fundamental rules or ideas...",
+          "description": "How it works or what defines it"
+        },
+        {
+          "key": "practitioners",
+          "label": "Practitioners",
+          "placeholder": "e.g., wizards, scientists, anyone",
+          "description": "Who uses or follows it"
+        },
+        {
+          "key": "limitations",
+          "label": "Limitations",
+          "placeholder": "What it can't do...",
+          "description": "Constraints and boundaries"
+        },
+        {
+          "key": "applications",
+          "label": "Applications",
+          "placeholder": "How it's used...",
+          "description": "Practical uses"
+        },
+        {
+          "key": "history",
+          "label": "History",
+          "placeholder": "How it developed...",
+          "description": "Evolution and development over time"
+        }
+      ]
+    }
+  }
+}
