@@ -3,6 +3,7 @@ import { UniverseSelection } from "./views/UniverseSelection";
 import { StoriesList } from "./views/StoriesList";
 import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
+import { ElementDetailPage } from "./views/ElementDetailPage";
 import "./App.css";
 
 function App() {
@@ -23,14 +24,7 @@ function App() {
       return <StoryEditor />;
 
     case 'element-detail':
-      // TODO: Implement Element Detail view
-      return (
-        <div style={{ padding: '24px' }}>
-          <h1>Element Detail</h1>
-          <p>Element ID: {currentRoute.elementId}</p>
-          <p>(To be implemented)</p>
-        </div>
-      );
+      return <ElementDetailPage />;
 
     default:
       return <UniverseSelection />;

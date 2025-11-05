@@ -12,7 +12,7 @@ import {
   Car,
   Package,
   Building2,
-  Dragon,
+  Bird,
   Calendar,
   Lightbulb,
   Star,
@@ -63,7 +63,7 @@ const getElementIcon = (type: ElementType, customIcon?: string | null): React.Re
     case 'organization':
       return <Building2 className={iconClass} />;
     case 'creature':
-      return <Dragon className={iconClass} />;
+      return <Bird className={iconClass} />;
     case 'event':
       return <Calendar className={iconClass} />;
     case 'concept':
