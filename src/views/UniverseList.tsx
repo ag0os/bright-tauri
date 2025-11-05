@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Search, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ElementCard } from '@/components/universe/ElementCard';
+import { CreateElementModal } from '@/components/universe/CreateElementModal';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
@@ -355,40 +356,8 @@ export function UniverseList() {
         )}
       </div>
 
-      {/* Create Element Modal - Placeholder for task 44 */}
-      {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onClick={() => setShowCreateModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              borderRadius: '8px',
-              padding: 'var(--spacing-6)',
-              maxWidth: '400px',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Create Element Modal</h3>
-            <p>This will be implemented in task 44</p>
-            <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(false)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Create Element Modal */}
+      {showCreateModal && <CreateElementModal onClose={() => setShowCreateModal(false)} />}
 
       {/* Spinner animation */}
       <style>
