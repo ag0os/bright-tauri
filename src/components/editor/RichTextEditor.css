@@ -1,0 +1,193 @@
+/**
+ * Rich Text Editor Styles
+ *
+ * Styling for Lexical editor using design system tokens.
+ */
+
+.rich-text-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-surface);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Toolbar Styles */
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-surface-secondary);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-1);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolbar-button:hover {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.toolbar-button.active {
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+}
+
+.toolbar-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  margin: 0 var(--spacing-1);
+}
+
+/* Editor Container */
+.editor-container {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Content Editable */
+.editor-content {
+  position: relative;
+  min-height: 100%;
+  padding: var(--spacing-6);
+  outline: none;
+  caret-color: var(--color-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
+}
+
+.editor-content[contenteditable="false"] {
+  cursor: default;
+}
+
+/* Placeholder */
+.editor-placeholder {
+  position: absolute;
+  top: var(--spacing-6);
+  left: var(--spacing-6);
+  color: var(--color-text-disabled);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Text Formatting */
+.editor-text-bold {
+  font-weight: 700;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+/* Paragraphs */
+.editor-paragraph {
+  margin: 0 0 var(--spacing-4) 0;
+}
+
+.editor-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Headings */
+.editor-heading-h1 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  margin: 0 0 var(--spacing-4) 0;
+  color: var(--color-text-primary);
+}
+
+.editor-heading-h2 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: var(--line-height-heading);
+  margin: 0 0 var(--spacing-3) 0;
+  color: var(--color-text-primary);
+}
+
+.editor-heading-h3 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: var(--line-height-heading);
+  margin: 0 0 var(--spacing-3) 0;
+  color: var(--color-text-primary);
+}
+
+/* Lists */
+.editor-list-ul,
+.editor-list-ol {
+  margin: 0 0 var(--spacing-4) 0;
+  padding-left: var(--spacing-6);
+}
+
+.editor-list-ul {
+  list-style-type: disc;
+}
+
+.editor-list-ol {
+  list-style-type: decimal;
+}
+
+.editor-listitem {
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+/* Quote */
+.editor-quote {
+  margin: var(--spacing-4) 0;
+  padding-left: var(--spacing-4);
+  border-left: 3px solid var(--color-border-strong);
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+/* Read-only Mode */
+.rich-text-editor.read-only {
+  background: var(--color-background);
+}
+
+.rich-text-editor.read-only .editor-content {
+  cursor: default;
+}
+
+/* Focus State */
+.editor-content:focus {
+  outline: none;
+}
+
+/* Selection */
+.editor-content ::selection {
+  background: var(--color-primary-subtle);
+}
