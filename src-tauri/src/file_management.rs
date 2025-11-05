@@ -5,7 +5,7 @@
 /// and scenes stored as markdown files.
 
 use crate::file_naming;
-use crate::git::{GitResult, GitService};
+use crate::git::GitService;
 use crate::models::Story;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -28,8 +28,8 @@ impl std::fmt::Display for FileManagementError {
             FileManagementError::FileExists(path) => {
                 write!(f, "File already exists: {}", path.display())
             }
-            FileManagementError::Io(err) => write!(f, "IO error: {}", err),
-            FileManagementError::Git(err) => write!(f, "Git error: {}", err),
+            FileManagementError::Io(err) => write!(f, "IO error: {err}"),
+            FileManagementError::Git(err) => write!(f, "Git error: {err}"),
         }
     }
 }
@@ -89,7 +89,7 @@ pub fn create_story_file(
     fs::write(&file_path, content)?;
 
     // Commit to Git
-    let commit_message = format!("Add {}: {}", filename, title);
+    let commit_message = format!("Add {filename}: {title}");
     GitService::commit_file(repo_path, &filename, content, &commit_message)?;
 
     // Return relative filename
@@ -275,9 +275,8 @@ pub fn write_metadata_file(
 
     // Serialize to pretty JSON
     let json = serde_json::to_string_pretty(&metadata)
-        .map_err(|e| FileManagementError::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to serialize metadata: {}", e),
+        .map_err(|e| FileManagementError::Io(std::io::Error::other(
+            format!("Failed to serialize metadata: {e}"),
         )))?;
 
     let metadata_path = repo_path.join("metadata.json");
@@ -564,7 +563,7 @@ mod tests {
 
         // Create 5 files
         for i in 1..=5 {
-            create_story_file(&repo_path, i, &format!("Chapter {}", i), &format!("Content {}", i))
+            create_story_file(&repo_path, i, &format!("Chapter {i}"), &format!("Content {i}"))
                 .unwrap();
         }
 

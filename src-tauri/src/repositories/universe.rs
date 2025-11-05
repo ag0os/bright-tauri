@@ -1,5 +1,5 @@
 use crate::db::Database;
-use crate::models::{CreateUniverseInput, Genre, Tone, Universe, UniverseStatus, UpdateUniverseInput};
+use crate::models::{CreateUniverseInput, Universe, UniverseStatus, UpdateUniverseInput};
 use rusqlite::{params, Result};
 use chrono::Utc;
 use uuid::Uuid;
@@ -62,7 +62,7 @@ impl UniverseRepository {
                 let genre = genre_str.and_then(|s| serde_json::from_str(&s).ok());
                 let tone = tone_str.and_then(|s| serde_json::from_str(&s).ok());
                 let themes = themes_json.and_then(|s| serde_json::from_str(&s).ok());
-                let status: UniverseStatus = serde_json::from_str(&format!("\"{}\"", status_str)).unwrap();
+                let status: UniverseStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
                 let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 
                 Ok(Universe {
@@ -106,7 +106,7 @@ impl UniverseRepository {
             let genre = genre_str.and_then(|s| serde_json::from_str(&s).ok());
             let tone = tone_str.and_then(|s| serde_json::from_str(&s).ok());
             let themes = themes_json.and_then(|s| serde_json::from_str(&s).ok());
-            let status: UniverseStatus = serde_json::from_str(&format!("\"{}\"", status_str)).unwrap();
+            let status: UniverseStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
             let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 
             Ok(Universe {
@@ -138,7 +138,7 @@ impl UniverseRepository {
         let tone_str = input.tone.map(|t| serde_json::to_string(&t).unwrap());
         let themes_json = input.themes.map(|t| serde_json::to_string(&t).unwrap());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
-        let status_str = input.status.map(|s| format!("{:?}", s).to_lowercase());
+        let status_str = input.status.map(|s| format!("{s:?}").to_lowercase());
 
         // Build dynamic UPDATE query based on which fields are provided
         let mut updates = vec!["updated_at = ?1"];

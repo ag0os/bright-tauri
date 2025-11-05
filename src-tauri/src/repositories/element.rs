@@ -14,7 +14,7 @@ impl ElementRepository {
         let now = Utc::now().to_rfc3339();
 
         let element_type_str = input.element_type
-            .map(|et| format!("{:?}", et).to_lowercase())
+            .map(|et| format!("{et:?}").to_lowercase())
             .unwrap_or_else(|| "character".to_string());
 
         let attributes_json = input.attributes.map(|a| serde_json::to_string(&a).unwrap());
@@ -112,7 +112,7 @@ impl ElementRepository {
 
     /// List Elements by type
     pub fn list_by_type(db: &Database, universe_id: &str, element_type: ElementType) -> Result<Vec<Element>> {
-        let type_str = format!("{:?}", element_type).to_lowercase();
+        let type_str = format!("{element_type:?}").to_lowercase();
 
         let conn = db.connection();
         let conn = conn.lock().unwrap();
@@ -144,7 +144,7 @@ impl ElementRepository {
     pub fn update(db: &Database, id: &str, input: UpdateElementInput) -> Result<Element> {
         let now = Utc::now().to_rfc3339();
 
-        let element_type_str = input.element_type.map(|et| format!("{:?}", et).to_lowercase());
+        let element_type_str = input.element_type.map(|et| format!("{et:?}").to_lowercase());
         let attributes_json = input.attributes.map(|a| serde_json::to_string(&a).unwrap());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
 
@@ -338,7 +338,7 @@ impl ElementRepository {
         let attributes_json: Option<String> = row.get(7)?;
         let tags_json: Option<String> = row.get(11)?;
 
-        let element_type: ElementType = serde_json::from_str(&format!("\"{}\"", element_type_str)).unwrap();
+        let element_type: ElementType = serde_json::from_str(&format!("\"{element_type_str}\"")).unwrap();
         let attributes: Option<HashMap<String, String>> = attributes_json.and_then(|s| serde_json::from_str(&s).ok());
         let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 

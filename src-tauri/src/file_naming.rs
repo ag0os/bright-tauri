@@ -50,7 +50,7 @@ pub fn generate_filename(order: usize, title: &str) -> String {
         slug
     };
 
-    format!("{:03}-{}.md", order, slug)
+    format!("{order:03}-{slug}.md")
 }
 
 /// Generate a unique filename by appending a counter if needed
@@ -83,7 +83,7 @@ pub fn generate_unique_filename(order: usize, title: &str, existing_filenames: &
 
     let mut counter = 2;
     loop {
-        let filename = format!("{:03}-{}-{}.md", order, slug, counter);
+        let filename = format!("{order:03}-{slug}-{counter}.md");
         if !existing_filenames.contains(&filename) {
             return filename;
         }
@@ -91,7 +91,7 @@ pub fn generate_unique_filename(order: usize, title: &str, existing_filenames: &
 
         // Safety: prevent infinite loop (though unlikely with realistic data)
         if counter > 1000 {
-            return format!("{:03}-{}-{}.md", order, slug, counter);
+            return format!("{order:03}-{slug}-{counter}.md");
         }
     }
 }

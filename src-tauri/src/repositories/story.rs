@@ -15,8 +15,8 @@ impl StoryRepository {
         // Generate variation_group_id if this is a new story (not a variation)
         let variation_group_id = Uuid::new_v4().to_string();
 
-        let story_type_str = input.story_type.map(|st| format!("{:?}", st).to_lowercase()).unwrap_or_else(|| "novel".to_string());
-        let variation_type_str = input.variation_type.map(|vt| format!("{:?}", vt).to_lowercase()).unwrap_or_else(|| "original".to_string());
+        let story_type_str = input.story_type.map(|st| format!("{st:?}").to_lowercase()).unwrap_or_else(|| "novel".to_string());
+        let variation_type_str = input.variation_type.map(|vt| format!("{vt:?}").to_lowercase()).unwrap_or_else(|| "original".to_string());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
 
         db.execute(
@@ -199,8 +199,8 @@ impl StoryRepository {
     pub fn update(db: &Database, id: &str, input: UpdateStoryInput) -> Result<Story> {
         let now = Utc::now().to_rfc3339();
 
-        let story_type_str = input.story_type.map(|st| format!("{:?}", st).to_lowercase());
-        let status_str = input.status.map(|s| format!("{:?}", s).to_lowercase());
+        let story_type_str = input.story_type.map(|st| format!("{st:?}").to_lowercase());
+        let status_str = input.status.map(|s| format!("{s:?}").to_lowercase());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
         let related_elements_json = input.related_element_ids.map(|ids| serde_json::to_string(&ids).unwrap());
 
@@ -292,9 +292,9 @@ impl StoryRepository {
         let tags_json: Option<String> = row.get(20)?;
         let related_elements_json: Option<String> = row.get(23)?;
 
-        let story_type: StoryType = serde_json::from_str(&format!("\"{}\"", story_type_str)).unwrap();
-        let status: StoryStatus = serde_json::from_str(&format!("\"{}\"", status_str)).unwrap();
-        let variation_type: VariationType = serde_json::from_str(&format!("\"{}\"", variation_type_str)).unwrap();
+        let story_type: StoryType = serde_json::from_str(&format!("\"{story_type_str}\"")).unwrap();
+        let status: StoryStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
+        let variation_type: VariationType = serde_json::from_str(&format!("\"{variation_type_str}\"")).unwrap();
         let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
         let related_element_ids = related_elements_json.and_then(|s| serde_json::from_str(&s).ok());
 

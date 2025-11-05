@@ -9,5 +9,5 @@ pub use story::{
     CreateStoryInput, Story, StoryStatus, StoryType, UpdateStoryInput, VariationType,
 };
 pub use universe::{
-    CreateUniverseInput, Genre, Tone, Universe, UniverseStatus, UpdateUniverseInput,
+    CreateUniverseInput, Universe, UniverseStatus, UpdateUniverseInput,
 };

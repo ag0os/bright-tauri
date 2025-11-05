@@ -14,8 +14,7 @@ impl Database {
         if let Some(parent) = db_path.parent() {
             std::fs::create_dir_all(parent).map_err(|e| {
                 rusqlite::Error::InvalidPath(PathBuf::from(format!(
-                    "Failed to create database directory: {}",
-                    e
+                    "Failed to create database directory: {e}"
                 )))
             })?;
         }
