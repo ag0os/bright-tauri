@@ -17,6 +17,34 @@ The design system follows a token-first, atomic design methodology, progressing 
 
 ### Phase 1: Foundations
 
+#### CSS Reset - Modern Reset
+**File**: `src/design-system/tokens/reset/modern-reset.css`
+
+A modern, opinionated CSS reset based on best practices from Pawel Grzybek. Automatically imported in the application entry point.
+
+**Key Features**:
+- **Universal Box-Sizing**: `box-sizing: border-box` for consistent sizing
+- **Zero Margins/Padding**: Removes browser defaults for predictable spacing
+- **Improved Typography**:
+  - `text-wrap: balance` for headings (prevents orphans)
+  - `text-wrap: pretty` for paragraphs (better line breaks)
+- **Enhanced Font Rendering**: `-webkit-font-smoothing: antialiased` on macOS
+- **Light/Dark Mode Support**: `color-scheme: light dark` enables native browser themes
+- **Accessibility**: Respects `prefers-reduced-motion` for animations
+- **RTL Support**: Google Translate RTL fix included
+- **Modern List Styling**: Better default positioning with logical properties
+
+**Browser Features**:
+- Hanging punctuation for better typography
+- Interpolate-size for smoother animations (when motion is enabled)
+- Future-proofed with commented `:heading` selector
+
+**Usage**: Automatically imported - no action needed. The reset is loaded first before all other styles to provide a consistent foundation.
+
+**CSS Layer**: Uses `@layer reset` for proper cascade control, allowing easy overrides when needed.
+
+---
+
 #### Colors - Modern Indigo
 **File**: `src/design-system/tokens/colors/modern-indigo.css`
 
@@ -301,6 +329,8 @@ Perfect for users who:
 ```
 src/design-system/
 ├── tokens/
+│   ├── reset/
+│   │   └── modern-reset.css
 │   ├── colors/
 │   │   └── modern-indigo.css
 │   ├── typography/

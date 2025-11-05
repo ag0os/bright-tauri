@@ -1,0 +1,105 @@
+/**
+ * Modern CSS Reset
+ * Based on recommendations from Pawel Grzybek
+ * https://pawelgrzybek.com/the-css-reset-again/
+ */
+
+@layer reset {
+  /* ================================
+     Base Reset
+     ================================ */
+
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* ================================
+     Root Element
+     ================================ */
+
+  html {
+    /* Enable light/dark mode support */
+    color-scheme: light dark;
+
+    /* Better font rendering on macOS */
+    -webkit-font-smoothing: antialiased;
+
+    /* Disable legacy iOS text size adjustment */
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+
+    /* Better typographic appearance */
+    hanging-punctuation: first allow-end last;
+  }
+
+  /* ================================
+     Google Translate RTL Fix
+     ================================ */
+
+  html.translated-rtl {
+    direction: rtl;
+  }
+
+  /* ================================
+     Typography
+     ================================ */
+
+  /* Balance text in headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    text-wrap: balance;
+  }
+
+  /* Future-proof with :heading selector when supported */
+  /* :heading {
+    text-wrap: balance;
+  } */
+
+  /* Prettier line breaks in paragraphs */
+  p {
+    text-wrap: pretty;
+  }
+
+  /* ================================
+     Lists
+     ================================ */
+
+  ul,
+  ol,
+  dl {
+    /* Better default list positioning */
+    list-style-position: inside;
+  }
+
+  /* Indent nested lists using logical line height unit */
+  ul ul,
+  ul ol,
+  ul dl,
+  ol ul,
+  ol ol,
+  ol dl,
+  dl ul,
+  dl ol,
+  dl dl {
+    padding-inline-start: 1lh;
+  }
+
+  /* ================================
+     Animations
+     ================================ */
+
+  /* Enable animations to auto/min-content for users who accept motion */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      interpolate-size: allow-keywords;
+    }
+  }
+}

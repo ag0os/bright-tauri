@@ -122,6 +122,7 @@ The project uses a comprehensive token-first design system built with React, Typ
 - **Storybook**: Run `npm run storybook` to view at `http://localhost:6006`
 
 ### Design Decisions
+- **CSS Reset**: Modern Reset (Pawel Grzybek's recommendations, auto-imported)
 - **Colors**: Modern Indigo (professional blue/indigo with warm amber accents)
 - **Typography**: Classic Serif (Playfair Display headings + system sans body, 1.250 scale)
 - **Icons**: Lucide Icons (modern line-based, adjustable stroke)
@@ -134,7 +135,7 @@ The project uses a comprehensive token-first design system built with React, Typ
 ### Structure
 ```
 src/design-system/
-├── tokens/           # Design tokens (colors, typography, icons, atoms)
+├── tokens/           # Design tokens (reset, colors, typography, icons, atoms)
 ├── organisms/        # Complex components (cards, navigation)
 ├── templates/        # Page layouts (dashboard)
 └── stories/          # Storybook stories for each component
