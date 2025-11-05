@@ -1,43 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import { UniverseCard } from '../components/UniverseCard';
 import { CreateUniverseModal } from '../components/CreateUniverseModal';
 import type { Universe } from '../types/Universe';
-import type { CreateUniverseInput } from '../types/CreateUniverseInput';
+import { useUniverseStore } from '@/stores/useUniverseStore';
+import { useNavigationStore } from '@/stores/useNavigationStore';
 import './UniverseSelection.css';
 
 export const UniverseSelection: React.FC = () => {
-  const [universes, setUniverses] = useState<Universe[]>([]);
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+
+  const { universes, isLoading, loadUniverses, createUniverse, setCurrentUniverse } = useUniverseStore();
+  const navigate = useNavigationStore((state) => state.navigate);
 
   // Load universes on mount
   useEffect(() => {
     loadUniverses();
-  }, []);
-
-  const loadUniverses = async () => {
-    try {
-      setIsLoading(true);
-      const result = await invoke<Universe[]>('list_universes');
-      setUniverses(result);
-    } catch (error) {
-      console.error('Failed to load universes:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [loadUniverses]);
 
   const handleSelectUniverse = (universe: Universe) => {
     console.log('Selected universe:', universe);
-    // TODO: Navigate to universe workspace
-    // navigate(`/universe/${universe.id}`);
+    setCurrentUniverse(universe);
+    // Navigate to stories list
+    navigate({ screen: 'stories-list' });
   };
 
   const handleCreateUniverse = async (name: string) => {
     try {
-      const input: CreateUniverseInput = {
+      const input = {
         name,
         description: null,
         genre: null,
@@ -49,12 +39,10 @@ export const UniverseSelection: React.FC = () => {
         tags: null,
       };
 
-      const newUniverse = await invoke<Universe>('create_universe', { input });
-
-      setUniverses([...universes, newUniverse]);
+      const newUniverse = await createUniverse(input);
       setIsModalOpen(false);
 
-      // Optionally select the newly created universe
+      // Select and navigate to the newly created universe
       handleSelectUniverse(newUniverse);
     } catch (error) {
       console.error('Failed to create universe:', error);
