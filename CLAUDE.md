@@ -217,6 +217,21 @@ npx tsc
 cd src-tauri && cargo test --lib
 ```
 
+### Testing
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once (CI mode)
+npm run test:run
+
+# Run tests with UI (if @vitest/ui is installed)
+npm run test:ui
+
+# Generate coverage report
+npm run test:coverage
+```
+
 ## Type Generation with ts-rs
 
 This project uses `ts-rs` to automatically generate TypeScript types from Rust structs, eliminating the need to maintain duplicate type definitions.
@@ -257,6 +272,144 @@ This generates `src/types/MyType.ts`:
 ```typescript
 export type MyType = { id: string, name: string };
 ```
+
+## Frontend Testing with Vitest
+
+The project uses Vitest with React Testing Library for frontend component and integration testing.
+
+### Test Framework Stack
+
+- **Vitest**: Fast Vite-native test runner with watch mode
+- **React Testing Library**: User-centric component testing
+- **jsdom**: DOM implementation for Node.js
+- **@testing-library/user-event**: User interaction simulation
+- **@testing-library/jest-dom**: Custom Jest matchers for DOM assertions
+
+### Test Structure
+
+```
+src/
+├── test/
+│   ├── setup.ts          # Global test setup, Tauri mocks
+│   └── utils.tsx         # Test utilities and helpers
+├── App.test.tsx          # Example: App component test
+└── design-system/
+    └── tokens/atoms/button/
+        └── Button.test.tsx  # Example: Button component test
+```
+
+### Configuration
+
+- **Vitest Config**: `vitest.config.ts` - Test environment, coverage, aliases
+- **Setup File**: `src/test/setup.ts` - Global mocks, cleanup, ResizeObserver mock
+- **Test Utils**: `src/test/utils.tsx` - Custom render functions, Tauri mocking utilities
+
+### Writing Tests
+
+#### Basic Component Test
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from '@/test/utils';
+import MyComponent from './MyComponent';
+
+describe('MyComponent', () => {
+  it('renders without crashing', () => {
+    renderWithProviders(<MyComponent />);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+  });
+});
+```
+
+#### Testing User Interactions
+
+```typescript
+import { vi } from 'vitest';
+import userEvent from '@testing-library/user-event';
+
+it('calls onClick when button is clicked', async () => {
+  const handleClick = vi.fn();
+  const user = userEvent.setup();
+
+  renderWithProviders(<Button onClick={handleClick}>Click Me</Button>);
+
+  await user.click(screen.getByRole('button'));
+  expect(handleClick).toHaveBeenCalledTimes(1);
+});
+```
+
+#### Mocking Tauri Commands
+
+```typescript
+import { mockTauriInvoke } from '@/test/utils';
+
+it('loads universe data from Tauri backend', async () => {
+  mockTauriInvoke('get_universe', { id: '123', name: 'Test Universe' });
+
+  renderWithProviders(<UniverseView />);
+
+  expect(await screen.findByText('Test Universe')).toBeInTheDocument();
+});
+```
+
+### Best Practices
+
+1. **Test User Behavior, Not Implementation**
+   - Query by role, label, or text (not by class or test IDs)
+   - Test what users see and do, not internal component state
+
+2. **Use Async Utilities for Async Updates**
+   - `await screen.findByText()` for elements that appear later
+   - `await waitFor(() => expect(...))` for async state changes
+
+3. **Mock Tauri Commands**
+   - All Tauri commands are automatically mocked in `src/test/setup.ts`
+   - Use `mockTauriInvoke()` to set up expected responses
+   - Use `resetTauriMocks()` to clear mocks between tests
+
+4. **Keep Tests Fast and Isolated**
+   - Each test should be independent
+   - Use `afterEach` cleanup (already configured)
+   - Avoid testing implementation details
+
+5. **Accessibility Testing**
+   - Query by roles: `getByRole('button')`, `getByRole('textbox')`
+   - Test keyboard interactions: `user.tab()`, `user.keyboard('{Enter}')`
+   - Check disabled states: `expect(button).toBeDisabled()`
+
+### Running Tests
+
+```bash
+# Watch mode (default)
+npm test
+
+# Run once (CI)
+npm run test:run
+
+# With coverage
+npm run test:coverage
+
+# With UI (if available)
+npm run test:ui
+```
+
+### Coverage
+
+Coverage reports are generated in `coverage/` directory and exclude:
+- Node modules
+- Test files (`*.test.tsx`, `*.spec.tsx`)
+- Storybook stories (`*.stories.tsx`)
+- Configuration files (`*.config.ts`)
+- Type definitions (`types/`)
+- Build output (`dist/`)
+- Rust backend (`src-tauri/`)
+
+### Examples
+
+See example tests:
+- `src/App.test.tsx` - Basic component test
+- `src/design-system/tokens/atoms/button/Button.test.tsx` - Comprehensive button component test
 
 ## Adding New Tauri Commands
 
