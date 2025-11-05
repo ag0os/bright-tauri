@@ -99,7 +99,7 @@ export function RichTextEditor({
                 }
               />
             }
-            ErrorBoundary={(props) => <div>Error: {props.error?.message}</div>}
+            ErrorBoundary={() => <div>Error loading editor</div>}
           />
           <HistoryPlugin />
           <OnChangePlugin onChange={handleChange} />

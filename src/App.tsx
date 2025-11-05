@@ -2,6 +2,7 @@ import { useNavigationStore } from "@/stores/useNavigationStore";
 import { UniverseSelection } from "./views/UniverseSelection";
 import { StoriesList } from "./views/StoriesList";
 import { UniverseList } from "./views/UniverseList";
+import { StoryEditor } from "./views/StoryEditor";
 import "./App.css";
 
 function App() {
@@ -19,14 +20,7 @@ function App() {
       return <UniverseList />;
 
     case 'story-editor':
-      // TODO: Implement Story Editor view
-      return (
-        <div style={{ padding: '24px' }}>
-          <h1>Story Editor</h1>
-          <p>Story ID: {currentRoute.storyId}</p>
-          <p>(To be implemented)</p>
-        </div>
-      );
+      return <StoryEditor />;
 
     case 'element-detail':
       // TODO: Implement Element Detail view
