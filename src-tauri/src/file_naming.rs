@@ -3,7 +3,6 @@
 /// This module provides functions to generate consistent, filesystem-safe
 /// filenames for child stories (chapters, scenes, etc.) in Git repositories.
 /// Files are named with an order prefix and slugified title: "001-chapter-name.md"
-
 /// Slugify a string to make it filesystem and URL-safe
 ///
 /// Converts to lowercase, replaces spaces with hyphens, removes invalid characters
@@ -13,6 +12,7 @@
 ///
 /// # Returns
 /// A slugified string safe for use in filenames
+#[allow(dead_code)]
 pub fn slugify(text: &str) -> String {
     text.to_lowercase()
         .trim()
@@ -40,6 +40,7 @@ pub fn slugify(text: &str) -> String {
 ///
 /// # Returns
 /// A formatted filename string
+#[allow(dead_code)]
 pub fn generate_filename(order: usize, title: &str) -> String {
     let slug = slugify(title);
 
@@ -65,7 +66,12 @@ pub fn generate_filename(order: usize, title: &str) -> String {
 ///
 /// # Returns
 /// A unique filename that doesn't exist in the provided list
-pub fn generate_unique_filename(order: usize, title: &str, existing_filenames: &[String]) -> String {
+#[allow(dead_code)]
+pub fn generate_unique_filename(
+    order: usize,
+    title: &str,
+    existing_filenames: &[String],
+) -> String {
     let base_filename = generate_filename(order, title);
 
     // If no collision, return the base filename
@@ -143,7 +149,10 @@ mod tests {
 
     #[test]
     fn test_generate_filename_basic() {
-        assert_eq!(generate_filename(1, "First Chapter"), "001-first-chapter.md");
+        assert_eq!(
+            generate_filename(1, "First Chapter"),
+            "001-first-chapter.md"
+        );
     }
 
     #[test]
@@ -153,7 +162,10 @@ mod tests {
 
     #[test]
     fn test_generate_filename_triple_digits() {
-        assert_eq!(generate_filename(123, "Large Number"), "123-large-number.md");
+        assert_eq!(
+            generate_filename(123, "Large Number"),
+            "123-large-number.md"
+        );
     }
 
     #[test]

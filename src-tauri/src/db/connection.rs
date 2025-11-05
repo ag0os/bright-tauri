@@ -44,6 +44,7 @@ impl Database {
     }
 
     /// Execute a query and process results
+    #[allow(dead_code)]
     pub fn query<T, F>(&self, sql: &str, params: &[&dyn rusqlite::ToSql], f: F) -> Result<Vec<T>>
     where
         F: FnMut(&rusqlite::Row) -> Result<T>,
@@ -55,6 +56,7 @@ impl Database {
     }
 
     /// Execute a query and return a single optional result
+    #[allow(dead_code)]
     pub fn query_one<T, F>(
         &self,
         sql: &str,

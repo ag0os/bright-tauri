@@ -1,7 +1,7 @@
 use crate::db::Database;
 use crate::models::{CreateUniverseInput, Universe, UniverseStatus, UpdateUniverseInput};
-use rusqlite::{params, Result};
 use chrono::Utc;
+use rusqlite::{params, Result};
 use uuid::Uuid;
 
 pub struct UniverseRepository;
@@ -12,10 +12,22 @@ impl UniverseRepository {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
 
-        let genre_str = input.genre.as_ref().map(|g| serde_json::to_string(g).unwrap());
-        let tone_str = input.tone.as_ref().map(|t| serde_json::to_string(t).unwrap());
-        let themes_json = input.themes.as_ref().map(|t| serde_json::to_string(t).unwrap());
-        let tags_json = input.tags.as_ref().map(|t| serde_json::to_string(t).unwrap());
+        let genre_str = input
+            .genre
+            .as_ref()
+            .map(|g| serde_json::to_string(g).unwrap());
+        let tone_str = input
+            .tone
+            .as_ref()
+            .map(|t| serde_json::to_string(t).unwrap());
+        let themes_json = input
+            .themes
+            .as_ref()
+            .map(|t| serde_json::to_string(t).unwrap());
+        let tags_json = input
+            .tags
+            .as_ref()
+            .map(|t| serde_json::to_string(t).unwrap());
 
         db.execute(
             "INSERT INTO universes (
@@ -62,7 +74,8 @@ impl UniverseRepository {
                 let genre = genre_str.and_then(|s| serde_json::from_str(&s).ok());
                 let tone = tone_str.and_then(|s| serde_json::from_str(&s).ok());
                 let themes = themes_json.and_then(|s| serde_json::from_str(&s).ok());
-                let status: UniverseStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
+                let status: UniverseStatus =
+                    serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
                 let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 
                 Ok(Universe {
@@ -93,39 +106,41 @@ impl UniverseRepository {
             "SELECT id, name, description, created_at, updated_at, genre, tone,
                     worldbuilding_notes, themes, status, color, icon, tags
              FROM universes
-             ORDER BY updated_at DESC"
+             ORDER BY updated_at DESC",
         )?;
 
-        let universes = stmt.query_map([], |row| {
-            let genre_str: Option<String> = row.get(5)?;
-            let tone_str: Option<String> = row.get(6)?;
-            let themes_json: Option<String> = row.get(8)?;
-            let status_str: String = row.get(9)?;
-            let tags_json: Option<String> = row.get(12)?;
+        let universes = stmt
+            .query_map([], |row| {
+                let genre_str: Option<String> = row.get(5)?;
+                let tone_str: Option<String> = row.get(6)?;
+                let themes_json: Option<String> = row.get(8)?;
+                let status_str: String = row.get(9)?;
+                let tags_json: Option<String> = row.get(12)?;
 
-            let genre = genre_str.and_then(|s| serde_json::from_str(&s).ok());
-            let tone = tone_str.and_then(|s| serde_json::from_str(&s).ok());
-            let themes = themes_json.and_then(|s| serde_json::from_str(&s).ok());
-            let status: UniverseStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
-            let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
+                let genre = genre_str.and_then(|s| serde_json::from_str(&s).ok());
+                let tone = tone_str.and_then(|s| serde_json::from_str(&s).ok());
+                let themes = themes_json.and_then(|s| serde_json::from_str(&s).ok());
+                let status: UniverseStatus =
+                    serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
+                let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 
-            Ok(Universe {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                description: row.get(2)?,
-                created_at: row.get(3)?,
-                updated_at: row.get(4)?,
-                genre,
-                tone,
-                worldbuilding_notes: row.get(7)?,
-                themes,
-                status,
-                color: row.get(10)?,
-                icon: row.get(11)?,
-                tags,
-            })
-        })?
-        .collect::<Result<Vec<_>>>()?;
+                Ok(Universe {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    description: row.get(2)?,
+                    created_at: row.get(3)?,
+                    updated_at: row.get(4)?,
+                    genre,
+                    tone,
+                    worldbuilding_notes: row.get(7)?,
+                    themes,
+                    status,
+                    color: row.get(10)?,
+                    icon: row.get(11)?,
+                    tags,
+                })
+            })?
+            .collect::<Result<Vec<_>>>()?;
 
         Ok(universes)
     }
@@ -185,14 +200,12 @@ impl UniverseRepository {
             params_vec.push(Box::new(tags));
         }
 
-        let query = format!(
-            "UPDATE universes SET {} WHERE id = ?",
-            updates.join(", ")
-        );
+        let query = format!("UPDATE universes SET {} WHERE id = ?", updates.join(", "));
 
         params_vec.push(Box::new(id.to_string()));
 
-        let params_refs: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
 
         db.execute(&query, &params_refs)?;
 

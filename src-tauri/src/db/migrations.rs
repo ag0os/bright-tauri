@@ -1,6 +1,7 @@
 use rusqlite::{Connection, Result};
 
 /// Current database schema version
+#[allow(dead_code)]
 const SCHEMA_VERSION: i32 = 1;
 
 /// Run all database migrations

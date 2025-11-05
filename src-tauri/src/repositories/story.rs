@@ -1,7 +1,9 @@
 use crate::db::Database;
-use crate::models::{CreateStoryInput, Story, StoryStatus, StoryType, UpdateStoryInput, VariationType};
-use rusqlite::{params, Result};
+use crate::models::{
+    CreateStoryInput, Story, StoryStatus, StoryType, UpdateStoryInput, VariationType,
+};
 use chrono::Utc;
+use rusqlite::{params, Result};
 use uuid::Uuid;
 
 pub struct StoryRepository;
@@ -15,8 +17,14 @@ impl StoryRepository {
         // Generate variation_group_id if this is a new story (not a variation)
         let variation_group_id = Uuid::new_v4().to_string();
 
-        let story_type_str = input.story_type.map(|st| format!("{st:?}").to_lowercase()).unwrap_or_else(|| "novel".to_string());
-        let variation_type_str = input.variation_type.map(|vt| format!("{vt:?}").to_lowercase()).unwrap_or_else(|| "original".to_string());
+        let story_type_str = input
+            .story_type
+            .map(|st| format!("{st:?}").to_lowercase())
+            .unwrap_or_else(|| "novel".to_string());
+        let variation_type_str = input
+            .variation_type
+            .map(|vt| format!("{vt:?}").to_lowercase())
+            .unwrap_or_else(|| "original".to_string());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
 
         db.execute(
@@ -92,10 +100,11 @@ impl StoryRepository {
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE universe_id = ?1
-             ORDER BY updated_at DESC"
+             ORDER BY updated_at DESC",
         )?;
 
-        let stories = stmt.query_map(params![universe_id], Self::map_row_to_story)?
+        let stories = stmt
+            .query_map(params![universe_id], Self::map_row_to_story)?
             .collect::<Result<Vec<_>>>()?;
 
         Ok(stories)
@@ -114,10 +123,11 @@ impl StoryRepository {
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE variation_group_id = ?1
-             ORDER BY created_at ASC"
+             ORDER BY created_at ASC",
         )?;
 
-        let stories = stmt.query_map(params![variation_group_id], Self::map_row_to_story)?
+        let stories = stmt
+            .query_map(params![variation_group_id], Self::map_row_to_story)?
             .collect::<Result<Vec<_>>>()?;
 
         Ok(stories)
@@ -136,10 +146,11 @@ impl StoryRepository {
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE parent_story_id = ?1
-             ORDER BY story_order ASC, created_at ASC"
+             ORDER BY story_order ASC, created_at ASC",
         )?;
 
-        let stories = stmt.query_map(params![parent_id], Self::map_row_to_story)?
+        let stories = stmt
+            .query_map(params![parent_id], Self::map_row_to_story)?
             .collect::<Result<Vec<_>>>()?;
 
         Ok(stories)
@@ -169,11 +180,11 @@ impl StoryRepository {
             );
 
             match parent_check {
-                Ok(Some(pid)) if pid == parent_id => {},
+                Ok(Some(pid)) if pid == parent_id => {}
                 Ok(Some(_)) | Ok(None) => {
                     conn.execute("ROLLBACK", [])?;
                     return Err(rusqlite::Error::QueryReturnedNoRows);
-                },
+                }
                 Err(e) => {
                     conn.execute("ROLLBACK", [])?;
                     return Err(e);
@@ -202,7 +213,9 @@ impl StoryRepository {
         let story_type_str = input.story_type.map(|st| format!("{st:?}").to_lowercase());
         let status_str = input.status.map(|s| format!("{s:?}").to_lowercase());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
-        let related_elements_json = input.related_element_ids.map(|ids| serde_json::to_string(&ids).unwrap());
+        let related_elements_json = input
+            .related_element_ids
+            .map(|ids| serde_json::to_string(&ids).unwrap());
 
         let mut updates = vec!["updated_at = ?1"];
         let mut params_vec: Vec<Box<dyn rusqlite::ToSql>> = vec![Box::new(now.clone())];
@@ -264,14 +277,12 @@ impl StoryRepository {
             params_vec.push(Box::new(series_name));
         }
 
-        let query = format!(
-            "UPDATE stories SET {} WHERE id = ?",
-            updates.join(", ")
-        );
+        let query = format!("UPDATE stories SET {} WHERE id = ?", updates.join(", "));
 
         params_vec.push(Box::new(id.to_string()));
 
-        let params_refs: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
 
         db.execute(&query, &params_refs)?;
 
@@ -294,7 +305,8 @@ impl StoryRepository {
 
         let story_type: StoryType = serde_json::from_str(&format!("\"{story_type_str}\"")).unwrap();
         let status: StoryStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
-        let variation_type: VariationType = serde_json::from_str(&format!("\"{variation_type_str}\"")).unwrap();
+        let variation_type: VariationType =
+            serde_json::from_str(&format!("\"{variation_type_str}\"")).unwrap();
         let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
         let related_element_ids = related_elements_json.and_then(|s| serde_json::from_str(&s).ok());
 
