@@ -7,5 +7,5 @@
  * export { useStoryStore } from './storyStore';
  */
 
-// Stores will be added here as they are created
-export {};
+// Stores
+export { useUniverseStore } from './useUniverseStore';
