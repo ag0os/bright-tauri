@@ -1,0 +1,140 @@
+/**
+ * TopBar Styles
+ *
+ * Minimal 48px top bar with universe selector and navigation tabs.
+ * Uses design system tokens for consistent styling.
+ */
+
+@import '../../design-system/tokens/colors/modern-indigo.css';
+@import '../../design-system/tokens/atoms/button/minimal-squared.css';
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 100;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Left Section - Logo and Universe Selector */
+.topbar__left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.topbar__logo {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+/* Universe Selector */
+.topbar__universe-selector {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.topbar__select {
+  appearance: none;
+  padding: 6px 32px 6px 12px;
+  min-width: 180px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--button-border-radius);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.topbar__select:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-surface-secondary);
+}
+
+.topbar__select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+.topbar__select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.topbar__select-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: var(--color-text-secondary);
+}
+
+/* Navigation Tabs */
+.topbar__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbar__nav-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  height: 32px;
+  border-radius: var(--button-border-radius);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.topbar__nav-button:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+}
+
+.topbar__nav-button--active {
+  color: var(--color-primary);
+  background: var(--color-primary-subtle);
+}
+
+.topbar__nav-button--active:hover {
+  background: var(--color-primary-subtle);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0 16px;
+  }
+
+  .topbar__left {
+    gap: 16px;
+  }
+
+  .topbar__select {
+    min-width: 140px;
+  }
+
+  .topbar__nav-button span {
+    display: none;
+  }
+}
