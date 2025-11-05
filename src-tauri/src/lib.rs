@@ -11,7 +11,7 @@ use tauri::Manager;
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
 fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+    format!("Hello, {name}! You've been greeted from Rust!")
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -26,8 +26,7 @@ pub fn run() {
                 .expect("Failed to get app data directory");
 
             // Ensure the app data directory exists
-            std::fs::create_dir_all(&app_data_dir)
-                .expect("Failed to create app data directory");
+            std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data directory");
 
             // Create database path
             let db_path = app_data_dir.join("bright.db");

@@ -1,8 +1,8 @@
-use git2::{Repository, Oid, Signature, Error as GitError};
+use git2::{Error as GitError, Oid, Repository, Signature};
 use serde::{Deserialize, Serialize};
-use std::path::{Path, PathBuf};
 use std::fmt;
 use std::fs;
+use std::path::{Path, PathBuf};
 use ts_rs::TS;
 
 /// Custom error type for Git operations
@@ -21,12 +21,12 @@ pub enum GitServiceError {
 impl fmt::Display for GitServiceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            GitServiceError::Git(e) => write!(f, "Git error: {}", e),
-            GitServiceError::Io(e) => write!(f, "IO error: {}", e),
+            GitServiceError::Git(e) => write!(f, "Git error: {e}"),
+            GitServiceError::Io(e) => write!(f, "IO error: {e}"),
             GitServiceError::RepositoryNotFound(path) => {
                 write!(f, "Repository not found at: {}", path.display())
             }
-            GitServiceError::InvalidOperation(msg) => write!(f, "Invalid operation: {}", msg),
+            GitServiceError::InvalidOperation(msg) => write!(f, "Invalid operation: {msg}"),
         }
     }
 }
@@ -97,6 +97,7 @@ pub struct GitService;
 
 impl GitService {
     /// Create a new GitService instance
+    #[allow(dead_code)]
     pub fn new() -> Self {
         GitService
     }
@@ -118,9 +119,10 @@ impl GitService {
 
         // Check if repository already exists
         if repo_path.exists() {
-            return Err(GitServiceError::InvalidOperation(
-                format!("Repository already exists at: {}", repo_path.display())
-            ));
+            return Err(GitServiceError::InvalidOperation(format!(
+                "Repository already exists at: {}",
+                repo_path.display()
+            )));
         }
 
         // Create directory structure
@@ -181,9 +183,8 @@ impl GitService {
         message: &str,
     ) -> GitResult<String> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Write content to file
         let full_file_path = repo_path.join(file_path);
@@ -231,9 +232,8 @@ impl GitService {
     /// Commit hash (OID as string)
     pub fn commit_all(repo_path: &Path, message: &str) -> GitResult<String> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Stage all changes (modified, new, deleted files)
         let mut index = repo.index()?;
@@ -270,28 +270,29 @@ impl GitService {
     ///
     /// # Returns
     /// Success or error
-    pub fn create_branch(
-        repo_path: &Path,
-        parent_branch: &str,
-        new_branch: &str,
-    ) -> GitResult<()> {
+    pub fn create_branch(repo_path: &Path, parent_branch: &str, new_branch: &str) -> GitResult<()> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Check if new branch already exists
-        if repo.find_branch(new_branch, git2::BranchType::Local).is_ok() {
-            return Err(GitServiceError::InvalidOperation(
-                format!("Branch '{}' already exists", new_branch)
-            ));
+        if repo
+            .find_branch(new_branch, git2::BranchType::Local)
+            .is_ok()
+        {
+            return Err(GitServiceError::InvalidOperation(format!(
+                "Branch '{new_branch}' already exists"
+            )));
         }
 
         // Find parent branch reference
-        let parent_ref = repo.find_branch(parent_branch, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Parent branch '{}' not found", parent_branch)
-            ))?;
+        let parent_ref = repo
+            .find_branch(parent_branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!(
+                    "Parent branch '{parent_branch}' not found"
+                ))
+            })?;
 
         let parent_commit = parent_ref.get().peel_to_commit()?;
 
@@ -311,23 +312,23 @@ impl GitService {
     /// Success or error
     pub fn checkout_branch(repo_path: &Path, branch: &str) -> GitResult<()> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Check for uncommitted changes
         let statuses = repo.statuses(None)?;
         if !statuses.is_empty() {
             return Err(GitServiceError::InvalidOperation(
-                "Cannot checkout branch: uncommitted changes exist".to_string()
+                "Cannot checkout branch: uncommitted changes exist".to_string(),
             ));
         }
 
         // Find the branch
-        let branch_ref = repo.find_branch(branch, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", branch)
-            ))?;
+        let branch_ref = repo
+            .find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch}' not found"))
+            })?;
 
         let reference = branch_ref.get();
         let commit = reference.peel_to_commit()?;
@@ -356,20 +357,21 @@ impl GitService {
         branch_b: &str,
     ) -> GitResult<DiffResult> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Get branch references
-        let branch_a_ref = repo.find_branch(branch_a, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", branch_a)
-            ))?;
+        let branch_a_ref = repo
+            .find_branch(branch_a, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch_a}' not found"))
+            })?;
 
-        let branch_b_ref = repo.find_branch(branch_b, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", branch_b)
-            ))?;
+        let branch_b_ref = repo
+            .find_branch(branch_b, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch_b}' not found"))
+            })?;
 
         // Get trees from branches
         let tree_a = branch_a_ref.get().peel_to_tree()?;
@@ -389,7 +391,9 @@ impl GitService {
                 _ => continue, // Skip other statuses
             };
 
-            let path = delta.new_file().path()
+            let path = delta
+                .new_file()
+                .path()
                 .or_else(|| delta.old_file().path())
                 .map(|p| p.to_string_lossy().to_string())
                 .unwrap_or_else(|| "unknown".to_string());
@@ -419,20 +423,21 @@ impl GitService {
         into_branch: &str,
     ) -> GitResult<MergeResult> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Get branch references
-        let from_ref = repo.find_branch(from_branch, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", from_branch)
-            ))?;
+        let from_ref = repo
+            .find_branch(from_branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{from_branch}' not found"))
+            })?;
 
-        let into_ref = repo.find_branch(into_branch, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", into_branch)
-            ))?;
+        let into_ref = repo
+            .find_branch(into_branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{into_branch}' not found"))
+            })?;
 
         // Checkout the into_branch first
         Self::checkout_branch(repo_path, into_branch)?;
@@ -462,7 +467,7 @@ impl GitService {
             return Ok(MergeResult {
                 success: true,
                 conflicts: vec![],
-                message: format!("Fast-forward merge of {} into {}", from_branch, into_branch),
+                message: format!("Fast-forward merge of {from_branch} into {into_branch}"),
             });
         }
 
@@ -473,12 +478,10 @@ impl GitService {
         let index = repo.index()?;
         if index.has_conflicts() {
             let mut conflicts = Vec::new();
-            for entry in index.conflicts()? {
-                if let Ok(conflict) = entry {
-                    if let Some(our) = conflict.our {
-                        if let Some(path) = std::str::from_utf8(&our.path).ok() {
-                            conflicts.push(path.to_string());
-                        }
+            for conflict in (index.conflicts()?).flatten() {
+                if let Some(our) = conflict.our {
+                    if let Ok(path) = std::str::from_utf8(&our.path) {
+                        conflicts.push(path.to_string());
                     }
                 }
             }
@@ -501,7 +504,7 @@ impl GitService {
             Some("HEAD"),
             &signature,
             &signature,
-            &format!("Merge {} into {}", from_branch, into_branch),
+            &format!("Merge {from_branch} into {into_branch}"),
             &tree,
             &[&into_commit, &from_commit],
         )?;
@@ -512,7 +515,7 @@ impl GitService {
         Ok(MergeResult {
             success: true,
             conflicts: vec![],
-            message: format!("Successfully merged {} into {}", from_branch, into_branch),
+            message: format!("Successfully merged {from_branch} into {into_branch}"),
         })
     }
 
@@ -526,15 +529,15 @@ impl GitService {
     /// Vec of CommitInfo ordered from newest to oldest
     pub fn get_history(repo_path: &Path, branch: &str) -> GitResult<Vec<CommitInfo>> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Get branch reference
-        let branch_ref = repo.find_branch(branch, git2::BranchType::Local)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Branch '{}' not found", branch)
-            ))?;
+        let branch_ref = repo
+            .find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch}' not found"))
+            })?;
 
         // Get the commit the branch points to
         let commit = branch_ref.get().peel_to_commit()?;
@@ -569,29 +572,26 @@ impl GitService {
     /// Success or error
     pub fn restore_commit(repo_path: &Path, commit_hash: &str) -> GitResult<()> {
         // Open repository
-        let repo = Repository::open(repo_path).map_err(|_| {
-            GitServiceError::RepositoryNotFound(repo_path.to_path_buf())
-        })?;
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Check for uncommitted changes
         let statuses = repo.statuses(None)?;
         if !statuses.is_empty() {
             return Err(GitServiceError::InvalidOperation(
-                "Cannot restore commit: uncommitted changes exist".to_string()
+                "Cannot restore commit: uncommitted changes exist".to_string(),
             ));
         }
 
         // Parse commit hash
-        let oid = Oid::from_str(commit_hash)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Invalid commit hash: {}", commit_hash)
-            ))?;
+        let oid = Oid::from_str(commit_hash).map_err(|_| {
+            GitServiceError::InvalidOperation(format!("Invalid commit hash: {commit_hash}"))
+        })?;
 
         // Find the commit
-        let commit = repo.find_commit(oid)
-            .map_err(|_| GitServiceError::InvalidOperation(
-                format!("Commit not found: {}", commit_hash)
-            ))?;
+        let commit = repo.find_commit(oid).map_err(|_| {
+            GitServiceError::InvalidOperation(format!("Commit not found: {commit_hash}"))
+        })?;
 
         // Checkout the commit
         repo.checkout_tree(commit.as_object(), None)?;
@@ -689,7 +689,7 @@ mod tests {
         let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
 
         // Verify path structure: {base}/git-repos/{story_id}
-        assert!(repo_path.ends_with(format!("git-repos/{}", story_id)));
+        assert!(repo_path.ends_with(format!("git-repos/{story_id}")));
     }
 
     #[test]
@@ -702,12 +702,9 @@ mod tests {
 
         // Commit a file
         let file_content = "# Chapter 1\n\nThis is the first chapter.";
-        let commit_hash = GitService::commit_file(
-            &repo_path,
-            "chapter1.md",
-            file_content,
-            "Add chapter 1"
-        ).unwrap();
+        let commit_hash =
+            GitService::commit_file(&repo_path, "chapter1.md", file_content, "Add chapter 1")
+                .unwrap();
 
         // Verify file was created
         let file_path = repo_path.join("chapter1.md");
@@ -720,7 +717,9 @@ mod tests {
         assert!(!commit_hash.is_empty());
 
         let repo = Repository::open(&repo_path).unwrap();
-        let commit = repo.find_commit(Oid::from_str(&commit_hash).unwrap()).unwrap();
+        let commit = repo
+            .find_commit(Oid::from_str(&commit_hash).unwrap())
+            .unwrap();
         assert_eq!(commit.message().unwrap(), "Add chapter 1");
     }
 
@@ -737,8 +736,9 @@ mod tests {
             &repo_path,
             "chapters/part1/chapter1.md",
             "Content",
-            "Add nested file"
-        ).unwrap();
+            "Add nested file",
+        )
+        .unwrap();
 
         // Verify nested directory and file were created
         assert!(repo_path.join("chapters/part1/chapter1.md").exists());
@@ -765,7 +765,9 @@ mod tests {
         assert!(!commit_hash.is_empty());
 
         let repo = Repository::open(&repo_path).unwrap();
-        let commit = repo.find_commit(Oid::from_str(&commit_hash).unwrap()).unwrap();
+        let commit = repo
+            .find_commit(Oid::from_str(&commit_hash).unwrap())
+            .unwrap();
         assert_eq!(commit.message().unwrap(), "Add three files");
 
         // Verify all files are in the commit
@@ -780,16 +782,11 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let invalid_path = temp_dir.path().join("nonexistent");
 
-        let result = GitService::commit_file(
-            &invalid_path,
-            "file.txt",
-            "content",
-            "message"
-        );
+        let result = GitService::commit_file(&invalid_path, "file.txt", "content", "message");
 
         assert!(result.is_err());
         match result {
-            Err(GitServiceError::RepositoryNotFound(_)) => {},
+            Err(GitServiceError::RepositoryNotFound(_)) => {}
             _ => panic!("Expected RepositoryNotFound error"),
         }
     }
@@ -803,7 +800,7 @@ mod tests {
 
         assert!(result.is_err());
         match result {
-            Err(GitServiceError::RepositoryNotFound(_)) => {},
+            Err(GitServiceError::RepositoryNotFound(_)) => {}
             _ => panic!("Expected RepositoryNotFound error"),
         }
     }
@@ -825,8 +822,10 @@ mod tests {
         GitService::create_branch(&repo_path, current_branch, "feature-branch").unwrap();
 
         // Verify branch was created
-        let branch = repo.find_branch("feature-branch", git2::BranchType::Local).unwrap();
-        assert!(branch.is_head() == false); // Not checked out yet
+        let branch = repo
+            .find_branch("feature-branch", git2::BranchType::Local)
+            .unwrap();
+        assert!(!branch.is_head()); // Not checked out yet
     }
 
     #[test]
@@ -982,15 +981,27 @@ mod tests {
 
         // Make changes on feature branch
         GitService::commit_file(&repo_path, "file2.txt", "Content B", "Add file2").unwrap();
-        GitService::commit_file(&repo_path, "file1.txt", "Content A Modified", "Modify file1").unwrap();
+        GitService::commit_file(
+            &repo_path,
+            "file1.txt",
+            "Content A Modified",
+            "Modify file1",
+        )
+        .unwrap();
 
         // Get diff
         let diff = GitService::diff_branches(&repo_path, &current_branch, "feature").unwrap();
 
         // Verify changes
         assert_eq!(diff.changes.len(), 2);
-        let has_added = diff.changes.iter().any(|c| c.path == "file2.txt" && c.status == ChangeStatus::Added);
-        let has_modified = diff.changes.iter().any(|c| c.path == "file1.txt" && c.status == ChangeStatus::Modified);
+        let has_added = diff
+            .changes
+            .iter()
+            .any(|c| c.path == "file2.txt" && c.status == ChangeStatus::Added);
+        let has_modified = diff
+            .changes
+            .iter()
+            .any(|c| c.path == "file1.txt" && c.status == ChangeStatus::Modified);
         assert!(has_added);
         assert!(has_modified);
     }
@@ -1013,7 +1024,8 @@ mod tests {
         // Create feature branch and add commits
         GitService::create_branch(&repo_path, &current_branch, "feature").unwrap();
         GitService::checkout_branch(&repo_path, "feature").unwrap();
-        GitService::commit_file(&repo_path, "feature.txt", "Feature content", "Add feature").unwrap();
+        GitService::commit_file(&repo_path, "feature.txt", "Feature content", "Add feature")
+            .unwrap();
 
         // Merge feature into main (fast-forward)
         let result = GitService::merge_branches(&repo_path, "feature", &current_branch).unwrap();

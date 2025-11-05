@@ -3,9 +3,8 @@
 /// This module provides functions to create, update, and manage story content files
 /// within Git repositories. Each story can have a Git repository with its chapters
 /// and scenes stored as markdown files.
-
 use crate::file_naming;
-use crate::git::{GitResult, GitService};
+use crate::git::GitService;
 use crate::models::Story;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -15,6 +14,7 @@ use std::path::{Path, PathBuf};
 #[derive(Debug)]
 pub enum FileManagementError {
     /// File already exists at the target path
+    #[allow(dead_code)]
     FileExists(PathBuf),
     /// IO error occurred
     Io(std::io::Error),
@@ -28,8 +28,8 @@ impl std::fmt::Display for FileManagementError {
             FileManagementError::FileExists(path) => {
                 write!(f, "File already exists: {}", path.display())
             }
-            FileManagementError::Io(err) => write!(f, "IO error: {}", err),
-            FileManagementError::Git(err) => write!(f, "Git error: {}", err),
+            FileManagementError::Io(err) => write!(f, "IO error: {err}"),
+            FileManagementError::Git(err) => write!(f, "Git error: {err}"),
         }
     }
 }
@@ -48,6 +48,7 @@ impl From<crate::git::GitServiceError> for FileManagementError {
     }
 }
 
+#[allow(dead_code)]
 pub type FileManagementResult<T> = Result<T, FileManagementError>;
 
 /// Create a new story file in a Git repository
@@ -70,6 +71,7 @@ pub type FileManagementResult<T> = Result<T, FileManagementError>;
 /// - The file already exists
 /// - IO operations fail
 /// - Git commit fails
+#[allow(dead_code)]
 pub fn create_story_file(
     repo_path: &Path,
     order: usize,
@@ -89,7 +91,7 @@ pub fn create_story_file(
     fs::write(&file_path, content)?;
 
     // Commit to Git
-    let commit_message = format!("Add {}: {}", filename, title);
+    let commit_message = format!("Add {filename}: {title}");
     GitService::commit_file(repo_path, &filename, content, &commit_message)?;
 
     // Return relative filename
@@ -97,6 +99,7 @@ pub fn create_story_file(
 }
 
 /// Represents a story file to be reordered
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct StoryFileToReorder {
     /// Current filename (e.g., "001-chapter.md")
@@ -133,6 +136,7 @@ pub struct FileRename {
 /// - A file doesn't exist
 /// - Git operations fail
 /// - IO operations fail
+#[allow(dead_code)]
 pub fn reorder_story_files(
     repo_path: &Path,
     stories: &[StoryFileToReorder],
@@ -233,6 +237,7 @@ pub struct StoryMetadata {
 
 impl StoryMetadata {
     /// Create metadata from a Story
+    #[allow(dead_code)]
     pub fn from_story(story: &Story) -> Self {
         StoryMetadata {
             id: story.id.clone(),
@@ -267,18 +272,16 @@ impl StoryMetadata {
 /// - JSON serialization fails
 /// - File write fails
 /// - Git commit fails
-pub fn write_metadata_file(
-    repo_path: &Path,
-    story: &Story,
-) -> FileManagementResult<String> {
+#[allow(dead_code)]
+pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
     let metadata = StoryMetadata::from_story(story);
 
     // Serialize to pretty JSON
-    let json = serde_json::to_string_pretty(&metadata)
-        .map_err(|e| FileManagementError::Io(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to serialize metadata: {}", e),
-        )))?;
+    let json = serde_json::to_string_pretty(&metadata).map_err(|e| {
+        FileManagementError::Io(std::io::Error::other(format!(
+            "Failed to serialize metadata: {e}"
+        )))
+    })?;
 
     let metadata_path = repo_path.join("metadata.json");
     fs::write(&metadata_path, &json)?;
@@ -301,10 +304,8 @@ pub fn write_metadata_file(
 ///
 /// # Returns
 /// The relative path to the metadata file ("metadata.json")
-pub fn update_metadata_file(
-    repo_path: &Path,
-    story: &Story,
-) -> FileManagementResult<String> {
+#[allow(dead_code)]
+pub fn update_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
     write_metadata_file(repo_path, story)
 }
 
@@ -319,8 +320,13 @@ mod tests {
         let temp_dir = TempDir::new().unwrap();
         let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
 
-        let filename = create_story_file(&repo_path, 1, "First Chapter", "# First Chapter\n\nContent here")
-            .unwrap();
+        let filename = create_story_file(
+            &repo_path,
+            1,
+            "First Chapter",
+            "# First Chapter\n\nContent here",
+        )
+        .unwrap();
 
         assert_eq!(filename, "001-first-chapter.md");
 
@@ -564,8 +570,13 @@ mod tests {
 
         // Create 5 files
         for i in 1..=5 {
-            create_story_file(&repo_path, i, &format!("Chapter {}", i), &format!("Content {}", i))
-                .unwrap();
+            create_story_file(
+                &repo_path,
+                i,
+                &format!("Chapter {i}"),
+                &format!("Content {i}"),
+            )
+            .unwrap();
         }
 
         // Completely reverse the order

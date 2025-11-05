@@ -1,9 +1,11 @@
 use crate::db::Database;
-use crate::models::{CreateElementInput, Element, ElementRelationship, ElementType, UpdateElementInput};
-use rusqlite::{params, Result};
+use crate::models::{
+    CreateElementInput, Element, ElementRelationship, ElementType, UpdateElementInput,
+};
 use chrono::Utc;
-use uuid::Uuid;
+use rusqlite::{params, Result};
 use std::collections::HashMap;
+use uuid::Uuid;
 
 pub struct ElementRepository;
 
@@ -13,8 +15,9 @@ impl ElementRepository {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
 
-        let element_type_str = input.element_type
-            .map(|et| format!("{:?}", et).to_lowercase())
+        let element_type_str = input
+            .element_type
+            .map(|et| format!("{et:?}").to_lowercase())
             .unwrap_or_else(|| "character".to_string());
 
         let attributes_json = input.attributes.map(|a| serde_json::to_string(&a).unwrap());
@@ -41,8 +44,8 @@ impl ElementRepository {
                 &tags_json,
                 &input.color,
                 &input.icon,
-                false,  // favorite
-                0,  // element_order
+                false, // favorite
+                0,     // element_order
             ],
         )?;
 
@@ -76,7 +79,11 @@ impl ElementRepository {
         let relationships = Self::get_relationships(db, id)?;
 
         Ok(Element {
-            relationships: if relationships.is_empty() { None } else { Some(relationships) },
+            relationships: if relationships.is_empty() {
+                None
+            } else {
+                Some(relationships)
+            },
             ..element
         })
     }
@@ -92,10 +99,11 @@ impl ElementRepository {
                     color, icon, favorite, element_order
              FROM elements
              WHERE universe_id = ?1
-             ORDER BY element_order ASC, name ASC"
+             ORDER BY element_order ASC, name ASC",
         )?;
 
-        let element_ids: Vec<String> = stmt.query_map(params![universe_id], |row| row.get(0))?
+        let element_ids: Vec<String> = stmt
+            .query_map(params![universe_id], |row| row.get(0))?
             .collect::<Result<Vec<_>>>()?;
 
         drop(stmt);
@@ -111,8 +119,12 @@ impl ElementRepository {
     }
 
     /// List Elements by type
-    pub fn list_by_type(db: &Database, universe_id: &str, element_type: ElementType) -> Result<Vec<Element>> {
-        let type_str = format!("{:?}", element_type).to_lowercase();
+    pub fn list_by_type(
+        db: &Database,
+        universe_id: &str,
+        element_type: ElementType,
+    ) -> Result<Vec<Element>> {
+        let type_str = format!("{element_type:?}").to_lowercase();
 
         let conn = db.connection();
         let conn = conn.lock().unwrap();
@@ -123,10 +135,11 @@ impl ElementRepository {
                     color, icon, favorite, element_order
              FROM elements
              WHERE universe_id = ?1 AND element_type = ?2
-             ORDER BY element_order ASC, name ASC"
+             ORDER BY element_order ASC, name ASC",
         )?;
 
-        let element_ids: Vec<String> = stmt.query_map(params![universe_id, type_str], |row| row.get(0))?
+        let element_ids: Vec<String> = stmt
+            .query_map(params![universe_id, type_str], |row| row.get(0))?
             .collect::<Result<Vec<_>>>()?;
 
         drop(stmt);
@@ -144,7 +157,9 @@ impl ElementRepository {
     pub fn update(db: &Database, id: &str, input: UpdateElementInput) -> Result<Element> {
         let now = Utc::now().to_rfc3339();
 
-        let element_type_str = input.element_type.map(|et| format!("{:?}", et).to_lowercase());
+        let element_type_str = input
+            .element_type
+            .map(|et| format!("{et:?}").to_lowercase());
         let attributes_json = input.attributes.map(|a| serde_json::to_string(&a).unwrap());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
 
@@ -200,14 +215,12 @@ impl ElementRepository {
             params_vec.push(Box::new(order));
         }
 
-        let query = format!(
-            "UPDATE elements SET {} WHERE id = ?",
-            updates.join(", ")
-        );
+        let query = format!("UPDATE elements SET {} WHERE id = ?", updates.join(", "));
 
         params_vec.push(Box::new(id.to_string()));
 
-        let params_refs: Vec<&dyn rusqlite::ToSql> = params_vec.iter().map(|b| b.as_ref()).collect();
+        let params_refs: Vec<&dyn rusqlite::ToSql> =
+            params_vec.iter().map(|b| b.as_ref()).collect();
 
         db.execute(&query, &params_refs)?;
 
@@ -231,7 +244,11 @@ impl ElementRepository {
     }
 
     /// Create a relationship between elements
-    fn create_relationship(db: &Database, source_id: &str, rel: &ElementRelationship) -> Result<()> {
+    fn create_relationship(
+        db: &Database,
+        source_id: &str,
+        rel: &ElementRelationship,
+    ) -> Result<()> {
         let rel_id = Uuid::new_v4().to_string();
 
         db.execute(
@@ -259,18 +276,19 @@ impl ElementRepository {
         let mut stmt = conn.prepare(
             "SELECT target_element_id, label, inverse_label, description
              FROM element_relationships
-             WHERE source_element_id = ?1"
+             WHERE source_element_id = ?1",
         )?;
 
-        let relationships = stmt.query_map(params![element_id], |row| {
-            Ok(ElementRelationship {
-                target_element_id: row.get(0)?,
-                label: row.get(1)?,
-                inverse_label: row.get(2)?,
-                description: row.get(3)?,
-            })
-        })?
-        .collect::<Result<Vec<_>>>()?;
+        let relationships = stmt
+            .query_map(params![element_id], |row| {
+                Ok(ElementRelationship {
+                    target_element_id: row.get(0)?,
+                    label: row.get(1)?,
+                    inverse_label: row.get(2)?,
+                    description: row.get(3)?,
+                })
+            })?
+            .collect::<Result<Vec<_>>>()?;
 
         Ok(relationships)
     }
@@ -293,39 +311,41 @@ impl ElementRepository {
         let mut stmt = conn.prepare(
             "SELECT target_element_id, label
              FROM element_relationships
-             WHERE source_element_id = ?1"
+             WHERE source_element_id = ?1",
         )?;
 
-        let mut related: Vec<(String, Element)> = stmt.query_map(params![element_id], |row| {
-            let target_id: String = row.get(0)?;
-            let label: String = row.get(1)?;
-            Ok((target_id, label))
-        })?
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .filter_map(|(target_id, label)| {
-            Self::find_by_id(db, &target_id).ok().map(|el| (label, el))
-        })
-        .collect();
+        let mut related: Vec<(String, Element)> = stmt
+            .query_map(params![element_id], |row| {
+                let target_id: String = row.get(0)?;
+                let label: String = row.get(1)?;
+                Ok((target_id, label))
+            })?
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .filter_map(|(target_id, label)| {
+                Self::find_by_id(db, &target_id).ok().map(|el| (label, el))
+            })
+            .collect();
 
         // Get incoming relationships (using inverse label)
         let mut stmt = conn.prepare(
             "SELECT source_element_id, inverse_label
              FROM element_relationships
-             WHERE target_element_id = ?1 AND inverse_label IS NOT NULL"
+             WHERE target_element_id = ?1 AND inverse_label IS NOT NULL",
         )?;
 
-        let incoming: Vec<(String, Element)> = stmt.query_map(params![element_id], |row| {
-            let source_id: String = row.get(0)?;
-            let inverse_label: String = row.get(1)?;
-            Ok((source_id, inverse_label))
-        })?
-        .collect::<Result<Vec<_>>>()?
-        .into_iter()
-        .filter_map(|(source_id, label)| {
-            Self::find_by_id(db, &source_id).ok().map(|el| (label, el))
-        })
-        .collect();
+        let incoming: Vec<(String, Element)> = stmt
+            .query_map(params![element_id], |row| {
+                let source_id: String = row.get(0)?;
+                let inverse_label: String = row.get(1)?;
+                Ok((source_id, inverse_label))
+            })?
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .filter_map(|(source_id, label)| {
+                Self::find_by_id(db, &source_id).ok().map(|el| (label, el))
+            })
+            .collect();
 
         related.extend(incoming);
 
@@ -338,8 +358,10 @@ impl ElementRepository {
         let attributes_json: Option<String> = row.get(7)?;
         let tags_json: Option<String> = row.get(11)?;
 
-        let element_type: ElementType = serde_json::from_str(&format!("\"{}\"", element_type_str)).unwrap();
-        let attributes: Option<HashMap<String, String>> = attributes_json.and_then(|s| serde_json::from_str(&s).ok());
+        let element_type: ElementType =
+            serde_json::from_str(&format!("\"{element_type_str}\"")).unwrap();
+        let attributes: Option<HashMap<String, String>> =
+            attributes_json.and_then(|s| serde_json::from_str(&s).ok());
         let tags = tags_json.and_then(|s| serde_json::from_str(&s).ok());
 
         Ok(Element {
@@ -359,8 +381,8 @@ impl ElementRepository {
             icon: row.get(13)?,
             favorite: row.get(14)?,
             order: row.get(15)?,
-            relationships: None,  // Loaded separately
-            related_story_ids: None,  // Not implemented yet
+            relationships: None,     // Loaded separately
+            related_story_ids: None, // Not implemented yet
         })
     }
 }

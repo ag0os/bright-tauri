@@ -74,6 +74,7 @@ impl Story {
     /// - Children (Chapter, Scene) never get repos
     /// - Series (grouping only) never gets repos
     /// - Planning docs (Outline, Treatment) follow parent logic
+    #[allow(dead_code)]
     pub fn should_have_git_repo(&self) -> bool {
         match self.story_type {
             // Containers always get repos
@@ -82,15 +83,13 @@ impl Story {
             // Standalone content gets repos only if no parent
             StoryType::ShortStory | StoryType::Episode | StoryType::Poem => {
                 self.parent_story_id.is_none()
-            },
+            }
 
             // Children never get their own repos
             StoryType::Chapter | StoryType::Scene => false,
 
             // Planning docs follow parent logic
-            StoryType::Outline | StoryType::Treatment => {
-                self.parent_story_id.is_none()
-            },
+            StoryType::Outline | StoryType::Treatment => self.parent_story_id.is_none(),
 
             // Series is just a grouping, no content
             StoryType::Series => false,

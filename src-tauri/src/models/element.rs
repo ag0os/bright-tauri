@@ -141,6 +141,7 @@ pub struct UpdateElementInput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub relationships: Option<Vec<ElementRelationship>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[allow(dead_code)]
     pub related_story_ids: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
@@ -257,7 +258,10 @@ mod tests {
         let json = serde_json::to_string(&relationship).unwrap();
         let deserialized: ElementRelationship = serde_json::from_str(&json).unwrap();
 
-        assert_eq!(relationship.target_element_id, deserialized.target_element_id);
+        assert_eq!(
+            relationship.target_element_id,
+            deserialized.target_element_id
+        );
         assert_eq!(relationship.label, deserialized.label);
         assert_eq!(relationship.inverse_label, deserialized.inverse_label);
     }
