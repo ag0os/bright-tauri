@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, Search, Loader2 } from 'lucide-react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { StoryCard } from '@/components/stories/StoryCard';
+import { StoryCard, CreateStoryModal } from '@/components/stories';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
@@ -397,54 +397,8 @@ export function StoriesList() {
         )}
       </div>
 
-      {/* Create Story Modal - Placeholder for Task 38 */}
-      {showCreateModal && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-          onClick={() => setShowCreateModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: 'var(--color-surface)',
-              padding: 'var(--spacing-6)',
-              borderRadius: '8px',
-              maxWidth: '500px',
-              width: '100%',
-              fontFamily: 'var(--typography-body-font)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2
-              style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h3-size)',
-                fontWeight: 'var(--typography-h3-weight)',
-                color: 'var(--color-text-primary)',
-                marginBottom: 'var(--spacing-4)',
-              }}
-            >
-              Create Story Modal
-            </h2>
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-4)' }}>
-              This will be implemented in Task 38.
-            </p>
-            <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(false)}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Create Story Modal */}
+      {showCreateModal && <CreateStoryModal onClose={() => setShowCreateModal(false)} />}
 
       {/* Spinner animation */}
       <style>
