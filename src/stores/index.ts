@@ -9,3 +9,4 @@
 
 // Stores
 export { useUniverseStore } from './useUniverseStore';
+export { useStoriesStore } from './useStoriesStore';
