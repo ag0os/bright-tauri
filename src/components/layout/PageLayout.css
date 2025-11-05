@@ -1,0 +1,53 @@
+/**
+ * PageLayout Styles
+ *
+ * Layout wrapper with consistent spacing using design system tokens.
+ * Provides a fixed top bar with scrollable content area.
+ */
+
+@import '../../design-system/tokens/spacing.css';
+@import '../../design-system/tokens/colors/modern-indigo.css';
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+/* Content Area */
+.page-layout__content {
+  margin-top: 48px; /* Height of TopBar */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Padded Content (default) */
+.page-layout__content--padded {
+  padding: var(--layout-padding-md);
+}
+
+/* Responsive Padding */
+@media (min-width: 768px) {
+  .page-layout__content--padded {
+    padding: var(--layout-padding-lg);
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-layout__content--padded {
+    padding: var(--layout-padding-xl);
+  }
+}
+
+/* Large screens - max width constraint for readability */
+@media (min-width: 1440px) {
+  .page-layout__content--padded {
+    padding-left: max(var(--layout-padding-xl), calc((100vw - 1280px) / 2));
+    padding-right: max(var(--layout-padding-xl), calc((100vw - 1280px) / 2));
+  }
+}
