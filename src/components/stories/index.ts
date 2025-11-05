@@ -8,5 +8,5 @@
  * export { StoryHierarchy } from './StoryHierarchy';
  */
 
-// Story components will be added here as they are created
-export {};
+// Story components
+export { StoryCard } from './StoryCard';
