@@ -13,6 +13,7 @@ export type Route =
   | { screen: 'stories-list' }
   | { screen: 'universe-list' }
   | { screen: 'story-editor'; storyId: string }
+  | { screen: 'story-children'; parentStoryId: string }
   | { screen: 'element-detail'; elementId: string };
 
 interface NavigationState {

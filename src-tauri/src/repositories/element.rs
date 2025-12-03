@@ -27,7 +27,7 @@ impl ElementRepository {
             "INSERT INTO elements (
                 id, universe_id, name, description, element_type, custom_type_name,
                 details, attributes, image_url, created_at, updated_at, tags,
-                color, icon, favorite, element_order
+                color, icon, favorite, \"order\"
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
             params![
                 &id,
@@ -67,7 +67,7 @@ impl ElementRepository {
         let element = conn.query_row(
             "SELECT id, universe_id, name, description, element_type, custom_type_name,
                     details, attributes, image_url, created_at, updated_at, tags,
-                    color, icon, favorite, element_order
+                    color, icon, favorite, \"order\"
              FROM elements WHERE id = ?1",
             params![id],
             Self::map_row_to_element,
@@ -96,10 +96,10 @@ impl ElementRepository {
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, name, description, element_type, custom_type_name,
                     details, attributes, image_url, created_at, updated_at, tags,
-                    color, icon, favorite, element_order
+                    color, icon, favorite, \"order\"
              FROM elements
              WHERE universe_id = ?1
-             ORDER BY element_order ASC, name ASC",
+             ORDER BY \"order\" ASC, name ASC",
         )?;
 
         let element_ids: Vec<String> = stmt
@@ -132,10 +132,10 @@ impl ElementRepository {
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, name, description, element_type, custom_type_name,
                     details, attributes, image_url, created_at, updated_at, tags,
-                    color, icon, favorite, element_order
+                    color, icon, favorite, \"order\"
              FROM elements
              WHERE universe_id = ?1 AND element_type = ?2
-             ORDER BY element_order ASC, name ASC",
+             ORDER BY \"order\" ASC, name ASC",
         )?;
 
         let element_ids: Vec<String> = stmt
@@ -211,7 +211,7 @@ impl ElementRepository {
             params_vec.push(Box::new(favorite));
         }
         if let Some(order) = input.order {
-            updates.push("element_order = ?");
+            updates.push("\"order\" = ?");
             params_vec.push(Box::new(order));
         }
 

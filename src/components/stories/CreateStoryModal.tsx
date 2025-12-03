@@ -19,17 +19,54 @@ import '@/design-system/tokens/spacing.css';
 
 interface CreateStoryModalProps {
   onClose: () => void;
+  parentStory?: {
+    id: string;
+    title: string;
+    storyType: StoryType;
+  };
 }
 
-export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
+// Determine the default child story type based on parent type
+const getDefaultChildType = (parentType: StoryType): StoryType => {
+  switch (parentType) {
+    case 'screenplay':
+      return 'scene';
+    case 'novel':
+    case 'series':
+    case 'collection':
+    default:
+      return 'chapter';
+  }
+};
+
+// Get child type options based on parent type
+const getChildTypeOptions = (parentType: StoryType): { value: StoryType; label: string }[] => {
+  switch (parentType) {
+    case 'screenplay':
+      return [
+        { value: 'scene', label: 'Scene' },
+        { value: 'chapter', label: 'Chapter' },
+      ];
+    default:
+      return [
+        { value: 'chapter', label: 'Chapter' },
+        { value: 'scene', label: 'Scene' },
+      ];
+  }
+};
+
+export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const currentUniverse = useUniverseStore((state) => state.currentUniverse);
-  const { createStory } = useStoriesStore();
+  const { createStory, invalidateChildren } = useStoriesStore();
+
+  const isCreatingChild = !!parentStory;
+  const defaultChildType = parentStory ? getDefaultChildType(parentStory.storyType) : 'novel';
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    storyType: 'novel' as StoryType,
+    storyType: isCreatingChild ? defaultChildType : ('novel' as StoryType),
     targetWordCount: '',
     tags: '',
   });
@@ -75,10 +112,15 @@ export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
           : null,
         color: null,
         seriesName: null,
-        parentStoryId: null,
+        parentStoryId: parentStory?.id || null,
         variationType: null,
         parentVariationId: null,
       });
+
+      // Invalidate parent's children cache if creating a child
+      if (parentStory) {
+        invalidateChildren(parentStory.id);
+      }
 
       // Navigate to story editor
       navigate({ screen: 'story-editor', storyId: story.id });
@@ -132,17 +174,31 @@ export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
             borderBottom: '1px solid var(--color-border)',
           }}
         >
-          <h2
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
-              color: 'var(--color-text-primary)',
-              margin: 0,
-            }}
-          >
-            Create New Story
-          </h2>
+          <div>
+            <h2
+              style={{
+                fontFamily: 'var(--typography-heading-font)',
+                fontSize: 'var(--typography-h3-size)',
+                fontWeight: 'var(--typography-h3-weight)',
+                color: 'var(--color-text-primary)',
+                margin: 0,
+              }}
+            >
+              {isCreatingChild ? 'Add Chapter' : 'Create New Story'}
+            </h2>
+            {isCreatingChild && parentStory && (
+              <p
+                style={{
+                  fontFamily: 'var(--typography-body-font)',
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--color-text-secondary)',
+                  margin: '4px 0 0 0',
+                }}
+              >
+                Adding to: {parentStory.title}
+              </p>
+            )}
+          </div>
           <button
             className="btn btn-ghost btn-sm"
             onClick={onClose}
@@ -182,7 +238,7 @@ export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
             {/* Story Type */}
             <div className="input-group input-5">
               <label className="input-label" htmlFor="story-type">
-                Story Type
+                {isCreatingChild ? 'Chapter Type' : 'Story Type'}
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
@@ -203,17 +259,27 @@ export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
                     color: 'var(--color-text-primary)',
                   }}
                 >
-                  <option value="novel">Novel</option>
-                  <option value="series">Series</option>
-                  <option value="screenplay">Screenplay</option>
-                  <option value="short-story">Short Story</option>
-                  <option value="poem">Poem</option>
-                  <option value="chapter">Chapter</option>
-                  <option value="scene">Scene</option>
-                  <option value="episode">Episode</option>
-                  <option value="outline">Outline</option>
-                  <option value="treatment">Treatment</option>
-                  <option value="collection">Collection</option>
+                  {isCreatingChild && parentStory ? (
+                    getChildTypeOptions(parentStory.storyType).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="novel">Novel</option>
+                      <option value="series">Series</option>
+                      <option value="screenplay">Screenplay</option>
+                      <option value="short-story">Short Story</option>
+                      <option value="poem">Poem</option>
+                      <option value="chapter">Chapter</option>
+                      <option value="scene">Scene</option>
+                      <option value="episode">Episode</option>
+                      <option value="outline">Outline</option>
+                      <option value="treatment">Treatment</option>
+                      <option value="collection">Collection</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -321,7 +387,7 @@ export function CreateStoryModal({ onClose }: CreateStoryModalProps) {
               className="btn btn-primary btn-base"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating...' : 'Create Story'}
+              {isSubmitting ? 'Creating...' : isCreatingChild ? 'Add Chapter' : 'Create Story'}
             </button>
           </div>
         </form>

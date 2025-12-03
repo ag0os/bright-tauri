@@ -3,6 +3,7 @@ import { UniverseSelection } from "./views/UniverseSelection";
 import { StoriesList } from "./views/StoriesList";
 import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
+import { StoryChildren } from "./views/StoryChildren";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import "./App.css";
 
@@ -22,6 +23,9 @@ function App() {
 
     case 'story-editor':
       return <StoryEditor />;
+
+    case 'story-children':
+      return <StoryChildren parentStoryId={currentRoute.parentStoryId} />;
 
     case 'element-detail':
       return <ElementDetailPage />;

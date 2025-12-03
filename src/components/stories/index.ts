@@ -11,3 +11,4 @@
 // Story components
 export { StoryCard } from './StoryCard';
 export { CreateStoryModal } from './CreateStoryModal';
+export { ChildStoryList } from './ChildStoryList';

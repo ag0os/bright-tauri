@@ -86,6 +86,8 @@ export function UniverseList() {
         color: null,
         icon: null,
         favorite: !element.favorite,
+        relatedStoryIds: null,
+        order: null,
       });
     } catch (error) {
       console.error('Failed to toggle favorite:', error);

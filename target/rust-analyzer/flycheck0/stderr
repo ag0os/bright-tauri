@@ -1,0 +1,500 @@
+   0.174937583s  INFO prepare_target{force=false package_id=bright-tauri v0.1.0 (/Users/cosmos/Projects/bright-tauri/src-tauri) target="bright-tauri"}: cargo::core::compiler::fingerprint: dependency on `bright_tauri_lib` is newer than we are 1762457551.860788044s > 1761571339.654002811s "/Users/cosmos/Projects/bright-tauri/src-tauri"
+   0.174998667s  INFO prepare_target{force=false package_id=bright-tauri v0.1.0 (/Users/cosmos/Projects/bright-tauri/src-tauri) target="bright-tauri"}: cargo::core::compiler::fingerprint: fingerprint dirty for bright-tauri v0.1.0 (/Users/cosmos/Projects/bright-tauri/src-tauri)/Check { test: true }/TargetInner { name: "bright-tauri", doc: true, ..: with_path("/Users/cosmos/Projects/bright-tauri/src-tauri/src/main.rs", Edition2021) }
+   0.175018167s  INFO prepare_target{force=false package_id=bright-tauri v0.1.0 (/Users/cosmos/Projects/bright-tauri/src-tauri) target="bright-tauri"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleDependency { name: "bright_tauri_lib", dep_mtime: FileTime { seconds: 1762457551, nanos: 860788044 }, max_mtime: FileTime { seconds: 1761571339, nanos: 654002811 } })
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+warning: failed to parse serde attribute
+  | 
+  | #[serde(skip_serializing_if = "Option::is_none")]
+  | 
+  = note: ts-rs failed to parse this attribute. It will be ignored.
+    Checking bright-tauri v0.1.0 (/Users/cosmos/Projects/bright-tauri/src-tauri)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.44s

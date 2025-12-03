@@ -32,7 +32,7 @@ impl StoryRepository {
                 id, universe_id, title, description, story_type, status, word_count,
                 content, variation_group_id, variation_type, parent_variation_id,
                 git_repo_path, current_branch, staged_changes, created_at, updated_at,
-                notes, outline, target_word_count, story_order, tags, color, favorite,
+                notes, outline, target_word_count, \"order\", tags, color, favorite,
                 related_element_ids, series_name, parent_story_id, last_edited_at, version
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)",
             params![
@@ -79,7 +79,7 @@ impl StoryRepository {
             "SELECT id, universe_id, title, description, story_type, status, word_count,
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
-                    notes, outline, target_word_count, story_order, tags, color, favorite,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories WHERE id = ?1",
             params![id],
@@ -96,7 +96,7 @@ impl StoryRepository {
             "SELECT id, universe_id, title, description, story_type, status, word_count,
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
-                    notes, outline, target_word_count, story_order, tags, color, favorite,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE universe_id = ?1
@@ -119,7 +119,7 @@ impl StoryRepository {
             "SELECT id, universe_id, title, description, story_type, status, word_count,
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
-                    notes, outline, target_word_count, story_order, tags, color, favorite,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE variation_group_id = ?1
@@ -142,11 +142,11 @@ impl StoryRepository {
             "SELECT id, universe_id, title, description, story_type, status, word_count,
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
-                    notes, outline, target_word_count, story_order, tags, color, favorite,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
                     related_element_ids, series_name, parent_story_id, last_edited_at, version
              FROM stories
              WHERE parent_story_id = ?1
-             ORDER BY story_order ASC, created_at ASC",
+             ORDER BY \"order\" ASC, created_at ASC",
         )?;
 
         let stories = stmt
@@ -195,7 +195,7 @@ impl StoryRepository {
         // Update order for each story
         for (index, story_id) in story_ids.iter().enumerate() {
             conn.execute(
-                "UPDATE stories SET story_order = ?1 WHERE id = ?2",
+                "UPDATE stories SET \"order\" = ?1 WHERE id = ?2",
                 params![index as u32, story_id],
             )?;
         }
@@ -253,7 +253,7 @@ impl StoryRepository {
             params_vec.push(Box::new(target_wc));
         }
         if let Some(order) = input.order {
-            updates.push("story_order = ?");
+            updates.push("\"order\" = ?");
             params_vec.push(Box::new(order));
         }
         if let Some(tags) = tags_json {

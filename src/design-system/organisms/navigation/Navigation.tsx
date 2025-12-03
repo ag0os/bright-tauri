@@ -7,7 +7,7 @@ export interface MinimalTopBarProps {
 }
 
 // Minimal Top Bar Navigation
-export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate }) => {
+export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNavigate }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
 

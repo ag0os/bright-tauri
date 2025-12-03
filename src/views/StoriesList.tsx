@@ -53,9 +53,14 @@ export function StoriesList() {
   };
 
   const handleStoryClick = (story: Story) => {
-    // For containers (series, chapter), navigate to chapter manager (future)
-    // For now, navigate to editor for all
-    navigate({ screen: 'story-editor', storyId: story.id });
+    // For container types, navigate to chapter manager
+    const containerTypes = ['novel', 'series', 'screenplay', 'collection'];
+    if (containerTypes.includes(story.storyType)) {
+      navigate({ screen: 'story-children', parentStoryId: story.id });
+    } else {
+      // For standalone types, navigate to editor
+      navigate({ screen: 'story-editor', storyId: story.id });
+    }
   };
 
   const handleEditStory = (story: Story) => {

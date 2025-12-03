@@ -18,8 +18,20 @@ vi.mock('@tauri-apps/plugin-opener', () => ({
 }));
 
 // Setup global test environment
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
+// Use globalThis for cross-environment compatibility
+(globalThis as typeof globalThis & { ResizeObserver: unknown }).ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
+
+// Mock localStorage for Zustand persist middleware
+const localStorageMock = {
+  getItem: vi.fn(() => null),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(() => null),
+};
+(globalThis as typeof globalThis & { localStorage: Storage }).localStorage = localStorageMock as Storage;

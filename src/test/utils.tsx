@@ -1,5 +1,7 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { ReactElement } from 'react';
+import { vi } from 'vitest';
+import * as tauriCore from '@tauri-apps/api/core';
 
 /**
  * Custom render function that wraps components with common providers
@@ -24,8 +26,8 @@ export function renderWithProviders(
  * Mock Tauri invoke function for testing
  * Usage: mockTauriInvoke('command_name', returnValue)
  */
-export function mockTauriInvoke(command: string, returnValue: any) {
-  const { invoke } = require('@tauri-apps/api/core');
+export function mockTauriInvoke(command: string, returnValue: unknown) {
+  const invoke = tauriCore.invoke as ReturnType<typeof vi.fn>;
   invoke.mockImplementation((cmd: string) => {
     if (cmd === command) {
       return Promise.resolve(returnValue);
@@ -38,7 +40,7 @@ export function mockTauriInvoke(command: string, returnValue: any) {
  * Reset all Tauri mocks
  */
 export function resetTauriMocks() {
-  const { invoke } = require('@tauri-apps/api/core');
+  const invoke = tauriCore.invoke as ReturnType<typeof vi.fn>;
   invoke.mockReset();
 }
 

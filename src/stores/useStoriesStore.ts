@@ -25,6 +25,10 @@ interface StoriesState {
   isLoading: boolean;
   error: string | null;
 
+  // Child story cache
+  childrenByParentId: Record<string, Story[]>;
+  childrenLoading: Record<string, boolean>;
+
   // Filters and sorting
   filters: StoryFilters;
   sortBy: SortBy;
@@ -37,6 +41,12 @@ interface StoriesState {
   getStory: (id: string) => Promise<Story>;
   updateStory: (id: string, input: UpdateStoryInput) => Promise<Story>;
   deleteStory: (id: string) => Promise<void>;
+
+  // Child story actions
+  loadStoryChildren: (parentId: string) => Promise<Story[]>;
+  reorderStoryChildren: (parentId: string, storyIds: string[]) => Promise<void>;
+  getStoryChildren: (parentId: string) => Story[];
+  invalidateChildren: (parentId: string) => void;
 
   // Filtering and sorting
   setFilter: (key: keyof StoryFilters, value: StoryType | StoryStatus | string | null) => void;
@@ -54,6 +64,10 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
   selectedStory: null,
   isLoading: false,
   error: null,
+
+  // Child story cache
+  childrenByParentId: {},
+  childrenLoading: {},
 
   // Initial filters and sorting
   filters: {
@@ -132,16 +146,74 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await invoke('delete_story', { id });
-      set((state) => ({
-        stories: state.stories.filter((s) => s.id !== id),
-        selectedStory: state.selectedStory?.id === id ? null : state.selectedStory,
-        isLoading: false,
-      }));
+      // Also remove from children cache if it's a child story
+      const deletedStory = get().stories.find((s) => s.id === id);
+      set((state) => {
+        const newChildrenByParentId = { ...state.childrenByParentId };
+        if (deletedStory?.parentStoryId && newChildrenByParentId[deletedStory.parentStoryId]) {
+          newChildrenByParentId[deletedStory.parentStoryId] =
+            newChildrenByParentId[deletedStory.parentStoryId].filter((s) => s.id !== id);
+        }
+        return {
+          stories: state.stories.filter((s) => s.id !== id),
+          selectedStory: state.selectedStory?.id === id ? null : state.selectedStory,
+          childrenByParentId: newChildrenByParentId,
+          isLoading: false,
+        };
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete story';
       set({ error: errorMessage, isLoading: false });
       throw error;
     }
+  },
+
+  // Child story actions
+  loadStoryChildren: async (parentId) => {
+    set((state) => ({
+      childrenLoading: { ...state.childrenLoading, [parentId]: true },
+      error: null,
+    }));
+    try {
+      const children = await invoke<Story[]>('list_story_children', { parentId });
+      set((state) => ({
+        childrenByParentId: { ...state.childrenByParentId, [parentId]: children },
+        childrenLoading: { ...state.childrenLoading, [parentId]: false },
+      }));
+      return children;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load children';
+      set((state) => ({
+        error: errorMessage,
+        childrenLoading: { ...state.childrenLoading, [parentId]: false },
+      }));
+      throw error;
+    }
+  },
+
+  reorderStoryChildren: async (parentId, storyIds) => {
+    set({ error: null });
+    try {
+      await invoke('reorder_story_children', { parentId, storyIds });
+      // Reload children to get updated order
+      await get().loadStoryChildren(parentId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reorder children';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  getStoryChildren: (parentId) => {
+    return get().childrenByParentId[parentId] || [];
+  },
+
+  invalidateChildren: (parentId) => {
+    set((state) => {
+      const newChildrenByParentId = { ...state.childrenByParentId };
+      delete newChildrenByParentId[parentId];
+      return { childrenByParentId: newChildrenByParentId };
+    });
   },
 
   // Filtering and sorting
