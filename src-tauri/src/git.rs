@@ -652,11 +652,7 @@ impl GitService {
     ///
     /// # Returns
     /// Success or error
-    pub fn resolve_conflict(
-        repo_path: &Path,
-        file_path: &str,
-        take_theirs: bool,
-    ) -> GitResult<()> {
+    pub fn resolve_conflict(repo_path: &Path, file_path: &str, take_theirs: bool) -> GitResult<()> {
         // Open repository
         let repo = Repository::open(repo_path)
             .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
@@ -665,14 +661,13 @@ impl GitService {
         let mut index = repo.index()?;
 
         // Check if file has conflict
-        let has_conflict = index
-            .conflicts()?
-            .flatten()
-            .any(|conflict| {
-                conflict.our.as_ref().and_then(|our| {
-                    std::str::from_utf8(&our.path).ok().map(|p| p == file_path)
-                }).unwrap_or(false)
-            });
+        let has_conflict = index.conflicts()?.flatten().any(|conflict| {
+            conflict
+                .our
+                .as_ref()
+                .and_then(|our| std::str::from_utf8(&our.path).ok().map(|p| p == file_path))
+                .unwrap_or(false)
+        });
 
         if !has_conflict {
             return Err(GitServiceError::InvalidOperation(format!(
@@ -747,14 +742,13 @@ impl GitService {
         let index = repo.index()?;
 
         // Check if file has conflict
-        let has_conflict = index
-            .conflicts()?
-            .flatten()
-            .any(|conflict| {
-                conflict.our.as_ref().and_then(|our| {
-                    std::str::from_utf8(&our.path).ok().map(|p| p == file_path)
-                }).unwrap_or(false)
-            });
+        let has_conflict = index.conflicts()?.flatten().any(|conflict| {
+            conflict
+                .our
+                .as_ref()
+                .and_then(|our| std::str::from_utf8(&our.path).ok().map(|p| p == file_path))
+                .unwrap_or(false)
+        });
 
         if !has_conflict {
             return Err(GitServiceError::InvalidOperation(format!(
