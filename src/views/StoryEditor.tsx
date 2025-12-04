@@ -5,12 +5,15 @@
  * Provides a distraction-free writing experience.
  */
 
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
+import { ArrowLeft, Save, Check, AlertCircle, Clock, GitBranch } from 'lucide-react';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { useToastStore } from '@/stores/useToastStore';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { useAutoSave } from '@/hooks/useAutoSave';
+import { useAutoCommit } from '@/hooks/useAutoCommit';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -22,9 +25,13 @@ import './StoryEditor.css';
 
 export function StoryEditor() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
+  const navigate = useNavigationStore((state) => state.navigate);
   const goBack = useNavigationStore((state) => state.goBack);
   const updateStory = useStoriesStore((state) => state.updateStory);
   const getStory = useStoriesStore((state) => state.getStory);
+  const showError = useToastStore((state) => state.error);
+  const autoCommitEnabled = useSettingsStore((state) => state.autoCommitEnabled);
+  const autoCommitDelay = useSettingsStore((state) => state.autoCommitDelay);
 
   const [story, setStory] = useState<Story | null>(null);
   const [content, setContent] = useState<string>('');
@@ -48,7 +55,8 @@ export function StoryEditor() {
         setContent(loadedStory.content || '');
         setTitle(loadedStory.title);
       } catch (error) {
-        console.error('Failed to load story:', error);
+        const message = error instanceof Error ? error.message : 'Failed to load story';
+        showError(message);
       } finally {
         setIsLoadingStory(false);
       }
@@ -62,25 +70,20 @@ export function StoryEditor() {
     content,
     onSave: async (newContent) => {
       if (!storyId) return;
-      await updateStory(storyId, {
-        title: null,
-        description: null,
-        storyType: null,
-        status: null,
-        content: newContent,
-        notes: null,
-        outline: null,
-        targetWordCount: null,
-        order: null,
-        tags: null,
-        color: null,
-        favorite: null,
-        relatedElementIds: null,
-        seriesName: null,
-      });
+      await updateStory(storyId, { content: newContent });
     },
     delay: 2000,
     enabled: !isLoadingStory && !!storyId,
+  });
+
+  // Auto-commit content changes to Git
+  useAutoCommit({
+    storyId: storyId || '',
+    gitRepoPath: story?.gitRepoPath || null,
+    filePath: 'content.md',
+    content,
+    delay: autoCommitDelay,
+    enabled: autoCommitEnabled && !isLoadingStory && !!storyId && !!story?.gitRepoPath,
   });
 
   // Handle title changes
@@ -89,27 +92,13 @@ export function StoryEditor() {
     if (!storyId || title === story?.title) return;
 
     try {
-      await updateStory(storyId, {
-        title: title,
-        description: null,
-        storyType: null,
-        status: null,
-        content: null,
-        notes: null,
-        outline: null,
-        targetWordCount: null,
-        order: null,
-        tags: null,
-        color: null,
-        favorite: null,
-        relatedElementIds: null,
-        seriesName: null,
-      });
+      await updateStory(storyId, { title });
       if (story) {
         setStory({ ...story, title });
       }
     } catch (error) {
-      console.error('Failed to update title:', error);
+      const message = error instanceof Error ? error.message : 'Failed to update title';
+      showError(message);
       // Revert title on error
       if (story) {
         setTitle(story.title);
@@ -129,13 +118,40 @@ export function StoryEditor() {
     }
   };
 
-  // Calculate word count
-  const wordCount = content
-    ? JSON.stringify(JSON.parse(content))
-        .replace(/[^a-zA-Z0-9\s]/g, ' ')
-        .split(/\s+/)
-        .filter((word) => word.length > 0).length
-    : 0;
+  // Calculate word count by extracting text from Lexical editor state
+  const wordCount = useMemo(() => {
+    if (!content) return 0;
+
+    try {
+      const editorState = JSON.parse(content);
+
+      // Recursively extract text from Lexical nodes
+      const extractText = (node: unknown): string => {
+        if (!node || typeof node !== 'object') return '';
+
+        const n = node as Record<string, unknown>;
+
+        // If node has text property, return it
+        if (typeof n.text === 'string') {
+          return n.text;
+        }
+
+        // If node has children, recursively extract text
+        if (Array.isArray(n.children)) {
+          return n.children.map(extractText).join(' ');
+        }
+
+        return '';
+      };
+
+      const text = extractText(editorState.root);
+
+      // Split by whitespace and filter empty strings
+      return text.split(/\s+/).filter((word) => word.length > 0).length;
+    } catch {
+      return 0;
+    }
+  }, [content]);
 
   // Render save state indicator
   const renderSaveIndicator = () => {
@@ -219,7 +235,29 @@ export function StoryEditor() {
           </h1>
         )}
 
-        {renderSaveIndicator()}
+        <div className="header-actions">
+          {story.gitRepoPath && (
+            <button
+              className="icon-button"
+              onClick={() => storyId && navigate({ screen: 'story-branches', storyId })}
+              aria-label="Manage branches"
+              title="Story variations (branches)"
+            >
+              <GitBranch size={18} />
+            </button>
+          )}
+
+          <button
+            className="icon-button"
+            onClick={() => storyId && navigate({ screen: 'story-history', storyId })}
+            aria-label="View history"
+            title="View version history"
+          >
+            <Clock size={18} />
+          </button>
+
+          {renderSaveIndicator()}
+        </div>
       </div>
 
       {/* Editor - Main Area */}

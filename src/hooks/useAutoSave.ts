@@ -65,6 +65,9 @@ export function useAutoSave<T>({
   const contentRef = useRef(content);
   contentRef.current = content;
 
+  // Track timeout for cleanup
+  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Save function
   const performSave = useCallback(async () => {
     if (!enabled) return;
@@ -76,9 +79,15 @@ export function useAutoSave<T>({
       await onSave(contentRef.current);
       setSaveState('saved');
 
+      // Clear any existing timeout
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+      }
+
       // Reset to idle after showing "saved" for a moment
-      setTimeout(() => {
+      savedTimeoutRef.current = setTimeout(() => {
         setSaveState('idle');
+        savedTimeoutRef.current = null;
       }, 2000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Save failed';
@@ -103,6 +112,10 @@ export function useAutoSave<T>({
 
     return () => {
       debouncedSave.current.cancel();
+      // Clean up saved timeout on unmount
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+      }
     };
   }, [delay]);
 
@@ -141,6 +154,10 @@ export function useAutoSave<T>({
     setSaveState('idle');
     setError(null);
     debouncedSave.current.cancel();
+    if (savedTimeoutRef.current) {
+      clearTimeout(savedTimeoutRef.current);
+      savedTimeoutRef.current = null;
+    }
   }, []);
 
   return {

@@ -83,6 +83,11 @@ pub fn run() {
             commands::git_merge_branches,
             commands::git_get_history,
             commands::git_restore_commit,
+            commands::git_list_branches,
+            commands::git_get_current_branch,
+            commands::git_resolve_conflict,
+            commands::git_abort_merge,
+            commands::git_get_conflict_content,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

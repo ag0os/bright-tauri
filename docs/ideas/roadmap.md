@@ -5,16 +5,16 @@ A creation app for writers and creators to build series of books, scripts, or an
 
 ## Progress Summary
 
-**Current Phase**: Foundation Complete → Frontend Development
+**Current Phase**: Frontend Development (Phase 1 Complete)
 
 **Completion Status**:
 - ✅ **Backend (95% Complete)**: Domain models, repository layer, Git integration, most service layer functionality
 - ✅ **Design System (100% Complete)**: Full token-first design system with Storybook, all phases complete
-- 🚧 **Frontend (10% Complete)**: Design system ready, awaiting UI implementation
-- ⏳ **AI Integration (Not Started)**: Awaiting frontend foundation
-- ⏳ **Voice Dictation (Not Started)**: Awaiting frontend foundation
+- 🚧 **Frontend (60% Complete)**: Core UI, story editor, chapter management, drag-and-drop implemented
+- ⏳ **AI Integration (Not Started)**: Awaiting Git UI completion
+- ⏳ **Voice Dictation (Not Started)**: Awaiting Git UI completion
 
-**Next Up**: Frontend development - Story editor UI, Git integration UI, and core workspace layout (tasks 20-26)
+**Next Up**: Git integration UI (tasks 20, 23-26) - auto-commit, branch management, diff viewer, merge UI, history
 
 ## Implemented ✅
 
@@ -66,6 +66,30 @@ A creation app for writers and creators to build series of books, scripts, or an
 - ✅ WCAG AA accessibility compliance
 - ✅ Desktop-optimized for writing applications
 
+### Frontend - Core UI (Implemented)
+- ✅ Universe selection/creation screen
+- ✅ Stories list view with filtering/sorting
+- ✅ Universe elements list (characters, locations, etc.)
+- ✅ Element detail view
+- ✅ Navigation store with routing
+- ✅ Error boundaries around all views
+- ✅ Toast notification system for user feedback
+
+### Frontend - Story Editor (Implemented)
+- ✅ Rich text editor (Lexical-based) with toolbar
+- ✅ Word count tracking (proper Lexical text extraction)
+- ✅ Auto-save functionality with debouncing (useAutoSave hook)
+- ✅ Chapter/section organization (StoryChildren view)
+- ✅ Drag-and-drop reordering (dnd-kit) for chapters
+- ✅ Inline title editing
+- ✅ Save state indicators (saving, saved, error)
+
+### Frontend - State Management (Implemented)
+- ✅ Zustand stores: useNavigationStore, useStoriesStore, useUniverseStore, useElementsStore, useToastStore
+- ✅ Optimistic updates with error rollback (drag-and-drop)
+- ✅ Child story caching and invalidation
+- ✅ Partial update types for cleaner API (StoryUpdate, ElementUpdate, UniverseUpdate)
+
 ## Roadmap
 
 ### Backend - Service Layer (Remaining)
@@ -77,18 +101,18 @@ A creation app for writers and creators to build series of books, scripts, or an
 ### Backend - Additional Commands (Remaining)
 - [ ] Search commands (universe-wide search across stories and elements)
 
-### Frontend - Core UI
-- [ ] Universe selection/creation screen
+### Frontend - Core UI (Remaining)
+- [x] Universe selection/creation screen
 - [ ] Main workspace layout (sidebar + editor + context panel)
-- [ ] Navigation between stories and elements
+- [x] Navigation between stories and elements
 - [ ] Universe settings panel
 
-### Frontend - Story Editor
-- [ ] Rich text editor for writing
-- [ ] Word count tracking
-- [ ] Auto-save functionality (task-20: with debouncing)
-- [ ] Chapter/section organization (task-21: chapter and child story management UI)
-- [ ] Drag-and-drop reordering (task-22: for chapters/stories)
+### Frontend - Story Editor (Remaining)
+- [x] Rich text editor for writing
+- [x] Word count tracking
+- [ ] Auto-commit on save with debouncing (task-20: Git auto-commit integration)
+- [x] Chapter/section organization (task-21: ✅ COMPLETE)
+- [x] Drag-and-drop reordering (task-22: ✅ COMPLETE)
 - [ ] Outline view
 - [ ] Notes panel
 
@@ -102,13 +126,13 @@ A creation app for writers and creators to build series of books, scripts, or an
 - [ ] Switch between variations (branch switching)
 - [ ] Compare variations side-by-side (diff view)
 
-### Frontend - Element Management
-- [ ] Element browser/list view
-- [ ] Element detail view/editor
-- [ ] Custom attribute editor (key-value pairs)
+### Frontend - Element Management (Remaining)
+- [x] Element browser/list view
+- [x] Element detail view/editor
+- [x] Custom attribute editor (key-value pairs)
 - [ ] Relationship visualization (graph view)
 - [ ] Element search and filtering
-- [ ] Element templates (for common types)
+- [x] Element templates (for common types - src/config/element-templates.json)
 
 ### Frontend - AI Integration
 - [ ] AI chat interface
@@ -138,10 +162,11 @@ A creation app for writers and creators to build series of books, scripts, or an
 - ✅ **UI Design System**: Custom token-first design system (Modern Indigo, Classic Serif, Lucide Icons)
 - ✅ **Component Library**: Custom React components with CSS tokens and Storybook documentation
 - ✅ **Git Backend**: git2 Rust library for version control
+- ✅ **Rich Text Editor**: Lexical (Meta's editor framework)
+- ✅ **State Management**: Zustand (lightweight, hooks-based)
+- ✅ **Drag-and-Drop**: dnd-kit (modern, accessible)
 
 ## Technical Decisions to Make
 - [ ] AI provider integration (OpenAI, Anthropic, local models?)
 - [ ] Voice dictation API (Web Speech API, Whisper, etc.)
-- [ ] Rich text editor library (TipTap, ProseMirror, Slate, Lexical?)
-- [ ] State management approach (Context, Zustand, Redux?)
 - [ ] Diff visualization library (react-diff-view, Monaco Diff Editor, custom?)

@@ -147,3 +147,69 @@ pub fn git_restore_commit(repo_path: String, commit_hash: String) -> Result<(), 
     let path = PathBuf::from(repo_path);
     GitService::restore_commit(&path, &commit_hash).map_err(|e| e.to_string())
 }
+
+/// List all local branches in the repository
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+///
+/// # Returns
+/// A vector of branch names
+#[tauri::command]
+pub fn git_list_branches(repo_path: String) -> Result<Vec<String>, String> {
+    let path = PathBuf::from(repo_path);
+    GitService::list_branches(&path).map_err(|e| e.to_string())
+}
+
+/// Get the name of the current branch
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+///
+/// # Returns
+/// The current branch name
+#[tauri::command]
+pub fn git_get_current_branch(repo_path: String) -> Result<String, String> {
+    let path = PathBuf::from(repo_path);
+    GitService::get_current_branch(&path).map_err(|e| e.to_string())
+}
+
+/// Resolve a file conflict by choosing ours or theirs version
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `file_path` - Relative path to the conflicted file
+/// * `take_theirs` - If true, use theirs version; if false, use ours
+#[tauri::command]
+pub fn git_resolve_conflict(
+    repo_path: String,
+    file_path: String,
+    take_theirs: bool,
+) -> Result<(), String> {
+    let path = PathBuf::from(repo_path);
+    GitService::resolve_conflict(&path, &file_path, take_theirs).map_err(|e| e.to_string())
+}
+
+/// Abort a merge in progress
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+#[tauri::command]
+pub fn git_abort_merge(repo_path: String) -> Result<(), String> {
+    let path = PathBuf::from(repo_path);
+    GitService::abort_merge(&path).map_err(|e| e.to_string())
+}
+
+/// Get the content of a conflicted file with conflict markers
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `file_path` - Relative path to the conflicted file
+///
+/// # Returns
+/// File content with conflict markers
+#[tauri::command]
+pub fn git_get_conflict_content(repo_path: String, file_path: String) -> Result<String, String> {
+    let path = PathBuf::from(repo_path);
+    GitService::get_conflict_content(&path, &file_path).map_err(|e| e.to_string())
+}

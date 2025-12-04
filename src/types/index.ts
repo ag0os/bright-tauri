@@ -38,3 +38,32 @@ export type { DiffResult } from './DiffResult';
 export type { FileChange } from './FileChange';
 export type { ChangeStatus } from './ChangeStatus';
 export type { MergeResult } from './MergeResult';
+
+// Utility types for partial updates
+// These convert `field: T | null` types to `field?: T | null` for easier usage
+import type { UpdateStoryInput as _UpdateStoryInput } from './UpdateStoryInput';
+import type { UpdateElementInput as _UpdateElementInput } from './UpdateElementInput';
+import type { UpdateUniverseInput as _UpdateUniverseInput } from './UpdateUniverseInput';
+
+/**
+ * Makes all nullable fields optional.
+ * Converts { field: T | null } to { field?: T | null }
+ */
+export type PartialNullable<T> = {
+  [K in keyof T]?: T[K];
+};
+
+/**
+ * Partial update type for Story - only include fields you want to change
+ */
+export type StoryUpdate = PartialNullable<_UpdateStoryInput>;
+
+/**
+ * Partial update type for Element - only include fields you want to change
+ */
+export type ElementUpdate = PartialNullable<_UpdateElementInput>;
+
+/**
+ * Partial update type for Universe - only include fields you want to change
+ */
+export type UniverseUpdate = PartialNullable<_UpdateUniverseInput>;

@@ -601,6 +601,173 @@ impl GitService {
 
         Ok(())
     }
+
+    /// List all local branches in the repository
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// Vector of branch names
+    pub fn list_branches(repo_path: &Path) -> GitResult<Vec<String>> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        let mut branches = Vec::new();
+
+        // Iterate over local branches
+        for branch_result in repo.branches(Some(git2::BranchType::Local))? {
+            let (branch, _) = branch_result?;
+            if let Some(name) = branch.name()? {
+                branches.push(name.to_string());
+            }
+        }
+
+        Ok(branches)
+    }
+
+    /// Get the name of the current branch
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// Current branch name, or "HEAD" if in detached HEAD state
+    pub fn get_current_branch(repo_path: &Path) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        let head = repo.head()?;
+        Ok(head.shorthand().unwrap_or("HEAD").to_string())
+    }
+
+    /// Resolve a file conflict by choosing ours or theirs version
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `file_path` - Relative path of the conflicted file
+    /// * `take_theirs` - If true, take theirs version; if false, take ours
+    ///
+    /// # Returns
+    /// Success or error
+    pub fn resolve_conflict(
+        repo_path: &Path,
+        file_path: &str,
+        take_theirs: bool,
+    ) -> GitResult<()> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Get the index with conflicts
+        let mut index = repo.index()?;
+
+        // Check if file has conflict
+        let has_conflict = index
+            .conflicts()?
+            .flatten()
+            .any(|conflict| {
+                conflict.our.as_ref().and_then(|our| {
+                    std::str::from_utf8(&our.path).ok().map(|p| p == file_path)
+                }).unwrap_or(false)
+            });
+
+        if !has_conflict {
+            return Err(GitServiceError::InvalidOperation(format!(
+                "File '{file_path}' does not have a conflict"
+            )));
+        }
+
+        // Checkout the chosen version using git2 checkout
+        let mut checkout_builder = git2::build::CheckoutBuilder::new();
+        checkout_builder.path(file_path);
+
+        if take_theirs {
+            checkout_builder.use_theirs(true);
+        } else {
+            checkout_builder.use_ours(true);
+        }
+
+        repo.checkout_index(Some(&mut index), Some(&mut checkout_builder))?;
+
+        // Add the resolved file to staging area
+        index.add_path(Path::new(file_path))?;
+        index.write()?;
+
+        Ok(())
+    }
+
+    /// Abort a merge in progress
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// Success or error
+    pub fn abort_merge(repo_path: &Path) -> GitResult<()> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Check if merge is in progress
+        let state = repo.state();
+        if state != git2::RepositoryState::Merge {
+            return Err(GitServiceError::InvalidOperation(
+                "No merge in progress".to_string(),
+            ));
+        }
+
+        // Clean up merge state
+        repo.cleanup_state()?;
+
+        // Reset to HEAD
+        let head = repo.head()?;
+        let commit = head.peel_to_commit()?;
+        repo.reset(commit.as_object(), git2::ResetType::Hard, None)?;
+
+        Ok(())
+    }
+
+    /// Get the content of a conflicted file with conflict markers
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `file_path` - Relative path of the conflicted file
+    ///
+    /// # Returns
+    /// File content with conflict markers as a string
+    pub fn get_conflict_content(repo_path: &Path, file_path: &str) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Get the index
+        let index = repo.index()?;
+
+        // Check if file has conflict
+        let has_conflict = index
+            .conflicts()?
+            .flatten()
+            .any(|conflict| {
+                conflict.our.as_ref().and_then(|our| {
+                    std::str::from_utf8(&our.path).ok().map(|p| p == file_path)
+                }).unwrap_or(false)
+            });
+
+        if !has_conflict {
+            return Err(GitServiceError::InvalidOperation(format!(
+                "File '{file_path}' does not have a conflict"
+            )));
+        }
+
+        // Read the file from disk (it will have conflict markers)
+        let full_path = repo_path.join(file_path);
+        let content = fs::read_to_string(&full_path)?;
+
+        Ok(content)
+    }
 }
 
 #[cfg(test)]

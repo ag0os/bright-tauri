@@ -14,6 +14,10 @@ export type Route =
   | { screen: 'universe-list' }
   | { screen: 'story-editor'; storyId: string }
   | { screen: 'story-children'; parentStoryId: string }
+  | { screen: 'story-history'; storyId: string }
+  | { screen: 'story-branches'; storyId: string }
+  | { screen: 'story-diff'; storyId: string; branchA?: string; branchB?: string }
+  | { screen: 'story-merge'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
   | { screen: 'element-detail'; elementId: string };
 
 interface NavigationState {

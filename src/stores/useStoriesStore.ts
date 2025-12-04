@@ -7,7 +7,30 @@
 
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
-import type { Story, CreateStoryInput, UpdateStoryInput, StoryStatus, StoryType } from '@/types';
+import type { Story, CreateStoryInput, UpdateStoryInput, StoryStatus, StoryType, StoryUpdate } from '@/types';
+
+/**
+ * Convert partial update to full UpdateStoryInput with null values for missing fields.
+ * This allows callers to only specify the fields they want to update.
+ */
+function toUpdateStoryInput(partial: StoryUpdate): UpdateStoryInput {
+  return {
+    title: partial.title ?? null,
+    description: partial.description ?? null,
+    storyType: partial.storyType ?? null,
+    status: partial.status ?? null,
+    content: partial.content ?? null,
+    notes: partial.notes ?? null,
+    outline: partial.outline ?? null,
+    targetWordCount: partial.targetWordCount ?? null,
+    order: partial.order ?? null,
+    tags: partial.tags ?? null,
+    color: partial.color ?? null,
+    favorite: partial.favorite ?? null,
+    relatedElementIds: partial.relatedElementIds ?? null,
+    seriesName: partial.seriesName ?? null,
+  };
+}
 
 type SortBy = 'lastEdited' | 'title' | 'wordCount';
 type SortOrder = 'asc' | 'desc';
@@ -39,7 +62,7 @@ interface StoriesState {
   selectStory: (story: Story | null) => void;
   createStory: (input: CreateStoryInput) => Promise<Story>;
   getStory: (id: string) => Promise<Story>;
-  updateStory: (id: string, input: UpdateStoryInput) => Promise<Story>;
+  updateStory: (id: string, input: StoryUpdate) => Promise<Story>;
   deleteStory: (id: string) => Promise<void>;
 
   // Child story actions
@@ -128,7 +151,9 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
   updateStory: async (id, input) => {
     set({ isLoading: true, error: null });
     try {
-      const story = await invoke<Story>('update_story', { id, input });
+      // Convert partial update to full input with null for missing fields
+      const fullInput = toUpdateStoryInput(input);
+      const story = await invoke<Story>('update_story', { id, input: fullInput });
       set((state) => ({
         stories: state.stories.map((s) => (s.id === id ? story : s)),
         selectedStory: state.selectedStory?.id === id ? story : state.selectedStory,
