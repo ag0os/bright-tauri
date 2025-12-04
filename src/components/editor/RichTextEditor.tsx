@@ -38,15 +38,16 @@ export function RichTextEditor({
   readOnly = false,
   placeholder = 'Start writing...',
 }: RichTextEditorProps) {
+  // Store the initial content only once when the component first mounts
+  // This prevents the editor from remounting on every keystroke
+  const [initialEditorState] = useState(() => initialContent || null);
   const [editorKey, setEditorKey] = useState(0);
 
-  // Parse initial content
-  const editorStateJSON = initialContent || null;
-
-  // Reset editor when readOnly changes or initialContent changes
+  // Only reset editor when readOnly changes (not on content changes)
+  // Content changes are handled internally by Lexical
   useEffect(() => {
     setEditorKey((prev) => prev + 1);
-  }, [readOnly, initialContent]);
+  }, [readOnly]);
 
   const initialConfig = {
     namespace: 'RichTextEditor',
@@ -71,7 +72,7 @@ export function RichTextEditor({
     },
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode],
     editable: !readOnly,
-    editorState: editorStateJSON,
+    editorState: initialEditorState,
     onError: (error: Error) => {
       console.error('Lexical Editor Error:', error);
     },
