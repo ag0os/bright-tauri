@@ -10,7 +10,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
+import { ContentChangePlugin } from './plugins/ContentChangePlugin';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import { ListItemNode, ListNode } from '@lexical/list';
 import { LinkNode } from '@lexical/link';
@@ -103,7 +103,7 @@ export function RichTextEditor({
             ErrorBoundary={() => <div>Error loading editor</div>}
           />
           <HistoryPlugin />
-          <OnChangePlugin onChange={handleChange} />
+          <ContentChangePlugin onChange={handleChange} />
         </div>
       </LexicalComposer>
     </div>

@@ -5,7 +5,7 @@
  * Provides a distraction-free writing experience.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, GitBranch } from '@phosphor-icons/react';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -65,13 +65,16 @@ export function StoryEditor() {
     loadStoryData();
   }, [storyId, getStory]);
 
+  // Memoized save callback to prevent unnecessary re-renders
+  const handleSaveContent = useCallback(async (newContent: string) => {
+    if (!storyId) return;
+    await updateStory(storyId, { content: newContent });
+  }, [storyId, updateStory]);
+
   // Auto-save content changes
   const { saveState } = useAutoSave({
     content,
-    onSave: async (newContent) => {
-      if (!storyId) return;
-      await updateStory(storyId, { content: newContent });
-    },
+    onSave: handleSaveContent,
     delay: 2000,
     enabled: !isLoadingStory && !!storyId,
   });

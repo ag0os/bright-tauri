@@ -65,10 +65,14 @@ export function useAutoSave<T>({
   const contentRef = useRef(content);
   contentRef.current = content;
 
+  // Store the latest onSave callback to avoid stale closures and dependency issues
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+
   // Track timeout for cleanup
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Save function
+  // Save function - uses refs to avoid dependency on onSave
   const performSave = useCallback(async () => {
     if (!enabled) return;
 
@@ -76,7 +80,7 @@ export function useAutoSave<T>({
     setError(null);
 
     try {
-      await onSave(contentRef.current);
+      await onSaveRef.current(contentRef.current);
       setSaveState('saved');
 
       // Clear any existing timeout
@@ -95,7 +99,7 @@ export function useAutoSave<T>({
       setSaveState('error');
       console.error('Auto-save error:', err);
     }
-  }, [enabled, onSave]);
+  }, [enabled]);
 
   // Create debounced save function
   const debouncedSave = useRef(
