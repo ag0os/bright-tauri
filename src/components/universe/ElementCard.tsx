@@ -11,19 +11,19 @@ import {
   MapPin,
   Car,
   Package,
-  Building2,
+  Buildings,
   Bird,
   Calendar,
   Lightbulb,
   Star,
-  Edit2,
-  Trash2,
+  PencilSimple,
+  Trash,
   Link,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
@@ -37,39 +37,27 @@ interface ElementCardProps {
   onToggleFavorite: (element: Element) => void;
 }
 
-// Map element types to Lucide icons
-const getElementIcon = (type: ElementType, customIcon?: string | null): React.ReactNode => {
-  const iconClass = 'icon icon-lg';
-
-  // If custom icon (emoji) is provided, render it
-  if (customIcon) {
-    return (
-      <span style={{ fontSize: '24px', lineHeight: 1 }} role="img" aria-label={type}>
-        {customIcon}
-      </span>
-    );
-  }
-
-  // Otherwise use Lucide icon based on type
+// Map element types to Phosphor icons
+const getElementIcon = (type: ElementType): React.ReactNode => {
   switch (type) {
     case 'character':
-      return <User className={iconClass} />;
+      return <User size={24} weight="duotone" />;
     case 'location':
-      return <MapPin className={iconClass} />;
+      return <MapPin size={24} weight="duotone" />;
     case 'vehicle':
-      return <Car className={iconClass} />;
+      return <Car size={24} weight="duotone" />;
     case 'item':
-      return <Package className={iconClass} />;
+      return <Package size={24} weight="duotone" />;
     case 'organization':
-      return <Building2 className={iconClass} />;
+      return <Buildings size={24} weight="duotone" />;
     case 'creature':
-      return <Bird className={iconClass} />;
+      return <Bird size={24} weight="duotone" />;
     case 'event':
-      return <Calendar className={iconClass} />;
+      return <Calendar size={24} weight="duotone" />;
     case 'concept':
-      return <Lightbulb className={iconClass} />;
+      return <Lightbulb size={24} weight="duotone" />;
     default:
-      return <Package className={iconClass} />;
+      return <Package size={24} weight="duotone" />;
   }
 };
 
@@ -148,7 +136,7 @@ export function ElementCard({
               alignItems: 'center',
             }}
           >
-            {getElementIcon(element.elementType, element.icon)}
+            {getElementIcon(element.elementType)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
@@ -180,7 +168,7 @@ export function ElementCard({
                 <>
                   <span>•</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Link className="icon icon-sm" style={{ width: '14px', height: '14px' }} />
+                    <Link className="icon icon-sm" weight="duotone" style={{ width: '14px', height: '14px' }} />
                     {actualRelationshipCount} {actualRelationshipCount === 1 ? 'link' : 'links'}
                   </span>
                 </>
@@ -190,9 +178,9 @@ export function ElementCard({
           {element.favorite && (
             <Star
               className="icon icon-base"
+              weight="fill"
               style={{
                 color: 'var(--color-accent)',
-                fill: 'var(--color-accent)',
                 flexShrink: 0,
               }}
             />
@@ -299,8 +287,8 @@ export function ElementCard({
               >
                 <Star
                   className="icon icon-base"
+                  weight={element.favorite ? 'fill' : 'duotone'}
                   style={{
-                    fill: element.favorite ? 'var(--color-accent)' : 'none',
                     color: element.favorite ? 'var(--color-accent)' : 'currentColor',
                   }}
                 />
@@ -311,7 +299,7 @@ export function ElementCard({
                 title="Edit element"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Edit2 className="icon icon-base" />
+                <PencilSimple className="icon icon-base" weight="duotone" />
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -319,7 +307,7 @@ export function ElementCard({
                 title="Delete element"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Trash2 className="icon icon-base" />
+                <Trash className="icon icon-base" weight="duotone" />
               </button>
             </div>
           )}

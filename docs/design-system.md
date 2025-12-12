@@ -102,32 +102,37 @@ Elegant serif headings paired with clean sans-serif body text, using a 1.250 (Ma
 
 ---
 
-#### Icons - Lucide Icons
-**File**: `src/design-system/tokens/icons/lucide.css`
+#### Icons - Phosphor Icons (Duotone)
+**File**: `src/design-system/tokens/icons/phosphor.css`
 
-Modern line-based icon library with adjustable stroke width.
+Modern, versatile icon library with duotone two-tone style for depth and visual interest.
 
 **Features**:
-- Consistent 24x24px grid
-- 2px default stroke width
-- Scalable and customizable
-- React component library: `lucide-react`
+- 6 weight variants: thin, light, regular, bold, fill, duotone
+- Duotone style adds depth with two-tone opacity
+- 7000+ icons available
+- Consistent 256x256 grid for pixel-perfect scaling
+- React component library: `@phosphor-icons/react`
 
 **Sizes**:
+- XS: 12px
 - Small: 16px
 - Base: 20px
 - Large: 24px
+- XL: 32px
+- 2XL: 48px
 
 **Installation**:
 ```bash
-npm install lucide-react
+npm install @phosphor-icons/react
 ```
 
 **Usage**:
 ```typescript
-import { FileText, Users, Star } from 'lucide-react';
+import { FileText, Users, Star } from '@phosphor-icons/react';
 
-<FileText size={20} />
+<FileText size={20} weight="duotone" />
+<Star size={24} weight="fill" />  // For filled state (e.g., favorited)
 ```
 
 ---
@@ -336,7 +341,7 @@ src/design-system/
 │   ├── typography/
 │   │   └── classic-serif.css
 │   ├── icons/
-│   │   └── lucide.css
+│   │   └── phosphor.css
 │   └── atoms/
 │       ├── button/
 │       │   └── minimal-squared.css
@@ -376,7 +381,7 @@ Import the design tokens you need in your component or story:
 ```typescript
 import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/lucide.css';
+import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 ```
 
@@ -513,7 +518,7 @@ When adding or modifying components:
 ## Resources
 
 - **Storybook**: `http://localhost:6006` (when running)
-- **Lucide Icons**: https://lucide.dev
+- **Phosphor Icons**: https://phosphoricons.com
 - **Color Contrast Checker**: https://webaim.org/resources/contrastchecker/
 - **WCAG Guidelines**: https://www.w3.org/WAI/WCAG21/quickref/
 

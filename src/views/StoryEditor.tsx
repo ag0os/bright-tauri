@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { ArrowLeft, Save, Check, AlertCircle, Clock, GitBranch } from 'lucide-react';
+import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, GitBranch } from '@phosphor-icons/react';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -17,7 +17,7 @@ import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
@@ -159,7 +159,7 @@ export function StoryEditor() {
       case 'saving':
         return (
           <div className="save-indicator saving">
-            <Save size={16} />
+            <FloppyDisk size={16} weight="duotone" />
             <span>Saving...</span>
           </div>
         );
@@ -173,7 +173,7 @@ export function StoryEditor() {
       case 'error':
         return (
           <div className="save-indicator error">
-            <AlertCircle size={16} />
+            <WarningCircle size={16} weight="duotone" />
             <span>Error saving</span>
           </div>
         );

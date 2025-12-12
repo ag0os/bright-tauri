@@ -1,14 +1,15 @@
 /**
- * Option 1: Lucide Icons
- * Modern, consistent line-based icons with customizable stroke
- * Library: lucide-react (https://lucide.dev)
- * Style: Outline with adjustable stroke width
- * Best for: Modern apps, flexible customization, consistent line weight
+ * Phosphor Icons (Duotone)
+ * Modern, versatile icons with multiple weight variants
+ * Library: @phosphor-icons/react (https://phosphoricons.com)
+ * Style: Duotone (two-tone with opacity variation)
+ * Best for: Modern apps, visual depth, versatile styling options
  */
 
 .icons-1 {
   /* Icon Library */
-  --icon-library: "lucide";
+  --icon-library: "phosphor";
+  --icon-variant: "duotone";
 
   /* Icon Sizes */
   --icon-size-xs: 12px;
@@ -18,12 +19,12 @@
   --icon-size-xl: 32px;
   --icon-size-2xl: 48px;
 
-  /* Stroke Width */
+  /* Phosphor doesn't use stroke-width, but we keep tokens for consistency */
   --icon-stroke-thin: 1px;
   --icon-stroke-regular: 2px;
   --icon-stroke-bold: 2.5px;
 
-  /* Default Stroke */
+  /* Default Stroke (for compatibility) */
   --icon-stroke-default: var(--icon-stroke-regular);
 
   /* Contextual Icon Sizes */
@@ -48,7 +49,6 @@
 .icons-1 .icon {
   width: var(--icon-size-base);
   height: var(--icon-size-base);
-  stroke-width: var(--icon-stroke-default);
   color: var(--icon-color-default);
 }
 
@@ -62,7 +62,3 @@
 .icons-1 .icon-button { width: var(--icon-button-size); height: var(--icon-button-size); }
 .icons-1 .icon-inline { width: var(--icon-inline-size); height: var(--icon-inline-size); }
 .icons-1 .icon-standalone { width: var(--icon-standalone-size); height: var(--icon-standalone-size); }
-
-.icons-1 .icon-thin { stroke-width: var(--icon-stroke-thin); }
-.icons-1 .icon-regular { stroke-width: var(--icon-stroke-regular); }
-.icons-1 .icon-bold { stroke-width: var(--icon-stroke-bold); }

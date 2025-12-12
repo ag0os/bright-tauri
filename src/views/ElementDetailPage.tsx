@@ -10,61 +10,49 @@ import {
   MapPin,
   Car,
   Package,
-  Building2,
+  Buildings,
   Bird,
   Calendar,
   Lightbulb,
   ArrowLeft,
   Star,
-  Edit2,
-  Trash2,
-  Loader2,
+  PencilSimple,
+  Trash,
+  CircleNotch,
   Link as LinkIcon,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import type { Element, ElementType, Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
 
-// Map element types to Lucide icons
-const getElementIcon = (type: ElementType, customIcon?: string | null): React.ReactNode => {
-  const iconClass = 'icon icon-2xl';
-
-  // If custom icon (emoji) is provided, render it
-  if (customIcon) {
-    return (
-      <span style={{ fontSize: '48px', lineHeight: 1 }} role="img" aria-label={type}>
-        {customIcon}
-      </span>
-    );
-  }
-
-  // Otherwise use Lucide icon based on type
+// Map element types to Phosphor icons
+const getElementIcon = (type: ElementType): React.ReactNode => {
   switch (type) {
     case 'character':
-      return <User className={iconClass} />;
+      return <User size={48} weight="duotone" />;
     case 'location':
-      return <MapPin className={iconClass} />;
+      return <MapPin size={48} weight="duotone" />;
     case 'vehicle':
-      return <Car className={iconClass} />;
+      return <Car size={48} weight="duotone" />;
     case 'item':
-      return <Package className={iconClass} />;
+      return <Package size={48} weight="duotone" />;
     case 'organization':
-      return <Building2 className={iconClass} />;
+      return <Buildings size={48} weight="duotone" />;
     case 'creature':
-      return <Bird className={iconClass} />;
+      return <Bird size={48} weight="duotone" />;
     case 'event':
-      return <Calendar className={iconClass} />;
+      return <Calendar size={48} weight="duotone" />;
     case 'concept':
-      return <Lightbulb className={iconClass} />;
+      return <Lightbulb size={48} weight="duotone" />;
     default:
-      return <Package className={iconClass} />;
+      return <Package size={48} weight="duotone" />;
   }
 };
 
@@ -195,7 +183,7 @@ export function ElementDetailPage() {
           gap: 'var(--spacing-3)',
         }}
       >
-        <Loader2
+        <CircleNotch
           className="icon icon-2xl"
           style={{
             color: 'var(--color-primary)',
@@ -309,11 +297,11 @@ export function ElementDetailPage() {
               {element.favorite ? 'Favorited' : 'Favorite'}
             </button>
             <button className="btn btn-secondary btn-base" onClick={handleEdit}>
-              <Edit2 className="icon icon-base" />
+              <PencilSimple className="icon icon-base" weight="duotone" />
               Edit
             </button>
             <button className="btn btn-secondary btn-base" onClick={handleDelete}>
-              <Trash2 className="icon icon-base" />
+              <Trash className="icon icon-base" weight="duotone" />
               Delete
             </button>
           </div>
@@ -346,7 +334,7 @@ export function ElementDetailPage() {
                 alignItems: 'center',
               }}
             >
-              {getElementIcon(element.elementType, element.icon)}
+              {getElementIcon(element.elementType)}
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, GitCompare, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, GitDiff, FileText, WarningCircle } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -15,7 +15,7 @@ import type { Story } from '@/types';
 import type { DiffResult, FileChange, ChangeStatus } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';
 import './StoryDiff.css';
@@ -173,7 +173,7 @@ export function StoryDiff() {
   if (!story.gitRepoPath) {
     return (
       <div className="story-diff-error">
-        <AlertCircle size={48} />
+        <WarningCircle size={48} weight="duotone" />
         <h2>No Version Control</h2>
         <p>This story does not have version control enabled.</p>
         <p>Enable Git to compare story variations.</p>
@@ -232,7 +232,7 @@ export function StoryDiff() {
           </div>
 
           <div className="selector-divider">
-            <GitCompare size={20} />
+            <GitDiff size={20} weight="duotone" />
           </div>
 
           <div className="selector-group">
@@ -296,7 +296,7 @@ export function StoryDiff() {
         {/* Initial empty state */}
         {!diffResult && !isComparing && (
           <div className="empty-state">
-            <GitCompare size={64} />
+            <GitDiff size={64} weight="duotone" />
             <p>Select two branches and click Compare to see the differences</p>
           </div>
         )}

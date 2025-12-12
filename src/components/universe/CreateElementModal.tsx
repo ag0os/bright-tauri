@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@phosphor-icons/react';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useNavigationStore } from '@/stores/useNavigationStore';
@@ -14,7 +14,7 @@ import type { ElementType } from '@/types';
 import elementTemplatesData from '@/config/element-templates.json';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
@@ -201,7 +201,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
           >
-            <X className="icon icon-base" />
+            <X className="icon icon-base" weight="duotone" />
           </button>
         </div>
 

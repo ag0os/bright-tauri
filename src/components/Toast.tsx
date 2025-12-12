@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
+import { X, CheckCircle, WarningCircle, Info } from '@phosphor-icons/react';
 import '@/design-system/tokens/colors/modern-indigo.css';
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -42,9 +42,9 @@ function Toast({ toast, onDismiss }: ToastProps) {
   };
 
   const icons = {
-    success: <CheckCircle size={18} />,
-    error: <AlertCircle size={18} />,
-    info: <Info size={18} />,
+    success: <CheckCircle size={18} weight="duotone" />,
+    error: <WarningCircle size={18} weight="duotone" />,
+    info: <Info size={18} weight="duotone" />,
   };
 
   const colors = {
@@ -95,7 +95,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         }}
         aria-label="Dismiss"
       >
-        <X size={16} />
+        <X size={16} weight="duotone" />
       </button>
     </div>
   );

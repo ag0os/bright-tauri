@@ -1,8 +1,9 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { Clock } from '@phosphor-icons/react';
 import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/lucide.css';
+import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 
 const meta: Meta = {
@@ -14,18 +15,9 @@ const meta: Meta = {
 
 export default meta;
 
-// Mock icon component
-const MockIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg
-    className={`icon ${className}`}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    style={{ width: '20px', height: '20px', strokeWidth: '2px' }}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6v6l4 2" />
-  </svg>
+// Icon component using Phosphor
+const IconDemo: React.FC = () => (
+  <Clock size={20} weight="duotone" />
 );
 
 const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
@@ -81,17 +73,17 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
         </h4>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button className="btn btn-primary btn-base">
-            <MockIcon />
+            <IconDemo />
             Icon Left
           </button>
           <button className="btn btn-secondary btn-base">
             Icon Right
-            <MockIcon />
+            <IconDemo />
           </button>
           <button className="btn btn-outline btn-base">
-            <MockIcon />
+            <IconDemo />
             Both Sides
-            <MockIcon />
+            <IconDemo />
           </button>
         </div>
       </div>

@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { ChevronDown, BookOpen, Globe, Sun, Moon } from 'lucide-react';
+import { CaretDown, BookOpen, Globe, Sun, Moon } from '@phosphor-icons/react';
 import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useTheme } from '@/hooks';
 import './TopBar.css';
@@ -64,7 +64,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
               </>
             )}
           </select>
-          <ChevronDown className="topbar__select-icon" size={16} />
+          <CaretDown className="topbar__select-icon" size={16} weight="duotone" />
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           className={`topbar__nav-button ${activeTab === 'stories' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('stories')}
         >
-          <BookOpen size={16} />
+          <BookOpen size={16} weight="duotone" />
           <span>Stories</span>
         </button>
 
@@ -81,7 +81,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           className={`topbar__nav-button ${activeTab === 'universe' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('universe')}
         >
-          <Globe size={16} />
+          <Globe size={16} weight="duotone" />
           <span>Universe</span>
         </button>
 
@@ -93,7 +93,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          {isDark ? <Sun size={16} weight="duotone" /> : <Moon size={16} weight="duotone" />}
         </button>
       </nav>
     </div>

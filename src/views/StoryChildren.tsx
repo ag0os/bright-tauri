@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, CircleNotch } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ChildStoryList, CreateStoryModal } from '@/components/stories';
 import { useNavigationStore } from '@/stores/useNavigationStore';
@@ -14,7 +14,7 @@ import { useStoriesStore } from '@/stores/useStoriesStore';
 import type { Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';
 
@@ -126,7 +126,7 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
             gap: 'var(--spacing-3)',
           }}
         >
-          <Loader2
+          <CircleNotch
             className="icon icon-2xl"
             style={{
               color: 'var(--color-primary)',

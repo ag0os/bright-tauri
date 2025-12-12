@@ -23,7 +23,7 @@ import {
   $isListNode,
 } from '@lexical/list';
 import { mergeRegister } from '@lexical/utils';
-import { Bold, Italic, Underline, Heading1, Heading2, List, ListOrdered } from 'lucide-react';
+import { TextB, TextItalic, TextUnderline, TextHOne, TextHTwo, ListBullets, ListNumbers } from '@phosphor-icons/react';
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -126,7 +126,7 @@ export function ToolbarPlugin() {
         aria-label="Format Bold"
         title="Bold"
       >
-        <Bold size={18} />
+        <TextB size={18} weight="duotone" />
       </button>
       <button
         type="button"
@@ -135,7 +135,7 @@ export function ToolbarPlugin() {
         aria-label="Format Italic"
         title="Italic"
       >
-        <Italic size={18} />
+        <TextItalic size={18} weight="duotone" />
       </button>
       <button
         type="button"
@@ -144,7 +144,7 @@ export function ToolbarPlugin() {
         aria-label="Format Underline"
         title="Underline"
       >
-        <Underline size={18} />
+        <TextUnderline size={18} weight="duotone" />
       </button>
 
       <div className="toolbar-divider" />
@@ -156,7 +156,7 @@ export function ToolbarPlugin() {
         aria-label="Heading 1"
         title="Heading 1"
       >
-        <Heading1 size={18} />
+        <TextHOne size={18} weight="duotone" />
       </button>
       <button
         type="button"
@@ -165,7 +165,7 @@ export function ToolbarPlugin() {
         aria-label="Heading 2"
         title="Heading 2"
       >
-        <Heading2 size={18} />
+        <TextHTwo size={18} weight="duotone" />
       </button>
 
       <div className="toolbar-divider" />
@@ -177,7 +177,7 @@ export function ToolbarPlugin() {
         aria-label="Bullet List"
         title="Bullet List"
       >
-        <List size={18} />
+        <ListBullets size={18} weight="duotone" />
       </button>
       <button
         type="button"
@@ -186,7 +186,7 @@ export function ToolbarPlugin() {
         aria-label="Numbered List"
         title="Numbered List"
       >
-        <ListOrdered size={18} />
+        <ListNumbers size={18} weight="duotone" />
       </button>
     </div>
   );

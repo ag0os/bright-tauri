@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from '@phosphor-icons/react';
 import { UniverseCard } from '../components/UniverseCard';
 import { CreateUniverseModal } from '../components/CreateUniverseModal';
 import type { Universe } from '../types/Universe';

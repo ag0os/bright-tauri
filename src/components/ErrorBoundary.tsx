@@ -6,7 +6,7 @@
  */
 
 import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { WarningCircle, ArrowClockwise } from '@phosphor-icons/react';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 
@@ -66,8 +66,9 @@ export class ErrorBoundary extends Component<Props, State> {
             color: 'var(--color-text-secondary)',
           }}
         >
-          <AlertCircle
+          <WarningCircle
             size={48}
+            weight="duotone"
             style={{ color: 'var(--color-semantic-error)' }}
           />
           <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>
@@ -97,7 +98,7 @@ export class ErrorBoundary extends Component<Props, State> {
             onClick={this.handleRetry}
             style={{ marginTop: '8px' }}
           >
-            <RefreshCw size={16} />
+            <ArrowClockwise size={16} weight="duotone" />
             Try Again
           </button>
         </div>

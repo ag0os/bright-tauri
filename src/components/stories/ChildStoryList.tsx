@@ -26,17 +26,17 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  BookMarked,
-  ScrollText,
+  BookBookmark,
+  Scroll,
   FileText,
-  Edit2,
-  Trash2,
-  GripVertical,
-} from 'lucide-react';
+  PencilSimple,
+  Trash,
+  DotsSixVertical,
+} from '@phosphor-icons/react';
 import type { Story, StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
@@ -56,11 +56,11 @@ const getStoryIcon = (type: StoryType): React.ReactNode => {
 
   switch (type) {
     case 'chapter':
-      return <BookMarked className={iconClass} />;
+      return <BookBookmark className={iconClass} weight="duotone" />;
     case 'scene':
-      return <ScrollText className={iconClass} />;
+      return <Scroll className={iconClass} weight="duotone" />;
     default:
-      return <FileText className={iconClass} />;
+      return <FileText className={iconClass} weight="duotone" />;
   }
 };
 
@@ -155,8 +155,9 @@ function SortableItem({
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical
+          <DotsSixVertical
             className="icon icon-base"
+            weight="duotone"
             style={{
               opacity: isHovered ? 1 : 0.6,
               transition: 'opacity 0.15s ease',
@@ -227,7 +228,7 @@ function SortableItem({
               title="Edit chapter"
               style={{ padding: 'var(--spacing-1)' }}
             >
-              <Edit2 className="icon icon-sm" />
+              <PencilSimple className="icon icon-sm" weight="duotone" />
             </button>
             <button
               className="btn btn-ghost btn-sm"
@@ -235,7 +236,7 @@ function SortableItem({
               title="Delete chapter"
               style={{ padding: 'var(--spacing-1)' }}
             >
-              <Trash2 className="icon icon-sm" />
+              <Trash className="icon icon-sm" weight="duotone" />
             </button>
           </div>
         )}
@@ -269,7 +270,7 @@ function DragOverlayItem({ child, index }: { child: Story; index: number }) {
           color: 'var(--color-text-tertiary)',
         }}
       >
-        <GripVertical className="icon icon-sm" />
+        <DotsSixVertical className="icon icon-sm" weight="duotone" />
         <span
           style={{
             fontFamily: 'var(--typography-body-font)',

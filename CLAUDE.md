@@ -125,7 +125,7 @@ The project uses a comprehensive token-first design system built with React, Typ
 - **CSS Reset**: Modern Reset (Pawel Grzybek's recommendations, auto-imported)
 - **Colors**: Modern Indigo (professional blue/indigo with warm amber accents)
 - **Typography**: Classic Serif (Playfair Display headings + system sans body, 1.250 scale)
-- **Icons**: Lucide Icons (modern line-based, adjustable stroke)
+- **Icons**: Phosphor Icons Duotone (modern two-tone style with depth)
 - **Buttons**: Minimal Squared (4px radius, compact spacing)
 - **Inputs**: Filled Background (Material Design inspired)
 - **Cards**: Elevated Shadow (shadow-based depth, no borders)

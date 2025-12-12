@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Users, Star, TrendingUp, Plus, Zap } from 'lucide-react';
+import { FileText, Users, Star, TrendUp, Plus, Lightning } from '@phosphor-icons/react';
 import { MinimalTopBar } from '../../organisms/navigation/Navigation';
 import './stats-grid.css';
 
@@ -22,7 +22,7 @@ export const StatsGridDashboard: React.FC = () => {
                 <div className="dashboard-1__stat-value">47,328</div>
               </div>
               <div className="dashboard-1__stat-change dashboard-1__stat-change--positive">
-                <TrendingUp size={16} />
+                <TrendUp size={16} weight="duotone" />
                 <span>+2,450 this week</span>
               </div>
             </div>
@@ -41,7 +41,7 @@ export const StatsGridDashboard: React.FC = () => {
                 <div className="dashboard-1__stat-value">12 days</div>
               </div>
               <div className="dashboard-1__stat-change dashboard-1__stat-change--positive">
-                <Zap size={16} />
+                <Lightning size={16} weight="duotone" />
                 <span>Keep it up!</span>
               </div>
             </div>
@@ -65,10 +65,10 @@ export const StatsGridDashboard: React.FC = () => {
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
-                    { title: 'Chapter 3: The Awakening', meta: 'My Novel · Edited 2h ago', status: 'Draft', icon: <FileText size={20} /> },
-                    { title: 'Character Profile: Sarah Chen', meta: 'My Novel · Edited 5h ago', status: 'Complete', icon: <Users size={20} /> },
-                    { title: 'Outline: Part Two', meta: 'My Novel · Edited yesterday', status: 'Draft', icon: <FileText size={20} /> },
-                    { title: 'Chapter 2: First Contact', meta: 'My Novel · Edited 2 days ago', status: 'Final', icon: <FileText size={20} /> },
+                    { title: 'Chapter 3: The Awakening', meta: 'My Novel · Edited 2h ago', status: 'Draft', icon: <FileText size={20} weight="duotone" /> },
+                    { title: 'Character Profile: Sarah Chen', meta: 'My Novel · Edited 5h ago', status: 'Complete', icon: <Users size={20} weight="duotone" /> },
+                    { title: 'Outline: Part Two', meta: 'My Novel · Edited yesterday', status: 'Draft', icon: <FileText size={20} weight="duotone" /> },
+                    { title: 'Chapter 2: First Contact', meta: 'My Novel · Edited 2 days ago', status: 'Final', icon: <FileText size={20} weight="duotone" /> },
                   ].map((doc, i) => (
                     <div key={i} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
@@ -89,8 +89,8 @@ export const StatsGridDashboard: React.FC = () => {
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
-                    { title: 'Downtown District', meta: '8 locations', icon: <Star size={20} /> },
-                    { title: 'Tech Corporation HQ', meta: '3 locations', icon: <Star size={20} /> },
+                    { title: 'Downtown District', meta: '8 locations', icon: <Star size={20} weight="duotone" /> },
+                    { title: 'Tech Corporation HQ', meta: '3 locations', icon: <Star size={20} weight="duotone" /> },
                   ].map((doc, i) => (
                     <div key={i} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
@@ -109,15 +109,15 @@ export const StatsGridDashboard: React.FC = () => {
                 <h3 className="dashboard-1__section-title">Quick Actions</h3>
                 <div className="dashboard-1__quick-actions">
                   <button className="dashboard-1__action-button">
-                    <Plus className="dashboard-1__action-icon" />
+                    <Plus className="dashboard-1__action-icon" weight="duotone" />
                     New Document
                   </button>
                   <button className="dashboard-1__action-button dashboard-1__action-button--secondary">
-                    <Users className="dashboard-1__action-icon" />
+                    <Users className="dashboard-1__action-icon" weight="duotone" />
                     New Character
                   </button>
                   <button className="dashboard-1__action-button dashboard-1__action-button--secondary">
-                    <Star className="dashboard-1__action-icon" />
+                    <Star className="dashboard-1__action-icon" weight="duotone" />
                     New Location
                   </button>
                 </div>

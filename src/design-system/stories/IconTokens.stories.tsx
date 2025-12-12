@@ -1,8 +1,9 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { Clock, FileText, Users, Star, Plus, MagnifyingGlass, Check } from '@phosphor-icons/react';
 import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/lucide.css';
+import '../tokens/icons/phosphor.css';
 
 const meta: Meta = {
   title: 'Design System/1. Foundations/Icons',
@@ -13,32 +14,18 @@ const meta: Meta = {
 
 export default meta;
 
-// Mock icon component using SVG circles
-const MockIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className = '', style }) => (
-  <svg
-    className={`icon ${className}`}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    style={style}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6v6l4 2" />
-  </svg>
-);
-
 const SizeDemo: React.FC<{ className: string }> = ({ className }) => (
   <div className={className} style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'flex-end' }}>
     {[
-      { size: 'xs', label: 'XS' },
-      { size: 'sm', label: 'SM' },
-      { size: 'base', label: 'Base' },
-      { size: 'lg', label: 'LG' },
-      { size: 'xl', label: 'XL' },
-      { size: '2xl', label: '2XL' },
+      { size: 12, label: 'XS (12px)' },
+      { size: 16, label: 'SM (16px)' },
+      { size: 20, label: 'Base (20px)' },
+      { size: 24, label: 'LG (24px)' },
+      { size: 32, label: 'XL (32px)' },
+      { size: 48, label: '2XL (48px)' },
     ].map(({ size, label }) => (
       <div key={size} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-        <MockIcon className={`icon-${size}`} />
+        <Clock size={size} weight="duotone" />
         <code style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '11px',
@@ -79,7 +66,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
           borderRadius: '6px',
           cursor: 'pointer',
         }}>
-          <MockIcon className="icon-button" />
+          <Plus size={20} weight="duotone" />
           Primary Action
         </button>
         <button style={{
@@ -97,7 +84,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
           cursor: 'pointer',
         }}>
           Secondary Action
-          <MockIcon className="icon-button" />
+          <Check size={20} weight="duotone" />
         </button>
       </div>
     </div>
@@ -122,7 +109,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
         alignItems: 'center',
         gap: 'var(--icon-gap-inline)',
       }}>
-        <MockIcon className="icon-inline" />
+        <MagnifyingGlass size={16} weight="duotone" />
         Icon appears inline with body text, maintaining proper alignment and spacing.
       </p>
     </div>
@@ -139,15 +126,15 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
         Standalone Icons
       </p>
       <div style={{ display: 'flex', gap: '16px' }}>
-        <MockIcon className="icon-standalone" style={{ color: 'var(--color-primary)' }} />
-        <MockIcon className="icon-standalone" style={{ color: 'var(--color-accent)' }} />
-        <MockIcon className="icon-standalone" style={{ color: 'var(--color-text-secondary)' }} />
+        <FileText size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
+        <Star size={24} weight="duotone" style={{ color: 'var(--color-accent)' }} />
+        <Users size={24} weight="duotone" style={{ color: 'var(--color-text-secondary)' }} />
       </div>
     </div>
   </div>
 );
 
-export const LucideIcons: StoryObj = {
+export const PhosphorIcons: StoryObj = {
   render: () => {
     return (
       <div className="option-1 typo-1 icons-1" style={{
@@ -163,7 +150,7 @@ export const LucideIcons: StoryObj = {
             marginBottom: '8px',
             color: 'var(--color-text-primary)',
           }}>
-            Lucide Icons
+            Phosphor Icons (Duotone)
           </h1>
           <p style={{
             fontFamily: 'var(--typography-body-font)',
@@ -171,7 +158,7 @@ export const LucideIcons: StoryObj = {
             color: 'var(--color-text-secondary)',
             marginBottom: '12px',
           }}>
-            Modern, consistent line-based icons with customizable stroke width.
+            Modern, versatile icons with duotone two-tone style for depth and visual interest.
           </p>
           <div style={{
             display: 'flex',
@@ -180,8 +167,8 @@ export const LucideIcons: StoryObj = {
             color: 'var(--color-text-secondary)',
             fontFamily: 'var(--font-mono)',
           }}>
-            <div><strong>Library:</strong> lucide-react</div>
-            <div><strong>Style:</strong> Outline with adjustable stroke (1px - 2.5px)</div>
+            <div><strong>Library:</strong> @phosphor-icons/react</div>
+            <div><strong>Style:</strong> Duotone (two-tone with opacity variation)</div>
           </div>
         </div>
 
@@ -250,10 +237,11 @@ export const LucideIcons: StoryObj = {
           paddingLeft: '24px',
           marginBottom: '24px',
         }}>
-          <li>Flexible stroke customization</li>
-          <li>Consistent line weight</li>
-          <li>Modern aesthetic</li>
-          <li>1000+ icons available</li>
+          <li>Duotone style adds depth with two-tone opacity</li>
+          <li>6 weight variants: thin, light, regular, bold, fill, duotone</li>
+          <li>Modern, contemporary aesthetic</li>
+          <li>7000+ icons available</li>
+          <li>Consistent 256x256 grid for pixel-perfect scaling</li>
         </ul>
 
         <h4 style={{
@@ -275,7 +263,7 @@ export const LucideIcons: StoryObj = {
         }}>
           <li>Size tokens ensure consistent scaling throughout the application</li>
           <li>Contextual sizing optimizes icons for their usage (button, inline, standalone)</li>
-          <li>Stroke variations allow for visual hierarchy and emphasis</li>
+          <li>Duotone variant creates visual hierarchy with subtle depth</li>
           <li>Icons inherit color from context using currentColor for flexibility</li>
           <li>Spacing tokens maintain proper gaps between icons and adjacent content</li>
         </ul>

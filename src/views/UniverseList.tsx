@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Loader2 } from 'lucide-react';
+import { Plus, MagnifyingGlass, CircleNotch, GlobeHemisphereWest } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ElementCard } from '@/components/universe/ElementCard';
 import { CreateElementModal } from '@/components/universe/CreateElementModal';
@@ -15,7 +15,7 @@ import { useUniverseStore } from '@/stores/useUniverseStore';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
@@ -164,7 +164,7 @@ export function UniverseList() {
           <div className="input-group input-5" style={{ flex: '1', minWidth: '250px' }}>
             <div className="input-wrapper">
               <div className="input-icon-prefix">
-                <Search className="icon icon-base" />
+                <MagnifyingGlass className="icon icon-base" weight="duotone" />
               </div>
               <input
                 type="text"
@@ -259,7 +259,7 @@ export function UniverseList() {
               gap: 'var(--spacing-3)',
             }}
           >
-            <Loader2
+            <CircleNotch
               className="icon icon-2xl"
               style={{
                 color: 'var(--color-primary)',
@@ -291,14 +291,14 @@ export function UniverseList() {
               textAlign: 'center',
             }}
           >
-            <div
+            <GlobeHemisphereWest
+              size={64}
+              weight="duotone"
               style={{
-                fontSize: '64px',
-                opacity: 0.2,
+                color: 'var(--color-text-secondary)',
+                opacity: 0.4,
               }}
-            >
-              🌍
-            </div>
+            />
             <h2
               style={{
                 fontFamily: 'var(--typography-heading-font)',

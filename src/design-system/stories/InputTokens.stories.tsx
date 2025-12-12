@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { MagnifyingGlass, CheckCircle } from '@phosphor-icons/react';
 import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/lucide.css';
+import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 import '../tokens/atoms/input/filled-background.css';
 
@@ -25,20 +26,6 @@ type InputOption = {
   border: string;
   strengths: string[];
 };
-
-// Mock icon component
-const MockIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg
-    className={`icon ${className}`}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    style={{ width: '20px', height: '20px', strokeWidth: '2px' }}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M9 12l2 2 4-4" />
-  </svg>
-);
 
 // Basic Input Component
 const BasicInput: React.FC<{ className: string }> = ({ className }) => {
@@ -231,7 +218,7 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
             <label className="input-label" htmlFor={`${option.className}-prefix`}>Search</label>
             <div className={`input-wrapper ${isFloating && iconValue ? 'has-value' : ''}`}>
               <div className="input-icon-prefix">
-                <MockIcon />
+                <MagnifyingGlass size={20} weight="duotone" />
               </div>
               <input
                 id={`${option.className}-prefix`}
@@ -256,7 +243,7 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
                 readOnly
               />
               <div className="input-icon-suffix">
-                <MockIcon />
+                <CheckCircle size={20} weight="duotone" />
               </div>
             </div>
           </div>

@@ -5,14 +5,14 @@
  */
 
 import { useState, FormEvent } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@phosphor-icons/react';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import type { StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
@@ -205,7 +205,7 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
           >
-            <X className="icon icon-base" />
+            <X className="icon icon-base" weight="duotone" />
           </button>
         </div>
 

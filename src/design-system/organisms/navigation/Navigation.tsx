@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, ChevronLeft, ChevronRight, Command, Search, Plus } from 'lucide-react';
+import { List, CaretLeft, CaretRight, Command, MagnifyingGlass, Plus } from '@phosphor-icons/react';
 import './minimal-topbar.css';
 
 export interface MinimalTopBarProps {
@@ -16,24 +16,24 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
       <div className={`nav-3__topbar ${isHidden ? 'nav-3__topbar--hidden' : ''}`}>
         <div className="nav-3__left">
           <button className="nav-3__nav-button">
-            <Menu className="nav-3__nav-icon" />
+            <List className="nav-3__nav-icon" weight="duotone" />
             <span>Projects</span>
           </button>
           <div className="nav-3__divider"></div>
           <button className="nav-3__icon-button">
-            <ChevronLeft className="nav-3__nav-icon" />
+            <CaretLeft className="nav-3__nav-icon" weight="duotone" />
           </button>
           <button className="nav-3__icon-button">
-            <ChevronRight className="nav-3__nav-icon" />
+            <CaretRight className="nav-3__nav-icon" weight="duotone" />
           </button>
         </div>
 
         <div className="nav-3__center">
           <div className="nav-3__breadcrumb">
             <span className="nav-3__breadcrumb-item">My Novel</span>
-            <ChevronRight className="nav-3__breadcrumb-separator" />
+            <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
             <span className="nav-3__breadcrumb-item">Part One</span>
-            <ChevronRight className="nav-3__breadcrumb-separator" />
+            <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
             <span className="nav-3__breadcrumb-item nav-3__breadcrumb-item--current">Chapter 3</span>
           </div>
         </div>
@@ -45,13 +45,13 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
           </div>
           <div className="nav-3__divider"></div>
           <button className="nav-3__icon-button">
-            <Command className="nav-3__nav-icon" />
+            <Command className="nav-3__nav-icon" weight="duotone" />
           </button>
           <button className="nav-3__icon-button">
-            <Search className="nav-3__nav-icon" />
+            <MagnifyingGlass className="nav-3__nav-icon" weight="duotone" />
           </button>
           <button className="nav-3__action-button nav-3__action-button--primary">
-            <Plus className="nav-3__action-icon" />
+            <Plus className="nav-3__action-icon" weight="duotone" />
             <span>New</span>
           </button>
         </div>

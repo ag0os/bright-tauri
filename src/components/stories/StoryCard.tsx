@@ -9,19 +9,19 @@ import React, { useState } from 'react';
 import {
   BookOpen,
   FileText,
-  ScrollText,
-  Layers,
-  Film,
+  Scroll,
+  Stack,
+  FilmStrip,
   Feather,
-  BookMarked,
+  BookBookmark,
   Star,
-  Edit2,
-  Trash2,
-} from 'lucide-react';
+  PencilSimple,
+  Trash,
+} from '@phosphor-icons/react';
 import type { Story, StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
@@ -41,21 +41,21 @@ const getStoryIcon = (type: StoryType): React.ReactNode => {
 
   switch (type) {
     case 'novel':
-      return <BookOpen className={iconClass} />;
+      return <BookOpen className={iconClass} weight="duotone" />;
     case 'series':
-      return <Layers className={iconClass} />;
+      return <Stack className={iconClass} weight="duotone" />;
     case 'screenplay':
-      return <Film className={iconClass} />;
+      return <FilmStrip className={iconClass} weight="duotone" />;
     case 'short-story':
-      return <FileText className={iconClass} />;
+      return <FileText className={iconClass} weight="duotone" />;
     case 'poem':
-      return <Feather className={iconClass} />;
+      return <Feather className={iconClass} weight="duotone" />;
     case 'chapter':
-      return <BookMarked className={iconClass} />;
+      return <BookBookmark className={iconClass} weight="duotone" />;
     case 'scene':
-      return <ScrollText className={iconClass} />;
+      return <Scroll className={iconClass} weight="duotone" />;
     default:
-      return <FileText className={iconClass} />;
+      return <FileText className={iconClass} weight="duotone" />;
   }
 };
 
@@ -183,9 +183,9 @@ export function StoryCard({
           {story.favorite && (
             <Star
               className="icon icon-base"
+              weight="fill"
               style={{
                 color: 'var(--color-accent)',
-                fill: 'var(--color-accent)',
                 flexShrink: 0,
               }}
             />
@@ -276,8 +276,8 @@ export function StoryCard({
               >
                 <Star
                   className="icon icon-base"
+                  weight={story.favorite ? 'fill' : 'duotone'}
                   style={{
-                    fill: story.favorite ? 'var(--color-accent)' : 'none',
                     color: story.favorite ? 'var(--color-accent)' : 'currentColor',
                   }}
                 />
@@ -288,7 +288,7 @@ export function StoryCard({
                 title="Edit story"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Edit2 className="icon icon-base" />
+                <PencilSimple className="icon icon-base" weight="duotone" />
               </button>
               <button
                 className="btn btn-ghost btn-sm"
@@ -296,7 +296,7 @@ export function StoryCard({
                 title="Delete story"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Trash2 className="icon icon-base" />
+                <Trash className="icon icon-base" weight="duotone" />
               </button>
             </div>
           )}

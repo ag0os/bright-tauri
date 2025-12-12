@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, GitBranch, Check, Plus, AlertCircle, GitCompare, GitMerge } from 'lucide-react';
+import { ArrowLeft, GitBranch, Check, Plus, WarningCircle, GitDiff, GitMerge } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -14,7 +14,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import type { Story, MergeResult } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
@@ -259,7 +259,7 @@ export function StoryBranches() {
   if (!story.gitRepoPath) {
     return (
       <div className="story-branches-error">
-        <AlertCircle size={48} />
+        <WarningCircle size={48} weight="duotone" />
         <h2>No Version Control</h2>
         <p>This story does not have version control enabled.</p>
         <p>Enable Git to create story variations and track changes.</p>
@@ -297,7 +297,7 @@ export function StoryBranches() {
           disabled={branches.length < 2}
           title={branches.length < 2 ? 'Need at least 2 branches to compare' : 'Compare branches'}
         >
-          <GitCompare size={18} />
+          <GitDiff size={18} weight="duotone" />
           Compare
         </button>
 

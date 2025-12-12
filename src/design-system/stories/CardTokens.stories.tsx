@@ -1,8 +1,9 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { ChartBar, Gear } from '@phosphor-icons/react';
 import '../tokens/colors/modern-indigo.css';
 import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/lucide.css';
+import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 import '../tokens/atoms/input/filled-background.css';
 import '../tokens/organisms/card/elevated-shadow.css';
@@ -15,20 +16,6 @@ const meta: Meta = {
 };
 
 export default meta;
-
-// Mock icon component
-const MockIcon: React.FC<{ className?: string }> = ({ className = '' }) => (
-  <svg
-    className={`icon ${className}`}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    style={{ width: '20px', height: '20px', strokeWidth: '2px' }}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6v6l4 2" />
-  </svg>
-);
 
 const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
   return (
@@ -194,7 +181,7 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
                 justifyContent: 'center',
                 color: '#ffffff',
               }}>
-                <MockIcon />
+                <ChartBar size={24} weight="duotone" />
               </div>
               <div>
                 <div style={{
@@ -233,7 +220,7 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
                 justifyContent: 'center',
                 color: '#ffffff',
               }}>
-                <MockIcon />
+                <Gear size={24} weight="duotone" />
               </div>
               <div>
                 <div style={{

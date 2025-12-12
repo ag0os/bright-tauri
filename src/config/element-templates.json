@@ -3,7 +3,6 @@
     "character": {
       "name": "Character",
       "description": "A person, being, or entity in your story",
-      "icon": "👤",
       "suggestedAttributes": [
         {
           "key": "age",
@@ -70,7 +69,6 @@
     "location": {
       "name": "Location",
       "description": "A place, setting, or geographical area",
-      "icon": "📍",
       "suggestedAttributes": [
         {
           "key": "type",
@@ -131,7 +129,6 @@
     "vehicle": {
       "name": "Vehicle",
       "description": "A mode of transportation or mobile craft",
-      "icon": "🚗",
       "suggestedAttributes": [
         {
           "key": "type",
@@ -192,7 +189,6 @@
     "item": {
       "name": "Item",
       "description": "An object, artifact, or piece of equipment",
-      "icon": "📦",
       "suggestedAttributes": [
         {
           "key": "type",
@@ -247,7 +243,6 @@
     "organization": {
       "name": "Organization",
       "description": "A group, faction, company, or institution",
-      "icon": "🏛️",
       "suggestedAttributes": [
         {
           "key": "type",
@@ -308,7 +303,6 @@
     "creature": {
       "name": "Creature",
       "description": "An animal, beast, or non-human entity",
-      "icon": "🐉",
       "suggestedAttributes": [
         {
           "key": "species",
@@ -369,7 +363,6 @@
     "event": {
       "name": "Event",
       "description": "A significant happening, incident, or occurrence",
-      "icon": "📅",
       "suggestedAttributes": [
         {
           "key": "date",
@@ -418,7 +411,6 @@
     "concept": {
       "name": "Concept",
       "description": "An abstract idea, system, or philosophy",
-      "icon": "💡",
       "suggestedAttributes": [
         {
           "key": "type",

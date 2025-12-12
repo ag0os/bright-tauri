@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Clock, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Clock, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -14,7 +14,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import type { CommitInfo, Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
-import '@/design-system/tokens/icons/lucide.css';
+import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';
 import './StoryHistory.css';
@@ -53,7 +53,7 @@ function ConfirmRestoreDialog({ commit, onConfirm, onCancel }: ConfirmRestoreDia
             Cancel
           </button>
           <button className="btn btn-primary btn-base" onClick={onConfirm}>
-            <RotateCcw size={16} />
+            <ArrowCounterClockwise size={16} weight="duotone" />
             Restore
           </button>
         </div>
@@ -263,7 +263,7 @@ export function StoryHistory() {
                         disabled={isRestoring || index === 0}
                         title={index === 0 ? 'Current version' : 'Restore to this version'}
                       >
-                        <RotateCcw size={14} />
+                        <ArrowCounterClockwise size={14} weight="duotone" />
                         {index === 0 ? 'Current' : 'Restore'}
                       </button>
                     </div>
