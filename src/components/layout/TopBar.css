@@ -120,6 +120,41 @@
   background: var(--color-primary-subtle);
 }
 
+/* Divider */
+.topbar__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border);
+  margin: 0 4px;
+}
+
+/* Theme Toggle */
+.topbar__theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--button-border-radius);
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.topbar__theme-toggle:hover {
+  background: var(--color-surface-secondary);
+  color: var(--color-text-primary);
+}
+
+.topbar__theme-toggle:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* No light mode overrides needed - tokens auto-switch via modern-indigo.css */
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .topbar {

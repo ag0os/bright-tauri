@@ -3,76 +3,26 @@
  * Small border radius with compact spacing
  * Style: Square corners (4px), tight padding, subtle focus
  * Best for: Dense interfaces, data-heavy applications
+ *
+ * IMPORTANT: This file uses global color tokens directly (var(--color-*))
+ * instead of intermediate scoped tokens to ensure theme switching works.
  */
 
-:root,
 .button-2 {
-  /* Button Shape */
+  /* Non-color tokens (these are fine as scoped) */
   --button-border-radius: 4px;
   --button-border-width: 1px;
-
-  /* Button Sizes - Padding (Y X) */
   --button-padding-sm: 6px 12px;
   --button-padding-base: 8px 16px;
   --button-padding-lg: 12px 24px;
-
-  /* Button Font Sizes */
-  --button-font-size-sm: var(--font-size-sm);      /* 14px */
-  --button-font-size-base: var(--font-size-base);  /* 16px */
-  --button-font-size-lg: var(--font-size-lg);      /* 18px */
-
-  /* Button Font Weight */
-  --button-font-weight: var(--font-weight-medium);
-
-  /* Button Icon Spacing */
   --button-icon-gap: 6px;
-
-  /* Button Min Height */
   --button-min-height-sm: 32px;
   --button-min-height-base: 40px;
   --button-min-height-lg: 48px;
-
-  /* Focus Ring */
   --button-focus-ring-width: 2px;
   --button-focus-ring-offset: 1px;
-  --button-focus-ring-color: var(--color-primary);
-  --button-focus-ring-opacity: 0.4;
-
-  /* Transition */
-  --button-transition: all 0.15s ease;
-
-  /* Primary Button */
-  --button-primary-bg: var(--color-primary);
-  --button-primary-text: #ffffff;
-  --button-primary-border: var(--color-primary);
-  --button-primary-hover-bg: var(--color-primary-hover);
-  --button-primary-hover-border: var(--color-primary-hover);
-  --button-primary-active-bg: var(--color-primary-active);
-
-  /* Secondary Button */
-  --button-secondary-bg: var(--color-surface);
-  --button-secondary-text: var(--color-primary);
-  --button-secondary-border: var(--color-border);
-  --button-secondary-hover-bg: var(--color-surface-hover);
-  --button-secondary-hover-border: var(--color-primary);
-
-  /* Outline Button */
-  --button-outline-bg: transparent;
-  --button-outline-text: var(--color-text-primary);
-  --button-outline-border: var(--color-border);
-  --button-outline-hover-bg: var(--color-surface);
-  --button-outline-hover-border: var(--color-text-secondary);
-
-  /* Ghost Button */
-  --button-ghost-bg: transparent;
-  --button-ghost-text: var(--color-text-secondary);
-  --button-ghost-border: transparent;
-  --button-ghost-hover-bg: var(--color-surface);
-  --button-ghost-hover-text: var(--color-text-primary);
-
-  /* Disabled State */
   --button-disabled-opacity: 0.4;
-  --button-disabled-cursor: not-allowed;
+  --button-transition: all 0.15s ease;
 }
 
 /* Button Base Styles */
@@ -82,7 +32,7 @@
   justify-content: center;
   gap: var(--button-icon-gap);
   font-family: var(--typography-body-font);
-  font-weight: var(--button-font-weight);
+  font-weight: var(--font-weight-medium);
   border-radius: var(--button-border-radius);
   border-width: var(--button-border-width);
   border-style: solid;
@@ -93,80 +43,83 @@
 }
 
 .btn:focus-visible {
-  outline: var(--button-focus-ring-width) solid var(--button-focus-ring-color);
+  outline: var(--button-focus-ring-width) solid var(--color-primary);
   outline-offset: var(--button-focus-ring-offset);
-  opacity: var(--button-focus-ring-opacity);
+  opacity: 0.4;
 }
 
 .btn:disabled {
   opacity: var(--button-disabled-opacity);
-  cursor: var(--button-disabled-cursor);
+  cursor: not-allowed;
 }
 
 /* Size Variants */
 .btn-sm {
   padding: var(--button-padding-sm);
-  font-size: var(--button-font-size-sm);
+  font-size: var(--font-size-sm);
   min-height: var(--button-min-height-sm);
 }
 
 .btn-base {
   padding: var(--button-padding-base);
-  font-size: var(--button-font-size-base);
+  font-size: var(--font-size-base);
   min-height: var(--button-min-height-base);
 }
 
 .btn-lg {
   padding: var(--button-padding-lg);
-  font-size: var(--button-font-size-lg);
+  font-size: var(--font-size-lg);
   min-height: var(--button-min-height-lg);
 }
 
-/* Style Variants */
+/* Primary Button - uses global tokens directly */
 .btn-primary {
-  background-color: var(--button-primary-bg);
-  color: var(--button-primary-text);
-  border-color: var(--button-primary-border);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--button-primary-hover-bg);
-  border-color: var(--button-primary-hover-border);
+  background-color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .btn-primary:active:not(:disabled) {
-  background-color: var(--button-primary-active-bg);
+  background-color: var(--color-primary-active);
 }
 
+/* Secondary Button - uses global tokens directly */
 .btn-secondary {
-  background-color: var(--button-secondary-bg);
-  color: var(--button-secondary-text);
-  border-color: var(--button-secondary-border);
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  border-color: var(--color-border);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: var(--button-secondary-hover-bg);
-  border-color: var(--button-secondary-hover-border);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-primary);
 }
 
+/* Outline Button - uses global tokens directly */
 .btn-outline {
-  background-color: var(--button-outline-bg);
-  color: var(--button-outline-text);
-  border-color: var(--button-outline-border);
+  background-color: transparent;
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: var(--button-outline-hover-bg);
-  border-color: var(--button-outline-hover-border);
+  background-color: var(--color-surface-secondary);
+  border-color: var(--color-text-secondary);
 }
 
+/* Ghost Button - uses global tokens directly */
 .btn-ghost {
-  background-color: var(--button-ghost-bg);
-  color: var(--button-ghost-text);
-  border-color: var(--button-ghost-border);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border-color: transparent;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background-color: var(--button-ghost-hover-bg);
-  color: var(--button-ghost-hover-text);
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-primary);
 }

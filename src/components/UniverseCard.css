@@ -88,3 +88,9 @@
   margin-bottom: var(--spacing-2);
   line-height: 1;
 }
+
+/* Light mode - add border for definition */
+:root[data-theme="light"] .universe-card,
+html[data-theme="light"] .universe-card {
+  border: 1px solid var(--color-border);
+}

@@ -3,61 +3,30 @@
  * Clean cards with subtle shadows for depth
  * Style: Soft shadow, no border, floating appearance
  * Best for: Modern apps, content cards, dashboard widgets
+ *
+ * IMPORTANT: This file uses global color tokens directly (var(--color-*))
+ * instead of intermediate scoped tokens to ensure theme switching works.
  */
 
 .card-1 {
-  /* Card Container */
-  --card-background: var(--color-surface);
+  /* Non-color tokens (these are fine as scoped) */
   --card-border-radius: 8px;
-  --card-border-width: 0;
-  --card-border-color: transparent;
-
-  /* Card Padding */
   --card-padding-sm: 16px;
   --card-padding-base: 24px;
   --card-padding-lg: 32px;
-
-  /* Card Elevation - Shadows (use global tokens from spacing.css) */
-  --card-shadow-sm: var(--shadow-sm);
-  --card-shadow-base: var(--shadow-base);
-  --card-shadow-lg: var(--shadow-lg);
-  --card-shadow-hover: var(--shadow-hover);
-
-  /* Card Header */
   --card-header-padding: 20px 24px;
-  --card-header-border-bottom: 1px solid var(--color-border);
-
-  /* Card Footer */
   --card-footer-padding: 16px 24px;
-  --card-footer-border-top: 1px solid var(--color-border);
-  --card-footer-background: var(--color-background);
-
-  /* Card Title */
-  --card-title-font-family: var(--typography-heading-font);
-  --card-title-font-size: var(--font-size-xl);
-  --card-title-font-weight: var(--font-weight-semibold);
-  --card-title-color: var(--color-text-primary);
-
-  /* Card Description */
-  --card-description-font-family: var(--typography-body-font);
-  --card-description-font-size: var(--font-size-sm);
-  --card-description-color: var(--color-text-secondary);
-  --card-description-margin-top: 4px;
-
-  /* Card Content */
   --card-content-padding: 24px;
   --card-content-gap: 16px;
-
-  /* Transition */
   --card-transition: all 0.2s ease;
 }
 
-/* Card Base */
+/* Card Base - uses global tokens directly */
 .card-1 .card {
-  background-color: var(--card-background);
+  background-color: var(--color-surface);
   border-radius: var(--card-border-radius);
-  border: var(--card-border-width) solid var(--card-border-color);
-  box-shadow: var(--card-shadow-base);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-base);
   transition: var(--card-transition);
   overflow: hidden;
 }
@@ -65,7 +34,7 @@
 /* Card Size Variants */
 .card-1 .card-sm {
   padding: var(--card-padding-sm);
-  box-shadow: var(--card-shadow-sm);
+  box-shadow: var(--shadow-sm);
 }
 
 .card-1 .card-base {
@@ -74,7 +43,7 @@
 
 .card-1 .card-lg {
   padding: var(--card-padding-lg);
-  box-shadow: var(--card-shadow-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 /* Interactive Card - Hover State */
@@ -83,29 +52,29 @@
 }
 
 .card-1 .card-interactive:hover {
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--shadow-hover);
   transform: translateY(-2px);
 }
 
-/* Card Header */
+/* Card Header - uses global tokens directly */
 .card-1 .card-header {
   padding: var(--card-header-padding);
-  border-bottom: var(--card-header-border-bottom);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .card-1 .card-title {
-  font-family: var(--card-title-font-family);
-  font-size: var(--card-title-font-size);
-  font-weight: var(--card-title-font-weight);
-  color: var(--card-title-color);
+  font-family: var(--typography-heading-font);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .card-1 .card-description {
-  font-family: var(--card-description-font-family);
-  font-size: var(--card-description-font-size);
-  color: var(--card-description-color);
-  margin-top: var(--card-description-margin-top);
+  font-family: var(--typography-body-font);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4px;
   line-height: 1.5;
 }
 
@@ -117,11 +86,11 @@
   gap: var(--card-content-gap);
 }
 
-/* Card Footer */
+/* Card Footer - uses global tokens directly */
 .card-1 .card-footer {
   padding: var(--card-footer-padding);
-  border-top: var(--card-footer-border-top);
-  background-color: var(--card-footer-background);
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-background);
   display: flex;
   gap: 12px;
   align-items: center;

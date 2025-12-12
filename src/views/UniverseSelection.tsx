@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { UniverseCard } from '../components/UniverseCard';
 import { CreateUniverseModal } from '../components/CreateUniverseModal';
 import type { Universe } from '../types/Universe';
 import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useNavigationStore } from '@/stores/useNavigationStore';
+import { useTheme } from '@/hooks';
 import './UniverseSelection.css';
 
 export const UniverseSelection: React.FC = () => {
@@ -12,6 +14,19 @@ export const UniverseSelection: React.FC = () => {
 
   const { universes, isLoading, loadUniverses, createUniverse, setCurrentUniverse } = useUniverseStore();
   const navigate = useNavigationStore((state) => state.navigate);
+  const { isDark, toggleTheme } = useTheme();
+
+  // Theme toggle component (reused in all states)
+  const ThemeToggle = () => (
+    <button
+      className="universe-selection__theme-toggle"
+      onClick={toggleTheme}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
 
   // Load universes on mount
   useEffect(() => {
@@ -107,6 +122,7 @@ export const UniverseSelection: React.FC = () => {
   if (isLoading) {
     return (
       <div className="universe-selection">
+        <ThemeToggle />
         <div className="universe-selection__loading">
           <p>Loading universes...</p>
         </div>
@@ -118,6 +134,7 @@ export const UniverseSelection: React.FC = () => {
   if (universes.length === 0) {
     return (
       <div className="universe-selection">
+        <ThemeToggle />
         <div className="universe-selection__empty">
           <h1 className="universe-selection__title">Create your first universe</h1>
           <p className="universe-selection__subtitle">
@@ -144,6 +161,7 @@ export const UniverseSelection: React.FC = () => {
   // Populated state
   return (
     <div className="universe-selection">
+      <ThemeToggle />
       <div className="universe-selection__container">
         <h1 className="universe-selection__header">Select a Universe</h1>
 

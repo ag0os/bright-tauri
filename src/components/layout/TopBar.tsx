@@ -6,8 +6,9 @@
  */
 
 import { useEffect } from 'react';
-import { ChevronDown, BookOpen, Globe } from 'lucide-react';
+import { ChevronDown, BookOpen, Globe, Sun, Moon } from 'lucide-react';
 import { useUniverseStore } from '@/stores/useUniverseStore';
+import { useTheme } from '@/hooks';
 import './TopBar.css';
 
 export type NavigationTab = 'stories' | 'universe';
@@ -19,6 +20,7 @@ interface TopBarProps {
 
 export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
   const { currentUniverse, universes, loadUniverses, setCurrentUniverse } = useUniverseStore();
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     loadUniverses();
@@ -81,6 +83,17 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
         >
           <Globe size={16} />
           <span>Universe</span>
+        </button>
+
+        <div className="topbar__divider" />
+
+        <button
+          className="topbar__theme-toggle"
+          onClick={toggleTheme}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
       </nav>
     </div>
