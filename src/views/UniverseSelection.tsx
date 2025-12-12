@@ -106,7 +106,7 @@ export const UniverseSelection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="universe-selection bg-purple-gradient">
+      <div className="universe-selection">
         <div className="universe-selection__loading">
           <p>Loading universes...</p>
         </div>
@@ -117,7 +117,7 @@ export const UniverseSelection: React.FC = () => {
   // Empty state
   if (universes.length === 0) {
     return (
-      <div className="universe-selection bg-purple-gradient">
+      <div className="universe-selection">
         <div className="universe-selection__empty">
           <h1 className="universe-selection__title">Create your first universe</h1>
           <p className="universe-selection__subtitle">
@@ -143,7 +143,7 @@ export const UniverseSelection: React.FC = () => {
 
   // Populated state
   return (
-    <div className="universe-selection bg-purple-gradient">
+    <div className="universe-selection">
       <div className="universe-selection__container">
         <h1 className="universe-selection__header">Select a Universe</h1>
 

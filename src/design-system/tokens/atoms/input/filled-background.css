@@ -16,13 +16,13 @@
   --input-label-margin-bottom: 8px;
 
   /* Required Indicator */
-  --input-required-color: #dc2626;
+  --input-required-color: var(--color-error);
 
   /* Input Field */
   --input-border-radius: 6px;
   --input-border-width: 0;
   --input-border-color: transparent;
-  --input-background: #f3f4f6;  /* Light gray fill */
+  --input-background: var(--color-surface-secondary);
   --input-text-color: var(--color-text-primary);
   --input-font-size: var(--font-size-base);
   --input-font-family: var(--typography-body-font);
@@ -42,19 +42,19 @@
   --input-placeholder-opacity: 0.6;
 
   /* Focus State */
-  --input-focus-bg: #e5e7eb;  /* Darker gray on focus */
+  --input-focus-bg: var(--color-surface);
   --input-focus-border-width: 2px;
   --input-focus-border-color: var(--color-primary);
 
   /* Error State */
-  --input-error-bg: #fee2e2;  /* Light red background */
-  --input-error-border-color: #dc2626;
-  --input-error-text-color: #dc2626;
+  --input-error-bg: var(--color-error-subtle);
+  --input-error-border-color: var(--color-error);
+  --input-error-text-color: var(--color-error);
 
   /* Disabled State */
-  --input-disabled-bg: #e5e7eb;
-  --input-disabled-text-color: var(--color-text-secondary);
-  --input-disabled-opacity: 0.7;
+  --input-disabled-bg: var(--color-surface-secondary);
+  --input-disabled-text-color: var(--color-text-disabled);
+  --input-disabled-opacity: 0.6;
   --input-disabled-cursor: not-allowed;
 
   /* Helper Text */
@@ -202,4 +202,37 @@
 
 .input-5 .input-group.has-error .input-helper {
   color: var(--input-error-text-color);
+}
+
+/* Select Styles */
+.input-5 select.input-field,
+.input-5 .select-field {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.input-5 select.input-field:focus,
+.input-5 .select-field:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.input-5 select.input-field:disabled,
+.input-5 .select-field:disabled {
+  cursor: not-allowed;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+/* Select option styling (limited browser support) */
+.input-5 select.input-field option,
+.input-5 .select-field option {
+  padding: 8px 12px;
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
 }

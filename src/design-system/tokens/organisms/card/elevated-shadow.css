@@ -17,11 +17,11 @@
   --card-padding-base: 24px;
   --card-padding-lg: 32px;
 
-  /* Card Elevation - Shadows */
-  --card-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --card-shadow-base: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-  --card-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
-  --card-shadow-hover: 0 12px 20px rgba(0, 0, 0, 0.10), 0 6px 8px rgba(0, 0, 0, 0.06);
+  /* Card Elevation - Shadows (use global tokens from spacing.css) */
+  --card-shadow-sm: var(--shadow-sm);
+  --card-shadow-base: var(--shadow-base);
+  --card-shadow-lg: var(--shadow-lg);
+  --card-shadow-hover: var(--shadow-hover);
 
   /* Card Header */
   --card-header-padding: 20px 24px;

@@ -1,7 +1,8 @@
 /* Import design system tokens */
-@import '../design-system/tokens/colors/purple-gradient.css';
+@import '../design-system/tokens/colors/modern-indigo.css';
 @import '../design-system/tokens/typography/classic-serif.css';
 @import '../design-system/tokens/atoms/button/minimal-squared.css';
+@import '../design-system/tokens/spacing.css';
 
 /* Main container */
 .universe-selection {
@@ -9,7 +10,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
+  padding: var(--spacing-12) var(--spacing-6);
+  background-color: var(--color-background);
 }
 
 /* Container for universes grid */
@@ -20,20 +22,19 @@
 
 /* Header */
 .universe-selection__header {
-  font-family: var(--font-heading);
-  font-size: 48px;
-  font-weight: 600;
-  color: white;
+  font-family: var(--typography-heading-font);
+  font-size: var(--typography-h1-size);
+  font-weight: var(--typography-h1-weight);
+  color: var(--color-text-primary);
   text-align: center;
-  margin-bottom: 48px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: var(--spacing-12);
 }
 
 /* Grid layout */
 .universe-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 32px;
+  gap: var(--spacing-8);
   justify-items: center;
 }
 
@@ -44,26 +45,26 @@
 }
 
 .universe-selection__title {
-  font-family: var(--font-heading);
-  font-size: 48px;
-  font-weight: 600;
-  color: white;
-  margin-bottom: 16px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: var(--typography-heading-font);
+  font-size: var(--typography-h1-size);
+  font-weight: var(--typography-h1-weight);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-4);
 }
 
 .universe-selection__subtitle {
-  font-size: 18px;
-  color: rgba(255, 255, 255, 1);
-  margin-bottom: 32px;
-  line-height: 1.6;
+  font-family: var(--typography-body-font);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-8);
+  line-height: var(--line-height-relaxed);
 }
 
 /* Loading state */
 .universe-selection__loading {
   text-align: center;
-  color: white;
-  font-size: 18px;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
 }
 
 /* Button styles - using design system */

@@ -63,7 +63,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         backgroundColor: 'var(--color-background-primary)',
         border: `1px solid ${colors[toast.type]}`,
         borderRadius: '8px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        boxShadow: 'var(--shadow-lg)',
         minWidth: '280px',
         maxWidth: '400px',
         opacity: isExiting ? 0 : 1,

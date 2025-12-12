@@ -184,15 +184,6 @@ export function StoriesList() {
               onChange={(e) =>
                 setFilter('type', e.target.value ? (e.target.value as StoryType) : null)
               }
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '4px',
-                padding: 'var(--spacing-2) var(--spacing-3)',
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-primary)',
-              }}
             >
               <option value="">All Types</option>
               <option value="novel">Novel</option>
@@ -217,15 +208,6 @@ export function StoriesList() {
               onChange={(e) =>
                 setFilter('status', e.target.value ? (e.target.value as StoryStatus) : null)
               }
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '4px',
-                padding: 'var(--spacing-2) var(--spacing-3)',
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-primary)',
-              }}
             >
               <option value="">All Statuses</option>
               <option value="draft">Draft</option>
@@ -247,15 +229,6 @@ export function StoriesList() {
                   sortOrder
                 )
               }
-              style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '4px',
-                padding: 'var(--spacing-2) var(--spacing-3)',
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-primary)',
-              }}
             >
               <option value="lastEdited">Last Edited</option>
               <option value="title">Title</option>

@@ -256,7 +256,7 @@ function DragOverlayItem({ child, index }: { child: Story; index: number }) {
         backgroundColor: 'var(--color-surface)',
         borderRadius: '6px',
         border: '2px solid var(--color-primary)',
-        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
+        boxShadow: 'var(--shadow-lg)',
         cursor: 'grabbing',
       }}
     >
