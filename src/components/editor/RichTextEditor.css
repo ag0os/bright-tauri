@@ -189,5 +189,5 @@
 
 /* Selection */
 .editor-content ::selection {
-  background: var(--color-primary-subtle);
+  background: var(--color-selection);
 }

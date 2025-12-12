@@ -85,6 +85,9 @@
   --color-primary-soft: rgba(99, 102, 241, 0.25);
   --color-primary-dark: var(--color-indigo-500);
 
+  /* Selection - needs higher contrast than primary-subtle for visibility */
+  --color-selection: var(--color-indigo-700);
+
   --color-accent: var(--color-amber-400);
   --color-accent-hover: var(--color-amber-300);
 
@@ -144,6 +147,9 @@
   --color-primary-ultralight: rgba(79, 70, 229, 0.05);
   --color-primary-soft: rgba(79, 70, 229, 0.15);
   --color-primary-dark: var(--color-indigo-700);
+
+  /* Selection - light blue for visibility in light mode */
+  --color-selection: var(--color-indigo-200);
 
   --color-accent: var(--color-amber-500);
   --color-accent-hover: var(--color-amber-600);
