@@ -710,6 +710,51 @@ impl GitService {
         Ok(head.shorthand().unwrap_or("HEAD").to_string())
     }
 
+    /// Check if a branch has uncommitted changes
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `branch` - Name of the branch to check
+    ///
+    /// # Returns
+    /// True if the branch has uncommitted changes, false otherwise
+    ///
+    /// # Errors
+    /// Returns error if branch doesn't exist or repository cannot be opened
+    pub fn has_uncommitted_changes(repo_path: &Path, branch: &str) -> GitResult<bool> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Check if branch exists
+        repo.find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch}' not found"))
+            })?;
+
+        // Get current branch to restore later
+        let current_branch = Self::get_current_branch(repo_path)?;
+
+        // If we're checking the current branch, just check status
+        if current_branch == branch {
+            let statuses = repo.statuses(None)?;
+            return Ok(!statuses.is_empty());
+        }
+
+        // For other branches, we need to temporarily switch to check their status
+        // However, switching branches requires no uncommitted changes in current branch
+        // So we'll use a different approach: check if the branch tip matches the working tree
+
+        // Actually, we can't reliably check uncommitted changes on a non-current branch
+        // without checking it out. The safest approach is to check the current branch only
+        // and assume other branches are clean (or require checkout first).
+
+        // For the use case of removing a variation mapping, we should check if the
+        // branch being removed is the current branch and if so, check for uncommitted changes.
+
+        Ok(false) // Non-current branches are assumed to have no uncommitted changes
+    }
+
     /// Resolve a file conflict by choosing ours or theirs version
     ///
     /// # Arguments
@@ -1565,5 +1610,83 @@ mod tests {
         // After the safety check, branch should still be named "trunk"
         let head = repo.head().unwrap();
         assert_eq!(head.shorthand().unwrap(), "trunk");
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_detects_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-uncommitted";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Initially no uncommitted changes
+        assert!(!GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+
+        // Create an uncommitted file
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Now should detect uncommitted changes
+        assert!(GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_no_changes_after_commit() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-committed";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Create and commit a file
+        GitService::commit_file(&repo_path, "file.txt", "Content", "Add file").unwrap();
+
+        // Should have no uncommitted changes
+        assert!(!GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_non_current_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-other-branch";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Create another branch
+        GitService::create_branch(&repo_path, &current_branch, "other-branch").unwrap();
+
+        // Check for uncommitted changes on non-current branch
+        // Should return false (non-current branches assumed clean)
+        assert!(!GitService::has_uncommitted_changes(&repo_path, "other-branch").unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_fails_for_nonexistent_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-no-branch";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Check for uncommitted changes on nonexistent branch
+        let result = GitService::has_uncommitted_changes(&repo_path, "nonexistent");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("not found"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
     }
 }

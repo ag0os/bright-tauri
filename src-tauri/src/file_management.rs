@@ -22,6 +22,8 @@ pub enum FileManagementError {
     Io(std::io::Error),
     /// Git operation error
     Git(crate::git::GitServiceError),
+    /// Operation blocked due to uncommitted changes
+    UncommittedChanges(String),
 }
 
 impl std::fmt::Display for FileManagementError {
@@ -32,6 +34,9 @@ impl std::fmt::Display for FileManagementError {
             }
             FileManagementError::Io(err) => write!(f, "IO error: {err}"),
             FileManagementError::Git(err) => write!(f, "Git error: {err}"),
+            FileManagementError::UncommittedChanges(msg) => {
+                write!(f, "Uncommitted changes exist: {msg}")
+            }
         }
     }
 }
@@ -531,6 +536,23 @@ pub fn list_variations(repo_path: &Path) -> FileManagementResult<Vec<VariationIn
 /// - Git commit fails
 #[allow(dead_code)]
 pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementResult<()> {
+    // Check if the branch has uncommitted changes
+    match GitService::has_uncommitted_changes(repo_path, slug) {
+        Ok(true) => {
+            return Err(FileManagementError::UncommittedChanges(format!(
+                "Cannot remove variation mapping for '{}': branch has uncommitted changes",
+                slug
+            )));
+        }
+        Ok(false) => {
+            // No uncommitted changes, proceed
+        }
+        Err(_) => {
+            // Branch doesn't exist or other error - proceed anyway
+            // The variation mapping can be removed even if the branch doesn't exist
+        }
+    }
+
     // Read existing metadata
     let mut metadata = read_metadata_file(repo_path)?;
 
@@ -1463,6 +1485,99 @@ mod tests {
         // Remove a variation that doesn't exist - should succeed silently
         let result = remove_variation_mapping(&repo_path, "nonexistent");
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_fails_with_uncommitted_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save a variation mapping for the current branch
+        save_variation_mapping(&repo_path, &current_branch, "Current Branch").unwrap();
+
+        // Create uncommitted changes
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Try to remove the variation mapping - should fail
+        let result = remove_variation_mapping(&repo_path, &current_branch);
+
+        assert!(result.is_err());
+        match result {
+            Err(FileManagementError::UncommittedChanges(msg)) => {
+                assert!(msg.contains(&current_branch));
+                assert!(msg.contains("uncommitted changes"));
+            }
+            _ => panic!("Expected UncommittedChanges error"),
+        }
+
+        // Verify the mapping was NOT removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert_eq!(
+            metadata.variations.get(&current_branch),
+            Some(&"Current Branch".to_string())
+        );
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_succeeds_with_committed_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save a variation mapping
+        save_variation_mapping(&repo_path, &current_branch, "Current Branch").unwrap();
+
+        // Commit all changes
+        GitService::commit_file(&repo_path, "test.txt", "Test", "Commit changes").unwrap();
+
+        // Now remove the variation mapping - should succeed
+        let result = remove_variation_mapping(&repo_path, &current_branch);
+        assert!(result.is_ok());
+
+        // Verify the mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get(&current_branch).is_none());
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_succeeds_for_non_current_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Create another branch
+        GitService::create_branch(&repo_path, &current_branch, "other-branch").unwrap();
+
+        // Save a variation mapping for the other branch
+        save_variation_mapping(&repo_path, "other-branch", "Other Branch").unwrap();
+
+        // Create uncommitted changes on current branch
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Remove the variation mapping for the other branch - should succeed
+        // because uncommitted changes are only checked on the current branch
+        let result = remove_variation_mapping(&repo_path, "other-branch");
+        assert!(result.is_ok());
+
+        // Verify the mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get("other-branch").is_none());
     }
 
     #[test]
