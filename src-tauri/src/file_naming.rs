@@ -53,7 +53,7 @@ pub fn slugify(text: &str) -> String {
 /// - Collapse multiple consecutive hyphens into one
 /// - Trim hyphens from start and end
 /// - If result is empty or all-special-chars, return "untitled"
-/// - Truncate to 50 characters max (for reasonable branch names)
+/// - Truncate to 63 characters max (Git ref component limit)
 ///
 /// # Arguments
 /// * `name` - The variation display name
@@ -70,13 +70,13 @@ pub fn slugify_variation_name(name: &str) -> String {
         return "untitled".to_string();
     }
 
-    // Truncate to 50 characters for reasonable branch names
-    if slug.len() > 50 {
+    // Truncate to 63 characters (Git ref component limit)
+    if slug.len() > 63 {
         // Try to truncate at a hyphen boundary to avoid cutting words
-        if let Some(pos) = slug[..50].rfind('-') {
+        if let Some(pos) = slug[..63].rfind('-') {
             slug[..pos].to_string()
         } else {
-            slug[..50].to_string()
+            slug[..63].to_string()
         }
     } else {
         slug
@@ -411,33 +411,33 @@ mod tests {
 
     #[test]
     fn test_slugify_variation_name_truncation() {
-        // Very long name should be truncated to 50 chars
-        let long_name = "This is a very long variation name that should be truncated to fifty characters maximum";
+        // Very long name should be truncated to 63 chars
+        let long_name = "This is a very long variation name that should be truncated to sixty three characters maximum";
         let result = slugify_variation_name(long_name);
 
-        assert!(result.len() <= 50);
+        assert!(result.len() <= 63);
         assert!(result.starts_with("this-is-a-very-long-variation-name"));
     }
 
     #[test]
     fn test_slugify_variation_name_truncation_at_word_boundary() {
         // Should try to truncate at a hyphen if possible
-        let long_name = "A very long variation name with multiple words that exceeds limit";
+        let long_name = "A very long variation name with multiple words that exceeds the sixty three character limit";
         let result = slugify_variation_name(long_name);
 
-        assert!(result.len() <= 50);
+        assert!(result.len() <= 63);
         // Should not end with a partial word
         assert!(!result.ends_with('-'));
     }
 
     #[test]
-    fn test_slugify_variation_name_exactly_50_chars() {
-        // Name that becomes exactly 50 chars after slugification should not be truncated
+    fn test_slugify_variation_name_exactly_63_chars() {
+        // Name that becomes exactly 63 chars after slugification should not be truncated
         // Using all lowercase and hyphens to ensure no processing changes length
-        let name = "abcde-12345-67890-abcde-12345-67890-abcde-12345-xy";
+        let name = "abcde-12345-67890-abcde-12345-67890-abcde-12345-67890-abcde-123";
         let result = slugify_variation_name(name);
-        assert_eq!(result.len(), 50);
-        assert_eq!(result, "abcde-12345-67890-abcde-12345-67890-abcde-12345-xy");
+        assert_eq!(result.len(), 63);
+        assert_eq!(result, "abcde-12345-67890-abcde-12345-67890-abcde-12345-67890-abcde-123");
     }
 
     // Tests for slugify_unique_variation
@@ -498,8 +498,8 @@ mod tests {
 
     #[test]
     fn test_slugify_unique_variation_preserves_truncation() {
-        // If base slug is truncated to 50 chars, appended numbers should still work
-        let long_name = "This is a very long variation name that will be truncated to fifty characters";
+        // If base slug is truncated to 63 chars, appended numbers should still work
+        let long_name = "This is a very long variation name that will be truncated to sixty three characters maximum";
         let base = slugify_variation_name(long_name);
 
         let branches = vec![base.clone()];
