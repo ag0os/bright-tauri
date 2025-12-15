@@ -233,6 +233,11 @@ pub struct StoryMetadata {
     pub word_count: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
+    /// Maps variation branch names (slugs) to their display names
+    /// e.g., "what-if-sarah-lived" -> "What if Sarah lived?"
+    /// This allows the UI to show friendly names while Git uses branch-safe slugs
+    #[serde(default, skip_serializing_if = "std::collections::HashMap::is_empty")]
+    pub variations: std::collections::HashMap<String, String>,
 }
 
 impl StoryMetadata {
@@ -250,6 +255,7 @@ impl StoryMetadata {
             updated_at: story.updated_at.clone(),
             word_count: story.word_count,
             target_word_count: story.target_word_count,
+            variations: std::collections::HashMap::new(),
         }
     }
 }
@@ -307,6 +313,31 @@ pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementRes
 #[allow(dead_code)]
 pub fn update_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
     write_metadata_file(repo_path, story)
+}
+
+/// Read metadata.json file from a Git repository
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+///
+/// # Returns
+/// StoryMetadata parsed from the metadata.json file
+///
+/// # Errors
+/// Returns an error if:
+/// - File doesn't exist
+/// - File cannot be read
+/// - JSON parsing fails
+#[allow(dead_code)]
+pub fn read_metadata_file(repo_path: &Path) -> FileManagementResult<StoryMetadata> {
+    let metadata_path = repo_path.join("metadata.json");
+    let json_content = fs::read_to_string(&metadata_path)?;
+    let metadata: StoryMetadata = serde_json::from_str(&json_content).map_err(|e| {
+        FileManagementError::Io(std::io::Error::other(format!(
+            "Failed to parse metadata: {e}"
+        )))
+    })?;
+    Ok(metadata)
 }
 
 #[cfg(test)]
@@ -772,6 +803,7 @@ mod tests {
             updated_at: "2024-01-02T00:00:00Z".to_string(),
             word_count: 1000,
             target_word_count: Some(50000),
+            variations: std::collections::HashMap::new(),
         };
 
         // Serialize and deserialize
@@ -779,5 +811,111 @@ mod tests {
         let deserialized: StoryMetadata = serde_json::from_str(&json).unwrap();
 
         assert_eq!(metadata, deserialized);
+    }
+
+    #[test]
+    fn test_story_metadata_variations_field() {
+        let mut variations = std::collections::HashMap::new();
+        variations.insert(
+            "what-if-sarah-lived".to_string(),
+            "What if Sarah lived?".to_string(),
+        );
+        variations.insert(
+            "alternate-ending".to_string(),
+            "Alternate Ending".to_string(),
+        );
+
+        let metadata = StoryMetadata {
+            id: "test-123".to_string(),
+            universe_id: "uni-456".to_string(),
+            title: "Test".to_string(),
+            description: "Desc".to_string(),
+            story_type: "Book".to_string(),
+            status: "InProgress".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            word_count: 1000,
+            target_word_count: Some(50000),
+            variations,
+        };
+
+        // Serialize and deserialize
+        let json = serde_json::to_string_pretty(&metadata).unwrap();
+        let deserialized: StoryMetadata = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(metadata, deserialized);
+        assert_eq!(deserialized.variations.len(), 2);
+        assert_eq!(
+            deserialized.variations.get("what-if-sarah-lived"),
+            Some(&"What if Sarah lived?".to_string())
+        );
+    }
+
+    #[test]
+    fn test_story_metadata_variations_empty_not_serialized() {
+        // Empty variations should not appear in JSON
+        let metadata = StoryMetadata {
+            id: "test-123".to_string(),
+            universe_id: "uni-456".to_string(),
+            title: "Test".to_string(),
+            description: "Desc".to_string(),
+            story_type: "Book".to_string(),
+            status: "InProgress".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            word_count: 1000,
+            target_word_count: Some(50000),
+            variations: std::collections::HashMap::new(),
+        };
+
+        let json = serde_json::to_string_pretty(&metadata).unwrap();
+        // Variations field should not be present in JSON when empty
+        assert!(!json.contains("variations"));
+    }
+
+    #[test]
+    fn test_story_metadata_backward_compatibility() {
+        // Old metadata.json without variations field should still parse
+        let old_json = r#"{
+            "id": "test-123",
+            "universe_id": "uni-456",
+            "title": "Test",
+            "description": "Desc",
+            "story_type": "Book",
+            "status": "InProgress",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-02T00:00:00Z",
+            "word_count": 1000,
+            "target_word_count": 50000
+        }"#;
+
+        let metadata: StoryMetadata = serde_json::from_str(old_json).unwrap();
+        assert_eq!(metadata.id, "test-123");
+        assert_eq!(metadata.variations.len(), 0);
+    }
+
+    #[test]
+    fn test_read_metadata_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Read metadata back
+        let metadata = read_metadata_file(&repo_path).unwrap();
+
+        assert_eq!(metadata.id, story.id);
+        assert_eq!(metadata.title, story.title);
+        assert_eq!(metadata.word_count, story.word_count);
+    }
+
+    #[test]
+    fn test_read_metadata_file_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().join("nonexistent");
+
+        let result = read_metadata_file(&repo_path);
+        assert!(result.is_err());
     }
 }
