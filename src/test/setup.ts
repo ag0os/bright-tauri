@@ -1,10 +1,12 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
+import { resetTauriMocks } from './utils';
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
+  resetTauriMocks();
 });
 
 // Mock Tauri API for frontend-only tests
