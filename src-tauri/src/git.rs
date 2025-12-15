@@ -163,13 +163,13 @@ impl GitService {
             &[],
         )?;
 
-        // Ensure branch is named "main" (git2 uses system default which might be "master")
+        // Ensure branch is named "original" (git2 uses system default which might be "master")
         let head = repo.head()?;
         if let Some(branch_name) = head.shorthand() {
-            if branch_name != "main" {
-                // Rename the branch to "main"
+            if branch_name != "original" {
+                // Rename the branch to "original"
                 let mut branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
-                branch.rename("main", false)?;
+                branch.rename("original", false)?;
             }
         }
 
@@ -635,6 +635,37 @@ impl GitService {
         }
 
         Ok(branches)
+    }
+
+    /// Get the canonical "original" branch name, with backward compatibility for "main"
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// "original" if it exists, otherwise "main" if it exists, otherwise error
+    ///
+    /// # Backward Compatibility
+    /// For existing repositories created before the "original" branch naming,
+    /// this function will return "main" if "original" doesn't exist.
+    pub fn get_original_branch(repo_path: &Path) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Try to find "original" branch first
+        if repo.find_branch("original", git2::BranchType::Local).is_ok() {
+            return Ok("original".to_string());
+        }
+
+        // Fall back to "main" for backward compatibility
+        if repo.find_branch("main", git2::BranchType::Local).is_ok() {
+            return Ok("main".to_string());
+        }
+
+        Err(GitServiceError::InvalidOperation(
+            "Neither 'original' nor 'main' branch found".to_string(),
+        ))
     }
 
     /// Get the name of the current branch

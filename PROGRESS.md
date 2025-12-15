@@ -8,9 +8,9 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 ## Steps Status
 
 ### Phase 1: Backend Foundation
-- [ ] Task 50: Add slugify utility and update metadata schema (HIGH) - Pending
-- [ ] Task 51: Update git_init_repo to use 'original' branch (HIGH) - Pending (depends on 50)
-- [ ] Task 52: Add variation CRUD functions (HIGH) - Pending (depends on 50)
+- [x] Task 50: Add slugify utility and update metadata schema (HIGH) - **COMPLETED**
+- [ ] Task 51: Update git_init_repo to use 'original' branch (HIGH) - In Progress (depends on 50)
+- [ ] Task 52: Add variation CRUD functions (HIGH) - In Progress (depends on 50)
 - [ ] Task 53: Update branch Tauri commands for variation abstraction (HIGH) - Pending (depends on 51, 52)
 
 ### Phase 2: Terminology Updates
@@ -27,7 +27,15 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 
 ## Execution Log
 
-(Will be updated as tasks are completed)
+### 2025-12-15 - Task 50: Add slugify utility and update metadata schema
+- Status: COMPLETED
+- Agent Type: general-purpose (backend)
+- Notes:
+  - Added slugify_variation_name() and slugify_unique_variation() to file_naming.rs
+  - Updated StoryMetadata with variations HashMap<String, String>
+  - 19 new unit tests, all 127 tests passing
+- Deliverables: src-tauri/src/file_naming.rs, src-tauri/src/file_management.rs
+- Commits: Pending (work complete, needs commit)
 
 ## Blockers
 
