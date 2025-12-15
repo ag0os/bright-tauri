@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Clock, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
-import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import type { CommitInfo, Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -94,7 +93,6 @@ function formatRelativeTime(timestamp: string): string {
 export function StoryHistory() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const goBack = useNavigationStore((state) => state.goBack);
-  const getStory = useStoriesStore((state) => state.getStory);
   const showSuccess = useToastStore((state) => state.success);
   const showError = useToastStore((state) => state.error);
 
@@ -120,8 +118,10 @@ export function StoryHistory() {
       setError(null);
 
       try {
-        // Load story
-        const loadedStory = await getStory(storyId);
+        // Ensure git repo exists (handles stories created before git integration)
+        const loadedStory = await invoke<Story>('ensure_story_git_repo', {
+          id: storyId,
+        });
         setStory(loadedStory);
 
         // Load commit history
@@ -132,7 +132,9 @@ export function StoryHistory() {
 
         setCommits(history);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to load history';
+        // Tauri invoke errors are strings, not Error objects
+        const message = typeof err === 'string' ? err : err instanceof Error ? err.message : 'Failed to load history';
+        console.error('Failed to load history:', err);
         setError(message);
         showError(message);
       } finally {
@@ -141,7 +143,7 @@ export function StoryHistory() {
     };
 
     loadData();
-  }, [storyId, getStory]);
+  }, [storyId]);
 
   const handleLoadMore = () => {
     setIsLoadingMore(true);

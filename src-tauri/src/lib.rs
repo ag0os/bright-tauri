@@ -65,6 +65,7 @@ pub fn run() {
             commands::list_story_children,
             commands::reorder_story_children,
             commands::get_story_with_children,
+            commands::ensure_story_git_repo,
             // Element commands
             commands::create_element,
             commands::get_element,

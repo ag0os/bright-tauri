@@ -295,6 +295,24 @@ impl StoryRepository {
         Ok(())
     }
 
+    /// Update the git repo path for a story (internal use)
+    pub fn set_git_repo_path(db: &Database, id: &str, git_repo_path: &str) -> Result<()> {
+        db.execute(
+            "UPDATE stories SET git_repo_path = ?1 WHERE id = ?2",
+            params![git_repo_path, id],
+        )?;
+        Ok(())
+    }
+
+    /// Update the current branch for a story (internal use)
+    pub fn set_current_branch(db: &Database, id: &str, branch: &str) -> Result<()> {
+        db.execute(
+            "UPDATE stories SET current_branch = ?1 WHERE id = ?2",
+            params![branch, id],
+        )?;
+        Ok(())
+    }
+
     /// Helper function to map a row to Story struct
     fn map_row_to_story(row: &rusqlite::Row) -> Result<Story> {
         let story_type_str: String = row.get(4)?;

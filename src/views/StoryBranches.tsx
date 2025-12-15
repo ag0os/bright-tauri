@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, GitBranch, Check, Plus, WarningCircle, GitDiff, GitMerge } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
-import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import type { Story, MergeResult } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -63,7 +62,6 @@ export function StoryBranches() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const navigate = useNavigationStore((state) => state.navigate);
   const goBack = useNavigationStore((state) => state.goBack);
-  const getStory = useStoriesStore((state) => state.getStory);
   const showError = useToastStore((state) => state.error);
   const showSuccess = useToastStore((state) => state.success);
 
@@ -87,15 +85,17 @@ export function StoryBranches() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const loadedStory = await getStory(storyId);
+        // Ensure git repo exists (handles stories created before git integration)
+        const loadedStory = await invoke<Story>('ensure_story_git_repo', {
+          id: storyId,
+        });
         setStory(loadedStory);
 
-        // Only fetch branches if story has a Git repo
-        if (loadedStory.gitRepoPath) {
-          await loadBranches(loadedStory.gitRepoPath);
-        }
+        // Fetch branches
+        await loadBranches(loadedStory.gitRepoPath);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to load story';
+        const message = typeof error === 'string' ? error : error instanceof Error ? error.message : 'Failed to load story';
+        console.error('Failed to load branches:', error);
         showError(message);
       } finally {
         setIsLoading(false);
@@ -103,7 +103,7 @@ export function StoryBranches() {
     };
 
     loadData();
-  }, [storyId, getStory]);
+  }, [storyId]);
 
   const loadBranches = async (repoPath: string) => {
     try {

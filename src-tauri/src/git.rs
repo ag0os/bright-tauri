@@ -163,6 +163,16 @@ impl GitService {
             &[],
         )?;
 
+        // Ensure branch is named "main" (git2 uses system default which might be "master")
+        let head = repo.head()?;
+        if let Some(branch_name) = head.shorthand() {
+            if branch_name != "main" {
+                // Rename the branch to "main"
+                let mut branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
+                branch.rename("main", false)?;
+            }
+        }
+
         Ok(repo_path)
     }
 
