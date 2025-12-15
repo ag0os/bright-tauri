@@ -1,7 +1,7 @@
 ---
 id: task-52
 title: 'Phase 1.3: Add variation CRUD functions'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2025-12-15 17:08'

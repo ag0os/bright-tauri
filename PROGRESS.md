@@ -9,9 +9,9 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 
 ### Phase 1: Backend Foundation
 - [x] Task 50: Add slugify utility and update metadata schema (HIGH) - **COMPLETED**
-- [ ] Task 51: Update git_init_repo to use 'original' branch (HIGH) - In Progress (depends on 50)
-- [ ] Task 52: Add variation CRUD functions (HIGH) - In Progress (depends on 50)
-- [ ] Task 53: Update branch Tauri commands for variation abstraction (HIGH) - Pending (depends on 51, 52)
+- [x] Task 51: Update git_init_repo to use 'original' branch (HIGH) - **COMPLETED**
+- [x] Task 52: Add variation CRUD functions (HIGH) - **COMPLETED**
+- [ ] Task 53: Update branch Tauri commands for variation abstraction (HIGH) - In Progress
 
 ### Phase 2: Terminology Updates
 - [ ] Task 54: Rename StoryBranches to StoryVariations (HIGH) - Pending (depends on 53)
@@ -35,7 +35,28 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
   - Updated StoryMetadata with variations HashMap<String, String>
   - 19 new unit tests, all 127 tests passing
 - Deliverables: src-tauri/src/file_naming.rs, src-tauri/src/file_management.rs
-- Commits: Pending (work complete, needs commit)
+- Commit: 65cbc82 - feat: Add slugify utility and update metadata schema for variations
+
+### 2025-12-15 - Task 51: Update git_init_repo to use 'original' branch
+- Status: COMPLETED
+- Agent Type: general-purpose (backend)
+- Notes:
+  - init_repo now renames default branch to "original"
+  - Added get_original_branch() for backward compatibility with "main"
+  - write_metadata_file initializes variations with "original" -> "Original"
+- Deliverables: src-tauri/src/git.rs, src-tauri/src/file_management.rs
+- Commit: beec071 (bundled with Task 52)
+
+### 2025-12-15 - Task 52: Add variation CRUD functions
+- Status: COMPLETED
+- Agent Type: general-purpose (backend)
+- Notes:
+  - Created VariationInfo struct with ts-rs export
+  - Implemented save_variation_mapping, get_variation_display_name, list_variations, remove_variation_mapping
+  - 16 new unit tests, all 143 tests passing
+  - TypeScript types generated at src/types/VariationInfo.ts
+- Deliverables: src-tauri/src/file_management.rs, src/types/VariationInfo.ts
+- Commit: beec071 - feat: Add variation CRUD functions for Version System UX Abstraction
 
 ## Blockers
 

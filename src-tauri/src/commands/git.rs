@@ -1,3 +1,5 @@
+use crate::file_management::{list_variations, save_variation_mapping, VariationInfo, get_variation_display_name};
+use crate::file_naming::slugify_unique_variation;
 use crate::git::{CommitInfo, DiffResult, GitService, MergeResult};
 use std::path::PathBuf;
 
@@ -52,27 +54,54 @@ pub fn git_commit_all(repo_path: String, message: String) -> Result<String, Stri
     GitService::commit_all(&path, &message).map_err(|e| e.to_string())
 }
 
-/// Create a new branch from a parent branch
+/// Create a new branch (variation) from a parent branch
+///
+/// Takes a display name, generates a unique slug for the branch name,
+/// creates the Git branch, and saves the display name mapping.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
 /// * `parent_branch` - Name of the parent branch to branch from
-/// * `new_branch` - Name for the new branch
+/// * `display_name` - User-friendly display name for the variation
+///
+/// # Returns
+/// VariationInfo for the newly created branch
 #[tauri::command]
 pub fn git_create_branch(
     repo_path: String,
     parent_branch: String,
-    new_branch: String,
-) -> Result<(), String> {
+    display_name: String,
+) -> Result<VariationInfo, String> {
     let path = PathBuf::from(repo_path);
-    GitService::create_branch(&path, &parent_branch, &new_branch).map_err(|e| e.to_string())
+
+    // Get list of existing branches
+    let existing_branches = GitService::list_branches(&path).map_err(|e| e.to_string())?;
+
+    // Generate unique slug from display name
+    let slug = slugify_unique_variation(&display_name, &existing_branches);
+
+    // Create the Git branch
+    GitService::create_branch(&path, &parent_branch, &slug).map_err(|e| e.to_string())?;
+
+    // Save the variation mapping
+    save_variation_mapping(&path, &slug, &display_name).map_err(|e| e.to_string())?;
+
+    // Return VariationInfo for the new branch
+    Ok(VariationInfo {
+        slug: slug.clone(),
+        display_name: display_name.clone(),
+        is_current: false, // Just created, not checked out yet
+        is_original: false, // New branches are never the original
+    })
 }
 
-/// Checkout (switch to) a branch
+/// Checkout (switch to) a branch (variation)
+///
+/// Frontend should pass the slug from VariationInfo.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
-/// * `branch` - Name of the branch to checkout
+/// * `branch` - Branch slug to checkout (from VariationInfo)
 ///
 /// # Errors
 /// Returns an error if there are uncommitted changes
@@ -101,15 +130,17 @@ pub fn git_diff_branches(
     GitService::diff_branches(&path, &branch_a, &branch_b).map_err(|e| e.to_string())
 }
 
-/// Merge one branch into another
+/// Merge one branch (variation) into another
+///
+/// Uses Git branch slugs for the operation but provides user-friendly error messages.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
-/// * `from_branch` - Name of the branch to merge from
-/// * `into_branch` - Name of the branch to merge into
+/// * `from_branch` - Slug of the branch to merge from
+/// * `into_branch` - Slug of the branch to merge into
 ///
 /// # Returns
-/// A MergeResult indicating success, conflicts, and a message
+/// A MergeResult indicating success, conflicts, and a user-friendly message
 #[tauri::command]
 pub fn git_merge_branches(
     repo_path: String,
@@ -117,7 +148,38 @@ pub fn git_merge_branches(
     into_branch: String,
 ) -> Result<MergeResult, String> {
     let path = PathBuf::from(repo_path);
-    GitService::merge_branches(&path, &from_branch, &into_branch).map_err(|e| e.to_string())
+
+    // Perform the merge
+    let result = GitService::merge_branches(&path, &from_branch, &into_branch)
+        .map_err(|e| {
+            // Make error messages more user-friendly
+            let err_str = e.to_string();
+            if err_str.contains("Branch") && err_str.contains("not found") {
+                format!("Variation not found. Please refresh the variation list.")
+            } else {
+                // Keep other errors as is
+                err_str
+            }
+        })?;
+
+    // Make success messages more user-friendly
+    let friendly_message = if result.message.contains("Already up-to-date") {
+        "Already up to date - no changes to merge".to_string()
+    } else if result.message.contains("Fast-forward") {
+        "Successfully merged without any conflicts".to_string()
+    } else if result.message.contains("Merge has conflicts") {
+        "Merge completed with conflicting changes that need resolution".to_string()
+    } else if result.message.contains("Successfully merged") {
+        "Successfully merged all changes".to_string()
+    } else {
+        result.message.clone()
+    };
+
+    Ok(MergeResult {
+        success: result.success,
+        conflicts: result.conflicts,
+        message: friendly_message,
+    })
 }
 
 /// Get commit history for a branch
@@ -148,30 +210,52 @@ pub fn git_restore_commit(repo_path: String, commit_hash: String) -> Result<(), 
     GitService::restore_commit(&path, &commit_hash).map_err(|e| e.to_string())
 }
 
-/// List all local branches in the repository
+/// List all local branches (variations) in the repository
+///
+/// Returns variation information including display names and status.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
 ///
 /// # Returns
-/// A vector of branch names
+/// A vector of VariationInfo structs with display names and metadata
 #[tauri::command]
-pub fn git_list_branches(repo_path: String) -> Result<Vec<String>, String> {
+pub fn git_list_branches(repo_path: String) -> Result<Vec<VariationInfo>, String> {
     let path = PathBuf::from(repo_path);
-    GitService::list_branches(&path).map_err(|e| e.to_string())
+    list_variations(&path).map_err(|e| e.to_string())
 }
 
-/// Get the name of the current branch
+/// Get information about the current branch (variation)
+///
+/// Returns variation information including display name and status.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
 ///
 /// # Returns
-/// The current branch name
+/// VariationInfo for the current branch
 #[tauri::command]
-pub fn git_get_current_branch(repo_path: String) -> Result<String, String> {
+pub fn git_get_current_branch(repo_path: String) -> Result<VariationInfo, String> {
     let path = PathBuf::from(repo_path);
-    GitService::get_current_branch(&path).map_err(|e| e.to_string())
+
+    // Get current branch name (slug)
+    let slug = GitService::get_current_branch(&path).map_err(|e| e.to_string())?;
+
+    // Get display name from metadata
+    let display_name = get_variation_display_name(&path, &slug)
+        .unwrap_or_else(|_| slug.clone()); // Fallback to slug if metadata not found
+
+    // Check if this is the original branch
+    let original_branch = crate::git::GitService::get_original_branch(&path)
+        .unwrap_or_else(|_| "original".to_string());
+    let is_original = slug == original_branch || slug == "main";
+
+    Ok(VariationInfo {
+        slug,
+        display_name,
+        is_current: true, // By definition, this is the current branch
+        is_original,
+    })
 }
 
 /// Resolve a file conflict by choosing ours or theirs version
