@@ -7,7 +7,7 @@ import { StoryEditor } from "./views/StoryEditor";
 import { StoryChildren } from "./views/StoryChildren";
 import { StoryHistory } from "./views/StoryHistory";
 import { StoryVariations } from "./views/StoryVariations";
-import { StoryDiff } from "./views/StoryDiff";
+import { StoryCompare } from "./views/StoryCompare";
 import { StoryCombine } from "./views/StoryCombine";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
@@ -71,8 +71,8 @@ function AppContent() {
 
     case 'story-compare':
       return (
-        <ErrorBoundary name="Story Diff">
-          <StoryDiff />
+        <ErrorBoundary name="Story Compare">
+          <StoryCompare />
         </ErrorBoundary>
       );
 
