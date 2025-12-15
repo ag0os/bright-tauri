@@ -8,7 +8,7 @@
  * - Restore functionality
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockTauriInvoke } from '@/test/utils';
@@ -84,9 +84,15 @@ describe('StoryHistory', () => {
     // Reset mocks
     vi.clearAllMocks();
 
-    // Mock Date.now() for consistent relative time testing
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
+    // Mock Date constructor for consistent relative time testing
+    // Using vi.spyOn instead of useFakeTimers to avoid issues with waitFor
+    const DateConstructor = Date;
+    vi.spyOn(global as any, 'Date').mockImplementation(((...args: any[]) => {
+      if (args.length === 0) {
+        return now;
+      }
+      return new DateConstructor(...args);
+    }) as any);
 
     // Setup store mocks
     mockGoBack = vi.fn();
@@ -112,7 +118,7 @@ describe('StoryHistory', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   describe('Loading and Display', () => {
@@ -246,7 +252,9 @@ describe('StoryHistory', () => {
       const restoreButtons = screen.getAllByRole('button', { name: /restore this snapshot/i });
       await user.click(restoreButtons[0]);
 
-      expect(screen.getByText(/restore to this snapshot/i)).toBeInTheDocument();
+      // Check for modal elements using getAllByText since text appears multiple times
+      const restoreTexts = screen.getAllByText(/restore to this snapshot/i);
+      expect(restoreTexts.length).toBeGreaterThan(0);
       expect(screen.getByText(/your current changes will be preserved/i)).toBeInTheDocument();
     });
 
@@ -265,7 +273,9 @@ describe('StoryHistory', () => {
       // Click the last restore button (for the "Added new character" commit)
       await user.click(restoreButtons[restoreButtons.length - 1]);
 
-      expect(screen.getByText(/added new character/i)).toBeInTheDocument();
+      // Check that commit details appear in the dialog (text may appear multiple times)
+      const addedNewCharacterTexts = screen.getAllByText(/added new character/i);
+      expect(addedNewCharacterTexts.length).toBeGreaterThan(0);
       expect(screen.getByText('ghi789j')).toBeInTheDocument();
     });
 
@@ -304,7 +314,9 @@ describe('StoryHistory', () => {
       const restoreButtons = screen.getAllByRole('button', { name: /restore this snapshot/i });
       await user.click(restoreButtons[0]);
 
-      const confirmButton = screen.getByRole('button', { name: /restore this snapshot/i });
+      // After modal opens, get the confirm button (now there are more restore buttons)
+      const allRestoreButtons = screen.getAllByRole('button', { name: /restore this snapshot/i });
+      const confirmButton = allRestoreButtons[allRestoreButtons.length - 1]; // The last one is in the modal
       await user.click(confirmButton);
 
       await waitFor(() => {
@@ -405,7 +417,9 @@ describe('StoryHistory', () => {
 
   describe('Error States', () => {
     it('shows error when story is not found', async () => {
-      mockTauriInvoke('ensure_story_git_repo', Promise.reject(new Error('Story not found')));
+      mockTauriInvoke('ensure_story_git_repo', () =>
+        Promise.reject(new Error('Story not found'))
+      );
 
       renderWithProviders(<StoryHistory />);
 
@@ -416,7 +430,9 @@ describe('StoryHistory', () => {
 
     it('shows go back button in error state', async () => {
       const user = userEvent.setup();
-      mockTauriInvoke('ensure_story_git_repo', Promise.reject(new Error('Failed to load')));
+      mockTauriInvoke('ensure_story_git_repo', () =>
+        Promise.reject(new Error('Failed to load'))
+      );
 
       renderWithProviders(<StoryHistory />);
 
@@ -443,7 +459,7 @@ describe('StoryHistory', () => {
         expect(screen.getByText('Test Story')).toBeInTheDocument();
       });
 
-      const backButton = screen.getByRole('button', { name: /back to editor/i });
+      const backButton = screen.getByRole('button', { name: /go back/i });
       await user.click(backButton);
 
       expect(mockGoBack).toHaveBeenCalled();

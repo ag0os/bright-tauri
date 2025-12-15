@@ -105,8 +105,10 @@ describe('StoryCombine', () => {
       renderWithProviders(<StoryCombine />);
 
       await waitFor(() => {
-        expect(screen.getByText(/alternate-ending/i)).toBeInTheDocument();
-        expect(screen.getByText(/main/i)).toBeInTheDocument();
+        const alternateElements = screen.getAllByText(/alternate-ending/i);
+        const mainElements = screen.getAllByText(/main/i);
+        expect(alternateElements.length).toBeGreaterThan(0);
+        expect(mainElements.length).toBeGreaterThan(0);
       });
     });
 
@@ -312,13 +314,9 @@ describe('StoryCombine', () => {
       await user.click(keepMainButtons[0]);
 
       const saveButton = screen.getByRole('button', { name: /save combined version/i });
-      await user.click(saveButton);
 
-      await waitFor(() => {
-        expect(mockShowError).toHaveBeenCalledWith(
-          expect.stringContaining('resolve all conflicts')
-        );
-      });
+      // Save button should still be disabled since not all conflicts are resolved
+      expect(saveButton).toBeDisabled();
     });
 
     it('successfully saves and navigates back when all resolved', async () => {

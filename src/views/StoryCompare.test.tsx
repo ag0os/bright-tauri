@@ -145,9 +145,14 @@ describe('StoryCompare', () => {
       renderWithProviders(<StoryCompare />);
 
       await waitFor(() => {
-        expect(screen.getByText('Original Story')).toBeInTheDocument();
-        expect(screen.getByText('Alternate Ending')).toBeInTheDocument();
-        expect(screen.getByText('What if Sarah lived?')).toBeInTheDocument();
+        // Each variation appears in both selectors, so we check they exist
+        const originalStoryElements = screen.getAllByText('Original Story');
+        const alternateEndingElements = screen.getAllByText('Alternate Ending');
+        const whatIfElements = screen.getAllByText('What if Sarah lived?');
+
+        expect(originalStoryElements.length).toBeGreaterThanOrEqual(2); // In both selectors
+        expect(alternateEndingElements.length).toBeGreaterThanOrEqual(2);
+        expect(whatIfElements.length).toBeGreaterThanOrEqual(2);
       });
     });
 
@@ -229,7 +234,12 @@ describe('StoryCompare', () => {
     it('loads and displays comparison when Compare is clicked', async () => {
       const user = userEvent.setup();
       mockTauriInvoke('git_list_variations', mockVariations);
-      mockTauriInvoke('git_get_file_content', 'Content from variation A');
+
+      let callCount = 0;
+      mockTauriInvoke('git_get_file_content', () => {
+        callCount++;
+        return Promise.resolve(`Content from variation ${callCount}`);
+      });
 
       renderWithProviders(<StoryCompare />);
 
@@ -241,7 +251,8 @@ describe('StoryCompare', () => {
       await user.click(compareButton);
 
       await waitFor(() => {
-        expect(screen.getByText('Content from variation A')).toBeInTheDocument();
+        expect(screen.getByText('Content from variation 1')).toBeInTheDocument();
+        expect(screen.getByText('Content from variation 2')).toBeInTheDocument();
       });
     });
 
@@ -267,9 +278,11 @@ describe('StoryCompare', () => {
       await user.click(compareButton);
 
       await waitFor(() => {
-        // Check for panel headers
-        expect(screen.getByText('Original Story')).toBeInTheDocument();
-        expect(screen.getByText('Alternate Ending')).toBeInTheDocument();
+        // Check for panel headers - each appears in selectors AND as panel headers
+        const originalStoryElements = screen.getAllByText('Original Story');
+        const alternateEndingElements = screen.getAllByText('Alternate Ending');
+        expect(originalStoryElements.length).toBeGreaterThanOrEqual(2);
+        expect(alternateEndingElements.length).toBeGreaterThanOrEqual(2);
 
         // Check for content
         expect(screen.getByText('Content from main')).toBeInTheDocument();
@@ -346,13 +359,9 @@ describe('StoryCompare', () => {
       await user.selectOptions(secondSelector, 'main');
 
       const compareButton = screen.getByRole('button', { name: /compare/i });
-      await user.click(compareButton);
 
-      await waitFor(() => {
-        expect(mockShowError).toHaveBeenCalledWith(
-          expect.stringContaining('cannot compare a variation with itself')
-        );
-      });
+      // Button should be disabled when same variation is selected
+      expect(compareButton).toBeDisabled();
     });
   });
 
@@ -431,7 +440,9 @@ describe('StoryCompare', () => {
     it('shows error toast when content fails to load', async () => {
       const user = userEvent.setup();
       mockTauriInvoke('git_list_variations', mockVariations);
-      mockTauriInvoke('git_get_file_content', Promise.reject(new Error('Failed to load content')));
+      mockTauriInvoke('git_get_file_content', () =>
+        Promise.reject(new Error('Failed to load content'))
+      );
 
       renderWithProviders(<StoryCompare />);
 
@@ -461,7 +472,7 @@ describe('StoryCompare', () => {
         expect(screen.getByText('Test Story')).toBeInTheDocument();
       });
 
-      const backButton = screen.getByRole('button', { name: /back to story/i });
+      const backButton = screen.getByRole('button', { name: /go back/i });
       await user.click(backButton);
 
       expect(mockGoBack).toHaveBeenCalled();

@@ -137,7 +137,8 @@ describe('StoryVariations', () => {
       renderWithProviders(<StoryVariations />);
 
       await waitFor(() => {
-        expect(screen.getByText(/original/i)).toBeInTheDocument();
+        const originalElements = screen.getAllByText(/original/i);
+        expect(originalElements.length).toBeGreaterThan(0);
       });
 
       // Only one "Original" badge should exist
@@ -184,8 +185,18 @@ describe('StoryVariations', () => {
 
       // Current variation should not have Switch/Combine buttons
       const currentVariationItem = screen.getByText('Current Variation').closest('.branch-item');
-      expect(currentVariationItem).not.toContain(screen.queryByText(/switch to/i));
-      expect(currentVariationItem).not.toContain(screen.queryByText(/combine/i));
+
+      // Use queryAllBy to handle multiple matches, then check if none are in current item
+      const switchButtons = screen.queryAllByText(/switch to/i);
+      const combineButtons = screen.queryAllByText(/combine/i);
+
+      switchButtons.forEach(button => {
+        expect(currentVariationItem).not.toContainElement(button);
+      });
+
+      combineButtons.forEach(button => {
+        expect(currentVariationItem).not.toContainElement(button);
+      });
     });
   });
 
@@ -378,10 +389,10 @@ describe('StoryVariations', () => {
         expect(screen.getByText('Alternate Ending')).toBeInTheDocument();
       });
 
-      // Mock error for uncommitted changes
-      mockTauriInvoke('git_checkout_branch', Promise.reject(
-        new Error('Cannot checkout: uncommitted changes in working directory')
-      ));
+      // Mock error for uncommitted changes - use function that returns rejected promise
+      mockTauriInvoke('git_checkout_branch', () =>
+        Promise.reject(new Error('Cannot checkout: uncommitted changes in working directory'))
+      );
 
       const switchButtons = screen.getAllByRole('button', { name: /switch to/i });
       await user.click(switchButtons[0]);
