@@ -220,6 +220,205 @@ describe('StoryVariations', () => {
       expect(screen.getByLabelText(/variation name/i)).toBeInTheDocument();
     });
 
+    it('blocks creation with reserved name "original" (case-insensitive)', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'original');
+
+      // Validation error should be shown
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Create button should be disabled
+      const createButton = screen.getByRole('button', { name: /create variation/i });
+      expect(createButton).toBeDisabled();
+    });
+
+    it('blocks creation with reserved name "main" (case-insensitive)', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'MAIN');
+
+      // Validation error should be shown
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Create button should be disabled
+      const createButton = screen.getByRole('button', { name: /create variation/i });
+      expect(createButton).toBeDisabled();
+    });
+
+    it('blocks creation with reserved name "master"', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'Master');
+
+      // Validation error should be shown
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Create button should be disabled
+      const createButton = screen.getByRole('button', { name: /create variation/i });
+      expect(createButton).toBeDisabled();
+    });
+
+    it('blocks creation with reserved name "HEAD"', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'head');
+
+      // Validation error should be shown
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Create button should be disabled
+      const createButton = screen.getByRole('button', { name: /create variation/i });
+      expect(createButton).toBeDisabled();
+    });
+
+    it('shows toast error when attempting to create with reserved name', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'original');
+
+      // Clear validation to allow click
+      await user.clear(input);
+      await user.type(input, 'original');
+
+      // Try to submit with Enter key (should be blocked)
+      await user.keyboard('{Enter}');
+
+      await waitFor(() => {
+        expect(mockShowError).toHaveBeenCalledWith(
+          expect.stringContaining('reserved name')
+        );
+      });
+    });
+
+    it('clears validation error when typing valid name after invalid', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+
+      // Type reserved name
+      await user.type(input, 'main');
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Clear and type valid name
+      await user.clear(input);
+      await user.type(input, 'Valid Variation Name');
+
+      // Error should be gone
+      expect(screen.queryByText(/is a reserved name/i)).not.toBeInTheDocument();
+
+      // Create button should be enabled
+      const createButton = screen.getByRole('button', { name: /create variation/i });
+      expect(createButton).not.toBeDisabled();
+    });
+
+    it('clears validation error when closing form', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'original');
+
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+
+      // Close form with Escape
+      await user.keyboard('{Escape}');
+
+      expect(screen.queryByText('Create New Variation')).not.toBeInTheDocument();
+
+      // Reopen form - error should not persist
+      await user.click(newVariationButton);
+      expect(screen.queryByText(/is a reserved name/i)).not.toBeInTheDocument();
+    });
+
     it('creates variation with special characters (tests slug generation)', async () => {
       const user = userEvent.setup();
       mockTauriInvoke('ensure_story_git_repo', mockStory);

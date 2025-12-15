@@ -101,6 +101,13 @@
   color: var(--color-text-secondary);
 }
 
+.form-error {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+}
+
 .form-actions {
   display: flex;
   gap: var(--spacing-sm);

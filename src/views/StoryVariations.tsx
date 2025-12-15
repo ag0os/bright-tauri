@@ -78,10 +78,31 @@ export function StoryVariations() {
   const [newVariationName, setNewVariationName] = useState('');
   const [isSwitching, setIsSwitching] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Extract story ID from route
   const storyId =
     currentRoute.screen === 'story-variations' ? currentRoute.storyId : null;
+
+  // Reserved variation names (case-insensitive)
+  const RESERVED_NAMES = ['original', 'main', 'master', 'head'];
+
+  /**
+   * Validates variation name against reserved names
+   * @param name - The variation name to validate
+   * @returns Error message if invalid, null if valid
+   */
+  const validateVariationName = (name: string): string | null => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return null;
+
+    const normalizedName = trimmedName.toLowerCase();
+    if (RESERVED_NAMES.includes(normalizedName)) {
+      return `"${trimmedName}" is a reserved name. Please choose a different variation name.`;
+    }
+
+    return null;
+  };
 
   // Load story and variations on mount
   useEffect(() => {
@@ -129,6 +150,13 @@ export function StoryVariations() {
   const handleCreateVariation = async () => {
     if (!story?.gitRepoPath || !newVariationName.trim() || !currentVariation) return;
 
+    // Validate variation name
+    const validationErrorMessage = validateVariationName(newVariationName);
+    if (validationErrorMessage) {
+      showError(validationErrorMessage);
+      return;
+    }
+
     setIsCreating(true);
     try {
       await invoke('git_create_branch', {
@@ -139,6 +167,7 @@ export function StoryVariations() {
 
       showSuccess(`Created variation: ${newVariationName.trim()}`);
       setNewVariationName('');
+      setValidationError(null);
       setShowCreateForm(false);
 
       // Reload variations
@@ -184,6 +213,15 @@ export function StoryVariations() {
     }
   };
 
+  const handleVariationNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewVariationName(value);
+
+    // Real-time validation
+    const error = validateVariationName(value);
+    setValidationError(error);
+  };
+
   const handleCreateFormKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -191,6 +229,7 @@ export function StoryVariations() {
     } else if (e.key === 'Escape') {
       setShowCreateForm(false);
       setNewVariationName('');
+      setValidationError(null);
     }
   };
 
@@ -331,20 +370,28 @@ export function StoryVariations() {
                 className="input-filled"
                 placeholder="e.g., What if Sarah lived?"
                 value={newVariationName}
-                onChange={(e) => setNewVariationName(e.target.value)}
+                onChange={handleVariationNameChange}
                 onKeyDown={handleCreateFormKeyDown}
                 autoFocus
                 disabled={isCreating}
+                aria-invalid={validationError !== null}
+                aria-describedby={validationError ? 'variation-name-error' : 'variation-name-hint'}
               />
-              <p className="form-hint">
-                Use a descriptive name that explains this story variation
-              </p>
+              {validationError ? (
+                <p id="variation-name-error" className="form-error" role="alert">
+                  {validationError}
+                </p>
+              ) : (
+                <p id="variation-name-hint" className="form-hint">
+                  Use a descriptive name that explains this story variation
+                </p>
+              )}
             </div>
             <div className="form-actions">
               <button
                 className="btn btn-primary btn-base"
                 onClick={handleCreateVariation}
-                disabled={isCreating || !newVariationName.trim()}
+                disabled={isCreating || !newVariationName.trim() || validationError !== null}
               >
                 {isCreating ? 'Creating...' : 'Create Variation'}
               </button>
@@ -353,6 +400,7 @@ export function StoryVariations() {
                 onClick={() => {
                   setShowCreateForm(false);
                   setNewVariationName('');
+                  setValidationError(null);
                 }}
                 disabled={isCreating}
               >
