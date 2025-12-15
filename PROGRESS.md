@@ -14,16 +14,16 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 - [x] Task 53: Update branch Tauri commands for variation abstraction (HIGH) - **COMPLETED**
 
 ### Phase 2: Terminology Updates
-- [ ] Task 54: Rename StoryBranches to StoryVariations (HIGH) - Pending (depends on 53)
-- [ ] Task 55: Update navigation routes for variation terminology (HIGH) - Pending (depends on 53)
-- [ ] Task 56: Update Settings terminology (MEDIUM) - Pending (depends on 53)
+- [x] Task 54: Rename StoryBranches to StoryVariations (HIGH) - **COMPLETED**
+- [x] Task 55: Update navigation routes for variation terminology (HIGH) - **COMPLETED**
+- [x] Task 56: Update Settings terminology (MEDIUM) - **COMPLETED**
 
 ### Phase 3: History View Enhancement
-- [ ] Task 57: Enhance StoryHistory with snapshot terminology (MEDIUM) - Pending (depends on 53)
+- [x] Task 57: Enhance StoryHistory with snapshot terminology (MEDIUM) - **COMPLETED**
 
 ### Phase 4: Simplified Conflict UI
-- [ ] Task 58: Rename StoryDiff to StoryCompare (MEDIUM) - Pending (depends on 54, 55)
-- [ ] Task 59: Rename StoryMerge to StoryCombine (MEDIUM) - Pending (depends on 54, 55)
+- [ ] Task 58: Rename StoryDiff to StoryCompare (MEDIUM) - In Progress
+- [ ] Task 59: Rename StoryMerge to StoryCombine (MEDIUM) - In Progress
 
 ## Execution Log
 
@@ -71,6 +71,52 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 - Commits: 4789b95, 05ad2d0
 
 **PHASE 1 BACKEND FOUNDATION COMPLETE**
+
+### 2025-12-15 - Task 54: Rename StoryBranches to StoryVariations
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - Renamed StoryBranches.tsx → StoryVariations.tsx
+  - Updated all terminology: "branch" → "variation"
+  - Added original variation badge with star icon
+  - Using VariationInfo.display_name for UI, slug for API
+- Deliverables: src/views/StoryVariations.tsx, src/views/StoryVariations.css
+- Commit: 6ff0d77
+
+### 2025-12-15 - Task 55: Update navigation routes
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - story-branches → story-variations
+  - story-diff → story-compare
+  - story-merge → story-combine
+  - Updated all navigate() calls across codebase
+- Deliverables: src/stores/useNavigationStore.ts, multiple view files
+- Commit: f10ef9e (bundled with Task 57)
+
+### 2025-12-15 - Task 56: Update Settings terminology
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - "Version Control" → "Auto-Save"
+  - "Auto-commit" → "Auto-save snapshots"
+  - "Commit Trigger" → "Save timing"
+  - "Commit Interval" → "Save frequency"
+- Deliverables: src/views/Settings.tsx
+- Commit: 6bd6f1d
+
+### 2025-12-15 - Task 57: Enhance StoryHistory
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - "Version History" → "Snapshots"
+  - Format: "2 hours ago - Chapter 3 rewrite (abc1234)"
+  - Auto-save detection for generic commits
+  - "Restore" → "Restore this snapshot"
+- Deliverables: src/views/StoryHistory.tsx, src/views/StoryHistory.css
+- Commit: f10ef9e
+
+**PHASE 2 & 3 COMPLETE**
 
 ## Blockers
 

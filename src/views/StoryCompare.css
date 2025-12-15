@@ -1,8 +1,8 @@
 /**
- * StoryDiff Styles
+ * StoryCompare Styles
  */
 
-.story-diff {
+.story-compare {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -10,7 +10,7 @@
 }
 
 /* Header */
-.story-diff-header {
+.story-compare-header {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -19,7 +19,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.story-diff-title {
+.story-compare-title {
   flex: 1;
   margin: 0;
   font-size: var(--font-size-h2);
@@ -44,7 +44,7 @@
 }
 
 /* Content */
-.story-diff-content {
+.story-compare-content {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-lg);
@@ -67,8 +67,8 @@
   color: var(--color-text-secondary);
 }
 
-/* Branch Selector */
-.branch-selector {
+/* Variation Selector */
+.variation-selector {
   display: flex;
   align-items: flex-end;
   gap: var(--spacing-md);
@@ -130,19 +130,19 @@
   color: var(--color-text-secondary);
 }
 
-/* Diff Results */
-.diff-results {
+/* Compare Results */
+.compare-results {
   margin-bottom: var(--spacing-lg);
 }
 
-.diff-results h3 {
+.compare-results h3 {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-h4);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
-.file-changes-list {
+.comparison-container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -208,140 +208,63 @@
   border-radius: var(--border-radius-sm);
 }
 
-.status-badge.status-added {
+.status-badge.status-new {
   color: var(--color-success);
   background-color: var(--color-success-light);
 }
 
-.status-badge.status-modified {
+.status-badge.status-changed {
   color: var(--color-warning);
   background-color: var(--color-warning-light);
 }
 
-.status-badge.status-deleted {
+.status-badge.status-removed {
   color: var(--color-error);
   background-color: var(--color-error-light);
 }
 
-/* Diff Viewer */
-.diff-viewer {
-  border-top: 1px solid var(--color-border);
+/* Side-by-Side Comparison */
+.side-by-side-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.comparison-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: var(--spacing-sm) var(--spacing-md);
   background-color: var(--color-background);
-  overflow-x: auto;
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.diff-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: var(--font-mono);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: var(--font-weight-medium);
   font-size: var(--font-size-small);
-}
-
-.diff-line {
-  transition: background-color 0.1s ease;
-}
-
-/* Line numbers */
-.line-number {
-  width: 48px;
-  min-width: 48px;
-  padding: 2px 8px;
-  text-align: right;
-  user-select: none;
-  color: var(--color-text-tertiary);
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  vertical-align: top;
-  font-size: var(--font-size-small);
-}
-
-.old-line-number {
-  border-right: 1px solid var(--color-border);
-}
-
-.new-line-number {
-  border-right: 2px solid var(--color-border);
-}
-
-/* Line content */
-.line-content {
-  padding: 2px 12px;
-  white-space: pre;
-  overflow-x: visible;
-  vertical-align: top;
-}
-
-.line-content pre {
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  white-space: pre;
-  word-wrap: normal;
-}
-
-/* Context lines (unchanged) */
-.diff-line-context {
-  background-color: var(--color-background);
-}
-
-.diff-line-context:hover {
-  background-color: var(--color-surface);
-}
-
-/* Added lines (green) */
-.diff-line-added {
-  background-color: rgba(34, 197, 94, 0.1);
-}
-
-.diff-line-added .line-number {
-  background-color: rgba(34, 197, 94, 0.15);
-}
-
-.diff-line-added .line-content {
-  background-color: rgba(34, 197, 94, 0.1);
-}
-
-.diff-line-added:hover .line-content {
-  background-color: rgba(34, 197, 94, 0.15);
-}
-
-/* Deleted lines (red) */
-.diff-line-deleted {
-  background-color: rgba(239, 68, 68, 0.1);
-}
-
-.diff-line-deleted .line-number {
-  background-color: rgba(239, 68, 68, 0.15);
-}
-
-.diff-line-deleted .line-content {
-  background-color: rgba(239, 68, 68, 0.1);
-}
-
-.diff-line-deleted:hover .line-content {
-  background-color: rgba(239, 68, 68, 0.15);
-}
-
-/* Hunk headers */
-.diff-line-header {
-  background-color: var(--color-surface);
-}
-
-.diff-line-header .line-number {
-  background-color: var(--color-surface);
   color: var(--color-text-secondary);
 }
 
-.diff-line-header .line-content {
-  background-color: var(--color-surface);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
+.panel-content {
+  padding: var(--spacing-md);
+  max-height: 600px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--color-text-primary);
 }
 
-.diff-line-header .line-content pre {
-  color: var(--color-primary);
+.changed-section {
+  background-color: rgba(255, 193, 7, 0.1);
+  padding: 2px 4px;
+  border-radius: 2px;
 }
 
 /* Empty States */
@@ -368,8 +291,8 @@
 }
 
 /* Loading States */
-.story-diff-loading,
-.story-diff-error {
+.story-compare-loading,
+.story-compare-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -379,24 +302,24 @@
   text-align: center;
 }
 
-.story-diff-error svg {
+.story-compare-error svg {
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-lg);
 }
 
-.story-diff-error h2 {
+.story-compare-error h2 {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
-.story-diff-error p {
+.story-compare-error p {
   margin: 0 0 var(--spacing-sm);
   font-size: var(--font-size-body);
   color: var(--color-text-secondary);
 }
 
-.story-diff-error p:last-of-type {
+.story-compare-error p:last-of-type {
   margin-bottom: var(--spacing-lg);
 }

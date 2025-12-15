@@ -8,7 +8,7 @@ import { StoryChildren } from "./views/StoryChildren";
 import { StoryHistory } from "./views/StoryHistory";
 import { StoryVariations } from "./views/StoryVariations";
 import { StoryDiff } from "./views/StoryDiff";
-import { StoryMerge } from "./views/StoryMerge";
+import { StoryCombine } from "./views/StoryCombine";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -78,8 +78,8 @@ function AppContent() {
 
     case 'story-combine':
       return (
-        <ErrorBoundary name="Story Merge">
-          <StoryMerge />
+        <ErrorBoundary name="Story Combine">
+          <StoryCombine />
         </ErrorBoundary>
       );
 

@@ -1,8 +1,8 @@
 /**
- * StoryMerge View
+ * StoryCombine View
  *
- * Merge conflict resolution UI for story variations.
- * Allows users to resolve conflicts by choosing between "ours" and "theirs" versions.
+ * Conflict resolution UI for combining story variations.
+ * Allows users to resolve conflicts by choosing between variation versions.
  */
 
 import { useEffect, useState } from 'react';
@@ -17,14 +17,14 @@ import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';
-import './StoryMerge.css';
+import './StoryCombine.css';
 
 interface ConflictResolution {
   filePath: string;
   resolution: 'ours' | 'theirs' | null;
 }
 
-export function StoryMerge() {
+export function StoryCombine() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const navigate = useNavigationStore((state) => state.navigate);
   const goBack = useNavigationStore((state) => state.goBack);
@@ -104,13 +104,13 @@ export function StoryMerge() {
         });
       }
 
-      // Commit the merge
+      // Commit the combined version
       await invoke('git_commit_all', {
         repoPath: story.gitRepoPath,
-        message: `Merge ${fromBranch} into ${intoBranch}`,
+        message: `Combine ${fromBranch} into ${intoBranch}`,
       });
 
-      showSuccess(`Successfully merged ${fromBranch} into ${intoBranch}`);
+      showSuccess(`Successfully combined ${fromBranch} into ${intoBranch}`);
 
       // Navigate back to branches view
       navigate({ screen: 'story-variations', storyId: story.id });
@@ -132,7 +132,7 @@ export function StoryMerge() {
         repoPath: story.gitRepoPath,
       });
 
-      showSuccess('Merge aborted');
+      showSuccess('Combine cancelled');
 
       // Navigate back to branches view
       navigate({ screen: 'story-variations', storyId: story.id });
@@ -147,8 +147,8 @@ export function StoryMerge() {
 
   if (!story || !fromBranch || !intoBranch) {
     return (
-      <div className="story-merge-error">
-        <p>Invalid merge state</p>
+      <div className="story-combine-error">
+        <p>Invalid combine state</p>
         <button className="btn btn-outline btn-base" onClick={goBack}>
           <ArrowLeft size={18} />
           Go Back
@@ -160,29 +160,29 @@ export function StoryMerge() {
   const allResolved = resolutions.every((r) => r.resolution !== null);
 
   return (
-    <div className="story-merge">
+    <div className="story-combine">
       {/* Header */}
-      <div className="story-merge-header">
+      <div className="story-combine-header">
         <button
           className="back-button"
           onClick={goBack}
           aria-label="Go back"
-          title="Back to Branches"
+          title="Back to Variations"
         >
           <ArrowLeft size={20} />
         </button>
 
-        <h1 className="story-merge-title">Resolve Merge Conflicts</h1>
+        <h1 className="story-combine-title">Combine Variations</h1>
       </div>
 
       {/* Content */}
-      <div className="story-merge-content">
-        {/* Merge Info */}
-        <div className="merge-info">
+      <div className="story-combine-content">
+        {/* Combine Info */}
+        <div className="combine-info">
           <Warning size={24} weight="duotone" className="warning-icon" />
           <div>
             <h2>
-              Merging <strong>{fromBranch}</strong> into <strong>{intoBranch}</strong>
+              Combining <strong>{fromBranch}</strong> into <strong>{intoBranch}</strong>
             </h2>
             <p>
               {conflicts.length} {conflicts.length === 1 ? 'file has' : 'files have'} conflicts that need to be resolved.
@@ -211,8 +211,8 @@ export function StoryMerge() {
                   {resolution.resolution && (
                     <span className="resolution-badge">
                       {resolution.resolution === 'ours'
-                        ? `Keeping ${intoBranch} version`
-                        : `Taking ${fromBranch} version`}
+                        ? `Keeping from ${intoBranch}`
+                        : `Keeping from ${fromBranch}`}
                     </span>
                   )}
                 </div>
@@ -229,7 +229,7 @@ export function StoryMerge() {
                     }
                     disabled={isResolving}
                   >
-                    Keep Current ({intoBranch})
+                    Keep from {intoBranch}
                   </button>
                   <button
                     className={`btn btn-sm ${
@@ -242,7 +242,7 @@ export function StoryMerge() {
                     }
                     disabled={isResolving}
                   >
-                    Take Incoming ({fromBranch})
+                    Keep from {fromBranch}
                   </button>
                 </div>
               </div>
@@ -251,14 +251,14 @@ export function StoryMerge() {
         </div>
 
         {/* Actions */}
-        <div className="merge-actions">
+        <div className="combine-actions">
           <button
             className="btn btn-outline btn-base"
             onClick={handleAbortMerge}
             disabled={isResolving || isAborting}
           >
             <X size={18} />
-            {isAborting ? 'Aborting...' : 'Cancel Merge'}
+            {isAborting ? 'Cancelling...' : 'Cancel'}
           </button>
           <button
             className="btn btn-primary btn-base"
@@ -267,11 +267,11 @@ export function StoryMerge() {
             title={
               !allResolved
                 ? 'Resolve all conflicts first'
-                : 'Commit the merge with resolved conflicts'
+                : 'Save the combined version with resolved conflicts'
             }
           >
             <Check size={18} />
-            {isResolving ? 'Resolving...' : 'Resolve & Commit'}
+            {isResolving ? 'Saving...' : 'Save Combined Version'}
           </button>
         </div>
       </div>
