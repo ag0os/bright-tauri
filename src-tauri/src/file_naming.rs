@@ -97,7 +97,7 @@ pub fn slugify_variation_name(name: &str) -> String {
 /// A unique slugified branch name that doesn't conflict with existing branches
 ///
 /// # Examples
-/// ```
+/// ```ignore
 /// let branches = vec!["main".to_string(), "what-if-sarah-lived".to_string()];
 /// let unique = slugify_unique_variation("What if Sarah lived?", &branches);
 /// // Returns "what-if-sarah-lived-2"
@@ -403,10 +403,7 @@ mod tests {
 
     #[test]
     fn test_slugify_variation_name_leading_trailing_spaces() {
-        assert_eq!(
-            slugify_variation_name("  Trimmed  "),
-            "trimmed"
-        );
+        assert_eq!(slugify_variation_name("  Trimmed  "), "trimmed");
     }
 
     #[test]
@@ -437,7 +434,10 @@ mod tests {
         let name = "abcde-12345-67890-abcde-12345-67890-abcde-12345-67890-abcde-123";
         let result = slugify_variation_name(name);
         assert_eq!(result.len(), 63);
-        assert_eq!(result, "abcde-12345-67890-abcde-12345-67890-abcde-12345-67890-abcde-123");
+        assert_eq!(
+            result,
+            "abcde-12345-67890-abcde-12345-67890-abcde-12345-67890-abcde-123"
+        );
     }
 
     // Tests for slugify_unique_variation
@@ -450,10 +450,7 @@ mod tests {
 
     #[test]
     fn test_slugify_unique_variation_with_conflict() {
-        let branches = vec![
-            "main".to_string(),
-            "what-if-sarah-lived".to_string(),
-        ];
+        let branches = vec!["main".to_string(), "what-if-sarah-lived".to_string()];
         let result = slugify_unique_variation("What if Sarah lived?", &branches);
         assert_eq!(result, "what-if-sarah-lived-2");
     }
@@ -546,7 +543,7 @@ mod tests {
         assert!(result.ends_with(".md"));
 
         // Extract the suffix between "001-chapter-" and ".md"
-        let suffix = &result[12..result.len()-3]; // 12 = "001-chapter-".len(), 3 = ".md".len()
+        let suffix = &result[12..result.len() - 3]; // 12 = "001-chapter-".len(), 3 = ".md".len()
         assert_eq!(suffix.len(), 8); // UUID suffix should be 8 chars
 
         // Should not be in the existing filenames (guaranteed unique)

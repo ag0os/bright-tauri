@@ -1,4 +1,6 @@
-use crate::file_management::{list_variations, save_variation_mapping, VariationInfo, get_variation_display_name};
+use crate::file_management::{
+    get_variation_display_name, list_variations, save_variation_mapping, VariationInfo,
+};
 use crate::file_naming::slugify_unique_variation;
 use crate::git::{CommitInfo, DiffResult, GitService, MergeResult};
 use std::path::PathBuf;
@@ -90,7 +92,7 @@ pub fn git_create_branch(
     Ok(VariationInfo {
         slug: slug.clone(),
         display_name: display_name.clone(),
-        is_current: false, // Just created, not checked out yet
+        is_current: false,  // Just created, not checked out yet
         is_original: false, // New branches are never the original
     })
 }
@@ -150,17 +152,16 @@ pub fn git_merge_branches(
     let path = PathBuf::from(repo_path);
 
     // Perform the merge
-    let result = GitService::merge_branches(&path, &from_branch, &into_branch)
-        .map_err(|e| {
-            // Make error messages more user-friendly
-            let err_str = e.to_string();
-            if err_str.contains("Branch") && err_str.contains("not found") {
-                format!("Variation not found. Please refresh the variation list.")
-            } else {
-                // Keep other errors as is
-                err_str
-            }
-        })?;
+    let result = GitService::merge_branches(&path, &from_branch, &into_branch).map_err(|e| {
+        // Make error messages more user-friendly
+        let err_str = e.to_string();
+        if err_str.contains("Branch") && err_str.contains("not found") {
+            format!("Variation not found. Please refresh the variation list.")
+        } else {
+            // Keep other errors as is
+            err_str
+        }
+    })?;
 
     // Make success messages more user-friendly
     let friendly_message = if result.message.contains("Already up-to-date") {
@@ -242,8 +243,7 @@ pub fn git_get_current_branch(repo_path: String) -> Result<VariationInfo, String
     let slug = GitService::get_current_branch(&path).map_err(|e| e.to_string())?;
 
     // Get display name from metadata
-    let display_name = get_variation_display_name(&path, &slug)
-        .unwrap_or_else(|_| slug.clone()); // Fallback to slug if metadata not found
+    let display_name = get_variation_display_name(&path, &slug).unwrap_or_else(|_| slug.clone()); // Fallback to slug if metadata not found
 
     // Check if this is the original branch
     let original_branch = crate::git::GitService::get_original_branch(&path)

@@ -352,7 +352,9 @@ pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementRes
 
     // Initialize variations mapping on first creation
     if is_new_metadata && metadata.variations.is_empty() {
-        metadata.variations.insert("original".to_string(), "Original".to_string());
+        metadata
+            .variations
+            .insert("original".to_string(), "Original".to_string());
     }
 
     // Serialize to pretty JSON
@@ -1232,12 +1234,7 @@ mod tests {
         write_metadata_file(&repo_path, &story).unwrap();
 
         // Save a variation mapping
-        save_variation_mapping(
-            &repo_path,
-            "what-if-sarah-lived",
-            "What if Sarah lived?",
-        )
-        .unwrap();
+        save_variation_mapping(&repo_path, "what-if-sarah-lived", "What if Sarah lived?").unwrap();
 
         // Read metadata and verify
         let metadata = read_metadata_file(&repo_path).unwrap();
@@ -1380,14 +1377,8 @@ mod tests {
             .iter()
             .find(|v| v.slug == current_branch)
             .unwrap();
-        let var1 = variations
-            .iter()
-            .find(|v| v.slug == "variation-1")
-            .unwrap();
-        let var2 = variations
-            .iter()
-            .find(|v| v.slug == "variation-2")
-            .unwrap();
+        let var1 = variations.iter().find(|v| v.slug == "variation-1").unwrap();
+        let var2 = variations.iter().find(|v| v.slug == "variation-2").unwrap();
 
         // Verify current branch (main)
         assert!(main_var.is_original);
@@ -1793,10 +1784,7 @@ mod tests {
         for i in 0..5 {
             let slug = format!("variation-{}", i);
             let expected_display = format!("Variation {}", i);
-            assert_eq!(
-                metadata.variations.get(&slug),
-                Some(&expected_display)
-            );
+            assert_eq!(metadata.variations.get(&slug), Some(&expected_display));
         }
     }
 }

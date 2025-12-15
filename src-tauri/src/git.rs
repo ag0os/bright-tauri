@@ -680,7 +680,10 @@ impl GitService {
             .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
 
         // Try to find "original" branch first
-        if repo.find_branch("original", git2::BranchType::Local).is_ok() {
+        if repo
+            .find_branch("original", git2::BranchType::Local)
+            .is_ok()
+        {
             return Ok("original".to_string());
         }
 

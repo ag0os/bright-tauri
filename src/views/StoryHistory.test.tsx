@@ -27,8 +27,8 @@ const mockStory: Story = {
   title: 'Test Story',
   description: 'A test story',
   universeId: 'universe-1',
-  storyType: 'Novel',
-  status: 'In Progress',
+  storyType: 'novel',
+  status: 'inprogress',
   content: '',
   notes: '',
   outline: '',
@@ -42,10 +42,15 @@ const mockStory: Story = {
   seriesName: null,
   parentStoryId: null,
   createdAt: '2025-01-01T00:00:00Z',
+  updatedAt: '2025-01-01T00:00:00Z',
   lastEditedAt: '2025-01-01T00:00:00Z',
   gitRepoPath: '/path/to/repo',
   currentBranch: 'main',
-  hasUncommittedChanges: false,
+  stagedChanges: false,
+  version: 1,
+  variationGroupId: 'vg-1',
+  variationType: 'original',
+  parentVariationId: null,
 };
 
 // Create timestamps that are a known time in the past
@@ -86,13 +91,15 @@ describe('StoryHistory', () => {
 
     // Mock Date constructor for consistent relative time testing
     // Using vi.spyOn instead of useFakeTimers to avoid issues with waitFor
-    const DateConstructor = Date;
-    vi.spyOn(global as any, 'Date').mockImplementation(((...args: any[]) => {
+    const OriginalDate = globalThis.Date;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (vi.spyOn(globalThis, 'Date') as any).mockImplementation(function (...args: unknown[]) {
       if (args.length === 0) {
         return now;
       }
-      return new DateConstructor(...args);
-    }) as any);
+      // @ts-expect-error - constructing Date with spread args
+      return new OriginalDate(...args);
+    });
 
     // Setup store mocks
     mockGoBack = vi.fn();

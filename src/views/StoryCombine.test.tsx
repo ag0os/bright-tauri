@@ -29,8 +29,8 @@ const mockStory: Story = {
   title: 'Test Story',
   description: 'A test story',
   universeId: 'universe-1',
-  storyType: 'Novel',
-  status: 'In Progress',
+  storyType: 'novel',
+  status: 'inprogress',
   content: '',
   notes: '',
   outline: '',
@@ -44,10 +44,15 @@ const mockStory: Story = {
   seriesName: null,
   parentStoryId: null,
   createdAt: '2025-01-01T00:00:00Z',
+  updatedAt: '2025-01-01T00:00:00Z',
   lastEditedAt: '2025-01-01T00:00:00Z',
   gitRepoPath: '/path/to/repo',
   currentBranch: 'main',
-  hasUncommittedChanges: false,
+  stagedChanges: false,
+  version: 1,
+  variationGroupId: 'vg-1',
+  variationType: 'original',
+  parentVariationId: null,
 };
 
 describe('StoryCombine', () => {
