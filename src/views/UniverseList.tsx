@@ -9,6 +9,8 @@ import { Plus, MagnifyingGlass, CircleNotch, GlobeHemisphereWest } from '@phosph
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ElementCard } from '@/components/universe/ElementCard';
 import { CreateElementModal } from '@/components/universe/CreateElementModal';
+import { EditElementModal } from '@/components/universe/EditElementModal';
+import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
@@ -38,6 +40,9 @@ export function UniverseList() {
   } = useElementsStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingElement, setEditingElement] = useState<Element | null>(null);
+  const [deletingElement, setDeletingElement] = useState<Element | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>('name');
 
   // Load elements on mount
@@ -58,17 +63,29 @@ export function UniverseList() {
   };
 
   const handleEditElement = (element: Element) => {
-    navigate({ screen: 'element-detail', elementId: element.id });
+    setEditingElement(element);
   };
 
-  const handleDeleteElement = async (element: Element) => {
-    if (window.confirm(`Are you sure you want to delete "${element.name}"?`)) {
-      try {
-        await deleteElement(element.id);
-      } catch (error) {
-        console.error('Failed to delete element:', error);
-      }
+  const handleDeleteElement = (element: Element) => {
+    setDeletingElement(element);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingElement) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteElement(deletingElement.id);
+      setDeletingElement(null);
+    } catch (error) {
+      console.error('Failed to delete element:', error);
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setDeletingElement(null);
   };
 
   const handleToggleFavorite = async (element: Element) => {
@@ -360,6 +377,33 @@ export function UniverseList() {
 
       {/* Create Element Modal */}
       {showCreateModal && <CreateElementModal onClose={() => setShowCreateModal(false)} />}
+
+      {/* Edit Element Modal */}
+      {editingElement && (
+        <EditElementModal
+          element={editingElement}
+          onClose={() => setEditingElement(null)}
+          onSuccess={() => {
+            // Reload elements to get the updated data
+            if (currentUniverse) {
+              loadElements(currentUniverse.id);
+            }
+            setEditingElement(null);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingElement && (
+        <ConfirmDeleteModal
+          title="Delete Element"
+          message="Are you sure you want to delete this element? This action cannot be undone."
+          itemName={deletingElement.name}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
+        />
+      )}
 
       {/* Spinner animation */}
       <style>

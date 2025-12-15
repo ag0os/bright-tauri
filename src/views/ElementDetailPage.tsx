@@ -24,6 +24,8 @@ import {
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { EditElementModal } from '@/components/universe/EditElementModal';
+import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import type { Element, ElementType, Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -77,6 +79,9 @@ export function ElementDetailPage() {
   const [relatedStories, setRelatedStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Get element ID from route
   const elementId =
@@ -150,23 +155,33 @@ export function ElementDetailPage() {
   };
 
   const handleEdit = () => {
-    // TODO: Navigate to edit mode or open edit modal
-    console.log('Edit element:', element?.id);
+    setShowEditModal(true);
   };
 
-  const handleDelete = async () => {
+  const handleEditSuccess = (updatedElement: Element) => {
+    setElement(updatedElement);
+  };
+
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
     if (!element) return;
 
-    if (window.confirm(`Are you sure you want to delete "${element.name}"?`)) {
-      try {
-        await deleteElement(element.id);
-        // Navigate back after successful deletion
-        navigate({ screen: 'universe-list' });
-      } catch (err) {
-        console.error('Failed to delete element:', err);
-        alert('Failed to delete element. Please try again.');
-      }
+    setIsDeleting(true);
+    try {
+      await deleteElement(element.id);
+      // Navigate back after successful deletion
+      navigate({ screen: 'universe-list' });
+    } catch (err) {
+      console.error('Failed to delete element:', err);
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
   };
 
   // Loading state
@@ -612,6 +627,27 @@ export function ElementDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Modal */}
+      {showEditModal && element && (
+        <EditElementModal
+          element={element}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={handleEditSuccess}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && element && (
+        <ConfirmDeleteModal
+          title="Delete Element"
+          message="Are you sure you want to delete this element? This action cannot be undone."
+          itemName={element.name}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }
