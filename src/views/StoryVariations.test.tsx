@@ -551,6 +551,165 @@ describe('StoryVariations', () => {
     });
   });
 
+  describe('Slug Preview', () => {
+    it('shows slug preview when typing variation name', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'What if Sarah lived?');
+
+      expect(screen.getByText(/branch name: what-if-sarah-lived/i)).toBeInTheDocument();
+    });
+
+    it('does not show slug preview when input is empty', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      expect(screen.queryByText(/branch name:/i)).not.toBeInTheDocument();
+    });
+
+    it('does not show slug preview when there is a validation error', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'original');
+
+      // Should show validation error, not slug preview
+      expect(screen.getByText(/is a reserved name/i)).toBeInTheDocument();
+      expect(screen.queryByText(/branch name:/i)).not.toBeInTheDocument();
+    });
+
+    it('updates slug preview in real-time as user types', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+
+      // Type "What"
+      await user.type(input, 'What');
+      expect(screen.getByText(/branch name: what/i)).toBeInTheDocument();
+
+      // Add " if"
+      await user.type(input, ' if');
+      expect(screen.getByText(/branch name: what-if/i)).toBeInTheDocument();
+
+      // Add " Sarah"
+      await user.type(input, ' Sarah');
+      expect(screen.getByText(/branch name: what-if-sarah/i)).toBeInTheDocument();
+    });
+
+    it('handles special characters in slug preview', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, "The Knight's Tale!");
+
+      // Should strip special characters
+      expect(screen.getByText(/branch name: the-knights-tale/i)).toBeInTheDocument();
+    });
+
+    it('shows "untitled" in preview for input with only special characters', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, '!!!@@@###');
+
+      expect(screen.getByText(/branch name: untitled/i)).toBeInTheDocument();
+    });
+
+    it('handles accented characters in slug preview', async () => {
+      const user = userEvent.setup();
+      mockTauriInvoke('ensure_story_git_repo', mockStory);
+      mockTauriInvoke('git_list_branches', mockVariations);
+      mockTauriInvoke('git_get_current_branch', mockVariations[0]);
+
+      renderWithProviders(<StoryVariations />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      const newVariationButton = screen.getByRole('button', { name: /new variation/i });
+      await user.click(newVariationButton);
+
+      const input = screen.getByLabelText(/variation name/i);
+      await user.type(input, 'Café Résumé');
+
+      // Should transliterate accented characters
+      expect(screen.getByText(/branch name: cafe-resume/i)).toBeInTheDocument();
+    });
+  });
+
   describe('Switching Variations', () => {
     it('switches to variation when "Switch to" is clicked', async () => {
       const user = userEvent.setup();

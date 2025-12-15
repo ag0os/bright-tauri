@@ -108,6 +108,13 @@
   font-weight: var(--font-weight-medium);
 }
 
+.slug-preview {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
 .form-actions {
   display: flex;
   gap: var(--spacing-sm);

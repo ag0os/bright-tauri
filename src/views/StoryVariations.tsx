@@ -88,6 +88,54 @@ export function StoryVariations() {
   const RESERVED_NAMES = ['original', 'main', 'master', 'head'];
 
   /**
+   * Simple client-side slugification that approximates the backend logic.
+   * This is a preview only - the backend does the actual slugification with full Unicode transliteration.
+   *
+   * @param text - The text to slugify
+   * @returns A slugified string (preview)
+   */
+  const slugifyPreview = (text: string): string => {
+    // Basic transliteration for common accented characters
+    const transliterate = (str: string): string => {
+      const map: Record<string, string> = {
+        'á': 'a', 'à': 'a', 'ä': 'a', 'â': 'a', 'ã': 'a', 'å': 'a',
+        'é': 'e', 'è': 'e', 'ë': 'e', 'ê': 'e',
+        'í': 'i', 'ì': 'i', 'ï': 'i', 'î': 'i',
+        'ó': 'o', 'ò': 'o', 'ö': 'o', 'ô': 'o', 'õ': 'o', 'ø': 'o',
+        'ú': 'u', 'ù': 'u', 'ü': 'u', 'û': 'u',
+        'ñ': 'n', 'ç': 'c', 'ß': 'ss',
+      };
+      return str.replace(/[^\x00-\x7F]/g, (char) => map[char] || char);
+    };
+
+    const slug = transliterate(text)
+      .toLowerCase()
+      .trim()
+      // Replace spaces and underscores with hyphens
+      .replace(/[\s_]+/g, '-')
+      // Remove any character that's not ASCII alphanumeric or hyphen
+      .replace(/[^a-z0-9-]/g, '')
+      // Replace multiple consecutive hyphens with single hyphen
+      .replace(/-+/g, '-')
+      // Remove leading/trailing hyphens
+      .replace(/^-|-$/g, '');
+
+    // Handle empty results
+    if (slug === '') {
+      return 'untitled';
+    }
+
+    // Truncate to 63 characters at hyphen boundary
+    if (slug.length > 63) {
+      const truncated = slug.substring(0, 63);
+      const lastHyphen = truncated.lastIndexOf('-');
+      return lastHyphen > 0 ? truncated.substring(0, lastHyphen) : truncated;
+    }
+
+    return slug;
+  };
+
+  /**
    * Validates variation name against reserved names
    * @param name - The variation name to validate
    * @returns Error message if invalid, null if valid
@@ -382,9 +430,16 @@ export function StoryVariations() {
                   {validationError}
                 </p>
               ) : (
-                <p id="variation-name-hint" className="form-hint">
-                  Use a descriptive name that explains this story variation
-                </p>
+                <>
+                  <p id="variation-name-hint" className="form-hint">
+                    Use a descriptive name that explains this story variation
+                  </p>
+                  {newVariationName.trim() && (
+                    <p className="slug-preview">
+                      Branch name: {slugifyPreview(newVariationName)}
+                    </p>
+                  )}
+                </>
               )}
             </div>
             <div className="form-actions">
