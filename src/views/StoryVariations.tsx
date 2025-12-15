@@ -1,16 +1,16 @@
 /**
- * StoryBranches View
+ * StoryVariations View
  *
- * Git branch management UI for story variations.
- * Allows users to create, view, and switch between different story branches.
+ * Story variation management UI with writer-friendly terminology.
+ * Allows users to create, view, and switch between different story variations.
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, GitBranch, Check, Plus, WarningCircle, GitDiff, GitMerge } from '@phosphor-icons/react';
+import { ArrowLeft, GitBranch, Check, Plus, WarningCircle, GitDiff, GitMerge, Star } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useToastStore } from '@/stores/useToastStore';
-import type { Story, MergeResult } from '@/types';
+import type { Story, MergeResult, VariationInfo } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -19,38 +19,43 @@ import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
 import './StoryVariations.css';
 
-interface BranchListItemProps {
-  name: string;
-  isCurrent: boolean;
+interface VariationListItemProps {
+  variation: VariationInfo;
   onSwitch: () => void;
-  onMerge: () => void;
+  onCombine: () => void;
 }
 
-function BranchListItem({ name, isCurrent, onSwitch, onMerge }: BranchListItemProps) {
+function VariationListItem({ variation, onSwitch, onCombine }: VariationListItemProps) {
   return (
-    <div className={`branch-item ${isCurrent ? 'current' : ''}`}>
+    <div className={`branch-item ${variation.is_current ? 'current' : ''}`}>
       <div className="branch-info">
         <GitBranch size={18} />
-        <span className="branch-name">{name}</span>
-        {isCurrent && (
+        <span className="branch-name">{variation.display_name}</span>
+        {variation.is_original && (
+          <span className="original-badge">
+            <Star size={14} weight="fill" />
+            Original
+          </span>
+        )}
+        {variation.is_current && (
           <span className="current-badge">
             <Check size={14} />
-            Current
+            Current Variation
           </span>
         )}
       </div>
-      {!isCurrent && (
+      {!variation.is_current && (
         <div className="branch-actions">
           <button className="btn btn-outline btn-sm" onClick={onSwitch}>
-            Switch
+            Switch to
           </button>
           <button
             className="btn btn-primary btn-sm"
-            onClick={onMerge}
-            title={`Merge ${name} into current branch`}
+            onClick={onCombine}
+            title={`Combine ${variation.display_name} into current variation`}
           >
             <GitMerge size={16} />
-            Merge
+            Combine
           </button>
         </div>
       )}
@@ -66,11 +71,11 @@ export function StoryVariations() {
   const showSuccess = useToastStore((state) => state.success);
 
   const [story, setStory] = useState<Story | null>(null);
-  const [branches, setBranches] = useState<string[]>([]);
-  const [currentBranch, setCurrentBranch] = useState<string>('');
+  const [variations, setVariations] = useState<VariationInfo[]>([]);
+  const [currentVariation, setCurrentVariation] = useState<VariationInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [newBranchName, setNewBranchName] = useState('');
+  const [newVariationName, setNewVariationName] = useState('');
   const [isSwitching, setIsSwitching] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -78,7 +83,7 @@ export function StoryVariations() {
   const storyId =
     currentRoute.screen === 'story-variations' ? currentRoute.storyId : null;
 
-  // Load story and branches on mount
+  // Load story and variations on mount
   useEffect(() => {
     if (!storyId) return;
 
@@ -91,11 +96,11 @@ export function StoryVariations() {
         });
         setStory(loadedStory);
 
-        // Fetch branches
-        await loadBranches(loadedStory.gitRepoPath);
+        // Fetch variations
+        await loadVariations(loadedStory.gitRepoPath);
       } catch (error) {
         const message = typeof error === 'string' ? error : error instanceof Error ? error.message : 'Failed to load story';
-        console.error('Failed to load branches:', error);
+        console.error('Failed to load variations:', error);
         showError(message);
       } finally {
         setIsLoading(false);
@@ -105,70 +110,63 @@ export function StoryVariations() {
     loadData();
   }, [storyId]);
 
-  const loadBranches = async (repoPath: string) => {
+  const loadVariations = async (repoPath: string) => {
     try {
-      const [branchList, current] = await Promise.all([
-        invoke<string[]>('git_list_branches', { repoPath }),
-        invoke<string>('git_get_current_branch', { repoPath }),
+      const [variationList, current] = await Promise.all([
+        invoke<VariationInfo[]>('git_list_branches', { repoPath }),
+        invoke<VariationInfo>('git_get_current_branch', { repoPath }),
       ]);
 
-      setBranches(branchList);
-      setCurrentBranch(current);
+      setVariations(variationList);
+      setCurrentVariation(current);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to load branches';
+        error instanceof Error ? error.message : 'Failed to load variations';
       showError(message);
     }
   };
 
-  const handleCreateBranch = async () => {
-    if (!story?.gitRepoPath || !newBranchName.trim()) return;
-
-    // Validate branch name (no spaces, lowercase)
-    const trimmedName = newBranchName.trim().toLowerCase().replace(/\s+/g, '-');
-    if (trimmedName !== newBranchName.trim()) {
-      showError('Branch name must be lowercase with no spaces');
-      return;
-    }
+  const handleCreateVariation = async () => {
+    if (!story?.gitRepoPath || !newVariationName.trim() || !currentVariation) return;
 
     setIsCreating(true);
     try {
       await invoke('git_create_branch', {
         repoPath: story.gitRepoPath,
-        parentBranch: currentBranch,
-        newBranch: trimmedName,
+        parentBranch: currentVariation.slug,
+        displayName: newVariationName.trim(),
       });
 
-      showSuccess(`Created branch: ${trimmedName}`);
-      setNewBranchName('');
+      showSuccess(`Created variation: ${newVariationName.trim()}`);
+      setNewVariationName('');
       setShowCreateForm(false);
 
-      // Reload branches
-      await loadBranches(story.gitRepoPath);
+      // Reload variations
+      await loadVariations(story.gitRepoPath);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to create branch';
+        error instanceof Error ? error.message : 'Failed to create variation';
       showError(message);
     } finally {
       setIsCreating(false);
     }
   };
 
-  const handleSwitchBranch = async (branchName: string) => {
+  const handleSwitchVariation = async (variation: VariationInfo) => {
     if (!story?.gitRepoPath) return;
 
     setIsSwitching(true);
     try {
       await invoke('git_checkout_branch', {
         repoPath: story.gitRepoPath,
-        branch: branchName,
+        branch: variation.slug,
       });
 
-      showSuccess(`Switched to branch: ${branchName}`);
-      setCurrentBranch(branchName);
+      showSuccess(`Switched to variation: ${variation.display_name}`);
+      setCurrentVariation(variation);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to switch branch';
+        error instanceof Error ? error.message : 'Failed to switch variation';
 
       // Check if error is due to uncommitted changes
       if (
@@ -176,7 +174,7 @@ export function StoryVariations() {
         message.includes('uncommitted changes')
       ) {
         showError(
-          'Cannot switch branches: You have unsaved changes. Please save or discard them first.'
+          'Cannot switch variations: You have unsaved changes. Please save or discard them first.'
         );
       } else {
         showError(message);
@@ -189,18 +187,18 @@ export function StoryVariations() {
   const handleCreateFormKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleCreateBranch();
+      handleCreateVariation();
     } else if (e.key === 'Escape') {
       setShowCreateForm(false);
-      setNewBranchName('');
+      setNewVariationName('');
     }
   };
 
-  const handleMergeBranch = async (fromBranch: string) => {
-    if (!story?.gitRepoPath || !storyId) return;
+  const handleCombineVariation = async (fromVariation: VariationInfo) => {
+    if (!story?.gitRepoPath || !storyId || !currentVariation) return;
 
-    // Confirm merge
-    const confirmMessage = `Merge "${fromBranch}" into "${currentBranch}"?\n\nThis will combine changes from both branches.`;
+    // Confirm combine
+    const confirmMessage = `Combine "${fromVariation.display_name}" into "${currentVariation.display_name}"?\n\nThis will merge changes from both variations.`;
     if (!window.confirm(confirmMessage)) {
       return;
     }
@@ -209,27 +207,27 @@ export function StoryVariations() {
     try {
       const result = await invoke<MergeResult>('git_merge_branches', {
         repoPath: story.gitRepoPath,
-        fromBranch,
-        intoBranch: currentBranch,
+        fromBranch: fromVariation.slug,
+        intoBranch: currentVariation.slug,
       });
 
       if (result.success) {
         showSuccess(result.message);
-        // Reload branches to reflect changes
-        await loadBranches(story.gitRepoPath);
+        // Reload variations to reflect changes
+        await loadVariations(story.gitRepoPath);
       } else {
         // Conflicts detected - navigate to merge resolution view
         navigate({
           screen: 'story-combine',
           storyId,
-          fromBranch,
-          intoBranch: currentBranch,
+          fromBranch: fromVariation.slug,
+          intoBranch: currentVariation.slug,
           conflicts: result.conflicts,
         });
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Failed to merge branches';
+        error instanceof Error ? error.message : 'Failed to combine variations';
       showError(message);
     } finally {
       setIsSwitching(false);
@@ -239,7 +237,7 @@ export function StoryVariations() {
   if (isLoading) {
     return (
       <div className="story-branches-loading">
-        <p>Loading branches...</p>
+        <p>Loading variations...</p>
       </div>
     );
   }
@@ -262,7 +260,7 @@ export function StoryVariations() {
         <WarningCircle size={48} weight="duotone" />
         <h2>No Version Control</h2>
         <p>This story does not have version control enabled.</p>
-        <p>Enable Git to create story variations and track changes.</p>
+        <p>Enable version control to create story variations and track changes.</p>
         <button className="btn btn-outline btn-base" onClick={goBack}>
           <ArrowLeft size={18} />
           Go Back
@@ -294,8 +292,8 @@ export function StoryVariations() {
         <button
           className="btn btn-outline btn-base"
           onClick={handleNavigateToCompare}
-          disabled={branches.length < 2}
-          title={branches.length < 2 ? 'Need at least 2 branches to compare' : 'Compare branches'}
+          disabled={variations.length < 2}
+          title={variations.length < 2 ? 'Need at least 2 variations to compare' : 'Compare variations'}
         >
           <GitDiff size={18} weight="duotone" />
           Compare
@@ -307,7 +305,7 @@ export function StoryVariations() {
           disabled={showCreateForm || isCreating}
         >
           <Plus size={18} />
-          New Branch
+          New Variation
         </button>
       </div>
 
@@ -317,44 +315,44 @@ export function StoryVariations() {
         <div className="story-info">
           <h2>{story.title}</h2>
           <p className="story-subtitle">
-            Manage different variations of your story using branches
+            Explore different versions of your story
           </p>
         </div>
 
-        {/* Create Branch Form */}
+        {/* Create Variation Form */}
         {showCreateForm && (
           <div className="create-branch-form">
-            <h3>Create New Branch</h3>
+            <h3>Create New Variation</h3>
             <div className="form-group">
-              <label htmlFor="branch-name">Branch Name</label>
+              <label htmlFor="variation-name">Variation Name</label>
               <input
-                id="branch-name"
+                id="variation-name"
                 type="text"
                 className="input-filled"
-                placeholder="e.g., alternate-ending"
-                value={newBranchName}
-                onChange={(e) => setNewBranchName(e.target.value)}
+                placeholder="e.g., What if Sarah lived?"
+                value={newVariationName}
+                onChange={(e) => setNewVariationName(e.target.value)}
                 onKeyDown={handleCreateFormKeyDown}
                 autoFocus
                 disabled={isCreating}
               />
               <p className="form-hint">
-                Use lowercase letters, numbers, and hyphens only
+                Use a descriptive name that explains this story variation
               </p>
             </div>
             <div className="form-actions">
               <button
                 className="btn btn-primary btn-base"
-                onClick={handleCreateBranch}
-                disabled={isCreating || !newBranchName.trim()}
+                onClick={handleCreateVariation}
+                disabled={isCreating || !newVariationName.trim()}
               >
-                {isCreating ? 'Creating...' : 'Create Branch'}
+                {isCreating ? 'Creating...' : 'Create Variation'}
               </button>
               <button
                 className="btn btn-outline btn-base"
                 onClick={() => {
                   setShowCreateForm(false);
-                  setNewBranchName('');
+                  setNewVariationName('');
                 }}
                 disabled={isCreating}
               >
@@ -364,20 +362,19 @@ export function StoryVariations() {
           </div>
         )}
 
-        {/* Branches List */}
+        {/* Variations List */}
         <div className="branches-section">
-          <h3>Branches ({branches.length})</h3>
+          <h3>Variations ({variations.length})</h3>
           <div className="branches-list">
-            {branches.length === 0 ? (
-              <p className="empty-message">No branches found</p>
+            {variations.length === 0 ? (
+              <p className="empty-message">No variations found</p>
             ) : (
-              branches.map((branch) => (
-                <BranchListItem
-                  key={branch}
-                  name={branch}
-                  isCurrent={branch === currentBranch}
-                  onSwitch={() => handleSwitchBranch(branch)}
-                  onMerge={() => handleMergeBranch(branch)}
+              variations.map((variation) => (
+                <VariationListItem
+                  key={variation.slug}
+                  variation={variation}
+                  onSwitch={() => handleSwitchVariation(variation)}
+                  onCombine={() => handleCombineVariation(variation)}
                 />
               ))
             )}
@@ -387,7 +384,7 @@ export function StoryVariations() {
         {/* Loading overlay when switching */}
         {isSwitching && (
           <div className="switching-overlay">
-            <p>Switching branches...</p>
+            <p>Switching variations...</p>
           </div>
         )}
       </div>

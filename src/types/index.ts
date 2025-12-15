@@ -38,6 +38,7 @@ export type { DiffResult } from './DiffResult';
 export type { FileChange } from './FileChange';
 export type { ChangeStatus } from './ChangeStatus';
 export type { MergeResult } from './MergeResult';
+export type { VariationInfo } from './VariationInfo';
 
 // Utility types for partial updates
 // These convert `field: T | null` types to `field?: T | null` for easier usage
