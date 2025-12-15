@@ -6,10 +6,11 @@ import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
 import { StoryChildren } from "./views/StoryChildren";
 import { StoryHistory } from "./views/StoryHistory";
-import { StoryBranches } from "./views/StoryBranches";
-import { StoryDiff } from "./views/StoryDiff";
-import { StoryMerge } from "./views/StoryMerge";
+import { StoryVariations } from "./views/StoryVariations";
+import { StoryCompare } from "./views/StoryCompare";
+import { StoryCombine } from "./views/StoryCombine";
 import { ElementDetailPage } from "./views/ElementDetailPage";
+import { Settings } from "./views/Settings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastContainer } from "./components/Toast";
 import "./App.css";
@@ -61,24 +62,24 @@ function AppContent() {
         </ErrorBoundary>
       );
 
-    case 'story-branches':
+    case 'story-variations':
       return (
-        <ErrorBoundary name="Story Branches">
-          <StoryBranches />
+        <ErrorBoundary name="Story Variations">
+          <StoryVariations />
         </ErrorBoundary>
       );
 
-    case 'story-diff':
+    case 'story-compare':
       return (
-        <ErrorBoundary name="Story Diff">
-          <StoryDiff />
+        <ErrorBoundary name="Story Compare">
+          <StoryCompare />
         </ErrorBoundary>
       );
 
-    case 'story-merge':
+    case 'story-combine':
       return (
-        <ErrorBoundary name="Story Merge">
-          <StoryMerge />
+        <ErrorBoundary name="Story Combine">
+          <StoryCombine />
         </ErrorBoundary>
       );
 
@@ -86,6 +87,13 @@ function AppContent() {
       return (
         <ErrorBoundary name="Element Detail">
           <ElementDetailPage />
+        </ErrorBoundary>
+      );
+
+    case 'settings':
+      return (
+        <ErrorBoundary name="Settings">
+          <Settings />
         </ErrorBoundary>
       );
 

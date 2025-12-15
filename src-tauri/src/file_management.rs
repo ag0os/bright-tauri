@@ -6,9 +6,13 @@
 use crate::file_naming;
 use crate::git::GitService;
 use crate::models::Story;
+use fs2::FileExt;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fs;
+use std::fs::File;
 use std::path::{Path, PathBuf};
+use ts_rs::TS;
 
 /// Error type for file management operations
 #[derive(Debug)]
@@ -20,6 +24,8 @@ pub enum FileManagementError {
     Io(std::io::Error),
     /// Git operation error
     Git(crate::git::GitServiceError),
+    /// Operation blocked due to uncommitted changes
+    UncommittedChanges(String),
 }
 
 impl std::fmt::Display for FileManagementError {
@@ -30,6 +36,9 @@ impl std::fmt::Display for FileManagementError {
             }
             FileManagementError::Io(err) => write!(f, "IO error: {err}"),
             FileManagementError::Git(err) => write!(f, "Git error: {err}"),
+            FileManagementError::UncommittedChanges(msg) => {
+                write!(f, "Uncommitted changes exist: {msg}")
+            }
         }
     }
 }
@@ -50,6 +59,56 @@ impl From<crate::git::GitServiceError> for FileManagementError {
 
 #[allow(dead_code)]
 pub type FileManagementResult<T> = Result<T, FileManagementError>;
+
+/// RAII guard for metadata.json file locking
+///
+/// This struct ensures that the metadata.json file is locked while in scope
+/// and automatically released when dropped, even if an error occurs.
+struct MetadataLock {
+    file: File,
+    lock_path: PathBuf,
+}
+
+impl MetadataLock {
+    /// Acquire an exclusive lock on metadata.json
+    ///
+    /// Creates a lock file (metadata.json.lock) and acquires an exclusive lock on it.
+    /// The lock is automatically released when this struct is dropped.
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository containing metadata.json
+    ///
+    /// # Returns
+    /// MetadataLock guard that will release the lock when dropped
+    ///
+    /// # Errors
+    /// Returns an error if the lock file cannot be created or locked
+    fn acquire(repo_path: &Path) -> FileManagementResult<Self> {
+        let lock_path = repo_path.join("metadata.json.lock");
+
+        // Create or open the lock file
+        let file = fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(&lock_path)?;
+
+        // Acquire exclusive lock (blocks if another process has the lock)
+        file.lock_exclusive()?;
+
+        Ok(MetadataLock {
+            file,
+            lock_path: lock_path.clone(),
+        })
+    }
+}
+
+impl Drop for MetadataLock {
+    fn drop(&mut self) {
+        // Lock is automatically released when the file is closed
+        // But we also need to clean up the lock file
+        let _ = fs::remove_file(&self.lock_path);
+    }
+}
 
 /// Create a new story file in a Git repository
 ///
@@ -233,6 +292,11 @@ pub struct StoryMetadata {
     pub word_count: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
+    /// Maps variation branch names (slugs) to their display names
+    /// e.g., "what-if-sarah-lived" -> "What if Sarah lived?"
+    /// This allows the UI to show friendly names while Git uses branch-safe slugs
+    #[serde(default, skip_serializing_if = "std::collections::HashMap::is_empty")]
+    pub variations: std::collections::HashMap<String, String>,
 }
 
 impl StoryMetadata {
@@ -250,6 +314,7 @@ impl StoryMetadata {
             updated_at: story.updated_at.clone(),
             word_count: story.word_count,
             target_word_count: story.target_word_count,
+            variations: std::collections::HashMap::new(),
         }
     }
 }
@@ -259,6 +324,9 @@ impl StoryMetadata {
 /// Creates or updates the metadata.json file in the repository root with
 /// story information. The file is formatted as pretty-printed JSON for
 /// human readability and committed to Git.
+///
+/// On first creation, initializes the variations mapping with "original" -> "Original"
+/// to establish the default branch name mapping for the Version System UX Abstraction.
 ///
 /// # Arguments
 /// * `repo_path` - Path to the Git repository
@@ -274,7 +342,20 @@ impl StoryMetadata {
 /// - Git commit fails
 #[allow(dead_code)]
 pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
-    let metadata = StoryMetadata::from_story(story);
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
+    let metadata_path = repo_path.join("metadata.json");
+    let is_new_metadata = !metadata_path.exists();
+
+    let mut metadata = StoryMetadata::from_story(story);
+
+    // Initialize variations mapping on first creation
+    if is_new_metadata && metadata.variations.is_empty() {
+        metadata
+            .variations
+            .insert("original".to_string(), "Original".to_string());
+    }
 
     // Serialize to pretty JSON
     let json = serde_json::to_string_pretty(&metadata).map_err(|e| {
@@ -283,13 +364,13 @@ pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementRes
         )))
     })?;
 
-    let metadata_path = repo_path.join("metadata.json");
     fs::write(&metadata_path, &json)?;
 
     // Commit to Git
     let commit_message = format!("Update metadata for story: {}", story.title);
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
+    // Lock is automatically released when _lock goes out of scope
     Ok("metadata.json".to_string())
 }
 
@@ -307,6 +388,259 @@ pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementRes
 #[allow(dead_code)]
 pub fn update_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
     write_metadata_file(repo_path, story)
+}
+
+/// Read metadata.json file from a Git repository
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+///
+/// # Returns
+/// StoryMetadata parsed from the metadata.json file
+///
+/// # Errors
+/// Returns an error if:
+/// - File doesn't exist
+/// - File cannot be read
+/// - JSON parsing fails
+#[allow(dead_code)]
+pub fn read_metadata_file(repo_path: &Path) -> FileManagementResult<StoryMetadata> {
+    let metadata_path = repo_path.join("metadata.json");
+    let json_content = fs::read_to_string(&metadata_path)?;
+    let metadata: StoryMetadata = serde_json::from_str(&json_content).map_err(|e| {
+        FileManagementError::Io(std::io::Error::other(format!(
+            "Failed to parse metadata: {e}"
+        )))
+    })?;
+    Ok(metadata)
+}
+
+/// Information about a story variation (Git branch with display name)
+///
+/// This struct represents a variation/branch in a story's Git repository,
+/// combining the Git branch name (slug) with its user-friendly display name.
+#[derive(Debug, Clone, Serialize, Deserialize, TS, PartialEq)]
+#[ts(export, export_to = "../../src/types/")]
+pub struct VariationInfo {
+    /// Git branch name (slug), e.g., "what-if-sarah-lived"
+    pub slug: String,
+    /// User-facing display name, e.g., "What if Sarah lived?"
+    pub display_name: String,
+    /// Is this the currently active branch?
+    pub is_current: bool,
+    /// Is this the original/main branch?
+    pub is_original: bool,
+}
+
+/// Save or update a variation mapping in metadata.json
+///
+/// Adds or updates the variation mapping in the metadata file, then commits
+/// the change to Git. If the variations field doesn't exist, it will be created.
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `slug` - The Git branch name (e.g., "what-if-sarah-lived")
+/// * `display_name` - The user-friendly name (e.g., "What if Sarah lived?")
+///
+/// # Returns
+/// Success or error
+///
+/// # Errors
+/// Returns an error if:
+/// - Metadata file doesn't exist
+/// - File cannot be read or written
+/// - Git commit fails
+#[allow(dead_code)]
+pub fn save_variation_mapping(
+    repo_path: &Path,
+    slug: &str,
+    display_name: &str,
+) -> FileManagementResult<()> {
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
+    // Read existing metadata
+    let mut metadata = read_metadata_file(repo_path)?;
+
+    // Update variations mapping
+    metadata
+        .variations
+        .insert(slug.to_string(), display_name.to_string());
+
+    // Serialize to pretty JSON
+    let json = serde_json::to_string_pretty(&metadata).map_err(|e| {
+        FileManagementError::Io(std::io::Error::other(format!(
+            "Failed to serialize metadata: {e}"
+        )))
+    })?;
+
+    // Write to file
+    let metadata_path = repo_path.join("metadata.json");
+    fs::write(&metadata_path, &json)?;
+
+    // Commit to Git
+    let commit_message = format!("Save variation mapping: {} -> {}", slug, display_name);
+    GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
+
+    // Lock is automatically released when _lock goes out of scope
+    Ok(())
+}
+
+/// Get the display name for a variation
+///
+/// Retrieves the display name from the metadata file. If the mapping doesn't
+/// exist, returns the slug as the display name (for backward compatibility).
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `slug` - The Git branch name
+///
+/// # Returns
+/// The display name if found, or the slug if not found
+///
+/// # Errors
+/// Returns an error if:
+/// - Metadata file doesn't exist
+/// - File cannot be read
+#[allow(dead_code)]
+pub fn get_variation_display_name(repo_path: &Path, slug: &str) -> FileManagementResult<String> {
+    // Read metadata
+    let metadata = read_metadata_file(repo_path)?;
+
+    // Return display name if found, otherwise return slug as fallback
+    Ok(metadata
+        .variations
+        .get(slug)
+        .cloned()
+        .unwrap_or_else(|| slug.to_string()))
+}
+
+/// List all variations in the repository
+///
+/// Returns information about all Git branches (variations) including their
+/// display names, current status, and whether they're the original branch.
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+///
+/// # Returns
+/// Vector of VariationInfo structs
+///
+/// # Errors
+/// Returns an error if:
+/// - Repository doesn't exist
+/// - Git operations fail
+/// - Metadata cannot be read
+#[allow(dead_code)]
+pub fn list_variations(repo_path: &Path) -> FileManagementResult<Vec<VariationInfo>> {
+    // Get all branches from Git
+    let branches = GitService::list_branches(repo_path)?;
+
+    // Get current branch
+    let current_branch = GitService::get_current_branch(repo_path)?;
+
+    // Read metadata (handle missing file gracefully)
+    let metadata = read_metadata_file(repo_path).unwrap_or_else(|_| StoryMetadata {
+        id: String::new(),
+        universe_id: String::new(),
+        title: String::new(),
+        description: String::new(),
+        story_type: String::new(),
+        status: String::new(),
+        created_at: String::new(),
+        updated_at: String::new(),
+        word_count: 0,
+        target_word_count: None,
+        variations: HashMap::new(),
+    });
+
+    // Build VariationInfo for each branch
+    let variations = branches
+        .into_iter()
+        .map(|slug| {
+            let display_name = metadata
+                .variations
+                .get(&slug)
+                .cloned()
+                .unwrap_or_else(|| slug.clone());
+
+            let is_current = slug == current_branch;
+            let is_original = slug == "original" || slug == "main";
+
+            VariationInfo {
+                slug,
+                display_name,
+                is_current,
+                is_original,
+            }
+        })
+        .collect();
+
+    Ok(variations)
+}
+
+/// Remove a variation mapping from metadata.json
+///
+/// Removes the variation mapping when a branch is deleted. This should be called
+/// after the Git branch is deleted to keep metadata in sync.
+///
+/// # Arguments
+/// * `repo_path` - Path to the Git repository
+/// * `slug` - The Git branch name to remove
+///
+/// # Returns
+/// Success or error
+///
+/// # Errors
+/// Returns an error if:
+/// - Metadata file doesn't exist
+/// - File cannot be read or written
+/// - Git commit fails
+#[allow(dead_code)]
+pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementResult<()> {
+    // Check if the branch has uncommitted changes
+    match GitService::has_uncommitted_changes(repo_path, slug) {
+        Ok(true) => {
+            return Err(FileManagementError::UncommittedChanges(format!(
+                "Cannot remove variation mapping for '{}': branch has uncommitted changes",
+                slug
+            )));
+        }
+        Ok(false) => {
+            // No uncommitted changes, proceed
+        }
+        Err(_) => {
+            // Branch doesn't exist or other error - proceed anyway
+            // The variation mapping can be removed even if the branch doesn't exist
+        }
+    }
+
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
+    // Read existing metadata
+    let mut metadata = read_metadata_file(repo_path)?;
+
+    // Remove the variation mapping
+    metadata.variations.remove(slug);
+
+    // Serialize to pretty JSON
+    let json = serde_json::to_string_pretty(&metadata).map_err(|e| {
+        FileManagementError::Io(std::io::Error::other(format!(
+            "Failed to serialize metadata: {e}"
+        )))
+    })?;
+
+    // Write to file
+    let metadata_path = repo_path.join("metadata.json");
+    fs::write(&metadata_path, &json)?;
+
+    // Commit to Git
+    let commit_message = format!("Remove variation mapping: {}", slug);
+    GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
+
+    // Lock is automatically released when _lock goes out of scope
+    Ok(())
 }
 
 #[cfg(test)]
@@ -772,6 +1106,7 @@ mod tests {
             updated_at: "2024-01-02T00:00:00Z".to_string(),
             word_count: 1000,
             target_word_count: Some(50000),
+            variations: std::collections::HashMap::new(),
         };
 
         // Serialize and deserialize
@@ -779,5 +1114,677 @@ mod tests {
         let deserialized: StoryMetadata = serde_json::from_str(&json).unwrap();
 
         assert_eq!(metadata, deserialized);
+    }
+
+    #[test]
+    fn test_story_metadata_variations_field() {
+        let mut variations = std::collections::HashMap::new();
+        variations.insert(
+            "what-if-sarah-lived".to_string(),
+            "What if Sarah lived?".to_string(),
+        );
+        variations.insert(
+            "alternate-ending".to_string(),
+            "Alternate Ending".to_string(),
+        );
+
+        let metadata = StoryMetadata {
+            id: "test-123".to_string(),
+            universe_id: "uni-456".to_string(),
+            title: "Test".to_string(),
+            description: "Desc".to_string(),
+            story_type: "Book".to_string(),
+            status: "InProgress".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            word_count: 1000,
+            target_word_count: Some(50000),
+            variations,
+        };
+
+        // Serialize and deserialize
+        let json = serde_json::to_string_pretty(&metadata).unwrap();
+        let deserialized: StoryMetadata = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(metadata, deserialized);
+        assert_eq!(deserialized.variations.len(), 2);
+        assert_eq!(
+            deserialized.variations.get("what-if-sarah-lived"),
+            Some(&"What if Sarah lived?".to_string())
+        );
+    }
+
+    #[test]
+    fn test_story_metadata_variations_empty_not_serialized() {
+        // Empty variations should not appear in JSON
+        let metadata = StoryMetadata {
+            id: "test-123".to_string(),
+            universe_id: "uni-456".to_string(),
+            title: "Test".to_string(),
+            description: "Desc".to_string(),
+            story_type: "Book".to_string(),
+            status: "InProgress".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-02T00:00:00Z".to_string(),
+            word_count: 1000,
+            target_word_count: Some(50000),
+            variations: std::collections::HashMap::new(),
+        };
+
+        let json = serde_json::to_string_pretty(&metadata).unwrap();
+        // Variations field should not be present in JSON when empty
+        assert!(!json.contains("variations"));
+    }
+
+    #[test]
+    fn test_story_metadata_backward_compatibility() {
+        // Old metadata.json without variations field should still parse
+        let old_json = r#"{
+            "id": "test-123",
+            "universe_id": "uni-456",
+            "title": "Test",
+            "description": "Desc",
+            "story_type": "Book",
+            "status": "InProgress",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-02T00:00:00Z",
+            "word_count": 1000,
+            "target_word_count": 50000
+        }"#;
+
+        let metadata: StoryMetadata = serde_json::from_str(old_json).unwrap();
+        assert_eq!(metadata.id, "test-123");
+        assert_eq!(metadata.variations.len(), 0);
+    }
+
+    #[test]
+    fn test_read_metadata_file() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Read metadata back
+        let metadata = read_metadata_file(&repo_path).unwrap();
+
+        assert_eq!(metadata.id, story.id);
+        assert_eq!(metadata.title, story.title);
+        assert_eq!(metadata.word_count, story.word_count);
+    }
+
+    #[test]
+    fn test_read_metadata_file_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = temp_dir.path().join("nonexistent");
+
+        let result = read_metadata_file(&repo_path);
+        assert!(result.is_err());
+    }
+
+    // Tests for variation CRUD functions
+
+    #[test]
+    fn test_save_variation_mapping_adds_new_variation() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Create initial metadata
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save a variation mapping
+        save_variation_mapping(&repo_path, "what-if-sarah-lived", "What if Sarah lived?").unwrap();
+
+        // Read metadata and verify
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        // Should have "original" (auto-created) + "what-if-sarah-lived"
+        assert!(metadata.variations.len() >= 1);
+        assert_eq!(
+            metadata.variations.get("what-if-sarah-lived"),
+            Some(&"What if Sarah lived?".to_string())
+        );
+    }
+
+    #[test]
+    fn test_save_variation_mapping_updates_existing_variation() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save initial mapping
+        save_variation_mapping(&repo_path, "alternate-ending", "Alternate Ending").unwrap();
+
+        // Update with new display name
+        save_variation_mapping(&repo_path, "alternate-ending", "Alternate Ending v2").unwrap();
+
+        // Verify update
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert_eq!(
+            metadata.variations.get("alternate-ending"),
+            Some(&"Alternate Ending v2".to_string())
+        );
+    }
+
+    #[test]
+    fn test_save_variation_mapping_multiple_variations() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save multiple variations
+        save_variation_mapping(&repo_path, "variation-1", "Variation One").unwrap();
+        save_variation_mapping(&repo_path, "variation-2", "Variation Two").unwrap();
+        save_variation_mapping(&repo_path, "variation-3", "Variation Three").unwrap();
+
+        // Verify all variations
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.len() >= 3); // At least the 3 we added
+        assert_eq!(
+            metadata.variations.get("variation-1"),
+            Some(&"Variation One".to_string())
+        );
+        assert_eq!(
+            metadata.variations.get("variation-2"),
+            Some(&"Variation Two".to_string())
+        );
+        assert_eq!(
+            metadata.variations.get("variation-3"),
+            Some(&"Variation Three".to_string())
+        );
+    }
+
+    #[test]
+    fn test_save_variation_mapping_commits_to_git() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        save_variation_mapping(&repo_path, "test-variation", "Test Variation").unwrap();
+
+        // Get git history and verify commit
+        let history = {
+            let repo = git2::Repository::open(&repo_path).unwrap();
+            let head_name = repo.head().unwrap().shorthand().unwrap().to_string();
+            GitService::get_history(&repo_path, &head_name).unwrap()
+        };
+
+        // Should have commits: initial + metadata + variation
+        assert!(history.len() >= 3);
+        assert!(history[0].message.contains("Save variation mapping"));
+        assert!(history[0].message.contains("test-variation"));
+    }
+
+    #[test]
+    fn test_get_variation_display_name_returns_display_name() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        save_variation_mapping(&repo_path, "my-variation", "My Variation").unwrap();
+
+        let display_name = get_variation_display_name(&repo_path, "my-variation").unwrap();
+        assert_eq!(display_name, "My Variation");
+    }
+
+    #[test]
+    fn test_get_variation_display_name_returns_slug_if_not_found() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Query a variation that doesn't have a mapping
+        let display_name = get_variation_display_name(&repo_path, "nonexistent").unwrap();
+        assert_eq!(display_name, "nonexistent");
+    }
+
+    #[test]
+    fn test_list_variations_returns_all_branches() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get the actual current branch name after init
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Create some branches from the current branch
+        GitService::create_branch(&repo_path, &current_branch, "variation-1").unwrap();
+        GitService::create_branch(&repo_path, &current_branch, "variation-2").unwrap();
+
+        // Save mappings for some (but not all) branches
+        save_variation_mapping(&repo_path, "variation-1", "Variation One").unwrap();
+
+        // List variations
+        let variations = list_variations(&repo_path).unwrap();
+
+        // Should have 3 branches: current_branch, variation-1, variation-2
+        assert_eq!(variations.len(), 3);
+
+        // Find each variation
+        let main_var = variations
+            .iter()
+            .find(|v| v.slug == current_branch)
+            .unwrap();
+        let var1 = variations.iter().find(|v| v.slug == "variation-1").unwrap();
+        let var2 = variations.iter().find(|v| v.slug == "variation-2").unwrap();
+
+        // Verify current branch (main)
+        assert!(main_var.is_original);
+        assert!(main_var.is_current);
+        assert_eq!(main_var.slug, current_branch);
+
+        // Verify variation-1 (has mapping)
+        assert!(!var1.is_original);
+        assert!(!var1.is_current);
+        assert_eq!(var1.display_name, "Variation One");
+
+        // Verify variation-2 (no mapping, uses slug)
+        assert!(!var2.is_original);
+        assert!(!var2.is_current);
+        assert_eq!(var2.display_name, "variation-2");
+    }
+
+    #[test]
+    fn test_list_variations_marks_current_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get the actual current branch name after init
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Create and checkout a branch
+        GitService::create_branch(&repo_path, &current_branch, "feature-branch").unwrap();
+        GitService::checkout_branch(&repo_path, "feature-branch").unwrap();
+
+        // List variations
+        let variations = list_variations(&repo_path).unwrap();
+
+        // Find feature-branch
+        let feature = variations
+            .iter()
+            .find(|v| v.slug == "feature-branch")
+            .unwrap();
+        let main = variations
+            .iter()
+            .find(|v| v.slug == current_branch)
+            .unwrap();
+
+        // Verify current status
+        assert!(feature.is_current);
+        assert!(!main.is_current);
+    }
+
+    #[test]
+    fn test_list_variations_handles_missing_metadata() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Delete metadata.json
+        fs::remove_file(repo_path.join("metadata.json")).unwrap();
+
+        // Should still work, returning empty variations map
+        let variations = list_variations(&repo_path).unwrap();
+
+        // Should have 1 branch: original (renamed from main/master during init_repo)
+        assert_eq!(variations.len(), 1);
+        assert_eq!(variations[0].slug, "original");
+        assert_eq!(variations[0].display_name, "original"); // Uses slug as fallback
+    }
+
+    #[test]
+    fn test_list_variations_marks_original_for_main_and_original() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get the actual current branch name after init
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Create branches - note: "original" might already exist, so try to create it but don't fail if it exists
+        let _ = GitService::create_branch(&repo_path, &current_branch, "original");
+        GitService::create_branch(&repo_path, &current_branch, "other-branch").unwrap();
+
+        let variations = list_variations(&repo_path).unwrap();
+
+        let main = variations
+            .iter()
+            .find(|v| v.slug == current_branch)
+            .unwrap();
+        let other = variations
+            .iter()
+            .find(|v| v.slug == "other-branch")
+            .unwrap();
+
+        // Current branch (main) should be marked as original
+        assert!(main.is_original);
+        assert!(!other.is_original);
+
+        // If "original" branch exists, it should also be marked as original
+        if let Some(original) = variations.iter().find(|v| v.slug == "original") {
+            assert!(original.is_original);
+        }
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_removes_variation() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Add variations
+        save_variation_mapping(&repo_path, "var-1", "Variation One").unwrap();
+        save_variation_mapping(&repo_path, "var-2", "Variation Two").unwrap();
+
+        // Remove one
+        remove_variation_mapping(&repo_path, "var-1").unwrap();
+
+        // Verify removal
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get("var-1").is_none());
+        assert_eq!(
+            metadata.variations.get("var-2"),
+            Some(&"Variation Two".to_string())
+        );
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_commits_to_git() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        save_variation_mapping(&repo_path, "test-var", "Test Variation").unwrap();
+        remove_variation_mapping(&repo_path, "test-var").unwrap();
+
+        // Get git history and verify commit
+        let history = {
+            let repo = git2::Repository::open(&repo_path).unwrap();
+            let head_name = repo.head().unwrap().shorthand().unwrap().to_string();
+            GitService::get_history(&repo_path, &head_name).unwrap()
+        };
+
+        // Should have commits including the remove commit
+        assert!(history[0].message.contains("Remove variation mapping"));
+        assert!(history[0].message.contains("test-var"));
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_nonexistent_is_ok() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Remove a variation that doesn't exist - should succeed silently
+        let result = remove_variation_mapping(&repo_path, "nonexistent");
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_fails_with_uncommitted_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save a variation mapping for the current branch
+        save_variation_mapping(&repo_path, &current_branch, "Current Branch").unwrap();
+
+        // Create uncommitted changes
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Try to remove the variation mapping - should fail
+        let result = remove_variation_mapping(&repo_path, &current_branch);
+
+        assert!(result.is_err());
+        match result {
+            Err(FileManagementError::UncommittedChanges(msg)) => {
+                assert!(msg.contains(&current_branch));
+                assert!(msg.contains("uncommitted changes"));
+            }
+            _ => panic!("Expected UncommittedChanges error"),
+        }
+
+        // Verify the mapping was NOT removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert_eq!(
+            metadata.variations.get(&current_branch),
+            Some(&"Current Branch".to_string())
+        );
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_succeeds_with_committed_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save a variation mapping
+        save_variation_mapping(&repo_path, &current_branch, "Current Branch").unwrap();
+
+        // Commit all changes
+        GitService::commit_file(&repo_path, "test.txt", "Test", "Commit changes").unwrap();
+
+        // Now remove the variation mapping - should succeed
+        let result = remove_variation_mapping(&repo_path, &current_branch);
+        assert!(result.is_ok());
+
+        // Verify the mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get(&current_branch).is_none());
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_succeeds_for_non_current_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Create another branch
+        GitService::create_branch(&repo_path, &current_branch, "other-branch").unwrap();
+
+        // Save a variation mapping for the other branch
+        save_variation_mapping(&repo_path, "other-branch", "Other Branch").unwrap();
+
+        // Create uncommitted changes on current branch
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Remove the variation mapping for the other branch - should succeed
+        // because uncommitted changes are only checked on the current branch
+        let result = remove_variation_mapping(&repo_path, "other-branch");
+        assert!(result.is_ok());
+
+        // Verify the mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get("other-branch").is_none());
+    }
+
+    #[test]
+    fn test_variation_info_struct() {
+        let info = VariationInfo {
+            slug: "what-if-sarah-lived".to_string(),
+            display_name: "What if Sarah lived?".to_string(),
+            is_current: true,
+            is_original: false,
+        };
+
+        assert_eq!(info.slug, "what-if-sarah-lived");
+        assert_eq!(info.display_name, "What if Sarah lived?");
+        assert!(info.is_current);
+        assert!(!info.is_original);
+    }
+
+    #[test]
+    fn test_variation_info_serialization() {
+        let info = VariationInfo {
+            slug: "test".to_string(),
+            display_name: "Test Variation".to_string(),
+            is_current: false,
+            is_original: true,
+        };
+
+        // Serialize and deserialize
+        let json = serde_json::to_string(&info).unwrap();
+        let deserialized: VariationInfo = serde_json::from_str(&json).unwrap();
+
+        assert_eq!(info, deserialized);
+    }
+
+    #[test]
+    fn test_metadata_lock_acquire_and_release() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Acquire lock in a scope
+        {
+            let _lock = MetadataLock::acquire(&repo_path).unwrap();
+            // Lock is held here
+            // Verify lock file exists
+            assert!(repo_path.join("metadata.json.lock").exists());
+        }
+        // Lock is released when _lock goes out of scope
+        // Lock file should be deleted
+        assert!(!repo_path.join("metadata.json.lock").exists());
+
+        // Should be able to acquire lock again
+        {
+            let _lock2 = MetadataLock::acquire(&repo_path).unwrap();
+            // Lock file should exist while lock is held
+            assert!(repo_path.join("metadata.json.lock").exists());
+        }
+        // Lock file should be deleted again
+        assert!(!repo_path.join("metadata.json.lock").exists());
+    }
+
+    #[test]
+    fn test_write_metadata_file_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+
+        // Write metadata should work with locking
+        let result = write_metadata_file(&repo_path, &story);
+        assert!(result.is_ok());
+
+        // Verify metadata was written
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert_eq!(metadata.id, story.id);
+    }
+
+    #[test]
+    fn test_save_variation_mapping_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save variation should work with locking
+        let result = save_variation_mapping(&repo_path, "test-var", "Test Variation");
+        assert!(result.is_ok());
+
+        // Verify mapping was saved
+        let display_name = get_variation_display_name(&repo_path, "test-var").unwrap();
+        assert_eq!(display_name, "Test Variation");
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Add a variation
+        save_variation_mapping(&repo_path, "test-var", "Test Variation").unwrap();
+
+        // Remove variation should work with locking
+        let result = remove_variation_mapping(&repo_path, "test-var");
+        assert!(result.is_ok());
+
+        // Verify mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get("test-var").is_none());
+    }
+
+    #[test]
+    fn test_concurrent_metadata_writes_are_serialized() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = Arc::new(GitService::init_repo(temp_dir.path(), "test-story").unwrap());
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Spawn multiple threads that try to write to metadata concurrently
+        let mut handles = vec![];
+        for i in 0..5 {
+            let repo_path_clone = Arc::clone(&repo_path);
+            let handle = thread::spawn(move || {
+                let slug = format!("variation-{}", i);
+                let display_name = format!("Variation {}", i);
+                save_variation_mapping(&repo_path_clone, &slug, &display_name)
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads to complete
+        let mut results = vec![];
+        for handle in handles {
+            results.push(handle.join().unwrap());
+        }
+
+        // All operations should succeed
+        for result in results {
+            assert!(result.is_ok());
+        }
+
+        // Verify all variations were saved
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        for i in 0..5 {
+            let slug = format!("variation-{}", i);
+            let expected_display = format!("Variation {}", i);
+            assert_eq!(metadata.variations.get(&slug), Some(&expected_display));
+        }
     }
 }

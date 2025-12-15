@@ -1,5 +1,5 @@
 /**
- * StoryBranches Styles
+ * StoryVariations Styles
  */
 
 .story-branches {
@@ -67,7 +67,7 @@
   color: var(--color-text-secondary);
 }
 
-/* Create Branch Form */
+/* Create Variation Form */
 .create-branch-form {
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
@@ -101,12 +101,26 @@
   color: var(--color-text-secondary);
 }
 
+.form-error {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+}
+
+.slug-preview {
+  margin-top: var(--spacing-xs);
+  font-size: var(--font-size-small);
+  color: var(--color-text-tertiary);
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
 .form-actions {
   display: flex;
   gap: var(--spacing-sm);
 }
 
-/* Branches Section */
+/* Variations Section */
 .branches-section {
   margin-bottom: var(--spacing-lg);
 }
@@ -131,7 +145,7 @@
   font-size: var(--font-size-body);
 }
 
-/* Branch Item */
+/* Variation Item */
 .branch-item {
   display: flex;
   align-items: center;
@@ -174,6 +188,18 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-primary);
   background-color: var(--color-primary-ultralight);
+  border-radius: var(--border-radius-sm);
+}
+
+.original-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-accent);
+  background-color: var(--color-accent-light);
   border-radius: var(--border-radius-sm);
 }
 

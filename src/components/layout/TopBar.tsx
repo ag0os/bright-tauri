@@ -6,7 +6,8 @@
  */
 
 import { useEffect } from 'react';
-import { CaretDown, BookOpen, Globe, Sun, Moon } from '@phosphor-icons/react';
+import { CaretDown, BookOpen, Globe, Sun, Moon, Gear } from '@phosphor-icons/react';
+import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useTheme } from '@/hooks';
 import './TopBar.css';
@@ -19,6 +20,7 @@ interface TopBarProps {
 }
 
 export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
+  const navigate = useNavigationStore((state) => state.navigate);
   const { currentUniverse, universes, loadUniverses, setCurrentUniverse } = useUniverseStore();
   const { isDark, toggleTheme } = useTheme();
 
@@ -94,6 +96,15 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {isDark ? <Sun size={16} weight="duotone" /> : <Moon size={16} weight="duotone" />}
+        </button>
+
+        <button
+          className="topbar__settings-button"
+          onClick={() => navigate({ screen: 'settings' })}
+          title="Settings"
+          aria-label="Settings"
+        >
+          <Gear size={16} weight="duotone" />
         </button>
       </nav>
     </div>

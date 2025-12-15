@@ -52,7 +52,6 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
     description: '',
     details: '',
     tags: '',
-    icon: '',
     color: '',
   });
 
@@ -62,7 +61,6 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
 
   const handleTemplateSelect = (templateKey: TemplateKey) => {
     setSelectedTemplate(templateKey);
-    setFormData({ ...formData, icon: templates[templateKey].icon });
     setStep('fill-form');
   };
 
@@ -121,7 +119,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
           : null,
         relationships: null,
         color: formData.color.trim() || null,
-        icon: formData.icon.trim() || null,
+        icon: null, // Icons are now determined by element type (Phosphor icons)
       });
 
       // Navigate to element detail
@@ -226,17 +224,20 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    justifyContent: 'flex-start',
                     gap: 'var(--spacing-2)',
                     padding: 'var(--spacing-4)',
                     height: 'auto',
                     textAlign: 'center',
+                    whiteSpace: 'normal',
                   }}
                 >
-                  <span style={{ fontSize: '32px' }}>{template.icon}</span>
+                  <span style={{ fontSize: '32px', flexShrink: 0 }}>{template.icon}</span>
                   <span
                     style={{
                       fontFamily: 'var(--typography-heading-font)',
                       fontWeight: 'var(--font-weight-semibold)',
+                      flexShrink: 0,
                     }}
                   >
                     {template.name}
@@ -245,6 +246,9 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                     style={{
                       fontSize: 'var(--font-size-xs)',
                       color: 'var(--color-text-secondary)',
+                      lineHeight: '1.4',
+                      whiteSpace: 'normal',
+                      wordWrap: 'break-word',
                     }}
                   >
                     {template.description}
@@ -439,24 +443,6 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                     />
                   </div>
                   <div className="input-helper">Comma-separated tags</div>
-                </div>
-
-                {/* Icon */}
-                <div className="input-group input-5">
-                  <label className="input-label" htmlFor="element-icon">
-                    Icon
-                  </label>
-                  <div className="input-wrapper">
-                    <input
-                      id="element-icon"
-                      type="text"
-                      className="input-field input-base"
-                      placeholder={templateData.icon}
-                      value={formData.icon}
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    />
-                  </div>
-                  <div className="input-helper">Emoji or text icon</div>
                 </div>
 
                 {/* Color */}

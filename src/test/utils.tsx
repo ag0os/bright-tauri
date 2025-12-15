@@ -22,26 +22,45 @@ export function renderWithProviders(
   return render(ui, options);
 }
 
+// Internal state for storing mock responses
+const mockResponses = new Map<string, unknown>();
+
 /**
- * Mock Tauri invoke function for testing
- * Usage: mockTauriInvoke('command_name', returnValue)
+ * Update the mock implementation of invoke to use the current mockResponses
  */
-export function mockTauriInvoke(command: string, returnValue: unknown) {
+function updateInvokeMock() {
   const invoke = tauriCore.invoke as ReturnType<typeof vi.fn>;
   invoke.mockImplementation((cmd: string) => {
-    if (cmd === command) {
-      return Promise.resolve(returnValue);
+    if (mockResponses.has(cmd)) {
+      const value = mockResponses.get(cmd);
+      // If returnValue is a function, call it to get the actual value
+      if (typeof value === 'function') {
+        return Promise.resolve(value());
+      }
+      return Promise.resolve(value);
     }
     return Promise.reject(new Error(`Unhandled command: ${cmd}`));
   });
 }
 
 /**
+ * Mock Tauri invoke function for testing
+ * Usage: mockTauriInvoke('command_name', returnValue)
+ * Supports multiple commands - call multiple times to set up multiple mocks
+ */
+export function mockTauriInvoke(command: string, returnValue: unknown) {
+  mockResponses.set(command, returnValue);
+  updateInvokeMock();
+}
+
+/**
  * Reset all Tauri mocks
  */
 export function resetTauriMocks() {
+  mockResponses.clear();
   const invoke = tauriCore.invoke as ReturnType<typeof vi.fn>;
   invoke.mockReset();
+  updateInvokeMock();
 }
 
 // Re-export everything from @testing-library/react

@@ -202,6 +202,14 @@
   font-weight: 600;
 }
 
+.commit-display {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  font-weight: 500;
+  cursor: help;
+}
+
 .restore-button {
   display: flex;
   align-items: center;

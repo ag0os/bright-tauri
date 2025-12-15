@@ -7,20 +7,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+/** Auto-commit mode: when to create Git commits */
+export type AutoCommitMode = 'on-close' | 'timed';
+
 interface SettingsState {
   // Auto-commit settings
   autoCommitEnabled: boolean;
-  autoCommitDelay: number; // milliseconds
+  autoCommitMode: AutoCommitMode;
+  autoCommitDelay: number; // milliseconds (only used when mode is 'timed')
 
   // Actions
   setAutoCommitEnabled: (enabled: boolean) => void;
+  setAutoCommitMode: (mode: AutoCommitMode) => void;
   setAutoCommitDelay: (delay: number) => void;
   resetToDefaults: () => void;
 }
 
 const DEFAULT_SETTINGS = {
   autoCommitEnabled: true,
-  autoCommitDelay: 30000, // 30 seconds
+  autoCommitMode: 'on-close' as AutoCommitMode, // Default: commit when leaving editor
+  autoCommitDelay: 30000, // 30 seconds (only used when mode is 'timed')
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -32,6 +38,10 @@ export const useSettingsStore = create<SettingsState>()(
       // Actions
       setAutoCommitEnabled: (enabled) => {
         set({ autoCommitEnabled: enabled });
+      },
+
+      setAutoCommitMode: (mode) => {
+        set({ autoCommitMode: mode });
       },
 
       setAutoCommitDelay: (delay) => {

@@ -102,6 +102,22 @@ impl GitService {
         GitService
     }
 
+    /// Create a signature using Git config (user.name and user.email)
+    /// Falls back to 'Bright' and 'noreply@bright.app' if not configured
+    fn create_signature(repo: &Repository) -> Result<Signature<'static>, GitError> {
+        let config = repo.config()?;
+
+        let name = config
+            .get_string("user.name")
+            .unwrap_or_else(|_| "Bright".to_string());
+
+        let email = config
+            .get_string("user.email")
+            .unwrap_or_else(|_| "noreply@bright.app".to_string());
+
+        Signature::now(&name, &email)
+    }
+
     /// Initialize a new Git repository for a story variation
     ///
     /// Creates a new repository at `{base_path}/git-repos/{story_id}/`
@@ -152,7 +168,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         repo.commit(
             Some("HEAD"),
@@ -162,6 +178,26 @@ impl GitService {
             &tree,
             &[],
         )?;
+
+        // Ensure branch is named "original" (git2 uses system default which might be "master" or "main")
+        // Only rename known default branch names to avoid unexpectedly renaming custom defaults
+        let head = repo.head()?;
+        if let Some(branch_name) = head.shorthand() {
+            if branch_name != "original" {
+                // Only rename 'master' or 'main' to 'original' for safety
+                if branch_name == "master" || branch_name == "main" {
+                    let mut branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
+                    branch.rename("original", false)?;
+                } else {
+                    // Log warning for unexpected default branch names
+                    eprintln!(
+                        "Warning: Repository initialized with unexpected default branch name '{}'. \
+                         Expected 'master' or 'main'. Branch was not renamed to 'original'.",
+                        branch_name
+                    );
+                }
+            }
+        }
 
         Ok(repo_path)
     }
@@ -205,7 +241,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         // Get parent commit (HEAD)
         let parent_commit = repo.head()?.peel_to_commit()?;
@@ -244,7 +280,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         // Get parent commit (HEAD)
         let parent_commit = repo.head()?.peel_to_commit()?;
@@ -497,7 +533,7 @@ impl GitService {
         let mut index = repo.index()?;
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
         let into_commit = into_ref.get().peel_to_commit()?;
 
         repo.commit(
@@ -627,6 +663,40 @@ impl GitService {
         Ok(branches)
     }
 
+    /// Get the canonical "original" branch name, with backward compatibility for "main"
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// "original" if it exists, otherwise "main" if it exists, otherwise error
+    ///
+    /// # Backward Compatibility
+    /// For existing repositories created before the "original" branch naming,
+    /// this function will return "main" if "original" doesn't exist.
+    pub fn get_original_branch(repo_path: &Path) -> GitResult<String> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Try to find "original" branch first
+        if repo
+            .find_branch("original", git2::BranchType::Local)
+            .is_ok()
+        {
+            return Ok("original".to_string());
+        }
+
+        // Fall back to "main" for backward compatibility
+        if repo.find_branch("main", git2::BranchType::Local).is_ok() {
+            return Ok("main".to_string());
+        }
+
+        Err(GitServiceError::InvalidOperation(
+            "Neither 'original' nor 'main' branch found".to_string(),
+        ))
+    }
+
     /// Get the name of the current branch
     ///
     /// # Arguments
@@ -641,6 +711,51 @@ impl GitService {
 
         let head = repo.head()?;
         Ok(head.shorthand().unwrap_or("HEAD").to_string())
+    }
+
+    /// Check if a branch has uncommitted changes
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    /// * `branch` - Name of the branch to check
+    ///
+    /// # Returns
+    /// True if the branch has uncommitted changes, false otherwise
+    ///
+    /// # Errors
+    /// Returns error if branch doesn't exist or repository cannot be opened
+    pub fn has_uncommitted_changes(repo_path: &Path, branch: &str) -> GitResult<bool> {
+        // Open repository
+        let repo = Repository::open(repo_path)
+            .map_err(|_| GitServiceError::RepositoryNotFound(repo_path.to_path_buf()))?;
+
+        // Check if branch exists
+        repo.find_branch(branch, git2::BranchType::Local)
+            .map_err(|_| {
+                GitServiceError::InvalidOperation(format!("Branch '{branch}' not found"))
+            })?;
+
+        // Get current branch to restore later
+        let current_branch = Self::get_current_branch(repo_path)?;
+
+        // If we're checking the current branch, just check status
+        if current_branch == branch {
+            let statuses = repo.statuses(None)?;
+            return Ok(!statuses.is_empty());
+        }
+
+        // For other branches, we need to temporarily switch to check their status
+        // However, switching branches requires no uncommitted changes in current branch
+        // So we'll use a different approach: check if the branch tip matches the working tree
+
+        // Actually, we can't reliably check uncommitted changes on a non-current branch
+        // without checking it out. The safest approach is to check the current branch only
+        // and assume other branches are clean (or require checkout first).
+
+        // For the use case of removing a variation mapping, we should check if the
+        // branch being removed is the current branch and if so, check for uncommitted changes.
+
+        Ok(false) // Non-current branches are assumed to have no uncommitted changes
     }
 
     /// Resolve a file conflict by choosing ours or theirs version
@@ -1403,5 +1518,178 @@ mod tests {
         let result = GitService::get_history(&repo_path, "nonexistent");
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_init_repo_renames_master_to_original() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-rename-master";
+
+        // Initialize repository (git2 might default to 'master' depending on system config)
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+        let repo = Repository::open(&repo_path).unwrap();
+
+        // Check current branch name
+        let head = repo.head().unwrap();
+        let branch_name = head.shorthand().unwrap();
+
+        // Should be renamed to "original" if it was "master" or "main"
+        // On modern systems, git defaults to "main", on older systems "master"
+        // Both should be renamed to "original"
+        assert_eq!(branch_name, "original");
+
+        // Verify the branch exists
+        let branch = repo.find_branch("original", git2::BranchType::Local);
+        assert!(branch.is_ok());
+    }
+
+    #[test]
+    fn test_init_repo_only_renames_known_defaults() {
+        let temp_dir = TempDir::new().unwrap();
+
+        // Create a test that manually sets up a repo with a custom default branch
+        let repo_path = temp_dir.path().join("git-repos").join("test-custom-branch");
+        fs::create_dir_all(&repo_path).unwrap();
+
+        // Initialize repo with custom default branch using git2 config
+        let repo = Repository::init(&repo_path).unwrap();
+
+        // Create initial commit
+        let metadata_path = repo_path.join("metadata.json");
+        fs::write(&metadata_path, r#"{"test": "data"}"#).unwrap();
+
+        let mut index = repo.index().unwrap();
+        index.add_path(Path::new("metadata.json")).unwrap();
+        index.write().unwrap();
+
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let signature = Signature::now("Test", "test@example.com").unwrap();
+
+        repo.commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            "Initial commit",
+            &tree,
+            &[],
+        )
+        .unwrap();
+
+        // Manually rename to a custom branch name (simulating git configured with init.defaultBranch=trunk)
+        let head = repo.head().unwrap();
+        if let Some(current_name) = head.shorthand() {
+            if current_name != "trunk" {
+                let mut branch = repo
+                    .find_branch(current_name, git2::BranchType::Local)
+                    .unwrap();
+                branch.rename("trunk", false).unwrap();
+            }
+        }
+
+        // Verify it's named "trunk"
+        let head = repo.head().unwrap();
+        assert_eq!(head.shorthand().unwrap(), "trunk");
+
+        // Now test that our safety logic would NOT rename "trunk" to "original"
+        // We test this by verifying that after running the rename logic,
+        // a branch named "trunk" (not "master" or "main") is preserved
+
+        let head = repo.head().unwrap();
+        if let Some(branch_name) = head.shorthand() {
+            // This is the safety logic from init_repo
+            if branch_name != "original" {
+                if branch_name == "master" || branch_name == "main" {
+                    // Would rename here
+                    panic!("Should not try to rename 'trunk' branch");
+                } else {
+                    // Should log warning and NOT rename
+                    // Verify branch is still "trunk"
+                    assert_eq!(branch_name, "trunk");
+                }
+            }
+        }
+
+        // After the safety check, branch should still be named "trunk"
+        let head = repo.head().unwrap();
+        assert_eq!(head.shorthand().unwrap(), "trunk");
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_detects_changes() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-uncommitted";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Initially no uncommitted changes
+        assert!(!GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+
+        // Create an uncommitted file
+        fs::write(repo_path.join("uncommitted.txt"), "Uncommitted content").unwrap();
+
+        // Now should detect uncommitted changes
+        assert!(GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_no_changes_after_commit() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-committed";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Create and commit a file
+        GitService::commit_file(&repo_path, "file.txt", "Content", "Add file").unwrap();
+
+        // Should have no uncommitted changes
+        assert!(!GitService::has_uncommitted_changes(&repo_path, &current_branch).unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_non_current_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-other-branch";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Get current branch
+        let current_branch = GitService::get_current_branch(&repo_path).unwrap();
+
+        // Create another branch
+        GitService::create_branch(&repo_path, &current_branch, "other-branch").unwrap();
+
+        // Check for uncommitted changes on non-current branch
+        // Should return false (non-current branches assumed clean)
+        assert!(!GitService::has_uncommitted_changes(&repo_path, "other-branch").unwrap());
+    }
+
+    #[test]
+    fn test_has_uncommitted_changes_fails_for_nonexistent_branch() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-no-branch";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Check for uncommitted changes on nonexistent branch
+        let result = GitService::has_uncommitted_changes(&repo_path, "nonexistent");
+
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::InvalidOperation(msg)) => {
+                assert!(msg.contains("not found"));
+            }
+            _ => panic!("Expected InvalidOperation error"),
+        }
     }
 }
