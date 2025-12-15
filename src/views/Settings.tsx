@@ -55,8 +55,8 @@ export function Settings() {
     setAutoCommitEnabled(!autoCommitEnabled);
     showSuccess(
       autoCommitEnabled
-        ? 'Auto-commit disabled'
-        : 'Auto-commit enabled'
+        ? 'Auto-save disabled'
+        : 'Auto-save enabled'
     );
   };
 
@@ -64,15 +64,15 @@ export function Settings() {
     setAutoCommitMode(mode);
     showSuccess(
       mode === 'on-close'
-        ? 'Auto-commit: when leaving editor'
-        : 'Auto-commit: time-based'
+        ? 'Auto-save: when leaving editor'
+        : 'Auto-save: periodically'
     );
   };
 
   const handleDelayChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const newDelay = parseInt(event.target.value, 10);
     setAutoCommitDelay(newDelay);
-    showSuccess(`Auto-commit delay set to ${formatDelay(newDelay)}`);
+    showSuccess(`Save frequency set to ${formatDelay(newDelay)}`);
   };
 
   const handleResetToDefaults = () => {
@@ -107,19 +107,19 @@ export function Settings() {
       {/* Settings Content */}
       <div className="settings-content">
         <div className="settings-section">
-          <h2 className="section-title">Version Control</h2>
+          <h2 className="section-title">Auto-Save</h2>
           <p className="section-description">
-            Configure automatic Git commits for your stories
+            Configure automatic saving of your stories
           </p>
 
           {/* Auto-commit Toggle */}
           <div className="setting-item">
             <div className="setting-info">
               <label htmlFor="auto-commit-toggle" className="setting-label">
-                Auto-commit
+                Auto-save snapshots
               </label>
               <p className="setting-description">
-                Automatically create Git commits to track your changes
+                Automatically save snapshots to track your changes
               </p>
             </div>
             <div className="setting-control">
@@ -139,10 +139,10 @@ export function Settings() {
           <div className={`setting-item ${!autoCommitEnabled ? 'setting-item--disabled' : ''}`}>
             <div className="setting-info">
               <label className="setting-label">
-                Commit Trigger
+                Save timing
               </label>
               <p className="setting-description">
-                Choose when to create version snapshots
+                Choose when to save your work
               </p>
             </div>
             <div className="setting-control">
@@ -167,7 +167,7 @@ export function Settings() {
                     onChange={() => handleModeChange('timed')}
                     disabled={!autoCommitEnabled}
                   />
-                  <span className="radio-label">Time-based</span>
+                  <span className="radio-label">Periodically</span>
                 </label>
               </div>
             </div>
@@ -178,10 +178,10 @@ export function Settings() {
             <div className={`setting-item ${!autoCommitEnabled ? 'setting-item--disabled' : ''}`}>
               <div className="setting-info">
                 <label htmlFor="auto-commit-delay" className="setting-label">
-                  Commit Interval
+                  Save frequency
                 </label>
                 <p className="setting-description">
-                  Time to wait after last edit before committing
+                  Time to wait after last edit before saving
                 </p>
               </div>
               <div className="setting-control">
