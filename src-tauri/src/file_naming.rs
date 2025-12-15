@@ -193,9 +193,10 @@ pub fn generate_unique_filename(
         }
         counter += 1;
 
-        // Safety: prevent infinite loop (though unlikely with realistic data)
+        // Safety: prevent infinite loop with UUID suffix for guaranteed uniqueness
         if counter > 1000 {
-            return format!("{order:03}-{slug}-{counter}.md");
+            let uuid_suffix = uuid::Uuid::new_v4().to_string()[..8].to_string();
+            return format!("{order:03}-{slug}-{uuid_suffix}.md");
         }
     }
 }

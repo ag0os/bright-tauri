@@ -533,7 +533,7 @@ impl GitService {
         let mut index = repo.index()?;
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
         let into_commit = into_ref.get().peel_to_commit()?;
 
         repo.commit(
