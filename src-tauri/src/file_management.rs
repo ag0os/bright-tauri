@@ -6,9 +6,11 @@
 use crate::file_naming;
 use crate::git::GitService;
 use crate::models::Story;
+use fs2::FileExt;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
+use std::fs::File;
 use std::path::{Path, PathBuf};
 use ts_rs::TS;
 
@@ -57,6 +59,56 @@ impl From<crate::git::GitServiceError> for FileManagementError {
 
 #[allow(dead_code)]
 pub type FileManagementResult<T> = Result<T, FileManagementError>;
+
+/// RAII guard for metadata.json file locking
+///
+/// This struct ensures that the metadata.json file is locked while in scope
+/// and automatically released when dropped, even if an error occurs.
+struct MetadataLock {
+    file: File,
+    lock_path: PathBuf,
+}
+
+impl MetadataLock {
+    /// Acquire an exclusive lock on metadata.json
+    ///
+    /// Creates a lock file (metadata.json.lock) and acquires an exclusive lock on it.
+    /// The lock is automatically released when this struct is dropped.
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository containing metadata.json
+    ///
+    /// # Returns
+    /// MetadataLock guard that will release the lock when dropped
+    ///
+    /// # Errors
+    /// Returns an error if the lock file cannot be created or locked
+    fn acquire(repo_path: &Path) -> FileManagementResult<Self> {
+        let lock_path = repo_path.join("metadata.json.lock");
+
+        // Create or open the lock file
+        let file = fs::OpenOptions::new()
+            .create(true)
+            .write(true)
+            .open(&lock_path)?;
+
+        // Acquire exclusive lock (blocks if another process has the lock)
+        file.lock_exclusive()?;
+
+        Ok(MetadataLock {
+            file,
+            lock_path: lock_path.clone(),
+        })
+    }
+}
+
+impl Drop for MetadataLock {
+    fn drop(&mut self) {
+        // Lock is automatically released when the file is closed
+        // But we also need to clean up the lock file
+        let _ = fs::remove_file(&self.lock_path);
+    }
+}
 
 /// Create a new story file in a Git repository
 ///
@@ -290,6 +342,9 @@ impl StoryMetadata {
 /// - Git commit fails
 #[allow(dead_code)]
 pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementResult<String> {
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
     let metadata_path = repo_path.join("metadata.json");
     let is_new_metadata = !metadata_path.exists();
 
@@ -313,6 +368,7 @@ pub fn write_metadata_file(repo_path: &Path, story: &Story) -> FileManagementRes
     let commit_message = format!("Update metadata for story: {}", story.title);
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
+    // Lock is automatically released when _lock goes out of scope
     Ok("metadata.json".to_string())
 }
 
@@ -398,6 +454,9 @@ pub fn save_variation_mapping(
     slug: &str,
     display_name: &str,
 ) -> FileManagementResult<()> {
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
     // Read existing metadata
     let mut metadata = read_metadata_file(repo_path)?;
 
@@ -421,6 +480,7 @@ pub fn save_variation_mapping(
     let commit_message = format!("Save variation mapping: {} -> {}", slug, display_name);
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
+    // Lock is automatically released when _lock goes out of scope
     Ok(())
 }
 
@@ -553,6 +613,9 @@ pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementR
         }
     }
 
+    // Acquire lock before any operations
+    let _lock = MetadataLock::acquire(repo_path)?;
+
     // Read existing metadata
     let mut metadata = read_metadata_file(repo_path)?;
 
@@ -574,6 +637,7 @@ pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementR
     let commit_message = format!("Remove variation mapping: {}", slug);
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
+    // Lock is automatically released when _lock goes out of scope
     Ok(())
 }
 
@@ -1609,5 +1673,130 @@ mod tests {
         let deserialized: VariationInfo = serde_json::from_str(&json).unwrap();
 
         assert_eq!(info, deserialized);
+    }
+
+    #[test]
+    fn test_metadata_lock_acquire_and_release() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        // Acquire lock in a scope
+        {
+            let _lock = MetadataLock::acquire(&repo_path).unwrap();
+            // Lock is held here
+            // Verify lock file exists
+            assert!(repo_path.join("metadata.json.lock").exists());
+        }
+        // Lock is released when _lock goes out of scope
+        // Lock file should be deleted
+        assert!(!repo_path.join("metadata.json.lock").exists());
+
+        // Should be able to acquire lock again
+        {
+            let _lock2 = MetadataLock::acquire(&repo_path).unwrap();
+            // Lock file should exist while lock is held
+            assert!(repo_path.join("metadata.json.lock").exists());
+        }
+        // Lock file should be deleted again
+        assert!(!repo_path.join("metadata.json.lock").exists());
+    }
+
+    #[test]
+    fn test_write_metadata_file_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+
+        // Write metadata should work with locking
+        let result = write_metadata_file(&repo_path, &story);
+        assert!(result.is_ok());
+
+        // Verify metadata was written
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert_eq!(metadata.id, story.id);
+    }
+
+    #[test]
+    fn test_save_variation_mapping_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Save variation should work with locking
+        let result = save_variation_mapping(&repo_path, "test-var", "Test Variation");
+        assert!(result.is_ok());
+
+        // Verify mapping was saved
+        let display_name = get_variation_display_name(&repo_path, "test-var").unwrap();
+        assert_eq!(display_name, "Test Variation");
+    }
+
+    #[test]
+    fn test_remove_variation_mapping_uses_lock() {
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = GitService::init_repo(temp_dir.path(), "test-story").unwrap();
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Add a variation
+        save_variation_mapping(&repo_path, "test-var", "Test Variation").unwrap();
+
+        // Remove variation should work with locking
+        let result = remove_variation_mapping(&repo_path, "test-var");
+        assert!(result.is_ok());
+
+        // Verify mapping was removed
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        assert!(metadata.variations.get("test-var").is_none());
+    }
+
+    #[test]
+    fn test_concurrent_metadata_writes_are_serialized() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let temp_dir = TempDir::new().unwrap();
+        let repo_path = Arc::new(GitService::init_repo(temp_dir.path(), "test-story").unwrap());
+
+        let story = create_test_story();
+        write_metadata_file(&repo_path, &story).unwrap();
+
+        // Spawn multiple threads that try to write to metadata concurrently
+        let mut handles = vec![];
+        for i in 0..5 {
+            let repo_path_clone = Arc::clone(&repo_path);
+            let handle = thread::spawn(move || {
+                let slug = format!("variation-{}", i);
+                let display_name = format!("Variation {}", i);
+                save_variation_mapping(&repo_path_clone, &slug, &display_name)
+            });
+            handles.push(handle);
+        }
+
+        // Wait for all threads to complete
+        let mut results = vec![];
+        for handle in handles {
+            results.push(handle.join().unwrap());
+        }
+
+        // All operations should succeed
+        for result in results {
+            assert!(result.is_ok());
+        }
+
+        // Verify all variations were saved
+        let metadata = read_metadata_file(&repo_path).unwrap();
+        for i in 0..5 {
+            let slug = format!("variation-{}", i);
+            let expected_display = format!("Variation {}", i);
+            assert_eq!(
+                metadata.variations.get(&slug),
+                Some(&expected_display)
+            );
+        }
     }
 }

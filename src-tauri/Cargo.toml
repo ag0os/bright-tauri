@@ -28,6 +28,7 @@ uuid = { version = "1.11", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 git2 = "0.19"
 deunicode = "1.4"
+fs2 = "0.4"
 
 [dev-dependencies]
 tempfile = "3"
