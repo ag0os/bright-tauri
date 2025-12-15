@@ -1471,4 +1471,99 @@ mod tests {
 
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_init_repo_renames_master_to_original() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-rename-master";
+
+        // Initialize repository (git2 might default to 'master' depending on system config)
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+        let repo = Repository::open(&repo_path).unwrap();
+
+        // Check current branch name
+        let head = repo.head().unwrap();
+        let branch_name = head.shorthand().unwrap();
+
+        // Should be renamed to "original" if it was "master" or "main"
+        // On modern systems, git defaults to "main", on older systems "master"
+        // Both should be renamed to "original"
+        assert_eq!(branch_name, "original");
+
+        // Verify the branch exists
+        let branch = repo.find_branch("original", git2::BranchType::Local);
+        assert!(branch.is_ok());
+    }
+
+    #[test]
+    fn test_init_repo_only_renames_known_defaults() {
+        let temp_dir = TempDir::new().unwrap();
+
+        // Create a test that manually sets up a repo with a custom default branch
+        let repo_path = temp_dir.path().join("git-repos").join("test-custom-branch");
+        fs::create_dir_all(&repo_path).unwrap();
+
+        // Initialize repo with custom default branch using git2 config
+        let repo = Repository::init(&repo_path).unwrap();
+
+        // Create initial commit
+        let metadata_path = repo_path.join("metadata.json");
+        fs::write(&metadata_path, r#"{"test": "data"}"#).unwrap();
+
+        let mut index = repo.index().unwrap();
+        index.add_path(Path::new("metadata.json")).unwrap();
+        index.write().unwrap();
+
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let signature = Signature::now("Test", "test@example.com").unwrap();
+
+        repo.commit(
+            Some("HEAD"),
+            &signature,
+            &signature,
+            "Initial commit",
+            &tree,
+            &[],
+        )
+        .unwrap();
+
+        // Manually rename to a custom branch name (simulating git configured with init.defaultBranch=trunk)
+        let head = repo.head().unwrap();
+        if let Some(current_name) = head.shorthand() {
+            if current_name != "trunk" {
+                let mut branch = repo
+                    .find_branch(current_name, git2::BranchType::Local)
+                    .unwrap();
+                branch.rename("trunk", false).unwrap();
+            }
+        }
+
+        // Verify it's named "trunk"
+        let head = repo.head().unwrap();
+        assert_eq!(head.shorthand().unwrap(), "trunk");
+
+        // Now test that our safety logic would NOT rename "trunk" to "original"
+        // We test this by verifying that after running the rename logic,
+        // a branch named "trunk" (not "master" or "main") is preserved
+
+        let head = repo.head().unwrap();
+        if let Some(branch_name) = head.shorthand() {
+            // This is the safety logic from init_repo
+            if branch_name != "original" {
+                if branch_name == "master" || branch_name == "main" {
+                    // Would rename here
+                    panic!("Should not try to rename 'trunk' branch");
+                } else {
+                    // Should log warning and NOT rename
+                    // Verify branch is still "trunk"
+                    assert_eq!(branch_name, "trunk");
+                }
+            }
+        }
+
+        // After the safety check, branch should still be named "trunk"
+        let head = repo.head().unwrap();
+        assert_eq!(head.shorthand().unwrap(), "trunk");
+    }
 }

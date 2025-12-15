@@ -86,7 +86,8 @@ pub fn slugify_variation_name(name: &str) -> String {
 /// Create a unique slugified variation name by checking against existing branch names
 ///
 /// If the slugified name already exists as a branch, appends -2, -3, etc.
-/// until a unique name is found.
+/// until a unique name is found. If more than 1000 duplicates exist (extremely rare),
+/// appends a UUID suffix to guarantee uniqueness.
 ///
 /// # Arguments
 /// * `name` - The variation display name
@@ -156,6 +157,8 @@ pub fn generate_filename(order: usize, title: &str) -> String {
 ///
 /// If the generated filename already exists in the provided list,
 /// appends a counter: "001-chapter-2.md", "001-chapter-3.md", etc.
+/// If more than 1000 duplicates exist (extremely rare), appends a UUID
+/// suffix to guarantee uniqueness.
 ///
 /// # Arguments
 /// * `order` - The order/position of the story (1-based)
@@ -503,5 +506,50 @@ mod tests {
         let result = slugify_unique_variation(long_name, &branches);
 
         assert_eq!(result, format!("{}-2", base));
+    }
+
+    #[test]
+    fn test_slugify_unique_variation_safety_with_many_duplicates() {
+        // Test that when >1000 duplicates exist, UUID suffix is used
+        let mut branches = vec!["test".to_string()];
+
+        // Add test-2 through test-1001
+        for i in 2..=1001 {
+            branches.push(format!("test-{}", i));
+        }
+
+        let result = slugify_unique_variation("Test", &branches);
+
+        // Should start with "test-" and have 8 character UUID suffix
+        assert!(result.starts_with("test-"));
+        let suffix = &result[5..]; // Remove "test-" prefix
+        assert_eq!(suffix.len(), 8); // UUID suffix should be 8 chars
+
+        // Should not be in the existing branches (guaranteed unique)
+        assert!(!branches.contains(&result));
+    }
+
+    #[test]
+    fn test_generate_unique_filename_safety_with_many_duplicates() {
+        // Test that when >1000 duplicates exist, UUID suffix is used
+        let mut existing = vec!["001-chapter.md".to_string()];
+
+        // Add 001-chapter-2.md through 001-chapter-1001.md
+        for i in 2..=1001 {
+            existing.push(format!("001-chapter-{}.md", i));
+        }
+
+        let result = generate_unique_filename(1, "Chapter", &existing);
+
+        // Should start with "001-chapter-" and end with ".md"
+        assert!(result.starts_with("001-chapter-"));
+        assert!(result.ends_with(".md"));
+
+        // Extract the suffix between "001-chapter-" and ".md"
+        let suffix = &result[12..result.len()-3]; // 12 = "001-chapter-".len(), 3 = ".md".len()
+        assert_eq!(suffix.len(), 8); // UUID suffix should be 8 chars
+
+        // Should not be in the existing filenames (guaranteed unique)
+        assert!(!existing.contains(&result));
     }
 }
