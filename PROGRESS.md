@@ -22,8 +22,8 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 - [x] Task 57: Enhance StoryHistory with snapshot terminology (MEDIUM) - **COMPLETED**
 
 ### Phase 4: Simplified Conflict UI
-- [ ] Task 58: Rename StoryDiff to StoryCompare (MEDIUM) - In Progress
-- [ ] Task 59: Rename StoryMerge to StoryCombine (MEDIUM) - In Progress
+- [x] Task 58: Rename StoryDiff to StoryCompare (MEDIUM) - **COMPLETED**
+- [x] Task 59: Rename StoryMerge to StoryCombine (MEDIUM) - **COMPLETED**
 
 ## Execution Log
 
@@ -118,10 +118,58 @@ Abstracting Git-based versioning into writer-friendly terminology: Variations, S
 
 **PHASE 2 & 3 COMPLETE**
 
+### 2025-12-15 - Task 58: Rename StoryDiff to StoryCompare
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - Renamed StoryDiff.tsx → StoryCompare.tsx
+  - Title: "Compare Versions" → "Compare Variations"
+  - Implemented side-by-side text comparison panels
+  - Status labels: Added→New, Modified→Changed, Deleted→Removed
+- Deliverables: src/views/StoryCompare.tsx, src/views/StoryCompare.css
+- Commits: 458de84, 8258d62, 58cd41e
+
+### 2025-12-15 - Task 59: Rename StoryMerge to StoryCombine
+- Status: COMPLETED
+- Agent Type: general-purpose (frontend)
+- Notes:
+  - Renamed StoryMerge.tsx → StoryCombine.tsx
+  - Title: "Resolve Merge Conflicts" → "Combine Variations"
+  - "Keep Current/Take Incoming" → "Keep from {variation_name}"
+  - "Cancel Merge" → "Cancel", "Resolve & Commit" → "Save Combined Version"
+- Deliverables: src/views/StoryCombine.tsx, src/views/StoryCombine.css
+- Commit: 7cee6e9
+
+**PHASE 4 COMPLETE - ALL PHASES DONE**
+
 ## Blockers
 
-None currently
+None
 
 ## Summary
 
-Ready to begin implementation. Phase 1 tasks must be completed sequentially due to dependencies. Phases 2-4 can be parallelized after Phase 1 completes.
+**IMPLEMENTATION COMPLETE**
+
+All 10 tasks for the Version System UX Abstraction feature have been successfully implemented:
+
+### Phase 1: Backend Foundation (Tasks 50-53)
+- Slugify utility for generating branch-safe names
+- Updated git_init_repo to use 'original' instead of 'main'
+- Variation CRUD functions with VariationInfo type
+- Updated Tauri commands to return display names
+
+### Phase 2: Terminology Updates (Tasks 54-56)
+- StoryBranches → StoryVariations with full terminology update
+- Navigation routes updated: branches→variations, diff→compare, merge→combine
+- Settings: Git terms → Auto-save/snapshot terminology
+
+### Phase 3: History Enhancement (Task 57)
+- "Version History" → "Snapshots"
+- Display format: "2 hours ago - Chapter 3 rewrite (abc1234)"
+- Improved restore confirmation messaging
+
+### Phase 4: Simplified Conflict UI (Tasks 58-59)
+- StoryDiff → StoryCompare with side-by-side panels
+- StoryMerge → StoryCombine with writer-friendly buttons
+
+All tests pass (143 Rust, TypeScript compiles clean). Ready for review.
