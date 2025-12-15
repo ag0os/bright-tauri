@@ -17,7 +17,7 @@ import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
-import './StoryBranches.css';
+import './StoryVariations.css';
 
 interface BranchListItemProps {
   name: string;
@@ -58,7 +58,7 @@ function BranchListItem({ name, isCurrent, onSwitch, onMerge }: BranchListItemPr
   );
 }
 
-export function StoryBranches() {
+export function StoryVariations() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const navigate = useNavigationStore((state) => state.navigate);
   const goBack = useNavigationStore((state) => state.goBack);
@@ -76,7 +76,7 @@ export function StoryBranches() {
 
   // Extract story ID from route
   const storyId =
-    currentRoute.screen === 'story-branches' ? currentRoute.storyId : null;
+    currentRoute.screen === 'story-variations' ? currentRoute.storyId : null;
 
   // Load story and branches on mount
   useEffect(() => {
@@ -220,7 +220,7 @@ export function StoryBranches() {
       } else {
         // Conflicts detected - navigate to merge resolution view
         navigate({
-          screen: 'story-merge',
+          screen: 'story-combine',
           storyId,
           fromBranch,
           intoBranch: currentBranch,
@@ -273,7 +273,7 @@ export function StoryBranches() {
 
   const handleNavigateToCompare = () => {
     if (!storyId) return;
-    navigate({ screen: 'story-diff', storyId });
+    navigate({ screen: 'story-compare', storyId });
   };
 
   return (

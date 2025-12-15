@@ -285,7 +285,7 @@ export function StoryEditor() {
           {story.gitRepoPath && (
             <button
               className="icon-button"
-              onClick={() => storyId && navigate({ screen: 'story-branches', storyId })}
+              onClick={() => storyId && navigate({ screen: 'story-variations', storyId })}
               aria-label="Manage branches"
               title="Story variations (branches)"
             >

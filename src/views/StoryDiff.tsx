@@ -206,11 +206,11 @@ export function StoryDiff() {
 
   // Extract story ID and optional branch selections from route
   const storyId =
-    currentRoute.screen === 'story-diff' ? currentRoute.storyId : null;
+    currentRoute.screen === 'story-compare' ? currentRoute.storyId : null;
   const initialBranchA =
-    currentRoute.screen === 'story-diff' ? currentRoute.branchA : undefined;
+    currentRoute.screen === 'story-compare' ? currentRoute.branchA : undefined;
   const initialBranchB =
-    currentRoute.screen === 'story-diff' ? currentRoute.branchB : undefined;
+    currentRoute.screen === 'story-compare' ? currentRoute.branchB : undefined;
 
   // Load story and branches on mount
   useEffect(() => {

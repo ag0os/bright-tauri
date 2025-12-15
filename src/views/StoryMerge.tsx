@@ -39,13 +39,13 @@ export function StoryMerge() {
 
   // Extract data from route
   const storyId =
-    currentRoute.screen === 'story-merge' ? currentRoute.storyId : null;
+    currentRoute.screen === 'story-combine' ? currentRoute.storyId : null;
   const fromBranch =
-    currentRoute.screen === 'story-merge' ? currentRoute.fromBranch : null;
+    currentRoute.screen === 'story-combine' ? currentRoute.fromBranch : null;
   const intoBranch =
-    currentRoute.screen === 'story-merge' ? currentRoute.intoBranch : null;
+    currentRoute.screen === 'story-combine' ? currentRoute.intoBranch : null;
   const conflicts =
-    currentRoute.screen === 'story-merge' ? currentRoute.conflicts : [];
+    currentRoute.screen === 'story-combine' ? currentRoute.conflicts : [];
 
   // Load story on mount
   useEffect(() => {
@@ -113,7 +113,7 @@ export function StoryMerge() {
       showSuccess(`Successfully merged ${fromBranch} into ${intoBranch}`);
 
       // Navigate back to branches view
-      navigate({ screen: 'story-branches', storyId: story.id });
+      navigate({ screen: 'story-variations', storyId: story.id });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to resolve conflicts';
@@ -135,7 +135,7 @@ export function StoryMerge() {
       showSuccess('Merge aborted');
 
       // Navigate back to branches view
-      navigate({ screen: 'story-branches', storyId: story.id });
+      navigate({ screen: 'story-variations', storyId: story.id });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to abort merge';

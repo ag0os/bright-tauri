@@ -6,7 +6,7 @@ import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
 import { StoryChildren } from "./views/StoryChildren";
 import { StoryHistory } from "./views/StoryHistory";
-import { StoryBranches } from "./views/StoryBranches";
+import { StoryVariations } from "./views/StoryVariations";
 import { StoryDiff } from "./views/StoryDiff";
 import { StoryMerge } from "./views/StoryMerge";
 import { ElementDetailPage } from "./views/ElementDetailPage";
@@ -62,21 +62,21 @@ function AppContent() {
         </ErrorBoundary>
       );
 
-    case 'story-branches':
+    case 'story-variations':
       return (
-        <ErrorBoundary name="Story Branches">
-          <StoryBranches />
+        <ErrorBoundary name="Story Variations">
+          <StoryVariations />
         </ErrorBoundary>
       );
 
-    case 'story-diff':
+    case 'story-compare':
       return (
         <ErrorBoundary name="Story Diff">
           <StoryDiff />
         </ErrorBoundary>
       );
 
-    case 'story-merge':
+    case 'story-combine':
       return (
         <ErrorBoundary name="Story Merge">
           <StoryMerge />

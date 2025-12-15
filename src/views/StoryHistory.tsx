@@ -1,8 +1,9 @@
 /**
  * StoryHistory View
  *
- * Displays Git commit history for a story in a visual timeline.
- * Allows users to browse past versions and restore to any commit.
+ * Displays story snapshots (Git commits) in a visual timeline.
+ * Uses writer-friendly terminology: commits are "snapshots".
+ * Allows users to browse past snapshots and restore to any snapshot.
  */
 
 import { useEffect, useState } from 'react';
@@ -30,17 +31,19 @@ function ConfirmRestoreDialog({ commit, onConfirm, onCancel }: ConfirmRestoreDia
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <h2 className="modal-title">Restore to Previous Version?</h2>
+        <h2 className="modal-title">Restore to This Snapshot?</h2>
 
         <div className="modal-body">
           <p className="modal-warning">
-            This will restore your story to an older version. Any uncommitted changes will be lost.
+            Restore to this snapshot? Your current changes will be preserved in a new variation.
           </p>
 
           <div className="commit-preview">
             <div className="commit-preview-label">Restoring to:</div>
             <div className="commit-preview-hash">{commit.hash.substring(0, 7)}</div>
-            <div className="commit-preview-message">{commit.message}</div>
+            <div className="commit-preview-message">
+              {isAutoSaveMessage(commit.message) ? 'Auto-save' : commit.message}
+            </div>
             <div className="commit-preview-meta">
               by {commit.author} on {formatTimestamp(commit.timestamp)}
             </div>
@@ -53,7 +56,7 @@ function ConfirmRestoreDialog({ commit, onConfirm, onCancel }: ConfirmRestoreDia
           </button>
           <button className="btn btn-primary btn-base" onClick={onConfirm}>
             <ArrowCounterClockwise size={16} weight="duotone" />
-            Restore
+            Restore this snapshot
           </button>
         </div>
       </div>
@@ -88,6 +91,24 @@ function formatRelativeTime(timestamp: string): string {
   if (diffDays < 7) return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
 
   return formatTimestamp(timestamp);
+}
+
+function isAutoSaveMessage(message: string): boolean {
+  const normalizedMessage = message.trim().toLowerCase();
+  return (
+    normalizedMessage === '' ||
+    normalizedMessage.includes('auto-save') ||
+    normalizedMessage.includes('autosave') ||
+    normalizedMessage.includes('auto save')
+  );
+}
+
+function formatCommitDisplay(commit: CommitInfo): string {
+  const relativeTime = formatRelativeTime(commit.timestamp);
+  const shortHash = commit.hash.substring(0, 7);
+  const displayMessage = isAutoSaveMessage(commit.message) ? 'Auto-save' : commit.message;
+
+  return `${relativeTime} - ${displayMessage} (${shortHash})`;
 }
 
 export function StoryHistory() {
@@ -168,7 +189,7 @@ export function StoryHistory() {
         commitHash: confirmRestore.hash,
       });
 
-      showSuccess(`Restored to version ${confirmRestore.hash.substring(0, 7)}`);
+      showSuccess(`Restored to snapshot ${confirmRestore.hash.substring(0, 7)}`);
 
       // Reload history after restore
       const history = await invoke<CommitInfo[]>('git_get_history', {
@@ -196,7 +217,7 @@ export function StoryHistory() {
     return (
       <div className="story-history-loading">
         <Clock size={48} />
-        <p>Loading history...</p>
+        <p>Loading snapshots...</p>
       </div>
     );
   }
@@ -227,7 +248,7 @@ export function StoryHistory() {
         </button>
 
         <div className="header-content">
-          <h1 className="page-title">Version History</h1>
+          <h1 className="page-title">Snapshots</h1>
           <p className="story-name">{story.title}</p>
         </div>
       </div>
@@ -237,9 +258,9 @@ export function StoryHistory() {
         {commits.length === 0 ? (
           <div className="empty-state">
             <Clock size={48} />
-            <p>No history yet</p>
+            <p>No snapshots yet</p>
             <p className="empty-state-hint">
-              Changes to your story will appear here
+              Snapshots of your story will appear here as you save
             </p>
           </div>
         ) : (
@@ -256,28 +277,25 @@ export function StoryHistory() {
 
                   <div className="commit-card">
                     <div className="commit-header">
-                      <div className="commit-hash">
-                        {commit.hash.substring(0, 7)}
+                      <div
+                        className="commit-display"
+                        title={formatTimestamp(commit.timestamp)}
+                      >
+                        {formatCommitDisplay(commit)}
                       </div>
                       <button
                         className="btn btn-outline btn-sm restore-button"
                         onClick={() => handleRestoreClick(commit)}
                         disabled={isRestoring || index === 0}
-                        title={index === 0 ? 'Current version' : 'Restore to this version'}
+                        title={index === 0 ? 'Current snapshot' : 'Restore to this snapshot'}
                       >
                         <ArrowCounterClockwise size={14} weight="duotone" />
-                        {index === 0 ? 'Current' : 'Restore'}
+                        {index === 0 ? 'Current' : 'Restore this snapshot'}
                       </button>
                     </div>
 
-                    <div className="commit-message">{commit.message}</div>
-
                     <div className="commit-meta">
                       <span className="commit-author">{commit.author}</span>
-                      <span className="commit-separator">•</span>
-                      <span className="commit-time" title={formatTimestamp(commit.timestamp)}>
-                        {formatRelativeTime(commit.timestamp)}
-                      </span>
                     </div>
                   </div>
                 </div>
