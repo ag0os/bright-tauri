@@ -18,7 +18,8 @@ export type Route =
   | { screen: 'story-branches'; storyId: string }
   | { screen: 'story-diff'; storyId: string; branchA?: string; branchB?: string }
   | { screen: 'story-merge'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
-  | { screen: 'element-detail'; elementId: string };
+  | { screen: 'element-detail'; elementId: string }
+  | { screen: 'settings' };
 
 interface NavigationState {
   // State

@@ -128,8 +128,9 @@
   margin: 0 4px;
 }
 
-/* Theme Toggle */
-.topbar__theme-toggle {
+/* Theme Toggle & Settings Button */
+.topbar__theme-toggle,
+.topbar__settings-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,12 +144,14 @@
   transition: all 0.15s ease;
 }
 
-.topbar__theme-toggle:hover {
+.topbar__theme-toggle:hover,
+.topbar__settings-button:hover {
   background: var(--color-surface-secondary);
   color: var(--color-text-primary);
 }
 
-.topbar__theme-toggle:focus {
+.topbar__theme-toggle:focus,
+.topbar__settings-button:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }

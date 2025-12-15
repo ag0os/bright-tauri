@@ -10,6 +10,7 @@ import { StoryBranches } from "./views/StoryBranches";
 import { StoryDiff } from "./views/StoryDiff";
 import { StoryMerge } from "./views/StoryMerge";
 import { ElementDetailPage } from "./views/ElementDetailPage";
+import { Settings } from "./views/Settings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastContainer } from "./components/Toast";
 import "./App.css";
@@ -86,6 +87,13 @@ function AppContent() {
       return (
         <ErrorBoundary name="Element Detail">
           <ElementDetailPage />
+        </ErrorBoundary>
+      );
+
+    case 'settings':
+      return (
+        <ErrorBoundary name="Settings">
+          <Settings />
         </ErrorBoundary>
       );
 

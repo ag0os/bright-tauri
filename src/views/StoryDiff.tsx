@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, GitDiff, FileText, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, GitDiff, FileText, WarningCircle, CaretDown, CaretRight } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -20,11 +20,94 @@ import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';
 import './StoryDiff.css';
 
+/**
+ * Represents a parsed line from a unified diff
+ */
+interface DiffLine {
+  type: 'added' | 'deleted' | 'context' | 'header';
+  oldLineNumber?: number;
+  newLineNumber?: number;
+  content: string;
+}
+
+/**
+ * Parse unified diff format into structured lines
+ */
+function parseDiff(diffText: string): DiffLine[] {
+  if (!diffText) return [];
+
+  const lines = diffText.split('\n');
+  const parsedLines: DiffLine[] = [];
+  let oldLine = 0;
+  let newLine = 0;
+
+  for (const line of lines) {
+    // Skip diff metadata lines (except the @@ hunk headers)
+    if (line.startsWith('diff --git') ||
+        line.startsWith('index ') ||
+        line.startsWith('---') ||
+        line.startsWith('+++')) {
+      continue;
+    }
+
+    // Hunk header (e.g., @@ -1,4 +1,6 @@)
+    if (line.startsWith('@@')) {
+      const match = line.match(/@@ -(\d+),?\d* \+(\d+),?\d* @@/);
+      if (match) {
+        oldLine = parseInt(match[1], 10);
+        newLine = parseInt(match[2], 10);
+      }
+      parsedLines.push({
+        type: 'header',
+        content: line,
+      });
+      continue;
+    }
+
+    // Added line
+    if (line.startsWith('+')) {
+      parsedLines.push({
+        type: 'added',
+        newLineNumber: newLine,
+        content: line.substring(1),
+      });
+      newLine++;
+      continue;
+    }
+
+    // Deleted line
+    if (line.startsWith('-')) {
+      parsedLines.push({
+        type: 'deleted',
+        oldLineNumber: oldLine,
+        content: line.substring(1),
+      });
+      oldLine++;
+      continue;
+    }
+
+    // Context line (unchanged)
+    parsedLines.push({
+      type: 'context',
+      oldLineNumber: oldLine,
+      newLineNumber: newLine,
+      content: line.startsWith(' ') ? line.substring(1) : line,
+    });
+    oldLine++;
+    newLine++;
+  }
+
+  return parsedLines;
+}
+
 interface FileChangeItemProps {
   fileChange: FileChange;
 }
 
 function FileChangeItem({ fileChange }: FileChangeItemProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [parsedDiff, setParsedDiff] = useState<DiffLine[]>([]);
+
   const statusColors: Record<ChangeStatus, string> = {
     Added: 'status-added',
     Modified: 'status-modified',
@@ -37,15 +120,72 @@ function FileChangeItem({ fileChange }: FileChangeItemProps) {
     Deleted: 'Deleted',
   };
 
+  // Parse diff when expanded
+  useEffect(() => {
+    if (isExpanded && fileChange.diff) {
+      const lines = parseDiff(fileChange.diff);
+      setParsedDiff(lines);
+    }
+  }, [isExpanded, fileChange.diff]);
+
+  const handleToggle = () => {
+    // Only allow expanding if there's a diff to show
+    if (fileChange.diff) {
+      setIsExpanded(!isExpanded);
+    }
+  };
+
+  const hasContent = Boolean(fileChange.diff);
+
   return (
     <div className="file-change-item">
-      <div className="file-info">
-        <FileText size={18} />
-        <span className="file-path">{fileChange.path}</span>
+      <div
+        className={`file-change-header ${hasContent ? 'clickable' : ''}`}
+        onClick={handleToggle}
+        role={hasContent ? 'button' : undefined}
+        tabIndex={hasContent ? 0 : undefined}
+        onKeyDown={(e) => {
+          if (hasContent && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
+            handleToggle();
+          }
+        }}
+      >
+        {hasContent && (
+          <span className="expand-icon">
+            {isExpanded ? <CaretDown size={18} /> : <CaretRight size={18} />}
+          </span>
+        )}
+        <div className="file-info">
+          <FileText size={18} />
+          <span className="file-path">{fileChange.path}</span>
+        </div>
+        <span className={`status-badge ${statusColors[fileChange.status]}`}>
+          {statusLabels[fileChange.status]}
+        </span>
       </div>
-      <span className={`status-badge ${statusColors[fileChange.status]}`}>
-        {statusLabels[fileChange.status]}
-      </span>
+
+      {isExpanded && parsedDiff.length > 0 && (
+        <div className="diff-viewer">
+          <table className="diff-table">
+            <tbody>
+              {parsedDiff.map((line, index) => (
+                <tr key={index} className={`diff-line diff-line-${line.type}`}>
+                  <td className="line-number old-line-number">
+                    {line.oldLineNumber ?? ''}
+                  </td>
+                  <td className="line-number new-line-number">
+                    {line.newLineNumber ?? ''}
+                  </td>
+                  <td className="line-content">
+                    <pre>{line.content || ' '}</pre>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -275,20 +415,11 @@ export function StoryDiff() {
                 <p>No differences found between these branches</p>
               </div>
             ) : (
-              <>
-                <div className="file-changes-list">
-                  {diffResult.changes.map((change, index) => (
-                    <FileChangeItem key={index} fileChange={change} />
-                  ))}
-                </div>
-
-                <div className="diff-note">
-                  <p>
-                    Note: Line-level diff view is not yet available. Compare
-                    files by switching between branches in the editor.
-                  </p>
-                </div>
-              </>
+              <div className="file-changes-list">
+                {diffResult.changes.map((change, index) => (
+                  <FileChangeItem key={index} fileChange={change} />
+                ))}
+              </div>
             )}
           </div>
         )}
