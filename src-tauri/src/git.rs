@@ -102,6 +102,22 @@ impl GitService {
         GitService
     }
 
+    /// Create a signature using Git config (user.name and user.email)
+    /// Falls back to 'Bright' and 'noreply@bright.app' if not configured
+    fn create_signature(repo: &Repository) -> Result<Signature<'static>, GitError> {
+        let config = repo.config()?;
+
+        let name = config
+            .get_string("user.name")
+            .unwrap_or_else(|_| "Bright".to_string());
+
+        let email = config
+            .get_string("user.email")
+            .unwrap_or_else(|_| "noreply@bright.app".to_string());
+
+        Signature::now(&name, &email)
+    }
+
     /// Initialize a new Git repository for a story variation
     ///
     /// Creates a new repository at `{base_path}/git-repos/{story_id}/`
@@ -152,7 +168,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         repo.commit(
             Some("HEAD"),
@@ -163,13 +179,23 @@ impl GitService {
             &[],
         )?;
 
-        // Ensure branch is named "original" (git2 uses system default which might be "master")
+        // Ensure branch is named "original" (git2 uses system default which might be "master" or "main")
+        // Only rename known default branch names to avoid unexpectedly renaming custom defaults
         let head = repo.head()?;
         if let Some(branch_name) = head.shorthand() {
             if branch_name != "original" {
-                // Rename the branch to "original"
-                let mut branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
-                branch.rename("original", false)?;
+                // Only rename 'master' or 'main' to 'original' for safety
+                if branch_name == "master" || branch_name == "main" {
+                    let mut branch = repo.find_branch(branch_name, git2::BranchType::Local)?;
+                    branch.rename("original", false)?;
+                } else {
+                    // Log warning for unexpected default branch names
+                    eprintln!(
+                        "Warning: Repository initialized with unexpected default branch name '{}'. \
+                         Expected 'master' or 'main'. Branch was not renamed to 'original'.",
+                        branch_name
+                    );
+                }
             }
         }
 
@@ -215,7 +241,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         // Get parent commit (HEAD)
         let parent_commit = repo.head()?.peel_to_commit()?;
@@ -254,7 +280,7 @@ impl GitService {
         let tree_id = index.write_tree()?;
         let tree = repo.find_tree(tree_id)?;
 
-        let signature = Signature::now("Bright", "noreply@bright.app")?;
+        let signature = Self::create_signature(&repo)?;
 
         // Get parent commit (HEAD)
         let parent_commit = repo.head()?.peel_to_commit()?;

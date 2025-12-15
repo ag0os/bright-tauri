@@ -3,18 +3,29 @@
 /// This module provides functions to generate consistent, filesystem-safe
 /// filenames for child stories (chapters, scenes, etc.) in Git repositories.
 /// Files are named with an order prefix and slugified title: "001-chapter-name.md"
+use deunicode::deunicode;
 /// Slugify a string to make it filesystem and URL-safe
 ///
-/// Converts to lowercase, replaces spaces with hyphens, removes invalid characters
+/// Transliterates Unicode characters to ASCII equivalents (e.g., é→e, ü→u),
+/// converts to lowercase, replaces spaces with hyphens, removes invalid characters
 ///
 /// # Arguments
 /// * `text` - The text to slugify
 ///
 /// # Returns
 /// A slugified string safe for use in filenames
+///
+/// # Examples
+/// * "Café Résumé" → "cafe-resume"
+/// * "Müller" → "muller"
+/// * "José García" → "jose-garcia"
 #[allow(dead_code)]
 pub fn slugify(text: &str) -> String {
-    text.to_lowercase()
+    // First transliterate Unicode to ASCII
+    let transliterated = deunicode(text);
+
+    transliterated
+        .to_lowercase()
         .trim()
         // Replace spaces and underscores with hyphens
         .replace(|c: char| c.is_whitespace() || c == '_', "-")
@@ -108,9 +119,10 @@ pub fn slugify_unique_variation(name: &str, existing_branches: &[String]) -> Str
         }
         counter += 1;
 
-        // Safety: prevent infinite loop (though unlikely with realistic data)
+        // Safety: prevent infinite loop with UUID suffix for guaranteed uniqueness
         if counter > 1000 {
-            return format!("{}-{}", base_slug, counter);
+            let uuid_suffix = uuid::Uuid::new_v4().to_string()[..8].to_string();
+            return format!("{}-{}", base_slug, uuid_suffix);
         }
     }
 }
@@ -219,8 +231,32 @@ mod tests {
 
     #[test]
     fn test_slugify_with_unicode() {
-        // Unicode characters should be removed (only ASCII alphanumeric kept)
-        assert_eq!(slugify("Café résumé"), "caf-rsum");
+        // Unicode characters should be transliterated to ASCII equivalents
+        assert_eq!(slugify("Café résumé"), "cafe-resume");
+    }
+
+    #[test]
+    fn test_slugify_with_unicode_german() {
+        // German umlauts should be transliterated
+        assert_eq!(slugify("Müller"), "muller");
+    }
+
+    #[test]
+    fn test_slugify_with_unicode_french_diaeresis() {
+        // French diaeresis should be transliterated
+        assert_eq!(slugify("naïve"), "naive");
+    }
+
+    #[test]
+    fn test_slugify_with_unicode_icelandic() {
+        // Icelandic characters should be transliterated
+        assert_eq!(slugify("Björk"), "bjork");
+    }
+
+    #[test]
+    fn test_slugify_with_unicode_spanish() {
+        // Spanish accented characters should be transliterated
+        assert_eq!(slugify("José García"), "jose-garcia");
     }
 
     #[test]
@@ -349,8 +385,8 @@ mod tests {
 
     #[test]
     fn test_slugify_variation_name_unicode() {
-        // Unicode should be stripped
-        assert_eq!(slugify_variation_name("Café Résumé"), "caf-rsum");
+        // Unicode should be transliterated to ASCII
+        assert_eq!(slugify_variation_name("Café Résumé"), "cafe-resume");
     }
 
     #[test]
