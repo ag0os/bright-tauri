@@ -82,6 +82,9 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     }
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required';
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -101,7 +104,7 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
       const story = await createStory({
         universeId: currentUniverse.id,
         title: formData.title.trim(),
-        description: formData.description.trim() || null,
+        description: formData.description.trim(),
         storyType: formData.storyType,
         content: null,
         notes: null,
@@ -305,9 +308,10 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
             </div>
 
             {/* Description */}
-            <div className="input-group input-5">
+            <div className={`input-group input-5 ${errors.description ? 'has-error' : ''}`}>
               <label className="input-label" htmlFor="story-description">
                 Description
+                <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <textarea
@@ -317,12 +321,14 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
+                  required
                   style={{
                     resize: 'vertical',
                     minHeight: '80px',
                   }}
                 />
               </div>
+              {errors.description && <div className="input-helper">{errors.description}</div>}
             </div>
 
             {/* Target Word Count */}
