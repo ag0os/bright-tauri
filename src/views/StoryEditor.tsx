@@ -282,6 +282,8 @@ export function StoryEditor() {
         )}
 
         <div className="header-actions">
+          {renderSaveIndicator()}
+
           {story.gitRepoPath && (
             <button
               className="icon-button"
@@ -301,8 +303,6 @@ export function StoryEditor() {
           >
             <Clock size={18} />
           </button>
-
-          {renderSaveIndicator()}
         </div>
       </div>
 
