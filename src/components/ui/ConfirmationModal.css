@@ -1,0 +1,111 @@
+/**
+ * Confirmation Modal Styles
+ *
+ * Generic confirmation modal following the project's design system.
+ * Uses Modern Indigo color tokens and Elevated Shadow card style.
+ */
+
+/* Overlay */
+.confirmation-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  animation: confirmationModalFadeIn 0.2s ease-out;
+}
+
+@keyframes confirmationModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Modal content */
+.confirmation-modal-content {
+  background-color: var(--color-surface);
+  border-radius: 8px;
+  padding: var(--spacing-6);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  animation: confirmationModalSlideIn 0.2s ease-out;
+}
+
+@keyframes confirmationModalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header with icon */
+.confirmation-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+}
+
+.confirmation-modal-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirmation-modal-title {
+  font-family: var(--typography-heading-font);
+  font-size: var(--typography-h3-size);
+  font-weight: var(--typography-h3-weight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Message content */
+.confirmation-modal-message {
+  font-family: var(--typography-body-font);
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--typography-body-line-height);
+  margin-bottom: var(--spacing-6);
+}
+
+.confirmation-modal-message p {
+  margin: 0 0 var(--spacing-3) 0;
+}
+
+.confirmation-modal-message p:last-child {
+  margin-bottom: 0;
+}
+
+/* Actions */
+.confirmation-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+}
+
+/* Ensure buttons inherit proper styling from design system */
+.confirmation-modal-actions .btn:focus-visible {
+  outline: var(--button-focus-ring-width) solid var(--color-primary);
+  outline-offset: var(--button-focus-ring-offset);
+}
+
+.confirmation-modal-actions .btn:disabled {
+  opacity: var(--button-disabled-opacity);
+  cursor: not-allowed;
+}

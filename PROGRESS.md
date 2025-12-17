@@ -263,3 +263,44 @@ Test Results:
 - Backend: 143 Rust tests passing
 
 Ready for final review and merge.
+
+---
+
+# Novel Deletion Bug Fix - Implementation Progress
+
+Generated: 2025-12-17
+
+## Problem Statement
+- Delete button for novels in StoriesList doesn't fully work
+- Deleting a novel orphans chapters (ON DELETE SET NULL)
+- No git repository cleanup when stories are deleted
+- No proper warning before deleting novels with chapters
+
+## Steps Status
+- [x] Step 1: Update backend to support cascade deletion (COMPLETED)
+- [ ] Step 2: Add confirmation modal component (In Progress)
+- [ ] Step 3: Update frontend to use cascade deletion (Pending)
+- [ ] Step 4: Test the complete deletion flow (Pending)
+
+## Execution Log
+
+### 2025-12-17 - Step 1: Backend Cascade Deletion
+- Status: COMPLETED
+- Agent Type: general-purpose (backend/Rust)
+- Notes:
+  - Updated StoryRepository::delete to recursively delete all children
+  - Returns Vec<String> of all deleted story IDs
+  - Added git repository cleanup for each deleted story
+  - Added get_story_child_count command for frontend warnings
+  - 6 new unit tests, all 169 Rust tests passing
+- Deliverables:
+  - src-tauri/src/repositories/story.rs
+  - src-tauri/src/commands/story.rs
+  - src-tauri/src/lib.rs
+- Commit: feat: Add cascade deletion for stories with git cleanup
+
+## Blockers
+- None
+
+## Summary
+Backend complete. Moving to frontend confirmation modal.
