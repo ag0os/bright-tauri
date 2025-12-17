@@ -63,8 +63,27 @@ pub fn update_story(
 }
 
 #[tauri::command]
-pub fn delete_story(db: State<Database>, id: String) -> Result<(), String> {
-    StoryRepository::delete(&db, &id).map_err(|e| e.to_string())
+pub fn delete_story(app: AppHandle, db: State<Database>, id: String) -> Result<Vec<String>, String> {
+    // Delete the story and get all deleted IDs
+    let deleted_ids = StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
+
+    // Get app data directory for git repos
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+
+    // Delete git repositories for all deleted stories
+    let git_repos_dir = app_data_dir.join("git-repos");
+    for story_id in &deleted_ids {
+        let repo_path = git_repos_dir.join(story_id);
+        if repo_path.exists() {
+            std::fs::remove_dir_all(&repo_path)
+                .map_err(|e| format!("Failed to delete git repo for {}: {}", story_id, e))?;
+        }
+    }
+
+    Ok(deleted_ids)
 }
 
 // Story hierarchy commands
@@ -89,6 +108,11 @@ pub fn get_story_with_children(
     id: String,
 ) -> Result<(Story, Vec<Story>), String> {
     StoryRepository::get_with_children(&db, &id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_story_child_count(db: State<Database>, id: String) -> Result<i32, String> {
+    StoryRepository::get_child_count(&db, &id).map_err(|e| e.to_string())
 }
 
 /// Ensure a story has a git repository initialized.
