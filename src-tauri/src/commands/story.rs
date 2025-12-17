@@ -63,7 +63,11 @@ pub fn update_story(
 }
 
 #[tauri::command]
-pub fn delete_story(app: AppHandle, db: State<Database>, id: String) -> Result<Vec<String>, String> {
+pub fn delete_story(
+    app: AppHandle,
+    db: State<Database>,
+    id: String,
+) -> Result<Vec<String>, String> {
     // Delete the story and get all deleted IDs
     let deleted_ids = StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
 
