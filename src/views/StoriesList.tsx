@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { Plus, MagnifyingGlass, CircleNotch, Books } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { StoryCard, CreateStoryModal } from '@/components/stories';
+import { StoryCard, CreateStoryModal, DeleteStoryModal } from '@/components/stories';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
@@ -29,6 +29,7 @@ export function StoriesList() {
     loadStories,
     deleteStory,
     updateStory,
+    getChildCount,
     filters,
     setFilter,
     getFilteredAndSortedStories,
@@ -38,6 +39,10 @@ export function StoriesList() {
   } = useStoriesStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
+  const [deleteChildCount, setDeleteChildCount] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load stories on mount
   useEffect(() => {
@@ -68,13 +73,44 @@ export function StoriesList() {
   };
 
   const handleDeleteStory = async (story: Story) => {
-    if (window.confirm(`Are you sure you want to delete "${story.title}"?`)) {
-      try {
-        await deleteStory(story.id);
-      } catch (error) {
-        console.error('Failed to delete story:', error);
-      }
+    try {
+      // Fetch child count before showing modal
+      const count = await getChildCount(story.id);
+      setStoryToDelete(story);
+      setDeleteChildCount(count);
+      setShowDeleteModal(true);
+    } catch (error) {
+      console.error('Failed to fetch child count:', error);
+      // Still show modal with 0 count if fetch fails
+      setStoryToDelete(story);
+      setDeleteChildCount(0);
+      setShowDeleteModal(true);
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!storyToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteStory(storyToDelete.id);
+      // Close modal and reset state
+      setShowDeleteModal(false);
+      setStoryToDelete(null);
+      setDeleteChildCount(0);
+    } catch (error) {
+      console.error('Failed to delete story:', error);
+      // Keep modal open to show error (error is already in store)
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setStoryToDelete(null);
+    setDeleteChildCount(0);
+    setIsDeleting(false);
   };
 
   const handleToggleFavorite = async (story: Story) => {
@@ -105,9 +141,9 @@ export function StoriesList() {
     (story) => !story.parentStoryId
   );
 
-  // Calculate child count for each story
+  // Calculate child count for each story (local count from loaded stories)
   const allStories = useStoriesStore((state) => state.stories);
-  const getChildCount = (storyId: string): number => {
+  const getLocalChildCount = (storyId: string): number => {
     return allStories.filter((s) => s.parentStoryId === storyId).length;
   };
 
@@ -364,7 +400,7 @@ export function StoriesList() {
               <StoryCard
                 key={story.id}
                 story={story}
-                childCount={getChildCount(story.id)}
+                childCount={getLocalChildCount(story.id)}
                 onClick={handleStoryClick}
                 onEdit={handleEditStory}
                 onDelete={handleDeleteStory}
@@ -377,6 +413,16 @@ export function StoriesList() {
 
       {/* Create Story Modal */}
       {showCreateModal && <CreateStoryModal onClose={() => setShowCreateModal(false)} />}
+
+      {/* Delete Story Modal */}
+      <DeleteStoryModal
+        isOpen={showDeleteModal}
+        story={storyToDelete}
+        childCount={deleteChildCount}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isDeleting={isDeleting}
+      />
 
       {/* Spinner animation */}
       <style>

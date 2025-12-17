@@ -70,6 +70,7 @@ interface StoriesState {
   reorderStoryChildren: (parentId: string, storyIds: string[]) => Promise<void>;
   getStoryChildren: (parentId: string) => Story[];
   invalidateChildren: (parentId: string) => void;
+  getChildCount: (id: string) => Promise<number>;
 
   // Filtering and sorting
   setFilter: (key: keyof StoryFilters, value: StoryType | StoryStatus | string | null) => void;
@@ -170,18 +171,29 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
   deleteStory: async (id) => {
     set({ isLoading: true, error: null });
     try {
-      await invoke('delete_story', { id });
-      // Also remove from children cache if it's a child story
-      const deletedStory = get().stories.find((s) => s.id === id);
+      // Backend now returns array of deleted story IDs (includes children)
+      const deletedIds = await invoke<string[]>('delete_story', { id });
+
       set((state) => {
+        // Remove all deleted IDs from stories list
+        const remainingStories = state.stories.filter((s) => !deletedIds.includes(s.id));
+
+        // Clean up children cache - remove deleted stories from all parent caches
         const newChildrenByParentId = { ...state.childrenByParentId };
-        if (deletedStory?.parentStoryId && newChildrenByParentId[deletedStory.parentStoryId]) {
-          newChildrenByParentId[deletedStory.parentStoryId] =
-            newChildrenByParentId[deletedStory.parentStoryId].filter((s) => s.id !== id);
-        }
+        Object.keys(newChildrenByParentId).forEach((parentId) => {
+          newChildrenByParentId[parentId] = newChildrenByParentId[parentId].filter(
+            (child) => !deletedIds.includes(child.id)
+          );
+        });
+
+        // Clear selected story if it was deleted
+        const newSelectedStory = state.selectedStory && deletedIds.includes(state.selectedStory.id)
+          ? null
+          : state.selectedStory;
+
         return {
-          stories: state.stories.filter((s) => s.id !== id),
-          selectedStory: state.selectedStory?.id === id ? null : state.selectedStory,
+          stories: remainingStories,
+          selectedStory: newSelectedStory,
           childrenByParentId: newChildrenByParentId,
           isLoading: false,
         };
@@ -239,6 +251,16 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
       delete newChildrenByParentId[parentId];
       return { childrenByParentId: newChildrenByParentId };
     });
+  },
+
+  getChildCount: async (id) => {
+    try {
+      return await invoke<number>('get_story_child_count', { id });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get child count';
+      set({ error: errorMessage });
+      throw error;
+    }
   },
 
   // Filtering and sorting

@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Plus, CircleNotch } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { ChildStoryList, CreateStoryModal } from '@/components/stories';
+import { ChildStoryList, CreateStoryModal, DeleteStoryModal } from '@/components/stories';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import type { Story } from '@/types';
@@ -32,6 +32,7 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
     getStoryChildren,
     reorderStoryChildren,
     deleteStory,
+    getChildCount,
     childrenLoading,
     error,
   } = useStoriesStore();
@@ -39,6 +40,10 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   const [parentStory, setParentStory] = useState<Story | null>(null);
   const [isLoadingParent, setIsLoadingParent] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
+  const [deleteChildCount, setDeleteChildCount] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load parent story and children on mount
   useEffect(() => {
@@ -74,15 +79,46 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   };
 
   const handleDeleteChild = async (story: Story) => {
-    if (window.confirm(`Are you sure you want to delete "${story.title}"?`)) {
-      try {
-        await deleteStory(story.id);
-        // Reload children after deletion
-        await loadStoryChildren(parentStoryId);
-      } catch (err) {
-        console.error('Failed to delete child story:', err);
-      }
+    try {
+      // Fetch child count before showing modal
+      const count = await getChildCount(story.id);
+      setStoryToDelete(story);
+      setDeleteChildCount(count);
+      setShowDeleteModal(true);
+    } catch (error) {
+      console.error('Failed to fetch child count:', error);
+      // Still show modal with 0 count if fetch fails
+      setStoryToDelete(story);
+      setDeleteChildCount(0);
+      setShowDeleteModal(true);
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!storyToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteStory(storyToDelete.id);
+      // Reload children after deletion
+      await loadStoryChildren(parentStoryId);
+      // Close modal and reset state
+      setShowDeleteModal(false);
+      setStoryToDelete(null);
+      setDeleteChildCount(0);
+    } catch (error) {
+      console.error('Failed to delete story:', error);
+      // Keep modal open to show error (error is already in store)
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setStoryToDelete(null);
+    setDeleteChildCount(0);
+    setIsDeleting(false);
   };
 
   const handleReorder = async (storyIds: string[]) => {
@@ -294,6 +330,16 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
           }}
         />
       )}
+
+      {/* Delete Story Modal */}
+      <DeleteStoryModal
+        isOpen={showDeleteModal}
+        story={storyToDelete}
+        childCount={deleteChildCount}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        isDeleting={isDeleting}
+      />
 
       {/* Spinner animation */}
       <style>
