@@ -17,13 +17,14 @@ impl StoryRepository {
         // Generate variation_group_id if this is a new story (not a variation)
         let variation_group_id = Uuid::new_v4().to_string();
 
+        // Use serde serialization to get correct kebab-case format (e.g., "short-story")
         let story_type_str = input
             .story_type
-            .map(|st| format!("{st:?}").to_lowercase())
+            .map(|st| serde_json::to_string(&st).unwrap().trim_matches('"').to_string())
             .unwrap_or_else(|| "novel".to_string());
         let variation_type_str = input
             .variation_type
-            .map(|vt| format!("{vt:?}").to_lowercase())
+            .map(|vt| serde_json::to_string(&vt).unwrap().trim_matches('"').to_string())
             .unwrap_or_else(|| "original".to_string());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
 
@@ -210,8 +211,13 @@ impl StoryRepository {
     pub fn update(db: &Database, id: &str, input: UpdateStoryInput) -> Result<Story> {
         let now = Utc::now().to_rfc3339();
 
-        let story_type_str = input.story_type.map(|st| format!("{st:?}").to_lowercase());
-        let status_str = input.status.map(|s| format!("{s:?}").to_lowercase());
+        // Use serde serialization to get correct kebab-case/lowercase format
+        let story_type_str = input
+            .story_type
+            .map(|st| serde_json::to_string(&st).unwrap().trim_matches('"').to_string());
+        let status_str = input
+            .status
+            .map(|s| serde_json::to_string(&s).unwrap().trim_matches('"').to_string());
         let tags_json = input.tags.map(|t| serde_json::to_string(&t).unwrap());
         let related_elements_json = input
             .related_element_ids
