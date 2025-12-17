@@ -55,6 +55,9 @@ const getChildTypeOptions = (parentType: StoryType): { value: StoryType; label: 
   }
 };
 
+// Container types that should navigate to chapter management instead of editor
+const CONTAINER_TYPES: StoryType[] = ['novel', 'series', 'screenplay', 'collection'];
+
 export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const currentUniverse = useUniverseStore((state) => state.currentUniverse);
@@ -125,8 +128,15 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
         invalidateChildren(parentStory.id);
       }
 
-      // Navigate to story editor
-      navigate({ screen: 'story-editor', storyId: story.id });
+      // Navigate based on story type
+      // Container types should go to chapter management, others to editor
+      if (!parentStory && CONTAINER_TYPES.includes(story.storyType)) {
+        // Creating a new container story - navigate to chapter management
+        navigate({ screen: 'story-children', parentStoryId: story.id });
+      } else {
+        // Creating a child story or non-container story - navigate to editor
+        navigate({ screen: 'story-editor', storyId: story.id });
+      }
       onClose();
     } catch (error) {
       console.error('Failed to create story:', error);
