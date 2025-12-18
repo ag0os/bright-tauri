@@ -9,6 +9,7 @@ import { StoryHistory } from "./views/StoryHistory";
 import { StoryVariations } from "./views/StoryVariations";
 import { StoryCompare } from "./views/StoryCompare";
 import { StoryCombine } from "./views/StoryCombine";
+import { StorySettings } from "./views/StorySettings";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -80,6 +81,13 @@ function AppContent() {
       return (
         <ErrorBoundary name="Story Combine">
           <StoryCombine />
+        </ErrorBoundary>
+      );
+
+    case 'story-settings':
+      return (
+        <ErrorBoundary name="Story Settings">
+          <StorySettings />
         </ErrorBoundary>
       );
 

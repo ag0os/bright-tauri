@@ -1,0 +1,115 @@
+/**
+ * Story Settings Styles
+ *
+ * Minimalist design for the story settings view.
+ * Uses design system tokens for consistency.
+ */
+
+/* Main Container */
+.story-settings {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--color-background);
+}
+
+/* Header */
+.story-settings__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.story-settings__back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--border-radius-md);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.story-settings__back-button:hover {
+  background-color: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+.story-settings__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.story-settings__title {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.story-settings__subtitle {
+  margin: var(--spacing-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* Content */
+.story-settings__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Form Fields */
+.story-settings__form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Error Banner */
+.story-settings__error-banner {
+  padding: var(--spacing-3);
+  background-color: var(--color-error-subtle);
+  color: var(--color-error);
+  border-radius: 4px;
+  font-family: var(--typography-body-font);
+  font-size: var(--font-size-sm);
+}
+
+/* Footer */
+.story-settings__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Loading and Error States */
+.story-settings__loading,
+.story-settings__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+
+.story-settings__error {
+  color: var(--color-error);
+}
