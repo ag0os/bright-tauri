@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, GitBranch } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, GitBranch, Gear } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -283,6 +283,15 @@ export function StoryEditor() {
 
         <div className="header-actions">
           {renderSaveIndicator()}
+
+          <button
+            className="icon-button"
+            onClick={() => storyId && navigate({ screen: 'story-settings', storyId })}
+            aria-label="Story settings"
+            title="Story settings"
+          >
+            <Gear size={18} weight="duotone" />
+          </button>
 
           {story.gitRepoPath && (
             <button

@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, CircleNotch } from '@phosphor-icons/react';
+import { ArrowLeft, Plus, CircleNotch, Gear } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { ChildStoryList, CreateStoryModal, DeleteStoryModal } from '@/components/stories';
 import { useNavigationStore } from '@/stores/useNavigationStore';
@@ -279,14 +279,24 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
             </p>
           </div>
 
-          {/* Add Chapter Button */}
-          <button
-            className="btn btn-primary btn-base"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <Plus className="icon icon-base" />
-            Add {getChildTypeLabel(false)}
-          </button>
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+            <button
+              className="btn btn-ghost btn-base"
+              onClick={() => navigate({ screen: 'story-settings', storyId: parentStoryId })}
+              aria-label="Story settings"
+              title="Story settings"
+            >
+              <Gear size={18} weight="duotone" />
+            </button>
+            <button
+              className="btn btn-primary btn-base"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Plus className="icon icon-base" />
+              Add {getChildTypeLabel(false)}
+            </button>
+          </div>
         </div>
 
         {/* Error State */}

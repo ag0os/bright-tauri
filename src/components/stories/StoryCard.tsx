@@ -15,10 +15,11 @@ import {
   Feather,
   BookBookmark,
   Star,
-  PencilSimple,
+  Gear,
   Trash,
 } from '@phosphor-icons/react';
 import type { Story, StoryType } from '@/types';
+import { useNavigationStore } from '@/stores/useNavigationStore';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -30,7 +31,6 @@ interface StoryCardProps {
   story: Story;
   childCount?: number;
   onClick: (story: Story) => void;
-  onEdit: (story: Story) => void;
   onDelete: (story: Story) => void;
   onToggleFavorite: (story: Story) => void;
 }
@@ -88,11 +88,11 @@ export function StoryCard({
   story,
   childCount,
   onClick,
-  onEdit,
   onDelete,
   onToggleFavorite,
 }: StoryCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigationStore((state) => state.navigate);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking action buttons
@@ -100,11 +100,6 @@ export function StoryCard({
       return;
     }
     onClick(story);
-  };
-
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(story);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -115,6 +110,11 @@ export function StoryCard({
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     onToggleFavorite(story);
+  };
+
+  const handleSettings = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate({ screen: 'story-settings', storyId: story.id });
   };
 
   return (
@@ -284,11 +284,11 @@ export function StoryCard({
               </button>
               <button
                 className="btn btn-ghost btn-sm"
-                onClick={handleEdit}
-                title="Edit story"
+                onClick={handleSettings}
+                title="Story settings"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <PencilSimple className="icon icon-base" weight="duotone" />
+                <Gear className="icon icon-base" weight="duotone" />
               </button>
               <button
                 className="btn btn-ghost btn-sm"

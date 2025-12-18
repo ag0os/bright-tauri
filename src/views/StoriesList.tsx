@@ -68,10 +68,6 @@ export function StoriesList() {
     }
   };
 
-  const handleEditStory = (story: Story) => {
-    navigate({ screen: 'story-editor', storyId: story.id });
-  };
-
   const handleDeleteStory = async (story: Story) => {
     try {
       // Fetch child count before showing modal
@@ -402,7 +398,6 @@ export function StoriesList() {
                 story={story}
                 childCount={getLocalChildCount(story.id)}
                 onClick={handleStoryClick}
-                onEdit={handleEditStory}
                 onDelete={handleDeleteStory}
                 onToggleFavorite={handleToggleFavorite}
               />
