@@ -156,7 +156,7 @@ pub fn git_merge_branches(
         // Make error messages more user-friendly
         let err_str = e.to_string();
         if err_str.contains("Branch") && err_str.contains("not found") {
-            format!("Variation not found. Please refresh the variation list.")
+            "Variation not found. Please refresh the variation list.".to_string()
         } else {
             // Keep other errors as is
             err_str

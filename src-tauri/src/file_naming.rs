@@ -114,7 +114,7 @@ pub fn slugify_unique_variation(name: &str, existing_branches: &[String]) -> Str
     // If there's a collision, append a counter
     let mut counter = 2;
     loop {
-        let unique_slug = format!("{}-{}", base_slug, counter);
+        let unique_slug = format!("{base_slug}-{counter}");
         if !existing_branches.contains(&unique_slug) {
             return unique_slug;
         }
@@ -123,7 +123,7 @@ pub fn slugify_unique_variation(name: &str, existing_branches: &[String]) -> Str
         // Safety: prevent infinite loop with UUID suffix for guaranteed uniqueness
         if counter > 1000 {
             let uuid_suffix = uuid::Uuid::new_v4().to_string()[..8].to_string();
-            return format!("{}-{}", base_slug, uuid_suffix);
+            return format!("{base_slug}-{uuid_suffix}");
         }
     }
 }

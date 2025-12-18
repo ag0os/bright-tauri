@@ -191,9 +191,8 @@ impl GitService {
                 } else {
                     // Log warning for unexpected default branch names
                     eprintln!(
-                        "Warning: Repository initialized with unexpected default branch name '{}'. \
-                         Expected 'master' or 'main'. Branch was not renamed to 'original'.",
-                        branch_name
+                        "Warning: Repository initialized with unexpected default branch name '{branch_name}'. \
+                         Expected 'master' or 'main'. Branch was not renamed to 'original'."
                     );
                 }
             }

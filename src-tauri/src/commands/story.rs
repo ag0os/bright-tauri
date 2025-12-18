@@ -17,16 +17,16 @@ pub fn create_story(
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
 
     // Initialize git repository for the story
     let git_repo_path = GitService::init_repo(&app_data_dir, &story.id)
-        .map_err(|e| format!("Failed to initialize git repository: {}", e))?;
+        .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
 
     // Update the story with the git repo path
     let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
     StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str)
-        .map_err(|e| format!("Failed to update git repo path: {}", e))?;
+        .map_err(|e| format!("Failed to update git repo path: {e}"))?;
 
     // Return the updated story
     StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string())
@@ -75,7 +75,7 @@ pub fn delete_story(
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
 
     // Delete git repositories for all deleted stories
     let git_repos_dir = app_data_dir.join("git-repos");
@@ -83,7 +83,7 @@ pub fn delete_story(
         let repo_path = git_repos_dir.join(story_id);
         if repo_path.exists() {
             std::fs::remove_dir_all(&repo_path)
-                .map_err(|e| format!("Failed to delete git repo for {}: {}", story_id, e))?;
+                .map_err(|e| format!("Failed to delete git repo for {story_id}: {e}"))?;
         }
     }
 
@@ -138,11 +138,11 @@ pub fn ensure_story_git_repo(
         if path.exists() && path.join(".git").exists() {
             // Sync the current branch name from the actual repo
             let actual_branch = GitService::get_current_branch(path)
-                .map_err(|e| format!("Failed to get current branch: {}", e))?;
+                .map_err(|e| format!("Failed to get current branch: {e}"))?;
 
             if actual_branch != story.current_branch {
                 StoryRepository::set_current_branch(&db, &story.id, &actual_branch)
-                    .map_err(|e| format!("Failed to update current branch: {}", e))?;
+                    .map_err(|e| format!("Failed to update current branch: {e}"))?;
                 return StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string());
             }
 
@@ -154,16 +154,16 @@ pub fn ensure_story_git_repo(
     let app_data_dir = app
         .path()
         .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
 
     // Initialize git repository for the story
     let git_repo_path = GitService::init_repo(&app_data_dir, &story.id)
-        .map_err(|e| format!("Failed to initialize git repository: {}", e))?;
+        .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
 
     // Update the story with the git repo path
     let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
     StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str)
-        .map_err(|e| format!("Failed to update git repo path: {}", e))?;
+        .map_err(|e| format!("Failed to update git repo path: {e}"))?;
 
     // Return the updated story
     StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string())

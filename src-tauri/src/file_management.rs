@@ -479,7 +479,7 @@ pub fn save_variation_mapping(
     fs::write(&metadata_path, &json)?;
 
     // Commit to Git
-    let commit_message = format!("Save variation mapping: {} -> {}", slug, display_name);
+    let commit_message = format!("Save variation mapping: {slug} -> {display_name}");
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
     // Lock is automatically released when _lock goes out of scope
@@ -602,8 +602,7 @@ pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementR
     match GitService::has_uncommitted_changes(repo_path, slug) {
         Ok(true) => {
             return Err(FileManagementError::UncommittedChanges(format!(
-                "Cannot remove variation mapping for '{}': branch has uncommitted changes",
-                slug
+                "Cannot remove variation mapping for '{slug}': branch has uncommitted changes"
             )));
         }
         Ok(false) => {
@@ -636,7 +635,7 @@ pub fn remove_variation_mapping(repo_path: &Path, slug: &str) -> FileManagementR
     fs::write(&metadata_path, &json)?;
 
     // Commit to Git
-    let commit_message = format!("Remove variation mapping: {}", slug);
+    let commit_message = format!("Remove variation mapping: {slug}");
     GitService::commit_file(repo_path, "metadata.json", &json, &commit_message)?;
 
     // Lock is automatically released when _lock goes out of scope
