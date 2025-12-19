@@ -1,11 +1,11 @@
 ---
 id: task-80
 title: Update Components for Container/Story Model
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:42'
-updated_date: '2025-12-19 20:39'
+updated_date: '2025-12-19 20:40'
 labels:
   - container-refactor
   - frontend
