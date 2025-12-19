@@ -57,14 +57,8 @@ export function StoriesList() {
   };
 
   const handleStoryClick = (story: Story) => {
-    // For container types, navigate to chapter manager
-    const containerTypes = ['novel', 'series', 'screenplay', 'collection'];
-    if (containerTypes.includes(story.storyType)) {
-      navigate({ screen: 'story-children', parentStoryId: story.id });
-    } else {
-      // For standalone types, navigate to editor
-      navigate({ screen: 'story-editor', storyId: story.id });
-    }
+    // All stories are content now - always navigate to editor
+    navigate({ screen: 'story-editor', storyId: story.id });
   };
 
   const handleDeleteStory = async (story: Story) => {

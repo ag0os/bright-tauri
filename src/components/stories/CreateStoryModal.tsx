@@ -53,9 +53,7 @@ const getChildTypeOptions = (parentType: StoryType): { value: StoryType; label: 
   }
 };
 
-// TODO(task-78): Container logic will be replaced when container/story separation is complete
-// For now, we'll navigate all new stories to the editor
-const CONTAINER_TYPES: StoryType[] = [];
+// Stories are always content now - no container logic needed
 
 export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
@@ -126,15 +124,8 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
 
       // TODO(task-76): Container children invalidation moved to useContainersStore
 
-      // Navigate based on story type
-      // Container types should go to chapter management, others to editor
-      if (!parentStory && CONTAINER_TYPES.includes(story.storyType)) {
-        // Creating a new container story - navigate to chapter management
-        navigate({ screen: 'story-children', parentStoryId: story.id });
-      } else {
-        // Creating a child story or non-container story - navigate to editor
-        navigate({ screen: 'story-editor', storyId: story.id });
-      }
+      // All stories are content now - always navigate to editor
+      navigate({ screen: 'story-editor', storyId: story.id });
       onClose();
     } catch (error) {
       console.error('Failed to create story:', error);
