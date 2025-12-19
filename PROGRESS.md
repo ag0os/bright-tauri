@@ -14,7 +14,7 @@ This separates containers (organizational structures) from stories (content enti
 | Phase 2 | Rust Models | 65, 66, 67 | Complete |
 | Phase 3 | Rust Repositories | 68, 69 | Complete |
 | Phase 4 | Tauri Commands | 70, 71, 72 | Complete |
-| Phase 5 | TypeScript Types | 73, 74 | Pending |
+| Phase 5 | TypeScript Types | 73, 74 | Complete |
 | Phase 6 | State Management | 75, 76 | Pending |
 | Phase 7 | Frontend Views | 77, 78, 79, 80 | Pending |
 | Phase 8 | Git Integration | 81, 82 | Pending |
@@ -42,8 +42,8 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-72: Remove Obsolete Story-as-Container Commands (Completed)
 
 ### Phase 5: TypeScript Types
-- [ ] task-73: Generate TypeScript Types for Container Model (Pending)
-- [ ] task-74: Update Frontend Type Imports for Container Model (Pending)
+- [x] task-73: Generate TypeScript Types for Container Model (Completed)
+- [x] task-74: Update Frontend Type Imports for Container Model (Completed)
 
 ### Phase 6: State Management
 - [ ] task-75: Create Zustand Store for Container State Management (Pending)
@@ -187,6 +187,29 @@ This separates containers (organizational structures) from stories (content enti
   - Unregistered from generate_handler! macro
   - Note: Frontend store still references - will be fixed in task-76
 - Commit: "chore(task-72): Remove obsolete story-as-container commands"
+
+### Phase 5: TypeScript Types
+
+#### 2025-12-19 - task-73: Generate TypeScript Types for Container Model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Verified all types generated via ts-rs
+  - Container.ts, Story.ts, StoryType.ts all correct
+  - CreateContainerInput.ts, UpdateContainerInput.ts, ContainerChildren.ts present
+  - Types were already up to date from earlier runs
+- Commit: None needed (types already generated)
+
+#### 2025-12-19 - task-74: Update Frontend Type Imports for Container Model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Fixed 16 TypeScript errors across frontend
+  - Removed references to "novel", "series", "collection" StoryType values
+  - Replaced parentStoryId with containerId throughout
+  - Updated CreateStoryModal default type to "chapter"
+  - Updated test mocks to use new types
+- Commit: "feat(task-74): Update frontend type imports for container model"
 
 ## Blockers
 

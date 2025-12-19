@@ -1,7 +1,7 @@
 ---
 id: task-74
 title: Update Frontend Type Imports for Container Model
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'

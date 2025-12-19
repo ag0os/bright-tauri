@@ -1,0 +1,206 @@
+/**
+ * Containers Store
+ *
+ * Manages the state of containers in the current universe with hierarchical
+ * organization and CRUD operations. Integrates with Tauri backend.
+ */
+
+import { create } from 'zustand';
+import { invoke } from '@tauri-apps/api/core';
+import type { Container, CreateContainerInput, UpdateContainerInput, ContainerChildren } from '@/types';
+
+interface ContainersState {
+  // State
+  containers: Container[];
+  selectedContainer: Container | null;
+  isLoading: boolean;
+  error: string | null;
+
+  // Child container/story cache
+  childrenByContainerId: Record<string, ContainerChildren>;
+  childrenLoading: Record<string, boolean>;
+
+  // Actions
+  loadContainers: (universeId: string) => Promise<void>;
+  selectContainer: (container: Container | null) => void;
+  createContainer: (input: CreateContainerInput) => Promise<Container>;
+  getContainer: (id: string) => Promise<Container>;
+  updateContainer: (id: string, input: UpdateContainerInput) => Promise<Container>;
+  deleteContainer: (id: string) => Promise<void>;
+
+  // Child container actions
+  loadContainerChildren: (containerId: string) => Promise<ContainerChildren>;
+  reorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => Promise<void>;
+  getContainerChildren: (containerId: string) => ContainerChildren | null;
+  invalidateChildren: (containerId: string) => void;
+
+  // Utility
+  clearError: () => void;
+}
+
+export const useContainersStore = create<ContainersState>((set, get) => ({
+  // Initial state
+  containers: [],
+  selectedContainer: null,
+  isLoading: false,
+  error: null,
+
+  // Child container cache
+  childrenByContainerId: {},
+  childrenLoading: {},
+
+  // Actions
+  loadContainers: async (universeId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const containers = await invoke<Container[]>('list_containers', { universeId });
+      set({ containers, isLoading: false });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load containers';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  selectContainer: (container) => {
+    set({ selectedContainer: container });
+  },
+
+  createContainer: async (input) => {
+    set({ isLoading: true, error: null });
+    try {
+      const container = await invoke<Container>('create_container', { input });
+      set((state) => ({
+        containers: [...state.containers, container],
+        selectedContainer: container,
+        isLoading: false,
+      }));
+      return container;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create container';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  getContainer: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const container = await invoke<Container>('get_container', { id });
+      set({ isLoading: false });
+      return container;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get container';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  updateContainer: async (id, input) => {
+    set({ isLoading: true, error: null });
+    try {
+      const container = await invoke<Container>('update_container', { id, input });
+      set((state) => ({
+        containers: state.containers.map((c) => (c.id === id ? container : c)),
+        selectedContainer: state.selectedContainer?.id === id ? container : state.selectedContainer,
+        isLoading: false,
+      }));
+      return container;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update container';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  deleteContainer: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      // Backend returns array of deleted container IDs (includes children)
+      const deletedIds = await invoke<string[]>('delete_container', { id });
+
+      set((state) => {
+        // Remove all deleted IDs from containers list
+        const remainingContainers = state.containers.filter((c) => !deletedIds.includes(c.id));
+
+        // Clean up children cache - remove deleted containers from all parent caches
+        const newChildrenByContainerId = { ...state.childrenByContainerId };
+        Object.keys(newChildrenByContainerId).forEach((parentId) => {
+          const children = newChildrenByContainerId[parentId];
+          newChildrenByContainerId[parentId] = {
+            containers: children.containers.filter((c) => !deletedIds.includes(c.id)),
+            stories: children.stories, // Stories are not deleted with container
+          };
+        });
+
+        // Clear selected container if it was deleted
+        const newSelectedContainer = state.selectedContainer && deletedIds.includes(state.selectedContainer.id)
+          ? null
+          : state.selectedContainer;
+
+        return {
+          containers: remainingContainers,
+          selectedContainer: newSelectedContainer,
+          childrenByContainerId: newChildrenByContainerId,
+          isLoading: false,
+        };
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete container';
+      set({ error: errorMessage, isLoading: false });
+      throw error;
+    }
+  },
+
+  // Child container actions
+  loadContainerChildren: async (containerId) => {
+    set((state) => ({
+      childrenLoading: { ...state.childrenLoading, [containerId]: true },
+      error: null,
+    }));
+    try {
+      const children = await invoke<ContainerChildren>('list_container_children', { containerId });
+      set((state) => ({
+        childrenByContainerId: { ...state.childrenByContainerId, [containerId]: children },
+        childrenLoading: { ...state.childrenLoading, [containerId]: false },
+      }));
+      return children;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load container children';
+      set((state) => ({
+        error: errorMessage,
+        childrenLoading: { ...state.childrenLoading, [containerId]: false },
+      }));
+      throw error;
+    }
+  },
+
+  reorderChildren: async (containerId, containerIds, storyIds) => {
+    set({ error: null });
+    try {
+      await invoke('reorder_container_children', { containerId, containerIds, storyIds });
+      // Reload children to get updated order
+      await get().loadContainerChildren(containerId);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to reorder children';
+      set({ error: errorMessage });
+      throw error;
+    }
+  },
+
+  getContainerChildren: (containerId) => {
+    return get().childrenByContainerId[containerId] || null;
+  },
+
+  invalidateChildren: (containerId) => {
+    set((state) => {
+      const newChildrenByContainerId = { ...state.childrenByContainerId };
+      delete newChildrenByContainerId[containerId];
+      return { childrenByContainerId: newChildrenByContainerId };
+    });
+  },
+
+  clearError: () => {
+    set({ error: null });
+  },
+}));
