@@ -89,6 +89,7 @@ pub enum StoryType {
     Poem,
     Outline,
     Treatment,
+    Screenplay,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]

@@ -1,7 +1,7 @@
 ---
 id: task-66
 title: Simplify Story Model to Content-Only Entity
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'
