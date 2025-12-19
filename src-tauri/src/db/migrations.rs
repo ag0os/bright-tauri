@@ -77,6 +77,29 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Stories table - Content-only model
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS stories (
+            id TEXT PRIMARY KEY,
+            universe_id TEXT NOT NULL,
+            container_id TEXT,
+            story_type TEXT,
+            title TEXT NOT NULL,
+            description TEXT,
+            content TEXT,
+            \"order\" INTEGER,
+            git_repo_path TEXT,
+            current_branch TEXT,
+            staged_changes INTEGER DEFAULT 0,
+            target_word_count INTEGER,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE,
+            FOREIGN KEY (container_id) REFERENCES containers(id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
+
     // Elements table
     conn.execute(
         "CREATE TABLE IF NOT EXISTS elements (
@@ -125,6 +148,14 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
     )?;
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_containers_parent ON containers(parent_container_id)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_stories_universe ON stories(universe_id)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_stories_container ON stories(container_id)",
         [],
     )?;
     conn.execute(
