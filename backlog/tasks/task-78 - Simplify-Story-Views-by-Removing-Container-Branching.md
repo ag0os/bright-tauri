@@ -1,7 +1,7 @@
 ---
 id: task-78
 title: Simplify Story Views by Removing Container Branching
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:42'

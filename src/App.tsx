@@ -12,6 +12,7 @@ import { StoryCombine } from "./views/StoryCombine";
 import { StorySettings } from "./views/StorySettings";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
+import { ContainerView } from "./views/ContainerView";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastContainer } from "./components/Toast";
 import "./App.css";
@@ -49,6 +50,7 @@ function AppContent() {
         </ErrorBoundary>
       );
 
+    // DEPRECATED: Use container-view instead for hierarchy management
     case 'story-children':
       return (
         <ErrorBoundary name="Story Chapters">
@@ -95,6 +97,37 @@ function AppContent() {
       return (
         <ErrorBoundary name="Element Detail">
           <ElementDetailPage />
+        </ErrorBoundary>
+      );
+
+    case 'container-view':
+      return (
+        <ErrorBoundary name="Container View">
+          <ContainerView containerId={currentRoute.containerId} />
+        </ErrorBoundary>
+      );
+
+    case 'container-create':
+      // TODO: Implement ContainerCreate view (task-77 follow-up)
+      return (
+        <ErrorBoundary name="Container Create">
+          <div style={{ padding: '2rem' }}>
+            <h1>Create Container</h1>
+            <p>Parent: {currentRoute.parentContainerId || 'Root'}</p>
+            <p>This view needs to be implemented.</p>
+          </div>
+        </ErrorBoundary>
+      );
+
+    case 'container-settings':
+      // TODO: Implement ContainerSettings view (task-77 follow-up)
+      return (
+        <ErrorBoundary name="Container Settings">
+          <div style={{ padding: '2rem' }}>
+            <h1>Container Settings</h1>
+            <p>Container ID: {currentRoute.containerId}</p>
+            <p>This view needs to be implemented.</p>
+          </div>
         </ErrorBoundary>
       );
 
