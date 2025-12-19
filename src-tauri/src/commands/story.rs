@@ -10,7 +10,15 @@ pub fn create_story(
     db: State<Database>,
     input: CreateStoryInput,
 ) -> Result<Story, String> {
-    // Create the story in the database
+    // Transaction sequence:
+    // 1. Insert DB row (story)
+    // 2. If entity should have git repo (standalone story):
+    //    - Initialize git repo
+    //    - If git init fails → rollback DB insert, return error
+    //    - Update git_repo_path in DB
+    //    - If path update fails → delete git repo dir, rollback DB, return error
+
+    // STEP 1: Create the story in the database
     let story = StoryRepository::create(&db, input).map_err(|e| e.to_string())?;
 
     // Only initialize git repository for standalone stories (container_id = None)
@@ -20,16 +28,50 @@ pub fn create_story(
         let app_data_dir = app
             .path()
             .app_data_dir()
-            .map_err(|e| format!("Failed to get app data directory: {e}"))?;
+            .map_err(|e| {
+                // Rollback: Delete the story from database
+                let _ = StoryRepository::delete(&db, &story.id);
+                format!("Failed to get app data directory: {e}")
+            })?;
 
-        // Initialize git repository for the story
-        let git_repo_path = GitService::init_repo(&app_data_dir, &story.id)
-            .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
+        // STEP 2: Initialize git repository for the story
+        let git_repo_path = GitService::init_repo(&app_data_dir, &story.id).map_err(|e| {
+            // Rollback: Delete the story from database
+            let _ = StoryRepository::delete(&db, &story.id);
+            format!("Failed to initialize git repository: {e}")
+        })?;
 
-        // Update the story with the git repo path
+        // STEP 3: Update the story with the git repo path
         let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
-        StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str)
-            .map_err(|e| format!("Failed to update git repo path: {e}"))?;
+        if let Err(e) = StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str) {
+            // Rollback: Delete the git repo directory
+            if git_repo_path.exists() {
+                let _ = std::fs::remove_dir_all(&git_repo_path);
+            }
+            // Rollback: Delete the story from database
+            let _ = StoryRepository::delete(&db, &story.id);
+            return Err(format!("Failed to update git repo path: {e}"));
+        }
+
+        // Get current branch from the newly created repo
+        let current_branch = GitService::get_current_branch(&git_repo_path).map_err(|e| {
+            // Rollback: Delete git repo and story
+            if git_repo_path.exists() {
+                let _ = std::fs::remove_dir_all(&git_repo_path);
+            }
+            let _ = StoryRepository::delete(&db, &story.id);
+            format!("Failed to get current branch: {e}")
+        })?;
+
+        // Update the current branch
+        if let Err(e) = StoryRepository::set_current_branch(&db, &story.id, &current_branch) {
+            // Rollback: Delete git repo and story
+            if git_repo_path.exists() {
+                let _ = std::fs::remove_dir_all(&git_repo_path);
+            }
+            let _ = StoryRepository::delete(&db, &story.id);
+            return Err(format!("Failed to update current branch: {e}"));
+        }
 
         // Return the updated story
         return StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string());

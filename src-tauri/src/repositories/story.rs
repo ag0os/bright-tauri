@@ -44,7 +44,7 @@ impl StoryRepository {
                 content, variation_group_id, variation_type, parent_variation_id,
                 git_repo_path, current_branch, staged_changes, created_at, updated_at,
                 notes, outline, target_word_count, \"order\", tags, color, favorite,
-                related_element_ids, series_name, parent_story_id, last_edited_at, version
+                related_element_ids, series_name, container_id, last_edited_at, version
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)",
             params![
                 &id,
@@ -716,5 +716,75 @@ mod tests {
         assert!(!child.should_have_git_repo());
         assert_eq!(child2.container_id, Some("container-123".to_string()));
         assert!(!child2.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_set_git_repo_path() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a standalone story
+        let input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Test Story".to_string(),
+            description: Some("Test".to_string()),
+            story_type: Some(StoryType::ShortStory),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, input).unwrap();
+
+        // Initially git_repo_path should be empty
+        assert!(story.git_repo_path.is_empty());
+
+        // Set git repo path
+        StoryRepository::set_git_repo_path(&db, &story.id, "/path/to/repo").unwrap();
+
+        // Verify it was set
+        let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
+        assert_eq!(updated.git_repo_path, "/path/to/repo");
+    }
+
+    #[test]
+    fn test_set_current_branch() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a standalone story
+        let input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Test Story".to_string(),
+            description: Some("Test".to_string()),
+            story_type: Some(StoryType::ShortStory),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, input).unwrap();
+
+        // Default branch should be "main"
+        assert_eq!(story.current_branch, "main");
+
+        // Set current branch
+        StoryRepository::set_current_branch(&db, &story.id, "feature-branch").unwrap();
+
+        // Verify it was set
+        let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
+        assert_eq!(updated.current_branch, "feature-branch");
     }
 }

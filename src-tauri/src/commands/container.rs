@@ -101,8 +101,15 @@ pub fn reorder_container_children(
 }
 
 /// Ensure a container has a git repository initialized.
-/// This is useful for containers that will contain stories.
+/// This is useful for containers that will contain stories (leaf containers).
 /// Returns the updated container with the git repo path set.
+///
+/// Transaction sequence:
+/// 1. Container already exists in DB (called after creation)
+/// 2. Initialize git repo
+/// 3. If git init fails → return error (container remains without git repo)
+/// 4. Update git_repo_path in DB
+/// 5. If path update fails → delete git repo dir, return error
 #[tauri::command]
 pub fn ensure_container_git_repo(
     app: AppHandle,
@@ -111,6 +118,16 @@ pub fn ensure_container_git_repo(
 ) -> Result<Container, String> {
     // Get the container
     let container = ContainerRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
+
+    // Verify this container can have a git repo (should not have child containers)
+    let child_containers = ContainerRepository::list_children(&db, &id).map_err(|e| e.to_string())?;
+    if !child_containers.is_empty() {
+        return Err(format!(
+            "Container '{}' has child containers and cannot have its own git repository. \
+             Only leaf containers (those containing stories) should have git repositories.",
+            container.title
+        ));
+    }
 
     // If git_repo_path is already set and exists, sync the branch name and return
     if let Some(ref git_repo_path) = container.git_repo_path {
@@ -139,14 +156,39 @@ pub fn ensure_container_git_repo(
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data directory: {e}"))?;
 
-    // Initialize git repository for the container
+    // STEP 2: Initialize git repository for the container
     let git_repo_path = GitService::init_repo(&app_data_dir, &container.id)
         .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
 
-    // Update the container with the git repo path
+    // STEP 3: Update the container with the git repo path
     let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
-    ContainerRepository::set_git_repo_path(&db, &container.id, &git_repo_path_str)
-        .map_err(|e| format!("Failed to update git repo path: {e}"))?;
+    if let Err(e) = ContainerRepository::set_git_repo_path(&db, &container.id, &git_repo_path_str) {
+        // Rollback: Delete the git repo directory
+        if git_repo_path.exists() {
+            let _ = std::fs::remove_dir_all(&git_repo_path);
+        }
+        return Err(format!("Failed to update git repo path: {e}"));
+    }
+
+    // Get current branch from the newly created repo
+    let current_branch = GitService::get_current_branch(&git_repo_path).map_err(|e| {
+        // Rollback: Delete git repo and clear git_repo_path from DB
+        if git_repo_path.exists() {
+            let _ = std::fs::remove_dir_all(&git_repo_path);
+        }
+        let _ = ContainerRepository::set_git_repo_path(&db, &container.id, "");
+        format!("Failed to get current branch: {e}")
+    })?;
+
+    // Update the current branch
+    if let Err(e) = ContainerRepository::set_current_branch(&db, &container.id, &current_branch) {
+        // Rollback: Delete git repo and clear git_repo_path from DB
+        if git_repo_path.exists() {
+            let _ = std::fs::remove_dir_all(&git_repo_path);
+        }
+        let _ = ContainerRepository::set_git_repo_path(&db, &container.id, "");
+        return Err(format!("Failed to update current branch: {e}"));
+    }
 
     // Return the updated container
     ContainerRepository::find_by_id(&db, &container.id).map_err(|e| e.to_string())
