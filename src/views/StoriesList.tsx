@@ -29,7 +29,6 @@ export function StoriesList() {
     loadStories,
     deleteStory,
     updateStory,
-    getChildCount,
     filters,
     setFilter,
     getFilteredAndSortedStories,
@@ -69,19 +68,12 @@ export function StoriesList() {
   };
 
   const handleDeleteStory = async (story: Story) => {
-    try {
-      // Fetch child count before showing modal
-      const count = await getChildCount(story.id);
-      setStoryToDelete(story);
-      setDeleteChildCount(count);
-      setShowDeleteModal(true);
-    } catch (error) {
-      console.error('Failed to fetch child count:', error);
-      // Still show modal with 0 count if fetch fails
-      setStoryToDelete(story);
-      setDeleteChildCount(0);
-      setShowDeleteModal(true);
-    }
+    // TODO(task-76): Child count will be fetched from container store when needed
+    // For now, calculate from local stories (stories with this story as container)
+    const count = allStories.filter((s) => s.containerId === story.id).length;
+    setStoryToDelete(story);
+    setDeleteChildCount(count);
+    setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {

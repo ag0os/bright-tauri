@@ -26,14 +26,11 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const goBack = useNavigationStore((state) => state.goBack);
 
+  // TODO(task-76/78): This view needs to be updated to use containers store instead of stories store
+  // For now, we'll use basic story CRUD operations
   const {
     getStory,
-    loadStoryChildren,
-    getStoryChildren,
-    reorderStoryChildren,
     deleteStory,
-    getChildCount,
-    childrenLoading,
     error,
   } = useStoriesStore();
 
@@ -45,14 +42,15 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   const [deleteChildCount, setDeleteChildCount] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load parent story and children on mount
+  // TODO(task-76/78): This component will be replaced with container-based management
+  // Load parent story on mount
   useEffect(() => {
     const loadData = async () => {
       setIsLoadingParent(true);
       try {
         const story = await getStory(parentStoryId);
         setParentStory(story);
-        await loadStoryChildren(parentStoryId);
+        // TODO(task-76/78): Load children from containers store
       } catch (err) {
         console.error('Failed to load story data:', err);
       } finally {
@@ -61,10 +59,11 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
     };
 
     loadData();
-  }, [parentStoryId, getStory, loadStoryChildren]);
+  }, [parentStoryId, getStory]);
 
-  const children = getStoryChildren(parentStoryId);
-  const isChildrenLoading = childrenLoading[parentStoryId] || false;
+  // TODO(task-76/78): Children will come from containers store
+  const children: Story[] = [];
+  const isChildrenLoading = false;
 
   const handleTabChange = (tab: 'stories' | 'universe') => {
     if (tab === 'universe') {
@@ -79,19 +78,10 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   };
 
   const handleDeleteChild = async (story: Story) => {
-    try {
-      // Fetch child count before showing modal
-      const count = await getChildCount(story.id);
-      setStoryToDelete(story);
-      setDeleteChildCount(count);
-      setShowDeleteModal(true);
-    } catch (error) {
-      console.error('Failed to fetch child count:', error);
-      // Still show modal with 0 count if fetch fails
-      setStoryToDelete(story);
-      setDeleteChildCount(0);
-      setShowDeleteModal(true);
-    }
+    // TODO(task-76/78): Child count will come from containers store
+    setStoryToDelete(story);
+    setDeleteChildCount(0);
+    setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -100,8 +90,7 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
     setIsDeleting(true);
     try {
       await deleteStory(storyToDelete.id);
-      // Reload children after deletion
-      await loadStoryChildren(parentStoryId);
+      // TODO(task-76/78): Reload children from containers store
       // Close modal and reset state
       setShowDeleteModal(false);
       setStoryToDelete(null);
@@ -122,8 +111,8 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
   };
 
   const handleReorder = async (storyIds: string[]) => {
-    // Let the error propagate to ChildStoryList for optimistic rollback
-    await reorderStoryChildren(parentStoryId, storyIds);
+    // TODO(task-76/78): Reordering will use containers store
+    console.log('Reorder not yet implemented with containers store', storyIds);
   };
 
   const handleSelectChild = (story: Story) => {
@@ -132,8 +121,7 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
 
   const handleCreateModalClose = () => {
     setShowCreateModal(false);
-    // Reload children after modal closes (in case a new child was created)
-    loadStoryChildren(parentStoryId);
+    // TODO(task-76/78): Reload children from containers store
   };
 
   // Get display text for child type based on parent type

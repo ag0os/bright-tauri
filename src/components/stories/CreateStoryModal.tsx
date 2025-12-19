@@ -60,7 +60,7 @@ const CONTAINER_TYPES: StoryType[] = [];
 export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const currentUniverse = useUniverseStore((state) => state.currentUniverse);
-  const { createStory, invalidateChildren } = useStoriesStore();
+  const { createStory } = useStoriesStore();
 
   const isCreatingChild = !!parentStory;
   const defaultChildType = parentStory ? getDefaultChildType(parentStory.storyType) : 'chapter';
@@ -124,10 +124,7 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
         parentVariationId: null,
       });
 
-      // Invalidate parent's children cache if creating a child
-      if (parentStory) {
-        invalidateChildren(parentStory.id);
-      }
+      // TODO(task-76): Container children invalidation moved to useContainersStore
 
       // Navigate based on story type
       // Container types should go to chapter management, others to editor
