@@ -95,49 +95,6 @@ pub fn delete_story(
     Ok(())
 }
 
-// Deprecated Story hierarchy commands
-// These commands are deprecated in favor of container-based hierarchy (task-71)
-// They will be removed in task-72
-
-/// @deprecated Use list_container_children instead. Will be removed in task-72.
-#[deprecated(note = "Use list_container_children instead. Will be removed in task-72.")]
-#[tauri::command]
-pub fn list_story_children(db: State<Database>, parent_id: String) -> Result<Vec<Story>, String> {
-    #[allow(deprecated)]
-    StoryRepository::list_children(&db, &parent_id).map_err(|e| e.to_string())
-}
-
-/// @deprecated Use reorder_container_children instead. Will be removed in task-72.
-#[deprecated(note = "Use reorder_container_children instead. Will be removed in task-72.")]
-#[tauri::command]
-pub fn reorder_story_children(
-    db: State<Database>,
-    parent_id: String,
-    story_ids: Vec<String>,
-) -> Result<(), String> {
-    #[allow(deprecated)]
-    StoryRepository::reorder_children(&db, &parent_id, story_ids).map_err(|e| e.to_string())
-}
-
-/// @deprecated Containers handle hierarchy now. Will be removed in task-72.
-#[deprecated(note = "Containers handle hierarchy now. Will be removed in task-72.")]
-#[tauri::command]
-pub fn get_story_with_children(
-    db: State<Database>,
-    id: String,
-) -> Result<(Story, Vec<Story>), String> {
-    #[allow(deprecated)]
-    StoryRepository::get_with_children(&db, &id).map_err(|e| e.to_string())
-}
-
-/// @deprecated Container count is managed by Container repository. Will be removed in task-72.
-#[deprecated(note = "Container count is managed by Container repository. Will be removed in task-72.")]
-#[tauri::command]
-pub fn get_story_child_count(db: State<Database>, id: String) -> Result<i32, String> {
-    #[allow(deprecated)]
-    StoryRepository::get_child_count(&db, &id).map_err(|e| e.to_string())
-}
-
 /// Ensure a story has a git repository initialized.
 /// This is useful for stories created before git integration was added.
 /// Also syncs the current_branch field with the actual git branch.

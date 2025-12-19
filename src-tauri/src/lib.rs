@@ -70,11 +70,6 @@ pub fn run() {
             commands::list_story_variations,
             commands::update_story,
             commands::delete_story,
-            // Story hierarchy commands
-            commands::list_story_children,
-            commands::reorder_story_children,
-            commands::get_story_with_children,
-            commands::get_story_child_count,
             commands::ensure_story_git_repo,
             // Element commands
             commands::create_element,
