@@ -13,7 +13,6 @@ export type Route =
   | { screen: 'stories-list' }
   | { screen: 'universe-list' }
   | { screen: 'story-editor'; storyId: string }
-  | { screen: 'story-children'; parentStoryId: string } // DEPRECATED: Use container-view instead
   | { screen: 'story-history'; storyId: string }
   | { screen: 'story-variations'; storyId: string }
   | { screen: 'story-compare'; storyId: string; branchA?: string; branchB?: string }

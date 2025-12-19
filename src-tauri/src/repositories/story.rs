@@ -334,35 +334,6 @@ impl StoryRepository {
         Ok(())
     }
 
-    // Deprecated methods - kept for backward compatibility until commands are updated (task-71)
-
-    /// @deprecated Use list_by_container instead
-    #[deprecated(note = "Use list_by_container instead. Will be removed in task-72.")]
-    pub fn list_children(db: &Database, parent_id: &str) -> Result<Vec<Story>> {
-        Self::list_by_container(db, parent_id)
-    }
-
-    /// @deprecated Use reorder_by_container instead
-    #[deprecated(note = "Use reorder_by_container instead. Will be removed in task-72.")]
-    pub fn reorder_children(db: &Database, parent_id: &str, story_ids: Vec<String>) -> Result<()> {
-        Self::reorder_by_container(db, parent_id, story_ids)
-    }
-
-    /// @deprecated Containers handle hierarchy now. This method will be removed.
-    #[deprecated(note = "Containers handle hierarchy now. Will be removed in task-72.")]
-    pub fn get_with_children(db: &Database, id: &str) -> Result<(Story, Vec<Story>)> {
-        let story = Self::find_by_id(db, id)?;
-        // Return story with empty children - containers will handle hierarchy
-        Ok((story, vec![]))
-    }
-
-    /// @deprecated Container count is managed by Container repository
-    #[deprecated(note = "Container count is managed by Container repository. Will be removed in task-72.")]
-    pub fn get_child_count(_db: &Database, _parent_id: &str) -> Result<i32> {
-        // Return 0 - containers will handle child counts
-        Ok(0)
-    }
-
     /// Update the git repo path for a story (internal use)
     pub fn set_git_repo_path(db: &Database, id: &str, git_repo_path: &str) -> Result<()> {
         db.execute(

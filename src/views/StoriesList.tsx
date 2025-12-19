@@ -117,7 +117,7 @@ export function StoriesList() {
   };
 
   // Get filtered and sorted stories (grouped view - top level only)
-  // TODO(task-78): Update to filter by containerId when container model is implemented
+  // Filter to show only stories not in containers (root stories)
   const filteredStories = getFilteredAndSortedStories().filter(
     (story) => !story.containerId
   );

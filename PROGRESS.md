@@ -16,8 +16,8 @@ This separates containers (organizational structures) from stories (content enti
 | Phase 4 | Tauri Commands | 70, 71, 72 | Complete |
 | Phase 5 | TypeScript Types | 73, 74 | Complete |
 | Phase 6 | State Management | 75, 76 | Complete |
-| Phase 7 | Frontend Views | 77, 78, 79, 80 | Pending |
-| Phase 8 | Git Integration | 81, 82 | Pending |
+| Phase 7 | Frontend Views | 77, 78, 79, 80 | Complete |
+| Phase 8 | Git Integration | 81, 82 | Complete |
 | Phase 9 | Cleanup | 83, 84 | Pending |
 
 ## Task Status
@@ -50,14 +50,14 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-76: Simplify Stories Store by Removing Container Logic (Completed)
 
 ### Phase 7: Frontend Views
-- [ ] task-77: Create Container Views for Hierarchy Management (Pending)
-- [ ] task-78: Simplify Story Views by Removing Container Branching (Pending)
-- [ ] task-79: Update Navigation for Container and Story Separation (Pending)
-- [ ] task-80: Update Components for Container/Story Model (Pending)
+- [x] task-77: Create Container Views for Hierarchy Management (Completed)
+- [x] task-78: Simplify Story Views by Removing Container Branching (Completed)
+- [x] task-79: Update Navigation for Container and Story Separation (Completed)
+- [x] task-80: Update Components for Container/Story Model (Completed)
 
 ### Phase 8: Git Integration
-- [ ] task-81: Update Git Initialization with Transaction Handling (Pending)
-- [ ] task-82: Implement Leaf Protection Validation (PREVENT Approach) (Pending)
+- [x] task-81: Update Git Initialization with Transaction Handling (Completed)
+- [x] task-82: Implement Leaf Protection Validation (PREVENT Approach) (Completed)
 
 ### Phase 9: Cleanup
 - [ ] task-83: Remove Dead Code from Story-as-Container Model (Pending)
@@ -234,6 +234,72 @@ This separates containers (organizational structures) from stories (content enti
   - Updated components to use local calculations instead of removed methods
   - Added TODOs for container store integration in views
 - Commit: "feat(task-76): Simplify Stories store by removing container logic"
+
+### Phase 7: Frontend Views
+
+#### 2025-12-19 - task-77: Create Container Views for Hierarchy Management
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created ContainerView.tsx (610 lines) - displays container details and children
+  - Created ContainerChildrenView.tsx - reusable children list component
+  - Added navigation routes: container-view, container-create, container-settings
+  - Visual distinction: containers (blue folders), stories (amber files)
+  - Reordering with up/down buttons
+- Commit: "feat(task-77): Create container views for hierarchy management"
+
+#### 2025-12-19 - task-78: Simplify Story Views by Removing Container Branching
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed CONTAINER_TYPES arrays from CreateStoryModal and StoriesList
+  - Removed conditional navigation (stories always go to editor)
+  - All story clicks now navigate to editor
+- Commit: "feat(task-78): Simplify story views by removing container branching"
+
+#### 2025-12-19 - task-79: Update Navigation for Container and Story Separation
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Added container routes to App.tsx router
+  - Added navigation helpers: navigateToContainer, navigateToContainerCreate, etc.
+  - Added story navigation helpers: navigateToStoryEditor, navigateToStorySettings, etc.
+  - Deprecated story-children route
+- Commit: "feat(task-79): Update navigation for container and story separation"
+
+#### 2025-12-19 - task-80: Update Components for Container/Story Model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created CreateContainerModal (novel, series, collection types)
+  - Created ContainerCard with type icons and leaf status
+  - Updated CreateStoryModal: removed container types, added container dropdown
+  - Updated StoryCard: removed child count display
+- Commit: "feat(task-80): Update components for container/story model"
+
+### Phase 8: Git Integration
+
+#### 2025-12-19 - task-81: Update Git Initialization with Transaction Handling
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Implemented atomic transaction: DB insert → Git init → Path update → Branch update
+  - Added rollback logic at each step for error recovery
+  - Standalone stories get their own git repos
+  - Child stories share container's git repo
+  - Fixed database schema to include all Story model fields
+- Commit: "feat(task-81): Update Git initialization with transaction handling"
+
+#### 2025-12-19 - task-82: Implement Leaf Protection Validation (PREVENT Approach)
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Verified leaf protection in ContainerRepository::create()
+  - Validation checks if parent has stories before allowing child containers
+  - Added test: test_add_child_to_empty_container_allowed
+  - Added test: test_container_remains_non_leaf_after_losing_children
+  - All 16 container repository tests passing
+- Commit: "feat(task-82): Implement leaf protection validation with comprehensive tests"
 
 ## Blockers
 

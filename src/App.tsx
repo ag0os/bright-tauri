@@ -4,7 +4,6 @@ import { UniverseSelection } from "./views/UniverseSelection";
 import { StoriesList } from "./views/StoriesList";
 import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
-import { StoryChildren } from "./views/StoryChildren";
 import { StoryHistory } from "./views/StoryHistory";
 import { StoryVariations } from "./views/StoryVariations";
 import { StoryCompare } from "./views/StoryCompare";
@@ -47,14 +46,6 @@ function AppContent() {
       return (
         <ErrorBoundary name="Story Editor">
           <StoryEditor />
-        </ErrorBoundary>
-      );
-
-    // DEPRECATED: Use container-view instead for hierarchy management
-    case 'story-children':
-      return (
-        <ErrorBoundary name="Story Chapters">
-          <StoryChildren parentStoryId={currentRoute.parentStoryId} />
         </ErrorBoundary>
       );
 
@@ -108,7 +99,6 @@ function AppContent() {
       );
 
     case 'container-create':
-      // TODO: Implement ContainerCreate view (task-77 follow-up)
       return (
         <ErrorBoundary name="Container Create">
           <div style={{ padding: '2rem' }}>
@@ -120,7 +110,6 @@ function AppContent() {
       );
 
     case 'container-settings':
-      // TODO: Implement ContainerSettings view (task-77 follow-up)
       return (
         <ErrorBoundary name="Container Settings">
           <div style={{ padding: '2rem' }}>
