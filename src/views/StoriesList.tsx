@@ -133,14 +133,16 @@ export function StoriesList() {
   };
 
   // Get filtered and sorted stories (grouped view - top level only)
+  // TODO(task-78): Update to filter by containerId when container model is implemented
   const filteredStories = getFilteredAndSortedStories().filter(
-    (story) => !story.parentStoryId
+    (story) => !story.containerId
   );
 
   // Calculate child count for each story (local count from loaded stories)
+  // TODO(task-78): This will be replaced with container-based counting
   const allStories = useStoriesStore((state) => state.stories);
   const getLocalChildCount = (storyId: string): number => {
-    return allStories.filter((s) => s.parentStoryId === storyId).length;
+    return allStories.filter((s) => s.containerId === storyId).length;
   };
 
   return (

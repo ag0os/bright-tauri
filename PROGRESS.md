@@ -13,7 +13,7 @@ This separates containers (organizational structures) from stories (content enti
 | Phase 1 | Database Schema | 62, 63, 64 | Complete |
 | Phase 2 | Rust Models | 65, 66, 67 | Complete |
 | Phase 3 | Rust Repositories | 68, 69 | Complete |
-| Phase 4 | Tauri Commands | 70, 71, 72 | Pending |
+| Phase 4 | Tauri Commands | 70, 71, 72 | Complete |
 | Phase 5 | TypeScript Types | 73, 74 | Pending |
 | Phase 6 | State Management | 75, 76 | Pending |
 | Phase 7 | Frontend Views | 77, 78, 79, 80 | Pending |
@@ -37,9 +37,9 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-69: Update Story Repository for Container-Based Organization (Completed)
 
 ### Phase 4: Tauri Commands
-- [ ] task-70: Add Tauri Commands for Container Operations (Pending)
-- [ ] task-71: Update Story Tauri Commands for Container Model (Pending)
-- [ ] task-72: Remove Obsolete Story-as-Container Commands (Pending)
+- [x] task-70: Add Tauri Commands for Container Operations (Completed)
+- [x] task-71: Update Story Tauri Commands for Container Model (Completed)
+- [x] task-72: Remove Obsolete Story-as-Container Commands (Completed)
 
 ### Phase 5: TypeScript Types
 - [ ] task-73: Generate TypeScript Types for Container Model (Pending)
@@ -156,6 +156,37 @@ This separates containers (organizational structures) from stories (content enti
   - Removed container-related logic from story repository
   - Note: Some tests blocked by schema/model alignment - will resolve in later phases
 - Commit: "feat(task-69): Update Story repository for container-based organization"
+
+### Phase 4: Tauri Commands
+
+#### 2025-12-19 - task-70: Add Tauri Commands for Container Operations
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created 8 Tauri commands: create/get/list/update/delete_container, list_container_children, reorder_container_children, ensure_container_git_repo
+  - Added input types: CreateContainerInput, UpdateContainerInput, ContainerChildren
+  - Registered all commands in generate_handler!
+  - Auto-generated TypeScript types
+- Commit: "feat(task-70): Add Tauri commands for container operations"
+
+#### 2025-12-19 - task-71: Update Story Tauri Commands for Container Model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated create_story to use container_id for standalone vs child determination
+  - Deprecated hierarchy commands (list_story_children, get_story_with_children, etc.)
+  - Enhanced ensure_story_git_repo to validate standalone stories only
+  - Removed container vs content branching logic
+- Commit: "feat(task-71): Update Story Tauri commands for container model"
+
+#### 2025-12-19 - task-72: Remove Obsolete Story-as-Container Commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed list_story_children, get_story_with_children, reorder_story_children, get_story_child_count
+  - Unregistered from generate_handler! macro
+  - Note: Frontend store still references - will be fixed in task-76
+- Commit: "chore(task-72): Remove obsolete story-as-container commands"
 
 ## Blockers
 

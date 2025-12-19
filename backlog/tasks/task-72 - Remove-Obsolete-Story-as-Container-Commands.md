@@ -1,7 +1,7 @@
 ---
 id: task-72
 title: Remove Obsolete Story-as-Container Commands
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'

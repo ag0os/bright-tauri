@@ -27,13 +27,11 @@ interface CreateStoryModalProps {
 }
 
 // Determine the default child story type based on parent type
+// TODO(task-78): This logic will be updated when container/story separation is complete
 const getDefaultChildType = (parentType: StoryType): StoryType => {
   switch (parentType) {
     case 'screenplay':
       return 'scene';
-    case 'novel':
-    case 'series':
-    case 'collection':
     default:
       return 'chapter';
   }
@@ -55,8 +53,9 @@ const getChildTypeOptions = (parentType: StoryType): { value: StoryType; label: 
   }
 };
 
-// Container types that should navigate to chapter management instead of editor
-const CONTAINER_TYPES: StoryType[] = ['novel', 'series', 'screenplay', 'collection'];
+// TODO(task-78): Container logic will be replaced when container/story separation is complete
+// For now, we'll navigate all new stories to the editor
+const CONTAINER_TYPES: StoryType[] = [];
 
 export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
@@ -64,12 +63,13 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
   const { createStory, invalidateChildren } = useStoriesStore();
 
   const isCreatingChild = !!parentStory;
-  const defaultChildType = parentStory ? getDefaultChildType(parentStory.storyType) : 'novel';
+  const defaultChildType = parentStory ? getDefaultChildType(parentStory.storyType) : 'chapter';
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    storyType: isCreatingChild ? defaultChildType : ('novel' as StoryType),
+    // TODO(task-78): Default story type will be set based on container type
+    storyType: isCreatingChild ? defaultChildType : ('chapter' as StoryType),
     targetWordCount: '',
     tags: '',
   });
@@ -118,7 +118,8 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
           : null,
         color: null,
         seriesName: null,
-        parentStoryId: parentStory?.id || null,
+        // TODO(task-78): This will use actual container ID when container model is implemented
+        containerId: parentStory?.id || null,
         variationType: null,
         parentVariationId: null,
       });
@@ -280,17 +281,15 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
                     ))
                   ) : (
                     <>
-                      <option value="novel">Novel</option>
-                      <option value="series">Series</option>
-                      <option value="screenplay">Screenplay</option>
-                      <option value="short-story">Short Story</option>
-                      <option value="poem">Poem</option>
+                      {/* TODO(task-78): Story type options will be updated for container model */}
                       <option value="chapter">Chapter</option>
+                      <option value="short-story">Short Story</option>
                       <option value="scene">Scene</option>
                       <option value="episode">Episode</option>
+                      <option value="poem">Poem</option>
                       <option value="outline">Outline</option>
                       <option value="treatment">Treatment</option>
-                      <option value="collection">Collection</option>
+                      <option value="screenplay">Screenplay</option>
                     </>
                   )}
                 </select>

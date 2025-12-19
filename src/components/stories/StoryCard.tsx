@@ -7,10 +7,8 @@
 
 import React, { useState } from 'react';
 import {
-  BookOpen,
   FileText,
   Scroll,
-  Stack,
   FilmStrip,
   Feather,
   BookBookmark,
@@ -39,11 +37,8 @@ interface StoryCardProps {
 const getStoryIcon = (type: StoryType): React.ReactNode => {
   const iconClass = 'icon icon-lg';
 
+  // TODO(task-78): Icon mapping will be updated for container model
   switch (type) {
-    case 'novel':
-      return <BookOpen className={iconClass} weight="duotone" />;
-    case 'series':
-      return <Stack className={iconClass} weight="duotone" />;
     case 'screenplay':
       return <FilmStrip className={iconClass} weight="duotone" />;
     case 'short-story':
@@ -54,6 +49,12 @@ const getStoryIcon = (type: StoryType): React.ReactNode => {
       return <BookBookmark className={iconClass} weight="duotone" />;
     case 'scene':
       return <Scroll className={iconClass} weight="duotone" />;
+    case 'episode':
+      return <FilmStrip className={iconClass} weight="duotone" />;
+    case 'outline':
+      return <FileText className={iconClass} weight="duotone" />;
+    case 'treatment':
+      return <FileText className={iconClass} weight="duotone" />;
     default:
       return <FileText className={iconClass} weight="duotone" />;
   }
