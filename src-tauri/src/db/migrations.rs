@@ -57,6 +57,26 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Containers table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS containers (
+            id TEXT PRIMARY KEY,
+            universe_id TEXT NOT NULL,
+            parent_container_id TEXT,
+            container_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            \"order\" INTEGER,
+            git_repo_path TEXT,
+            current_branch TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_container_id) REFERENCES containers(id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
+
     // Elements table
     conn.execute(
         "CREATE TABLE IF NOT EXISTS elements (
@@ -99,6 +119,14 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
     )?;
 
     // Create indices for better query performance
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_containers_universe ON containers(universe_id)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_containers_parent ON containers(parent_container_id)",
+        [],
+    )?;
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_elements_universe ON elements(universe_id)",
         [],
