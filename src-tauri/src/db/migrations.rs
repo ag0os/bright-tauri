@@ -34,7 +34,8 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
 }
 
 /// Initial schema - Version 1
-/// Creates tables for Universe, Story, and Element domain models
+/// Creates tables for Universe and Element domain models
+/// NOTE: Stories table removed - will be recreated in container/story refactor
 fn migrate_v1(conn: &Connection) -> Result<()> {
     // Universes table
     conn.execute(
@@ -52,44 +53,6 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
             color TEXT,
             icon TEXT,
             tags TEXT -- JSON array
-        )",
-        [],
-    )?;
-
-    // Stories table
-    conn.execute(
-        "CREATE TABLE IF NOT EXISTS stories (
-            id TEXT PRIMARY KEY,
-            universe_id TEXT NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL,
-            story_type TEXT NOT NULL,
-            status TEXT NOT NULL,
-            word_count INTEGER NOT NULL,
-            target_word_count INTEGER,
-            content TEXT NOT NULL,
-            notes TEXT,
-            outline TEXT,
-            \"order\" INTEGER,
-            tags TEXT, -- JSON array
-            color TEXT,
-            favorite INTEGER,
-            related_element_ids TEXT, -- JSON array
-            parent_story_id TEXT,
-            series_name TEXT,
-            last_edited_at TEXT NOT NULL,
-            version INTEGER NOT NULL,
-            variation_group_id TEXT NOT NULL,
-            variation_type TEXT NOT NULL,
-            parent_variation_id TEXT,
-            git_repo_path TEXT NOT NULL,
-            current_branch TEXT NOT NULL,
-            staged_changes INTEGER NOT NULL,
-            FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE,
-            FOREIGN KEY (parent_story_id) REFERENCES stories(id) ON DELETE SET NULL,
-            FOREIGN KEY (parent_variation_id) REFERENCES stories(id) ON DELETE SET NULL
         )",
         [],
     )?;
@@ -136,10 +99,6 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
     )?;
 
     // Create indices for better query performance
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_stories_universe ON stories(universe_id)",
-        [],
-    )?;
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_elements_universe ON elements(universe_id)",
         [],
