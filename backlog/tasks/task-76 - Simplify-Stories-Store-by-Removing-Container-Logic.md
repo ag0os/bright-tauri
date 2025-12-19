@@ -1,11 +1,11 @@
 ---
 id: task-76
 title: Simplify Stories Store by Removing Container Logic
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'
-updated_date: '2025-12-19 20:22'
+updated_date: '2025-12-19 20:23'
 labels:
   - container-refactor
   - frontend

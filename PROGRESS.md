@@ -15,7 +15,7 @@ This separates containers (organizational structures) from stories (content enti
 | Phase 3 | Rust Repositories | 68, 69 | Complete |
 | Phase 4 | Tauri Commands | 70, 71, 72 | Complete |
 | Phase 5 | TypeScript Types | 73, 74 | Complete |
-| Phase 6 | State Management | 75, 76 | Pending |
+| Phase 6 | State Management | 75, 76 | Complete |
 | Phase 7 | Frontend Views | 77, 78, 79, 80 | Pending |
 | Phase 8 | Git Integration | 81, 82 | Pending |
 | Phase 9 | Cleanup | 83, 84 | Pending |
@@ -46,8 +46,8 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-74: Update Frontend Type Imports for Container Model (Completed)
 
 ### Phase 6: State Management
-- [ ] task-75: Create Zustand Store for Container State Management (Pending)
-- [ ] task-76: Simplify Stories Store by Removing Container Logic (Pending)
+- [x] task-75: Create Zustand Store for Container State Management (Completed)
+- [x] task-76: Simplify Stories Store by Removing Container Logic (Completed)
 
 ### Phase 7: Frontend Views
 - [ ] task-77: Create Container Views for Hierarchy Management (Pending)
@@ -210,6 +210,30 @@ This separates containers (organizational structures) from stories (content enti
   - Updated CreateStoryModal default type to "chapter"
   - Updated test mocks to use new types
 - Commit: "feat(task-74): Update frontend type imports for container model"
+
+### Phase 6: State Management
+
+#### 2025-12-19 - task-75: Create Zustand Store for Container State Management
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created useContainersStore in src/stores/useContainersStore.ts
+  - Implemented state: containers, containerChildren map, loading states
+  - Added actions: loadContainers, loadContainerChildren, createContainer, updateContainer, deleteContainer, reorderChildren
+  - Exported Container types from src/types/index.ts
+  - Exported store from src/stores/index.ts
+- Commit: "feat(task-75): Create Zustand store for container state management"
+
+#### 2025-12-19 - task-76: Simplify Stories Store by Removing Container Logic
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed childrenByParentId and childrenLoading state
+  - Removed child story actions (loadStoryChildren, reorderStoryChildren, etc.)
+  - Simplified deleteStory to only manage stories list
+  - Updated components to use local calculations instead of removed methods
+  - Added TODOs for container store integration in views
+- Commit: "feat(task-76): Simplify Stories store by removing container logic"
 
 ## Blockers
 

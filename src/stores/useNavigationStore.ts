@@ -20,7 +20,10 @@ export type Route =
   | { screen: 'story-combine'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
   | { screen: 'story-settings'; storyId: string }
   | { screen: 'element-detail'; elementId: string }
-  | { screen: 'settings' };
+  | { screen: 'settings' }
+  | { screen: 'container-view'; containerId: string }
+  | { screen: 'container-create'; parentContainerId: string | null }
+  | { screen: 'container-settings'; containerId: string };
 
 interface NavigationState {
   // State
