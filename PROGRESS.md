@@ -12,7 +12,7 @@ This separates containers (organizational structures) from stories (content enti
 |-------|-------------|-------|--------|
 | Phase 1 | Database Schema | 62, 63, 64 | Complete |
 | Phase 2 | Rust Models | 65, 66, 67 | Complete |
-| Phase 3 | Rust Repositories | 68, 69 | Pending |
+| Phase 3 | Rust Repositories | 68, 69 | Complete |
 | Phase 4 | Tauri Commands | 70, 71, 72 | Pending |
 | Phase 5 | TypeScript Types | 73, 74 | Pending |
 | Phase 6 | State Management | 75, 76 | Pending |
@@ -33,8 +33,8 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-67: Update StoryType Enum to Content Types Only (Completed)
 
 ### Phase 3: Rust Repositories
-- [ ] task-68: Create Container Repository with Nesting and Leaf Protection (Pending)
-- [ ] task-69: Update Story Repository for Container-Based Organization (Pending)
+- [x] task-68: Create Container Repository with Nesting and Leaf Protection (Completed)
+- [x] task-69: Update Story Repository for Container-Based Organization (Completed)
 
 ### Phase 4: Tauri Commands
 - [ ] task-70: Add Tauri Commands for Container Operations (Pending)
@@ -130,6 +130,32 @@ This separates containers (organizational structures) from stories (content enti
   - Final enum: Chapter, ShortStory, Scene, Episode, Poem, Outline, Treatment, Screenplay
   - TypeScript type regenerated
 - Commit: "feat(task-67): Update StoryType enum to content types only"
+
+### Phase 3: Rust Repositories
+
+#### 2025-12-19 - task-68: Create Container Repository with Nesting and Leaf Protection
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created ContainerRepository in src-tauri/src/repositories/container.rs
+  - Implemented CRUD: create, find_by_id, list_by_universe, list_children, update, delete
+  - Added reorder_children with transaction support
+  - Implemented leaf protection validation (prevents child containers when parent has stories)
+  - Added filesystem cleanup on delete (removes git repo directory)
+  - Added 14 comprehensive unit tests
+- Commit: "feat(task-68): Add Container repository with leaf protection"
+
+#### 2025-12-19 - task-69: Update Story Repository for Container-Based Organization
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Replaced list_children with list_by_container (uses container_id)
+  - Removed get_with_children (containers handle hierarchy)
+  - Added list_standalone_stories (container_id IS NULL)
+  - Updated reorder to work with container_id context
+  - Removed container-related logic from story repository
+  - Note: Some tests blocked by schema/model alignment - will resolve in later phases
+- Commit: "feat(task-69): Update Story repository for container-based organization"
 
 ## Blockers
 

@@ -116,6 +116,46 @@ impl Container {
     }
 }
 
+/// Input for creating a new Container
+#[derive(Debug, Clone, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
+#[serde(rename_all = "camelCase")]
+pub struct CreateContainerInput {
+    pub universe_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_container_id: Option<String>,
+    pub container_type: String,
+    pub title: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<i32>,
+}
+
+/// Input for updating an existing Container
+#[derive(Debug, Clone, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateContainerInput {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_type: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<i32>,
+}
+
+/// Response type containing child containers and stories
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
+#[serde(rename_all = "camelCase")]
+pub struct ContainerChildren {
+    pub containers: Vec<Container>,
+    pub stories: Vec<crate::models::Story>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
