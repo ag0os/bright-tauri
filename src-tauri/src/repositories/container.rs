@@ -395,8 +395,8 @@ mod tests {
 
         // Add a story to the parent container
         db.execute(
-            "INSERT INTO stories (id, universe_id, container_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-            params!["story-1", "universe-1", &parent.id, "Chapter 1", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+            "INSERT INTO stories (id, universe_id, container_id, title, last_edited_at, variation_group_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            params!["story-1", "universe-1", &parent.id, "Chapter 1", "2024-01-01T00:00:00Z", "vg-1", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
         )
         .unwrap();
 
@@ -418,6 +418,91 @@ mod tests {
             }
             _ => panic!("Expected InvalidParameterName error"),
         }
+    }
+
+    #[test]
+    fn test_add_child_to_empty_container_allowed() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container (empty, no stories)
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "My Novel".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Should be able to add child container to empty parent
+        let result = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "chapter".to_string(),
+            "Child Container".to_string(),
+            None,
+            1,
+        );
+
+        assert!(result.is_ok());
+        let child = result.unwrap();
+        assert_eq!(child.parent_container_id, Some(parent.id));
+        assert_eq!(child.title, "Child Container");
+    }
+
+    #[test]
+    fn test_container_remains_non_leaf_after_losing_children() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Add child container (parent becomes non-leaf)
+        let child = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Verify child exists
+        let children_before = ContainerRepository::list_children(&db, &parent.id).unwrap();
+        assert_eq!(children_before.len(), 1);
+
+        // Delete the child container
+        ContainerRepository::delete(&db, &child.id).unwrap();
+
+        // Verify parent still exists and has no children
+        let parent_after = ContainerRepository::find_by_id(&db, &parent.id).unwrap();
+        let children_after = ContainerRepository::list_children(&db, &parent.id).unwrap();
+        assert_eq!(children_after.len(), 0);
+
+        // Parent should still exist but should not automatically get git repo
+        // (git_repo_path should remain None unless explicitly initialized)
+        assert!(parent_after.git_repo_path.is_none());
+
+        // Parent can now have stories added (since it has no children)
+        let story_insert = db.execute(
+            "INSERT INTO stories (id, universe_id, container_id, title, last_edited_at, variation_group_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            params!["story-2", "universe-1", &parent.id, "New Story", "2024-01-01T00:00:00Z", "vg-2", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+        );
+        assert!(story_insert.is_ok());
     }
 
     #[test]
