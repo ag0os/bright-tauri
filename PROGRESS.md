@@ -11,7 +11,7 @@ This separates containers (organizational structures) from stories (content enti
 | Phase | Description | Tasks | Status |
 |-------|-------------|-------|--------|
 | Phase 1 | Database Schema | 62, 63, 64 | Complete |
-| Phase 2 | Rust Models | 65, 66, 67 | Pending |
+| Phase 2 | Rust Models | 65, 66, 67 | Complete |
 | Phase 3 | Rust Repositories | 68, 69 | Pending |
 | Phase 4 | Tauri Commands | 70, 71, 72 | Pending |
 | Phase 5 | TypeScript Types | 73, 74 | Pending |
@@ -28,9 +28,9 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-64: Drop Old Database Schema and Start Fresh (Completed)
 
 ### Phase 2: Rust Models
-- [ ] task-65: Create Container Rust Model with Nesting Support (Pending)
-- [ ] task-66: Simplify Story Model to Content-Only Entity (Pending)
-- [ ] task-67: Update StoryType Enum to Content Types Only (Pending)
+- [x] task-65: Create Container Rust Model with Nesting Support (Completed)
+- [x] task-66: Simplify Story Model to Content-Only Entity (Completed)
+- [x] task-67: Update StoryType Enum to Content Types Only (Completed)
 
 ### Phase 3: Rust Repositories
 - [ ] task-68: Create Container Repository with Nesting and Leaf Protection (Pending)
@@ -95,6 +95,41 @@ This separates containers (organizational structures) from stories (content enti
   - Preserved all content fields (title, description, content, git_repo_path, etc.)
   - Added indexes: idx_stories_universe, idx_stories_container
 - Commit: "feat(task-63): Add simplified stories table migration"
+
+### Phase 2: Rust Models
+
+#### 2025-12-19 - task-65: Create Container Rust Model with Nesting Support
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created Container struct in src-tauri/src/models/container.rs
+  - Added all fields: id, universe_id, parent_container_id, container_type, title, description, order, git_repo_path, current_branch, staged_changes, timestamps
+  - Implemented is_leaf() and should_have_git_repo() methods
+  - Added ts-rs derive for TypeScript generation
+  - Added 7 unit tests for Container model
+- Commit: "feat(task-65): Add Container Rust model with nesting support"
+
+#### 2025-12-19 - task-66: Simplify Story Model to Content-Only Entity
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed parent_story_id from Story struct
+  - Added container_id: Option<String> for container association
+  - Simplified should_have_git_repo() to check container_id.is_none()
+  - Removed container-related methods
+  - Updated repository layer SQL queries
+  - Updated unit tests
+- Commit: "feat(task-66): Simplify Story model to content-only entity"
+
+#### 2025-12-19 - task-67: Update StoryType Enum to Content Types Only
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Verified Novel, Series, Collection removed from StoryType
+  - Added Screenplay variant (content type, not container)
+  - Final enum: Chapter, ShortStory, Scene, Episode, Poem, Outline, Treatment, Screenplay
+  - TypeScript type regenerated
+- Commit: "feat(task-67): Update StoryType enum to content types only"
 
 ## Blockers
 
