@@ -1,7 +1,7 @@
 ---
 id: task-79
 title: Update Navigation for Container and Story Separation
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:42'

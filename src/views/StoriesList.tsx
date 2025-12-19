@@ -62,11 +62,9 @@ export function StoriesList() {
   };
 
   const handleDeleteStory = async (story: Story) => {
-    // TODO(task-76): Child count will be fetched from container store when needed
-    // For now, calculate from local stories (stories with this story as container)
-    const count = allStories.filter((s) => s.containerId === story.id).length;
+    // Stories no longer have children (handled by containers)
     setStoryToDelete(story);
-    setDeleteChildCount(count);
+    setDeleteChildCount(0);
     setShowDeleteModal(true);
   };
 
@@ -124,12 +122,7 @@ export function StoriesList() {
     (story) => !story.containerId
   );
 
-  // Calculate child count for each story (local count from loaded stories)
-  // TODO(task-78): This will be replaced with container-based counting
-  const allStories = useStoriesStore((state) => state.stories);
-  const getLocalChildCount = (storyId: string): number => {
-    return allStories.filter((s) => s.containerId === storyId).length;
-  };
+  // Stories no longer have children (that's handled by containers now)
 
   return (
     <PageLayout activeTab="stories" onTabChange={handleTabChange}>
@@ -384,7 +377,6 @@ export function StoriesList() {
               <StoryCard
                 key={story.id}
                 story={story}
-                childCount={getLocalChildCount(story.id)}
                 onClick={handleStoryClick}
                 onDelete={handleDeleteStory}
                 onToggleFavorite={handleToggleFavorite}

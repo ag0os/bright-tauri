@@ -321,11 +321,7 @@ export function StoryChildren({ parentStoryId }: StoryChildrenProps) {
       {showCreateModal && parentStory && (
         <CreateStoryModal
           onClose={handleCreateModalClose}
-          parentStory={{
-            id: parentStory.id,
-            title: parentStory.title,
-            storyType: parentStory.storyType,
-          }}
+          containerId={parentStory.containerId || undefined}
         />
       )}
 

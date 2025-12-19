@@ -1,22 +1,20 @@
 /**
- * Story Card Component
+ * Container Card Component
  *
- * Reusable card component for displaying a story in the list view.
- * Uses Elevated Shadow card design from design system.
+ * Reusable card component for displaying a container in the list view.
+ * Shows container type, child count, and leaf/non-leaf status.
  */
 
 import React, { useState } from 'react';
 import {
-  FileText,
-  Scroll,
-  FilmStrip,
-  Feather,
-  BookBookmark,
-  Star,
+  Book,
+  Books,
+  FolderOpen,
+  GitBranch,
   Gear,
   Trash,
 } from '@phosphor-icons/react';
-import type { Story, StoryType } from '@/types';
+import type { Container } from '@/types';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -25,45 +23,32 @@ import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
 
-interface StoryCardProps {
-  story: Story;
-  onClick: (story: Story) => void;
-  onDelete: (story: Story) => void;
-  onToggleFavorite: (story: Story) => void;
+interface ContainerCardProps {
+  container: Container;
+  childCount?: { containers: number; stories: number };
+  onClick: (container: Container) => void;
+  onDelete: (container: Container) => void;
 }
 
-// Map story types to icons (content-only types)
-const getStoryIcon = (type: StoryType): React.ReactNode => {
+// Map container types to icons
+const getContainerIcon = (type: string): React.ReactNode => {
   const iconClass = 'icon icon-lg';
 
   switch (type) {
-    case 'screenplay':
-      return <FilmStrip className={iconClass} weight="duotone" />;
-    case 'short-story':
-      return <FileText className={iconClass} weight="duotone" />;
-    case 'poem':
-      return <Feather className={iconClass} weight="duotone" />;
-    case 'chapter':
-      return <BookBookmark className={iconClass} weight="duotone" />;
-    case 'scene':
-      return <Scroll className={iconClass} weight="duotone" />;
-    case 'episode':
-      return <FilmStrip className={iconClass} weight="duotone" />;
-    case 'outline':
-      return <FileText className={iconClass} weight="duotone" />;
-    case 'treatment':
-      return <FileText className={iconClass} weight="duotone" />;
+    case 'novel':
+      return <Book className={iconClass} weight="duotone" />;
+    case 'series':
+      return <Books className={iconClass} weight="duotone" />;
+    case 'collection':
+      return <FolderOpen className={iconClass} weight="duotone" />;
     default:
-      return <FileText className={iconClass} weight="duotone" />;
+      return <FolderOpen className={iconClass} weight="duotone" />;
   }
 };
 
-// Format status for display
-const formatStatus = (status: string): string => {
-  return status
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+// Format container type for display
+const formatContainerType = (type: string): string => {
+  return type.charAt(0).toUpperCase() + type.slice(1);
 };
 
 // Format timestamp as relative time
@@ -83,37 +68,39 @@ const formatTimestamp = (timestamp: string): string => {
   return date.toLocaleDateString();
 };
 
-export function StoryCard({
-  story,
+export function ContainerCard({
+  container,
+  childCount,
   onClick,
   onDelete,
-  onToggleFavorite,
-}: StoryCardProps) {
+}: ContainerCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
 
+  // A leaf container has a git repo (contains stories)
+  const isLeaf = !!container.gitRepoPath;
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking action buttons
-    if ((e.target as HTMLElement).closest('.story-card-actions')) {
+    if ((e.target as HTMLElement).closest('.container-card-actions')) {
       return;
     }
-    onClick(story);
+    onClick(container);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete(story);
-  };
-
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleFavorite(story);
+    onDelete(container);
   };
 
   const handleSettings = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate({ screen: 'story-settings', storyId: story.id });
+    navigate({ screen: 'container-settings', containerId: container.id });
   };
+
+  const totalChildren = childCount
+    ? childCount.containers + childCount.stories
+    : 0;
 
   return (
     <div
@@ -142,7 +129,7 @@ export function StoryCard({
               alignItems: 'center',
             }}
           >
-            {getStoryIcon(story.storyType)}
+            {getContainerIcon(container.containerType)}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
@@ -158,7 +145,7 @@ export function StoryCard({
                 whiteSpace: 'nowrap',
               }}
             >
-              {story.title}
+              {container.title}
             </h3>
             <div
               style={{
@@ -169,23 +156,34 @@ export function StoryCard({
                 color: 'var(--color-text-secondary)',
               }}
             >
-              <span>{formatStatus(story.storyType)}</span>
+              <span
+                style={{
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  backgroundColor: 'var(--color-primary-bg)',
+                  color: 'var(--color-primary)',
+                  fontWeight: 'var(--font-weight-medium)',
+                }}
+              >
+                {formatContainerType(container.containerType)}
+              </span>
+              {isLeaf && (
+                <>
+                  <span>•</span>
+                  <GitBranch
+                    className="icon icon-sm"
+                    weight="duotone"
+                    style={{ color: 'var(--color-success)' }}
+                  />
+                  <span style={{ fontSize: 'var(--font-size-xs)' }}>Leaf</span>
+                </>
+              )}
             </div>
           </div>
-          {story.favorite && (
-            <Star
-              className="icon icon-base"
-              weight="fill"
-              style={{
-                color: 'var(--color-accent)',
-                flexShrink: 0,
-              }}
-            />
-          )}
         </div>
 
         {/* Description */}
-        {story.description && (
+        {container.description && (
           <p
             style={{
               fontFamily: 'var(--typography-body-font)',
@@ -200,7 +198,7 @@ export function StoryCard({
               WebkitBoxOrient: 'vertical',
             }}
           >
-            {story.description}
+            {container.description}
           </p>
         )}
 
@@ -224,37 +222,29 @@ export function StoryCard({
               color: 'var(--color-text-secondary)',
             }}
           >
-            <span>{story.wordCount.toLocaleString()} words</span>
-            <span>•</span>
-            <span
-              style={{
-                padding: '2px 8px',
-                borderRadius: '4px',
-                backgroundColor:
-                  story.status === 'completed'
-                    ? 'var(--color-success-bg)'
-                    : story.status === 'inprogress'
-                    ? 'var(--color-primary-bg)'
-                    : 'var(--color-surface)',
-                color:
-                  story.status === 'completed'
-                    ? 'var(--color-success)'
-                    : story.status === 'inprogress'
-                    ? 'var(--color-primary)'
-                    : 'var(--color-text-secondary)',
-                fontWeight: 'var(--font-weight-medium)',
-              }}
-            >
-              {formatStatus(story.status)}
-            </span>
-            <span>•</span>
-            <span>{formatTimestamp(story.lastEditedAt)}</span>
+            {childCount && (
+              <>
+                {childCount.containers > 0 && (
+                  <>
+                    <span>{childCount.containers} {childCount.containers === 1 ? 'container' : 'containers'}</span>
+                  </>
+                )}
+                {childCount.stories > 0 && (
+                  <>
+                    {childCount.containers > 0 && <span>•</span>}
+                    <span>{childCount.stories} {childCount.stories === 1 ? 'story' : 'stories'}</span>
+                  </>
+                )}
+                {totalChildren > 0 && <span>•</span>}
+              </>
+            )}
+            <span>{formatTimestamp(container.updatedAt)}</span>
           </div>
 
           {/* Right: Hover Actions */}
           {isHovered && (
             <div
-              className="story-card-actions"
+              className="container-card-actions"
               style={{
                 display: 'flex',
                 gap: 'var(--spacing-1)',
@@ -262,22 +252,8 @@ export function StoryCard({
             >
               <button
                 className="btn btn-ghost btn-sm"
-                onClick={handleToggleFavorite}
-                title={story.favorite ? 'Remove from favorites' : 'Add to favorites'}
-                style={{ padding: 'var(--spacing-1)' }}
-              >
-                <Star
-                  className="icon icon-base"
-                  weight={story.favorite ? 'fill' : 'duotone'}
-                  style={{
-                    color: story.favorite ? 'var(--color-accent)' : 'currentColor',
-                  }}
-                />
-              </button>
-              <button
-                className="btn btn-ghost btn-sm"
                 onClick={handleSettings}
-                title="Story settings"
+                title="Container settings"
                 style={{ padding: 'var(--spacing-1)' }}
               >
                 <Gear className="icon icon-base" weight="duotone" />
@@ -285,7 +261,7 @@ export function StoryCard({
               <button
                 className="btn btn-ghost btn-sm"
                 onClick={handleDelete}
-                title="Delete story"
+                title="Delete container"
                 style={{ padding: 'var(--spacing-1)' }}
               >
                 <Trash className="icon icon-base" weight="duotone" />

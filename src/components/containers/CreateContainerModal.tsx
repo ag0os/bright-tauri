@@ -1,16 +1,14 @@
 /**
- * Create Story Modal
+ * Create Container Modal
  *
- * Modal component for creating a new story with form validation and error handling.
+ * Modal component for creating a new container (Novel, Series, Collection).
  */
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import { X } from '@phosphor-icons/react';
-import { useStoriesStore } from '@/stores/useStoriesStore';
-import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useContainersStore } from '@/stores/useContainersStore';
+import { useUniverseStore } from '@/stores/useUniverseStore';
 import { useNavigationStore } from '@/stores/useNavigationStore';
-import type { StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -18,50 +16,35 @@ import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
 
-interface CreateStoryModalProps {
+interface CreateContainerModalProps {
   onClose: () => void;
-  containerId?: string; // If provided, story will be created in this container
+  parentContainer?: {
+    id: string;
+    title: string;
+  };
 }
 
-// Content-only story types (no container types like 'novel', 'series')
-const storyTypeOptions: { value: StoryType; label: string }[] = [
-  { value: 'chapter', label: 'Chapter' },
-  { value: 'scene', label: 'Scene' },
-  { value: 'short-story', label: 'Short Story' },
-  { value: 'episode', label: 'Episode' },
-  { value: 'poem', label: 'Poem' },
-  { value: 'outline', label: 'Outline' },
-  { value: 'treatment', label: 'Treatment' },
-  { value: 'screenplay', label: 'Screenplay' },
+type ContainerType = 'novel' | 'series' | 'collection';
+
+const containerTypeOptions: { value: ContainerType; label: string }[] = [
+  { value: 'novel', label: 'Novel' },
+  { value: 'series', label: 'Series' },
+  { value: 'collection', label: 'Collection' },
 ];
 
-export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps) {
+export function CreateContainerModal({ onClose, parentContainer }: CreateContainerModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const currentUniverse = useUniverseStore((state) => state.currentUniverse);
-  const { createStory } = useStoriesStore();
-  const { containers } = useContainersStore();
+  const { createContainer } = useContainersStore();
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    storyType: 'chapter' as StoryType,
-    containerId: containerId || '', // Empty string means standalone
-    targetWordCount: '',
-    tags: '',
+    containerType: 'novel' as ContainerType,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Load containers on mount if universe is selected
-  useEffect(() => {
-    if (currentUniverse && containers.length === 0) {
-      useContainersStore.getState().loadContainers(currentUniverse.id);
-    }
-  }, [currentUniverse, containers.length]);
-
-  // Filter containers to only show leaf containers (those with git repos)
-  const leafContainers = containers.filter((c) => c.gitRepoPath !== null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -70,9 +53,6 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
     const newErrors: Record<string, string> = {};
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -90,37 +70,22 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
     setErrors({});
 
     try {
-      const story = await createStory({
+      const container = await createContainer({
         universeId: currentUniverse.id,
+        parentContainerId: parentContainer?.id || null,
+        containerType: formData.containerType,
         title: formData.title.trim(),
-        description: formData.description.trim(),
-        storyType: formData.storyType,
-        content: null,
-        notes: null,
-        outline: null,
-        targetWordCount: formData.targetWordCount ? parseInt(formData.targetWordCount, 10) : null,
-        tags: formData.tags
-          ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
-          : null,
-        color: null,
-        seriesName: null,
-        containerId: formData.containerId || null, // null = standalone story
-        variationType: null,
-        parentVariationId: null,
+        description: formData.description.trim() || null,
+        order: null, // Backend will auto-assign order
       });
 
-      // Invalidate container children cache if story was added to container
-      if (formData.containerId) {
-        useContainersStore.getState().invalidateChildren(formData.containerId);
-      }
-
-      // Navigate to story editor
-      navigate({ screen: 'story-editor', storyId: story.id });
+      // Navigate to container view
+      navigate({ screen: 'container-view', containerId: container.id });
       onClose();
     } catch (error) {
-      console.error('Failed to create story:', error);
+      console.error('Failed to create container:', error);
       setErrors({
-        general: error instanceof Error ? error.message : 'Failed to create story',
+        general: error instanceof Error ? error.message : 'Failed to create container',
       });
       setIsSubmitting(false);
     }
@@ -176,8 +141,20 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                 margin: 0,
               }}
             >
-              Create New Story
+              Create New Container
             </h2>
+            {parentContainer && (
+              <p
+                style={{
+                  fontFamily: 'var(--typography-body-font)',
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--color-text-secondary)',
+                  margin: '4px 0 0 0',
+                }}
+              >
+                Adding to: {parentContainer.title}
+              </p>
+            )}
           </div>
           <button
             className="btn btn-ghost btn-sm"
@@ -215,54 +192,19 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
               </div>
             )}
 
-            {/* Container Selection (optional) */}
+            {/* Container Type */}
             <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-container">
-                Container
-              </label>
-              <div className="input-wrapper">
-                <select
-                  id="story-container"
-                  className="input-field input-base"
-                  value={formData.containerId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, containerId: e.target.value })
-                  }
-                  disabled={!!containerId} // Disable if container was pre-selected
-                  style={{
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: '4px',
-                    padding: 'var(--spacing-2) var(--spacing-3)',
-                    fontFamily: 'var(--typography-body-font)',
-                    fontSize: 'var(--font-size-base)',
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
-                  <option value="">Standalone (no container)</option>
-                  {leafContainers.map((container) => (
-                    <option key={container.id} value={container.id}>
-                      {container.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="input-helper">Optional: Add story to a container</div>
-            </div>
-
-            {/* Story Type */}
-            <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-type">
-                Story Type
+              <label className="input-label" htmlFor="container-type">
+                Container Type
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <select
-                  id="story-type"
+                  id="container-type"
                   className="input-field input-base"
-                  value={formData.storyType}
+                  value={formData.containerType}
                   onChange={(e) =>
-                    setFormData({ ...formData, storyType: e.target.value as StoryType })
+                    setFormData({ ...formData, containerType: e.target.value as ContainerType })
                   }
                   style={{
                     backgroundColor: 'var(--color-surface)',
@@ -274,7 +216,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                     color: 'var(--color-text-primary)',
                   }}
                 >
-                  {storyTypeOptions.map((option) => (
+                  {containerTypeOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -285,16 +227,16 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
 
             {/* Title */}
             <div className={`input-group input-5 ${errors.title ? 'has-error' : ''}`}>
-              <label className="input-label" htmlFor="story-title">
+              <label className="input-label" htmlFor="container-title">
                 Title
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <input
-                  id="story-title"
+                  id="container-title"
                   type="text"
                   className="input-field input-base"
-                  placeholder="Enter story title"
+                  placeholder="Enter container title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   required
@@ -304,64 +246,25 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
             </div>
 
             {/* Description */}
-            <div className={`input-group input-5 ${errors.description ? 'has-error' : ''}`}>
-              <label className="input-label" htmlFor="story-description">
+            <div className="input-group input-5">
+              <label className="input-label" htmlFor="container-description">
                 Description
-                <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <textarea
-                  id="story-description"
+                  id="container-description"
                   className="input-field input-base"
-                  placeholder="Brief description of your story"
+                  placeholder="Brief description of this container"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  required
                   style={{
                     resize: 'vertical',
                     minHeight: '80px',
                   }}
                 />
               </div>
-              {errors.description && <div className="input-helper">{errors.description}</div>}
-            </div>
-
-            {/* Target Word Count */}
-            <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-word-count">
-                Target Word Count
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id="story-word-count"
-                  type="number"
-                  className="input-field input-base"
-                  placeholder="e.g., 80000"
-                  value={formData.targetWordCount}
-                  onChange={(e) => setFormData({ ...formData, targetWordCount: e.target.value })}
-                  min="0"
-                />
-              </div>
-              <div className="input-helper">Optional goal for story length</div>
-            </div>
-
-            {/* Tags */}
-            <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-tags">
-                Tags
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id="story-tags"
-                  type="text"
-                  className="input-field input-base"
-                  placeholder="fantasy, adventure, epic"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                />
-              </div>
-              <div className="input-helper">Comma-separated tags</div>
+              <div className="input-helper">Optional description</div>
             </div>
           </div>
 
@@ -389,7 +292,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
               className="btn btn-primary btn-base"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating...' : 'Create Story'}
+              {isSubmitting ? 'Creating...' : 'Create Container'}
             </button>
           </div>
         </form>
