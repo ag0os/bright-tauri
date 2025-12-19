@@ -1,7 +1,7 @@
 ---
 id: task-77
 title: Create Container Views for Hierarchy Management
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:42'
