@@ -67,9 +67,9 @@ pub fn delete_story(
     app: AppHandle,
     db: State<Database>,
     id: String,
-) -> Result<Vec<String>, String> {
-    // Delete the story and get all deleted IDs
-    let deleted_ids = StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
+) -> Result<(), String> {
+    // Delete the story
+    StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
 
     // Get app data directory for git repos
     let app_data_dir = app
@@ -77,17 +77,15 @@ pub fn delete_story(
         .app_data_dir()
         .map_err(|e| format!("Failed to get app data directory: {e}"))?;
 
-    // Delete git repositories for all deleted stories
+    // Delete git repository for the story (if it exists)
     let git_repos_dir = app_data_dir.join("git-repos");
-    for story_id in &deleted_ids {
-        let repo_path = git_repos_dir.join(story_id);
-        if repo_path.exists() {
-            std::fs::remove_dir_all(&repo_path)
-                .map_err(|e| format!("Failed to delete git repo for {story_id}: {e}"))?;
-        }
+    let repo_path = git_repos_dir.join(&id);
+    if repo_path.exists() {
+        std::fs::remove_dir_all(&repo_path)
+            .map_err(|e| format!("Failed to delete git repo for {id}: {e}"))?;
     }
 
-    Ok(deleted_ids)
+    Ok(())
 }
 
 // Story hierarchy commands

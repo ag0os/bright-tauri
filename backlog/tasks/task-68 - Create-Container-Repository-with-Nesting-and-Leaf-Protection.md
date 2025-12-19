@@ -1,7 +1,7 @@
 ---
 id: task-68
 title: Create Container Repository with Nesting and Leaf Protection
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'

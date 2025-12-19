@@ -91,7 +91,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories WHERE id = ?1",
             params![id],
             Self::map_row_to_story,
@@ -108,7 +108,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
              WHERE universe_id = ?1
              ORDER BY updated_at DESC",
@@ -131,7 +131,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
              WHERE variation_group_id = ?1
              ORDER BY created_at ASC",
@@ -144,8 +144,8 @@ impl StoryRepository {
         Ok(stories)
     }
 
-    /// Get all children of a parent story, ordered by story_order
-    pub fn list_children(db: &Database, parent_id: &str) -> Result<Vec<Story>> {
+    /// Get all stories within a container, ordered by story_order
+    pub fn list_by_container(db: &Database, container_id: &str) -> Result<Vec<Story>> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
 
@@ -154,44 +154,60 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
-             WHERE parent_story_id = ?1
+             WHERE container_id = ?1
              ORDER BY \"order\" ASC, created_at ASC",
         )?;
 
         let stories = stmt
-            .query_map(params![parent_id], Self::map_row_to_story)?
+            .query_map(params![container_id], Self::map_row_to_story)?
             .collect::<Result<Vec<_>>>()?;
 
         Ok(stories)
     }
 
-    /// Get a parent story with all its children
-    pub fn get_with_children(db: &Database, id: &str) -> Result<(Story, Vec<Story>)> {
-        let parent = Self::find_by_id(db, id)?;
-        let children = Self::list_children(db, id)?;
-        Ok((parent, children))
+    /// Get all standalone stories (stories without a container)
+    pub fn list_standalone_stories(db: &Database, universe_id: &str) -> Result<Vec<Story>> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let mut stmt = conn.prepare(
+            "SELECT id, universe_id, title, description, story_type, status, word_count,
+                    content, variation_group_id, variation_type, parent_variation_id,
+                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
+                    related_element_ids, series_name, container_id, last_edited_at, version
+             FROM stories
+             WHERE universe_id = ?1 AND container_id IS NULL
+             ORDER BY updated_at DESC",
+        )?;
+
+        let stories = stmt
+            .query_map(params![universe_id], Self::map_row_to_story)?
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(stories)
     }
 
-    /// Reorder children by updating their order fields
-    pub fn reorder_children(db: &Database, parent_id: &str, story_ids: Vec<String>) -> Result<()> {
+    /// Reorder stories within a container by updating their order fields
+    pub fn reorder_by_container(db: &Database, container_id: &str, story_ids: Vec<String>) -> Result<()> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
 
         // Start transaction
         conn.execute("BEGIN TRANSACTION", [])?;
 
-        // Validate that all story_ids belong to the parent
+        // Validate that all story_ids belong to the container
         for story_id in &story_ids {
-            let parent_check: Result<Option<String>, _> = conn.query_row(
-                "SELECT parent_story_id FROM stories WHERE id = ?1",
+            let container_check: Result<Option<String>, _> = conn.query_row(
+                "SELECT container_id FROM stories WHERE id = ?1",
                 params![story_id],
                 |row| row.get(0),
             );
 
-            match parent_check {
-                Ok(Some(pid)) if pid == parent_id => {}
+            match container_check {
+                Ok(Some(cid)) if cid == container_id => {}
                 Ok(Some(_)) | Ok(None) => {
                     conn.execute("ROLLBACK", [])?;
                     return Err(rusqlite::Error::QueryReturnedNoRows);
@@ -311,45 +327,40 @@ impl StoryRepository {
         Self::find_by_id(db, id)
     }
 
-    /// Delete a Story and all its children recursively
-    /// Returns a list of all deleted story IDs (including the parent)
-    pub fn delete(db: &Database, id: &str) -> Result<Vec<String>> {
-        let mut deleted_ids = Vec::new();
-        Self::delete_recursive(db, id, &mut deleted_ids)?;
-        Ok(deleted_ids)
-    }
-
-    /// Helper function to recursively delete a story and its children
-    fn delete_recursive(db: &Database, id: &str, deleted_ids: &mut Vec<String>) -> Result<()> {
-        // First, get all children of this story
-        let children = Self::list_children(db, id)?;
-
-        // Recursively delete each child
-        for child in children {
-            Self::delete_recursive(db, &child.id, deleted_ids)?;
-        }
-
-        // Delete the story itself from the database
+    /// Delete a Story
+    /// Note: Container hierarchy is managed by the Container repository
+    pub fn delete(db: &Database, id: &str) -> Result<()> {
         db.execute("DELETE FROM stories WHERE id = ?1", params![id])?;
-
-        // Add the ID to the list of deleted IDs
-        deleted_ids.push(id.to_string());
-
         Ok(())
     }
 
-    /// Get the count of direct children for a story
-    pub fn get_child_count(db: &Database, parent_id: &str) -> Result<i32> {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
+    // Deprecated methods - kept for backward compatibility until commands are updated (task-71)
 
-        let count: i32 = conn.query_row(
-            "SELECT COUNT(*) FROM stories WHERE parent_story_id = ?1",
-            params![parent_id],
-            |row| row.get(0),
-        )?;
+    /// @deprecated Use list_by_container instead
+    #[deprecated(note = "Use list_by_container instead. Will be removed in task-72.")]
+    pub fn list_children(db: &Database, parent_id: &str) -> Result<Vec<Story>> {
+        Self::list_by_container(db, parent_id)
+    }
 
-        Ok(count)
+    /// @deprecated Use reorder_by_container instead
+    #[deprecated(note = "Use reorder_by_container instead. Will be removed in task-72.")]
+    pub fn reorder_children(db: &Database, parent_id: &str, story_ids: Vec<String>) -> Result<()> {
+        Self::reorder_by_container(db, parent_id, story_ids)
+    }
+
+    /// @deprecated Containers handle hierarchy now. This method will be removed.
+    #[deprecated(note = "Containers handle hierarchy now. Will be removed in task-72.")]
+    pub fn get_with_children(db: &Database, id: &str) -> Result<(Story, Vec<Story>)> {
+        let story = Self::find_by_id(db, id)?;
+        // Return story with empty children - containers will handle hierarchy
+        Ok((story, vec![]))
+    }
+
+    /// @deprecated Container count is managed by Container repository
+    #[deprecated(note = "Container count is managed by Container repository. Will be removed in task-72.")]
+    pub fn get_child_count(_db: &Database, _parent_id: &str) -> Result<i32> {
+        // Return 0 - containers will handle child counts
+        Ok(0)
     }
 
     /// Update the git repo path for a story (internal use)
@@ -447,7 +458,7 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_story_without_children() {
+    fn test_delete_story() {
         let (db, _temp_dir) = setup_test_db();
 
         // Create a standalone story
@@ -471,11 +482,7 @@ mod tests {
         let story = StoryRepository::create(&db, input).unwrap();
 
         // Delete the story
-        let deleted_ids = StoryRepository::delete(&db, &story.id).unwrap();
-
-        // Should return only the deleted story ID
-        assert_eq!(deleted_ids.len(), 1);
-        assert_eq!(deleted_ids[0], story.id);
+        StoryRepository::delete(&db, &story.id).unwrap();
 
         // Story should be deleted
         let result = StoryRepository::find_by_id(&db, &story.id);
@@ -483,77 +490,101 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_child_story() {
+    fn test_list_by_container() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a child story with container
-        let child_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Child Story".to_string(),
-            description: Some("Child".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: Some("container-123".to_string()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
+        let container_id = "container-123".to_string();
 
-        let child = StoryRepository::create(&db, child_input).unwrap();
+        // Create multiple stories in the same container
+        for i in 1..=3 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::Chapter),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some(container_id.clone()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+            StoryRepository::create(&db, input).unwrap();
+        }
 
-        // Delete the child story
-        let deleted_ids = StoryRepository::delete(&db, &child.id).unwrap();
+        // List stories by container
+        let stories = StoryRepository::list_by_container(&db, &container_id).unwrap();
+        assert_eq!(stories.len(), 3);
 
-        // Should return only the child ID
-        assert_eq!(deleted_ids.len(), 1);
-        assert!(deleted_ids.contains(&child.id));
-
-        // Child should be deleted
-        assert!(StoryRepository::find_by_id(&db, &child.id).is_err());
+        // All stories should have the same container_id
+        for story in stories {
+            assert_eq!(story.container_id, Some(container_id.clone()));
+        }
     }
 
     #[test]
-    fn test_delete_story() {
+    fn test_list_standalone_stories() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a standalone story
-        let input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Story to Delete".to_string(),
-            description: Some("Test".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
+        // Create standalone stories (no container)
+        for i in 1..=2 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Standalone Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::ShortStory),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: None,
+                variation_type: None,
+                parent_variation_id: None,
+            };
+            StoryRepository::create(&db, input).unwrap();
+        }
 
-        let story = StoryRepository::create(&db, input).unwrap();
+        // Create stories with container
+        for i in 1..=3 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Container Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::Chapter),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some("container-123".to_string()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+            StoryRepository::create(&db, input).unwrap();
+        }
 
-        // Delete the story
-        let deleted_ids = StoryRepository::delete(&db, &story.id).unwrap();
+        // List standalone stories only
+        let standalone_stories = StoryRepository::list_standalone_stories(&db, "universe-1").unwrap();
+        assert_eq!(standalone_stories.len(), 2);
 
-        // Should return only the story ID
-        assert_eq!(deleted_ids.len(), 1);
-        assert!(deleted_ids.contains(&story.id));
-
-        // Story should be deleted
-        assert!(StoryRepository::find_by_id(&db, &story.id).is_err());
+        // All stories should have container_id = None
+        for story in standalone_stories {
+            assert!(story.container_id.is_none());
+            assert!(story.should_have_git_repo());
+        }
     }
 
     #[test]
-    fn test_get_child_count_no_children() {
+    fn test_create_standalone_story() {
         let (db, _temp_dir) = setup_test_db();
 
         // Create a standalone story
@@ -582,18 +613,18 @@ mod tests {
     }
 
     #[test]
-    fn test_get_child_count_with_children() {
+    fn test_create_stories_with_container() {
         let (db, _temp_dir) = setup_test_db();
 
         // Create a container ID for testing
         let container_id = "container-123".to_string();
 
-        // Create 3 child stories under the same container
+        // Create 3 stories under the same container
         for i in 1..=3 {
-            let child_input = CreateStoryInput {
+            let input = CreateStoryInput {
                 universe_id: "universe-1".to_string(),
-                title: format!("Child {}", i),
-                description: Some("Child".to_string()),
+                title: format!("Story {}", i),
+                description: Some("Test".to_string()),
                 story_type: Some(StoryType::Chapter),
                 content: None,
                 notes: None,
@@ -607,14 +638,14 @@ mod tests {
                 parent_variation_id: None,
             };
 
-            let child = StoryRepository::create(&db, child_input).unwrap();
-            assert_eq!(child.container_id, Some(container_id.clone()));
-            assert!(!child.should_have_git_repo());
+            let story = StoryRepository::create(&db, input).unwrap();
+            assert_eq!(story.container_id, Some(container_id.clone()));
+            assert!(!story.should_have_git_repo());
         }
     }
 
     #[test]
-    fn test_get_child_count_only_direct_children() {
+    fn test_mixed_standalone_and_container_stories() {
         let (db, _temp_dir) = setup_test_db();
 
         // Create standalone story (no container)
@@ -637,7 +668,7 @@ mod tests {
 
         let standalone = StoryRepository::create(&db, standalone_input).unwrap();
 
-        // Create child story (with container)
+        // Create stories with container
         let child_input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
             title: "Chapter".to_string(),
@@ -657,7 +688,6 @@ mod tests {
 
         let child = StoryRepository::create(&db, child_input).unwrap();
 
-        // Create another child story
         let child2_input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
             title: "Scene".to_string(),
@@ -675,12 +705,16 @@ mod tests {
             parent_variation_id: None,
         };
 
-        let _child2 = StoryRepository::create(&db, child2_input).unwrap();
+        let child2 = StoryRepository::create(&db, child2_input).unwrap();
 
-        // Verify standalone story was created
+        // Verify standalone story
         assert!(standalone.container_id.is_none());
+        assert!(standalone.should_have_git_repo());
 
-        // Verify children have container_id
+        // Verify container stories
         assert_eq!(child.container_id, Some("container-123".to_string()));
+        assert!(!child.should_have_git_repo());
+        assert_eq!(child2.container_id, Some("container-123".to_string()));
+        assert!(!child2.should_have_git_repo());
     }
 }
