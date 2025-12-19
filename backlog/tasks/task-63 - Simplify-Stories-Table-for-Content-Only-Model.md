@@ -1,7 +1,7 @@
 ---
 id: task-63
 title: Simplify Stories Table for Content-Only Model
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:41'
