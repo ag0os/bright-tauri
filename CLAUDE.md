@@ -56,11 +56,12 @@ The app provides pre-configured templates for common element types to help write
 ### What's Implemented ✅
 
 **Backend (95% Complete)**:
-- Domain models: Universe, Story (with hierarchy & variations), Element
+- Domain models: Universe, Container (organizational), Story (content), Element
+- Container/Story separation with leaf protection and transaction handling
 - Full CRUD operations via repository layer
-- Story hierarchy support: chapters, child stories, reordering (`list_children`, `reorder_children`, `get_with_children`)
+- Container hierarchy support with unlimited nesting depth
 - Git integration complete: init, commit, branch, diff, merge, history
-- File management: naming strategy (001-title.md), creation, reordering, metadata.json
+- File management: naming strategy, creation, reordering, metadata.json
 - All features exposed via Tauri commands to frontend
 
 **Design System (100% Complete)**:
@@ -79,8 +80,10 @@ The app provides pre-configured templates for common element types to help write
 ### Key Architectural Decisions
 
 - **Git Backend**: Using `git2` Rust library for version control
-- **Story Hierarchy**: Stories can have child stories (chapters) stored as numbered markdown files (001-title.md)
-- **Metadata Sync**: metadata.json in each story's Git repo keeps SQLite and filesystem in sync
+- **Container/Story Separation**: Clear distinction between organizational entities (Containers) and content entities (Stories)
+- **Leaf Protection**: Containers can contain either child containers OR stories, but not both (enforced at creation)
+- **Git Repository Ownership**: Only leaf containers and standalone stories have Git repositories
+- **Metadata Sync**: metadata.json in each Git repo keeps SQLite and filesystem in sync
 - **Design System**: Custom token-first system (not using external component libraries)
 
 **Full Roadmap**: See `docs/ideas/roadmap.md` for complete feature list and progress tracking.
@@ -103,6 +106,133 @@ The app provides pre-configured templates for common element types to help write
 - **Crate Name**: `bright_tauri_lib` (note the `_lib` suffix to avoid Windows conflicts)
 - **Domain Models**: Located in `src-tauri/src/models/` directory
 - **Database Layer**: SQLite database with migrations in `src-tauri/src/db/`
+
+### Container/Story Architecture
+
+The application uses a clear separation between organizational entities (Containers) and content entities (Stories):
+
+#### Container Entity
+**Purpose**: Organizational structure for grouping and nesting content
+
+**Model**: `src-tauri/src/models/container.rs`
+
+**Container Types** (stored as strings):
+- `novel` - A novel that contains chapters
+- `series` - A series that contains novels or collections
+- `collection` - A collection of stories or other containers
+
+**Key Characteristics**:
+- Containers can nest other containers (e.g., Series → Novels → Chapters)
+- Containers are classified as either **leaf** or **non-leaf**:
+  - **Leaf containers**: Contain stories, have their own Git repository
+  - **Non-leaf containers**: Contain child containers, no Git repository
+- Leaf status is determined by presence of `git_repo_path`
+
+**Hierarchy Rules**:
+1. A container can contain either child containers OR stories, but not both (enforced by leaf protection)
+2. Only leaf containers (containing stories) have Git repositories
+3. Non-leaf containers (containing child containers) do NOT have Git repositories
+4. Containers support unlimited nesting depth
+
+**Leaf Protection Validation (PREVENT approach)**:
+- When creating a child container, the system validates the parent doesn't already have stories
+- If the parent has stories, creation fails with error: "Cannot add child container to a container that already has stories"
+- This prevents breaking the Git repository structure
+- Implemented in `ContainerRepository::create()` with `get_story_count()` validation
+
+**Example Hierarchy**:
+```
+Series (non-leaf, no git repo)
+├── Novel 1 (leaf, has git repo)
+│   ├── Chapter 1 (story)
+│   ├── Chapter 2 (story)
+│   └── Chapter 3 (story)
+└── Novel 2 (leaf, has git repo)
+    ├── Chapter 1 (story)
+    └── Chapter 2 (story)
+```
+
+#### Story Entity
+**Purpose**: Actual written content (chapters, scenes, poems, etc.)
+
+**Model**: `src-tauri/src/models/story.rs`
+
+**Story Types** (enum `StoryType`):
+- `chapter` - A chapter of a larger work
+- `scene` - A scene within a story
+- `short-story` - Standalone short story
+- `episode` - An episode (for series/TV format)
+- `poem` - A poem
+- `outline` - Story outline/plan
+- `treatment` - Story treatment (film/TV)
+- `screenplay` - A screenplay
+
+**Key Characteristics**:
+- Stories are pure content entities - they do NOT contain other stories
+- Stories can exist standalone or within a container
+- Stories support variations (original, alternate-ending, screenplay, etc.)
+- Stories have Git versioning for tracking changes
+
+**Git Repository Ownership Rules**:
+1. **Standalone stories** (`container_id = None`): Have their own Git repository
+2. **Child stories** (`container_id = Some(id)`): Share parent container's Git repository
+
+**Example**:
+```rust
+// Standalone story - has own git repo
+Story {
+    container_id: None,
+    git_repo_path: "/path/to/story-repo",
+    ...
+}
+
+// Child story - shares container's git repo
+Story {
+    container_id: Some("novel-1"),
+    git_repo_path: "/path/to/novel-1-repo", // Same as parent container
+    ...
+}
+```
+
+#### Transaction Handling
+
+**Git Repository Creation**:
+- Creating a container with Git repo is atomic with database operations
+- Uses database transactions: `BEGIN TRANSACTION` → create container → init git → `COMMIT`
+- On failure, transaction rolls back automatically
+- Ensures data integrity between SQLite and filesystem
+
+**Implementation** (`ContainerRepository::create`):
+```rust
+conn.execute("BEGIN TRANSACTION", [])?;
+// Create container in database
+// Initialize Git repository (if leaf)
+conn.execute("COMMIT", [])?;
+```
+
+#### Migration Strategy
+
+**Clean Slate Approach**:
+- The Container/Story refactor required dropping the old schema and starting fresh
+- Old `stories` table mixed organizational and content concerns
+- New schema cleanly separates:
+  - `containers` table: Organizational hierarchy
+  - `stories` table: Pure content
+- Migration: Drop old database, recreate with new schema (see `src-tauri/src/db/migrations.rs`)
+
+#### Common Patterns
+
+**Creating a Novel with Chapters**:
+1. Create container: `type: "novel"` → Gets Git repo (leaf container)
+2. Add stories: `container_id: novel.id, story_type: Chapter` → Share container's Git repo
+
+**Creating a Series of Novels**:
+1. Create container: `type: "series"` → No Git repo (will contain child containers)
+2. Create child containers: `type: "novel", parent_container_id: series.id` → Each gets own Git repo
+3. Add chapters to each novel → Share respective novel's Git repo
+
+**Standalone Short Story**:
+1. Create story: `container_id: None, story_type: ShortStory` → Gets own Git repo
 
 ### Configuration
 - **Tauri Config**: `src-tauri/tauri.conf.json`
