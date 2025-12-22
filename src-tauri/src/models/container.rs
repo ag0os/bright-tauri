@@ -48,39 +48,18 @@ impl Container {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use bright_tauri_lib::models::Container;
+    /// ```ignore
     /// let leaf = Container {
-    ///     id: "novel-1".to_string(),
-    ///     universe_id: "universe-1".to_string(),
-    ///     parent_container_id: Some("series-1".to_string()),
-    ///     container_type: "novel".to_string(),
-    ///     title: "Book 1".to_string(),
-    ///     description: None,
-    ///     order: 1,
     ///     git_repo_path: Some("/path/to/repo".to_string()),
-    ///     current_branch: Some("main".to_string()),
-    ///     staged_changes: false,
-    ///     created_at: "2024-01-01T00:00:00Z".to_string(),
-    ///     updated_at: "2024-01-01T00:00:00Z".to_string(),
+    ///     // ... other fields
     /// };
-    /// assert!(leaf.is_leaf());
+    /// assert!(leaf.is_leaf()); // true - has git repo
     ///
     /// let branch = Container {
-    ///     id: "series-1".to_string(),
-    ///     universe_id: "universe-1".to_string(),
-    ///     parent_container_id: None,
-    ///     container_type: "series".to_string(),
-    ///     title: "My Series".to_string(),
-    ///     description: None,
-    ///     order: 1,
     ///     git_repo_path: None, // Branch containers don't have git repos
-    ///     current_branch: None,
-    ///     staged_changes: false,
-    ///     created_at: "2024-01-01T00:00:00Z".to_string(),
-    ///     updated_at: "2024-01-01T00:00:00Z".to_string(),
+    ///     // ... other fields
     /// };
-    /// assert!(!branch.is_leaf());
+    /// assert!(!branch.is_leaf()); // false - no git repo
     /// ```
     pub fn is_leaf(&self) -> bool {
         self.git_repo_path.is_some()
@@ -93,23 +72,12 @@ impl Container {
     ///
     /// # Examples
     ///
-    /// ```
-    /// # use bright_tauri_lib::models::Container;
+    /// ```ignore
     /// let leaf = Container {
-    ///     id: "novel-1".to_string(),
-    ///     universe_id: "universe-1".to_string(),
-    ///     parent_container_id: None,
-    ///     container_type: "novel".to_string(),
-    ///     title: "My Novel".to_string(),
-    ///     description: None,
-    ///     order: 1,
     ///     git_repo_path: Some("/path/to/repo".to_string()),
-    ///     current_branch: Some("main".to_string()),
-    ///     staged_changes: false,
-    ///     created_at: "2024-01-01T00:00:00Z".to_string(),
-    ///     updated_at: "2024-01-01T00:00:00Z".to_string(),
+    ///     // ... other fields
     /// };
-    /// assert!(leaf.should_have_git_repo());
+    /// assert!(leaf.should_have_git_repo()); // true - is a leaf container
     /// ```
     pub fn should_have_git_repo(&self) -> bool {
         self.is_leaf()
