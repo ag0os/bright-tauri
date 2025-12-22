@@ -5,9 +5,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Plus, MagnifyingGlass, CircleNotch, Books } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass, CircleNotch, Books, FolderPlus } from '@phosphor-icons/react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StoryCard, CreateStoryModal, DeleteStoryModal } from '@/components/stories';
+import { CreateContainerModal } from '@/components/containers/CreateContainerModal';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
@@ -38,6 +39,7 @@ export function StoriesList() {
   } = useStoriesStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateContainerModal, setShowCreateContainerModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
   const [deleteChildCount, setDeleteChildCount] = useState(0);
@@ -155,13 +157,24 @@ export function StoriesList() {
           >
             Stories
           </h1>
-          <button
-            className="btn btn-primary btn-base"
-            onClick={() => setShowCreateModal(true)}
-          >
-            <Plus className="icon icon-base" />
-            New Story
-          </button>
+          <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+            <button
+              className="btn btn-outline btn-base"
+              onClick={() => setShowCreateContainerModal(true)}
+              title="Create a container (Novel, Series, Collection)"
+            >
+              <FolderPlus className="icon icon-base" />
+              New Container
+            </button>
+            <button
+              className="btn btn-primary btn-base"
+              onClick={() => setShowCreateModal(true)}
+              title="Create a standalone story"
+            >
+              <Plus className="icon icon-base" />
+              New Story
+            </button>
+          </div>
         </div>
 
         {/* Toolbar */}
@@ -385,6 +398,11 @@ export function StoriesList() {
           </div>
         )}
       </div>
+
+      {/* Create Container Modal */}
+      {showCreateContainerModal && (
+        <CreateContainerModal onClose={() => setShowCreateContainerModal(false)} />
+      )}
 
       {/* Create Story Modal */}
       {showCreateModal && <CreateStoryModal onClose={() => setShowCreateModal(false)} />}
