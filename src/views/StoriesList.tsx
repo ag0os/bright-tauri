@@ -9,10 +9,12 @@ import { Plus, MagnifyingGlass, CircleNotch, Books, FolderPlus } from '@phosphor
 import { PageLayout } from '@/components/layout/PageLayout';
 import { StoryCard, CreateStoryModal, DeleteStoryModal } from '@/components/stories';
 import { CreateContainerModal } from '@/components/containers/CreateContainerModal';
+import { ContainerCard } from '@/components/containers/ContainerCard';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
+import { useContainersStore } from '@/stores/useContainersStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
-import type { Story, StoryType, StoryStatus } from '@/types';
+import type { Story, StoryType, StoryStatus, Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -38,19 +40,31 @@ export function StoriesList() {
     sortOrder,
   } = useStoriesStore();
 
+  const {
+    containers,
+    isLoading: containersLoading,
+    error: containersError,
+    loadContainers,
+    deleteContainer,
+  } = useContainersStore();
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateContainerModal, setShowCreateContainerModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState<Story | null>(null);
   const [deleteChildCount, setDeleteChildCount] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [containerToDelete, setContainerToDelete] = useState<Container | null>(null);
+  const [showDeleteContainerModal, setShowDeleteContainerModal] = useState(false);
+  const [isDeletingContainer, setIsDeletingContainer] = useState(false);
 
-  // Load stories on mount
+  // Load stories and containers on mount
   useEffect(() => {
     if (currentUniverse) {
       loadStories(currentUniverse.id);
+      loadContainers(currentUniverse.id);
     }
-  }, [currentUniverse, loadStories]);
+  }, [currentUniverse, loadStories, loadContainers]);
 
   const handleTabChange = (tab: 'stories' | 'universe') => {
     if (tab === 'universe') {
@@ -118,11 +132,44 @@ export function StoriesList() {
     }
   };
 
+  const handleContainerClick = (container: Container) => {
+    navigate({ screen: 'container-view', containerId: container.id });
+  };
+
+  const handleDeleteContainer = async (container: Container) => {
+    setContainerToDelete(container);
+    setShowDeleteContainerModal(true);
+  };
+
+  const handleConfirmDeleteContainer = async () => {
+    if (!containerToDelete) return;
+
+    setIsDeletingContainer(true);
+    try {
+      await deleteContainer(containerToDelete.id);
+      setShowDeleteContainerModal(false);
+      setContainerToDelete(null);
+    } catch (error) {
+      console.error('Failed to delete container:', error);
+    } finally {
+      setIsDeletingContainer(false);
+    }
+  };
+
+  const handleCancelDeleteContainer = () => {
+    setShowDeleteContainerModal(false);
+    setContainerToDelete(null);
+    setIsDeletingContainer(false);
+  };
+
   // Get filtered and sorted stories (grouped view - top level only)
   // Filter to show only stories not in containers (root stories)
   const filteredStories = getFilteredAndSortedStories().filter(
     (story) => !story.containerId
   );
+
+  // Get root-level containers (no parentContainerId)
+  const rootContainers = containers.filter((c) => !c.parentContainerId);
 
   // Stories no longer have children (that's handled by containers now)
 
@@ -273,7 +320,7 @@ export function StoriesList() {
         </div>
 
         {/* Error State */}
-        {error && (
+        {(error || containersError) && (
           <div
             style={{
               padding: 'var(--spacing-4)',
@@ -285,12 +332,12 @@ export function StoriesList() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            {error}
+            {error || containersError}
           </div>
         )}
 
         {/* Loading State */}
-        {isLoading && (
+        {(isLoading || containersLoading) && (
           <div
             style={{
               display: 'flex',
@@ -315,13 +362,86 @@ export function StoriesList() {
                 color: 'var(--color-text-secondary)',
               }}
             >
-              Loading stories...
+              Loading...
             </p>
           </div>
         )}
 
+        {/* Containers Section */}
+        {!isLoading && !containersLoading && rootContainers.length > 0 && (
+          <div style={{ marginBottom: 'var(--spacing-6)' }}>
+            <h2
+              style={{
+                fontFamily: 'var(--typography-heading-font)',
+                fontSize: 'var(--typography-h3-size)',
+                fontWeight: 'var(--typography-h3-weight)',
+                color: 'var(--color-text-primary)',
+                margin: 0,
+                marginBottom: 'var(--spacing-4)',
+              }}
+            >
+              Containers
+            </h2>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: 'var(--spacing-6)',
+                alignItems: 'start',
+              }}
+            >
+              {rootContainers.map((container) => (
+                <ContainerCard
+                  key={container.id}
+                  container={container}
+                  onClick={handleContainerClick}
+                  onDelete={handleDeleteContainer}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Standalone Stories Section */}
+        {!isLoading && !containersLoading && filteredStories.length > 0 && (
+          <div>
+            {rootContainers.length > 0 && (
+              <h2
+                style={{
+                  fontFamily: 'var(--typography-heading-font)',
+                  fontSize: 'var(--typography-h3-size)',
+                  fontWeight: 'var(--typography-h3-weight)',
+                  color: 'var(--color-text-primary)',
+                  margin: 0,
+                  marginBottom: 'var(--spacing-4)',
+                }}
+              >
+                Standalone Stories
+              </h2>
+            )}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: 'var(--spacing-6)',
+                alignItems: 'start',
+              }}
+            >
+              {filteredStories.map((story) => (
+                <StoryCard
+                  key={story.id}
+                  story={story}
+                  onClick={handleStoryClick}
+                  onDelete={handleDeleteStory}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
-        {!isLoading && filteredStories.length === 0 && (
+        {!isLoading && !containersLoading && filteredStories.length === 0 && rootContainers.length === 0 && (
           <div
             style={{
               display: 'flex',
@@ -375,28 +495,6 @@ export function StoriesList() {
             )}
           </div>
         )}
-
-        {/* Stories Grid */}
-        {!isLoading && filteredStories.length > 0 && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: 'var(--spacing-6)',
-              alignItems: 'start',
-            }}
-          >
-            {filteredStories.map((story) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                onClick={handleStoryClick}
-                onDelete={handleDeleteStory}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Create Container Modal */}
@@ -416,6 +514,78 @@ export function StoriesList() {
         onCancel={handleCancelDelete}
         isDeleting={isDeleting}
       />
+
+      {/* Delete Container Modal */}
+      {showDeleteContainerModal && containerToDelete && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={handleCancelDeleteContainer}
+        >
+          <div
+            className="card card-base option-1 typo-1 button-2"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '500px',
+              padding: 'var(--spacing-6)',
+            }}
+          >
+            <h2
+              style={{
+                fontFamily: 'var(--typography-heading-font)',
+                fontSize: 'var(--typography-h3-size)',
+                fontWeight: 'var(--typography-h3-weight)',
+                color: 'var(--color-text-primary)',
+                margin: 0,
+                marginBottom: 'var(--spacing-4)',
+              }}
+            >
+              Delete Container?
+            </h2>
+            <p
+              style={{
+                fontFamily: 'var(--typography-body-font)',
+                fontSize: 'var(--font-size-base)',
+                color: 'var(--color-text-secondary)',
+                margin: 0,
+                marginBottom: 'var(--spacing-6)',
+              }}
+            >
+              Are you sure you want to delete "{containerToDelete.title}"? This action cannot be
+              undone. All child containers and stories will also be deleted.
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end' }}>
+              <button
+                className="btn btn-outline btn-base"
+                onClick={handleCancelDeleteContainer}
+                disabled={isDeletingContainer}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary btn-base"
+                onClick={handleConfirmDeleteContainer}
+                disabled={isDeletingContainer}
+                style={{
+                  backgroundColor: 'var(--color-error)',
+                }}
+              >
+                {isDeletingContainer ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Spinner animation */}
       <style>
