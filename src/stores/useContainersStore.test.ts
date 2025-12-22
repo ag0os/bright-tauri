@@ -359,4 +359,48 @@ describe('useContainersStore - Optimistic Reordering', () => {
     // Verify state was not modified (cache should be empty)
     expect(useContainersStore.getState()._childrenCache.size).toBe(0);
   });
+
+  it('handles container creation failure and sets error state', async () => {
+    // Mock backend error
+    const backendError = new Error('Cannot add child container to a container that already has stories');
+    vi.mocked(invoke).mockRejectedValue(backendError);
+
+    // Get the store function
+    const { createContainer } = useContainersStore.getState();
+
+    // Try to create a container (should fail)
+    await act(async () => {
+      try {
+        await createContainer({
+          universeId: 'u1',
+          parentContainerId: 'parent-with-stories',
+          containerType: 'novel',
+          title: 'New Novel',
+          description: 'A new novel',
+          order: 0,
+        });
+      } catch (error) {
+        // Expected error
+      }
+    });
+
+    // Verify error was set in store
+    const state = useContainersStore.getState();
+    expect(state.error).toBe('Cannot add child container to a container that already has stories');
+
+    // Verify isLoading is false
+    expect(state.isLoading).toBe(false);
+
+    // Verify backend was called with correct parameters
+    expect(invoke).toHaveBeenCalledWith('create_container', {
+      input: {
+        universeId: 'u1',
+        parentContainerId: 'parent-with-stories',
+        containerType: 'novel',
+        title: 'New Novel',
+        description: 'A new novel',
+        order: 0,
+      },
+    });
+  });
 });

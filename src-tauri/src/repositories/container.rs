@@ -1982,4 +1982,268 @@ mod tests {
         assert!(subtree_single.len() > 0);
         assert_eq!(subtree_single.len(), all_containers.len());
     }
+
+    #[test]
+    fn test_concurrent_container_creation_same_parent() {
+        use std::sync::Arc;
+        use std::thread;
+
+        let (db, _temp_dir) = setup_test_db();
+        let db = Arc::new(db);
+
+        // Create parent container
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Parent Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let parent_id = Arc::new(parent.id.clone());
+
+        // Spawn multiple threads to create containers concurrently
+        let mut handles = vec![];
+        for i in 0..5 {
+            let db_clone = Arc::clone(&db);
+            let parent_id_clone = Arc::clone(&parent_id);
+
+            let handle = thread::spawn(move || {
+                ContainerRepository::create(
+                    &db_clone,
+                    "universe-1".to_string(),
+                    Some(parent_id_clone.to_string()),
+                    "novel".to_string(),
+                    format!("Novel {}", i),
+                    None,
+                    i,
+                )
+            });
+            handles.push(handle);
+        }
+
+        // Collect results
+        let mut results = vec![];
+        for handle in handles {
+            results.push(handle.join().unwrap());
+        }
+
+        // All should succeed
+        assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 5);
+
+        // Verify all containers were created with unique IDs
+        let children = ContainerRepository::list_children(&db, &parent_id).unwrap();
+        assert_eq!(children.len(), 5);
+
+        // Verify all IDs are unique
+        let mut ids: Vec<String> = children.iter().map(|c| c.id.clone()).collect();
+        ids.sort();
+        ids.dedup();
+        assert_eq!(ids.len(), 5);
+    }
+
+    #[test]
+    fn test_reorder_with_invalid_container_ids() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent with children
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Parent Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let child1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Novel 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let _child2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Novel 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        // Create another parent with a different child
+        let other_parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Other Series".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        let other_child = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(other_parent.id.clone()),
+            "novel".to_string(),
+            "Other Novel".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Try to reorder parent's children using a child from other_parent
+        let result = ContainerRepository::reorder_children(
+            &db,
+            &parent.id,
+            vec![child1.id.clone(), other_child.id.clone()],
+        );
+
+        // Should fail because other_child doesn't belong to parent
+        assert!(result.is_err());
+        assert!(matches!(result, Err(rusqlite::Error::QueryReturnedNoRows)));
+    }
+
+    #[test]
+    fn test_full_series_workflow() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create series container (will have child containers, so no git repo)
+        let series = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Epic Series".to_string(),
+            Some("A grand series of novels".to_string()),
+            1,
+        )
+        .unwrap();
+
+        assert!(series.git_repo_path.is_none());
+
+        // Create 2 novel containers under series (each gets git repo)
+        let novel1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            Some("First book".to_string()),
+            1,
+        )
+        .unwrap();
+
+        let novel2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Book 2".to_string(),
+            Some("Second book".to_string()),
+            2,
+        )
+        .unwrap();
+
+        // Verify series has no git repo (non-leaf)
+        let series_after_children = ContainerRepository::find_by_id(&db, &series.id).unwrap();
+        assert!(series_after_children.git_repo_path.is_none());
+
+        // Create chapters (stories) under each novel
+        use crate::models::CreateStoryInput;
+        use crate::models::StoryType;
+        use crate::repositories::StoryRepository;
+
+        // Novel 1 chapters
+        for i in 1..=3 {
+            let story_input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Chapter {}", i),
+                description: Some(format!("Chapter {} of Book 1", i)),
+                story_type: Some(StoryType::Chapter),
+                content: Some(format!("Content of chapter {}", i)),
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some(novel1.id.clone()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+
+            StoryRepository::create(&db, story_input).unwrap();
+        }
+
+        // Novel 2 chapters
+        for i in 1..=2 {
+            let story_input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Chapter {}", i),
+                description: Some(format!("Chapter {} of Book 2", i)),
+                story_type: Some(StoryType::Chapter),
+                content: Some(format!("Content of chapter {}", i)),
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some(novel2.id.clone()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+
+            StoryRepository::create(&db, story_input).unwrap();
+        }
+
+        // Verify hierarchy
+        let series_children = ContainerRepository::list_children(&db, &series.id).unwrap();
+        assert_eq!(series_children.len(), 2);
+
+        let novel1_stories = StoryRepository::list_by_container(&db, &novel1.id).unwrap();
+        assert_eq!(novel1_stories.len(), 3);
+
+        let novel2_stories = StoryRepository::list_by_container(&db, &novel2.id).unwrap();
+        assert_eq!(novel2_stories.len(), 2);
+
+        // Delete series - should cascade delete all
+        let deleted_ids = ContainerRepository::delete(&db, &series.id).unwrap();
+
+        // Should have deleted: series + novel1 + novel2 = 3 containers
+        assert_eq!(deleted_ids.len(), 3);
+        assert!(deleted_ids.contains(&series.id));
+        assert!(deleted_ids.contains(&novel1.id));
+        assert!(deleted_ids.contains(&novel2.id));
+
+        // Verify all containers are deleted
+        assert!(ContainerRepository::find_by_id(&db, &series.id).is_err());
+        assert!(ContainerRepository::find_by_id(&db, &novel1.id).is_err());
+        assert!(ContainerRepository::find_by_id(&db, &novel2.id).is_err());
+
+        // Verify stories are also deleted (CASCADE)
+        assert_eq!(
+            StoryRepository::list_by_container(&db, &novel1.id).unwrap().len(),
+            0
+        );
+        assert_eq!(
+            StoryRepository::list_by_container(&db, &novel2.id).unwrap().len(),
+            0
+        );
+    }
 }

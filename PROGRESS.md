@@ -382,12 +382,12 @@ Implementing 9 tasks identified during PR review. Tasks are organized into paral
 | 88 | Handle empty non-leaf container edge case | ✅ Complete | general-purpose |
 | 89 | Add git repository corruption detection | ✅ Complete | general-purpose |
 
-### Wave 2: Performance & UX (Parallel) 🔄
+### Wave 2: Performance & UX (Parallel) ✅
 | Task | Description | Status | Agent |
 |------|-------------|--------|-------|
-| 93 | Add recursive CTE query for container hierarchy | In Progress | general-purpose |
-| 90 | Add optimistic UI updates for container reordering | In Progress | general-purpose |
-| 94 | Add cache size limits to frontend stores | In Progress | general-purpose |
+| 93 | Add recursive CTE query for container hierarchy | ✅ Complete | general-purpose |
+| 90 | Add optimistic UI updates for container reordering | ✅ Complete | general-purpose |
+| 94 | Add cache size limits to frontend stores | ✅ Complete | general-purpose |
 
 ### Wave 3: Documentation (Parallel) ✅
 | Task | Description | Status | Agent |
@@ -395,10 +395,10 @@ Implementing 9 tasks identified during PR review. Tasks are organized into paral
 | 95 | Add ADR for clean slate migration decision | ✅ Complete | general-purpose |
 | 96 | Document git repository initialization lifecycle | ✅ Complete | general-purpose |
 
-### Wave 4: Testing (After other waves)
+### Wave 4: Testing (After other waves) 🔄
 | Task | Description | Status | Agent |
 |------|-------------|--------|-------|
-| 97 | Add missing test cases from PR review | Pending | general-purpose |
+| 97 | Add missing test cases from PR review | In Progress | general-purpose |
 
 ## PR Review Tasks - Execution Log
 
@@ -433,8 +433,30 @@ Implementing 9 tasks identified during PR review. Tasks are organized into paral
 - Includes: 3 Mermaid sequence diagrams, troubleshooting guide
 - Commit: docs(task-96): Document git repository initialization lifecycle
 
+### Wave 2 Completed - 2025-12-22
+
+#### Task 93: Add recursive CTE query for container hierarchy loading
+- Status: ✅ Complete
+- Changes: Added get_subtree() method using recursive CTE
+- Performance: 3.34x faster (126µs vs 424µs for 15-container hierarchy)
+- Tests: 7 new tests including performance benchmark
+- Commit: feat(task-93): Add recursive CTE query for container hierarchy loading
+
+#### Task 90: Add optimistic UI updates for container reordering
+- Status: ✅ Complete
+- Changes: Added optimisticReorderChildren(), rollback on error, error display
+- Tests: 5 new tests for optimistic updates and rollback
+- Commit: feat(task-90): Add optimistic UI updates for container reordering
+
+#### Task 94: Add cache size limits to frontend stores
+- Status: ✅ Complete
+- Changes: Created LRUCache utility, integrated into useContainersStore
+- Config: 100 entries max, 5 minute TTL
+- Tests: 21 LRU cache tests + 5 store tests
+- Commit: feat(task-94): Add cache size limits to frontend stores
+
 ## PR Review Tasks - Summary
 - Total Tasks: 9
-- Completed: 5
-- In Progress: 3
-- Pending: 1
+- Completed: 8
+- In Progress: 1
+- Pending: 0
