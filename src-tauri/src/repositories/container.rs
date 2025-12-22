@@ -119,14 +119,14 @@ impl ContainerRepository {
         container_ids: Vec<String>,
     ) -> Result<()> {
         let conn = db.connection();
-        let conn = conn.lock().unwrap();
+        let mut conn = conn.lock().unwrap();
 
-        // Start transaction
-        conn.execute("BEGIN TRANSACTION", [])?;
+        // Start transaction using Rust's transaction API
+        let tx = conn.transaction()?;
 
         // Validate that all container_ids belong to the parent
         for container_id in &container_ids {
-            let parent_check: Result<Option<String>, _> = conn.query_row(
+            let parent_check: Result<Option<String>, _> = tx.query_row(
                 "SELECT parent_container_id FROM containers WHERE id = ?1",
                 params![container_id],
                 |row| row.get(0),
@@ -135,11 +135,11 @@ impl ContainerRepository {
             match parent_check {
                 Ok(Some(pid)) if pid == parent_id => {}
                 Ok(Some(_)) | Ok(None) => {
-                    conn.execute("ROLLBACK", [])?;
+                    // Transaction will automatically rollback on Drop
                     return Err(rusqlite::Error::QueryReturnedNoRows);
                 }
                 Err(e) => {
-                    conn.execute("ROLLBACK", [])?;
+                    // Transaction will automatically rollback on Drop
                     return Err(e);
                 }
             }
@@ -147,14 +147,14 @@ impl ContainerRepository {
 
         // Update order for each container
         for (index, container_id) in container_ids.iter().enumerate() {
-            conn.execute(
+            tx.execute(
                 "UPDATE containers SET \"order\" = ?1 WHERE id = ?2",
                 params![index as i32, container_id],
             )?;
         }
 
-        // Commit transaction
-        conn.execute("COMMIT", [])?;
+        // Commit transaction (automatic rollback on Drop if this is not reached)
+        tx.commit()?;
 
         Ok(())
     }
