@@ -1,6 +1,7 @@
 use crate::db::Database;
 use crate::models::Container;
 use chrono::Utc;
+use log::warn;
 use rusqlite::{params, Result};
 use uuid::Uuid;
 
@@ -231,11 +232,13 @@ impl ContainerRepository {
         if let Some(git_repo_path) = container.git_repo_path {
             if std::path::Path::new(&git_repo_path).exists() {
                 if let Err(e) = std::fs::remove_dir_all(&git_repo_path) {
-                    eprintln!(
-                        "Warning: Failed to remove git repo directory {}: {}",
+                    warn!(
+                        "Failed to remove git repo directory {}: {}. This may result in orphaned files on disk.",
                         git_repo_path, e
                     );
-                    // Continue even if filesystem cleanup fails
+                    // Continue even if filesystem cleanup fails to allow database cleanup to complete.
+                    // TODO: Implement a maintenance command to find and remove orphaned git repositories.
+                    // This would scan for git repo directories that don't have corresponding database entries.
                 }
             }
         }

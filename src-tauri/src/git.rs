@@ -1,4 +1,5 @@
 use git2::{Error as GitError, Oid, Repository, Signature};
+use log::warn;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs;
@@ -190,9 +191,10 @@ impl GitService {
                     branch.rename("original", false)?;
                 } else {
                     // Log warning for unexpected default branch names
-                    eprintln!(
-                        "Warning: Repository initialized with unexpected default branch name '{branch_name}'. \
-                         Expected 'master' or 'main'. Branch was not renamed to 'original'."
+                    warn!(
+                        "Repository initialized with unexpected default branch name '{}'. \
+                         Expected 'master' or 'main'. Branch was not renamed to 'original'.",
+                        branch_name
                     );
                 }
             }
