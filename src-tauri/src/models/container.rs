@@ -1,6 +1,11 @@
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 
+/// Maximum allowed nesting depth for containers to prevent performance issues
+/// and enforce reasonable hierarchy limits. A depth of 10 allows for complex
+/// structures like: Universe → Series → Collection → Arc → Volume → Novel → Part → Chapter → Scene → Section
+pub const MAX_NESTING_DEPTH: u32 = 10;
+
 /// Container domain model
 ///
 /// A Container represents an organizational entity within a Universe that can contain

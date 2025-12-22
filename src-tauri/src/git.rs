@@ -17,6 +17,8 @@ pub enum GitServiceError {
     RepositoryNotFound(PathBuf),
     /// Invalid operation
     InvalidOperation(String),
+    /// Repository corruption detected
+    RepositoryCorrupted(String),
 }
 
 impl fmt::Display for GitServiceError {
@@ -28,6 +30,7 @@ impl fmt::Display for GitServiceError {
                 write!(f, "Repository not found at: {}", path.display())
             }
             GitServiceError::InvalidOperation(msg) => write!(f, "Invalid operation: {msg}"),
+            GitServiceError::RepositoryCorrupted(msg) => write!(f, "Repository corrupted: {msg}"),
         }
     }
 }
@@ -101,6 +104,88 @@ impl GitService {
     #[allow(dead_code)]
     pub fn new() -> Self {
         GitService
+    }
+
+    /// Validate git repository integrity
+    ///
+    /// Checks:
+    /// 1. .git directory exists
+    /// 2. HEAD reference can be resolved
+    /// 3. refs/heads directory exists and has at least one branch
+    ///
+    /// # Arguments
+    /// * `repo_path` - Path to the Git repository
+    ///
+    /// # Returns
+    /// Ok(()) if repository is valid, or GitServiceError::RepositoryCorrupted with details
+    pub fn validate_repo_integrity(repo_path: &Path) -> GitResult<()> {
+        // Check if .git directory exists
+        let git_dir = repo_path.join(".git");
+        if !git_dir.exists() {
+            return Err(GitServiceError::RepositoryCorrupted(format!(
+                "Missing .git directory at {}. The repository may not be initialized or the .git directory has been deleted.",
+                repo_path.display()
+            )));
+        }
+
+        // Try to open the repository
+        let repo = match Repository::open(repo_path) {
+            Ok(r) => r,
+            Err(e) => {
+                return Err(GitServiceError::RepositoryCorrupted(format!(
+                    "Failed to open repository at {}: {}. The repository structure may be corrupted.",
+                    repo_path.display(),
+                    e
+                )));
+            }
+        };
+
+        // Check if HEAD can be resolved
+        match repo.head() {
+            Ok(head) => {
+                // Try to peel HEAD to a commit to ensure it's valid
+                if let Err(e) = head.peel_to_commit() {
+                    return Err(GitServiceError::RepositoryCorrupted(format!(
+                        "HEAD reference exists but cannot be resolved to a commit: {}. The repository may have a corrupted HEAD.",
+                        e
+                    )));
+                }
+            }
+            Err(e) => {
+                return Err(GitServiceError::RepositoryCorrupted(format!(
+                    "Failed to resolve HEAD reference: {}. The repository may be corrupted or have an invalid HEAD.",
+                    e
+                )));
+            }
+        }
+
+        // Check if refs/heads exists and has at least one branch
+        let refs_heads_dir = git_dir.join("refs").join("heads");
+        if !refs_heads_dir.exists() {
+            return Err(GitServiceError::RepositoryCorrupted(format!(
+                "Missing refs/heads directory at {}. The repository structure is corrupted.",
+                refs_heads_dir.display()
+            )));
+        }
+
+        // Check if there's at least one branch
+        let branches = match Self::list_branches(repo_path) {
+            Ok(b) => b,
+            Err(e) => {
+                return Err(GitServiceError::RepositoryCorrupted(format!(
+                    "Failed to list branches: {}. The repository may have corrupted branch references.",
+                    e
+                )));
+            }
+        };
+
+        if branches.is_empty() {
+            return Err(GitServiceError::RepositoryCorrupted(
+                "No branches found in repository. The repository may be corrupted or incompletely initialized.".to_string()
+            ));
+        }
+
+        Ok(())
     }
 
     /// Create a signature using Git config (user.name and user.email)
@@ -1691,6 +1776,141 @@ mod tests {
                 assert!(msg.contains("not found"));
             }
             _ => panic!("Expected InvalidOperation error"),
+        }
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_valid_repo() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-validate-valid";
+
+        // Initialize a valid repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Validation should pass
+        let result = GitService::validate_repo_integrity(&repo_path);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_missing_git_dir() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-validate-no-git";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Delete .git directory
+        let git_dir = repo_path.join(".git");
+        fs::remove_dir_all(&git_dir).unwrap();
+
+        // Validation should fail
+        let result = GitService::validate_repo_integrity(&repo_path);
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryCorrupted(msg)) => {
+                assert!(msg.contains("Missing .git directory"));
+            }
+            _ => panic!("Expected RepositoryCorrupted error"),
+        }
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_corrupted_head() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-validate-bad-head";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Corrupt HEAD by pointing it to a non-existent ref
+        let head_path = repo_path.join(".git").join("HEAD");
+        fs::write(&head_path, "ref: refs/heads/nonexistent").unwrap();
+
+        // Validation should fail
+        let result = GitService::validate_repo_integrity(&repo_path);
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryCorrupted(msg)) => {
+                assert!(msg.contains("Failed to resolve HEAD") || msg.contains("cannot be resolved to a commit"));
+            }
+            _ => panic!("Expected RepositoryCorrupted error"),
+        }
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_missing_refs_heads() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-validate-no-refs";
+
+        // Initialize repository
+        let repo_path = GitService::init_repo(temp_dir.path(), story_id).unwrap();
+
+        // Delete refs/heads directory
+        let refs_heads = repo_path.join(".git").join("refs").join("heads");
+        fs::remove_dir_all(&refs_heads).unwrap();
+
+        // Validation should fail
+        let result = GitService::validate_repo_integrity(&repo_path);
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryCorrupted(msg)) => {
+                // Could fail on various checks - HEAD resolution, missing refs/heads, or branch listing
+                eprintln!("Error message: {}", msg);
+                assert!(
+                    msg.contains("Missing refs/heads directory")
+                    || msg.contains("Failed to list branches")
+                    || msg.contains("HEAD")
+                    || msg.contains("No branches found")
+                );
+            }
+            _ => panic!("Expected RepositoryCorrupted error"),
+        }
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_no_branches() {
+        let temp_dir = TempDir::new().unwrap();
+        let story_id = "test-validate-no-branches";
+
+        // Create a repository directory structure without proper initialization
+        let repo_path = temp_dir.path().join("git-repos").join(story_id);
+        fs::create_dir_all(&repo_path).unwrap();
+
+        // Create minimal git structure but without branches
+        let git_dir = repo_path.join(".git");
+        fs::create_dir_all(&git_dir).unwrap();
+        fs::create_dir_all(git_dir.join("refs").join("heads")).unwrap();
+        fs::create_dir_all(git_dir.join("objects")).unwrap();
+
+        // Create a basic HEAD file pointing to a non-existent branch
+        fs::write(git_dir.join("HEAD"), "ref: refs/heads/main").unwrap();
+
+        // Validation should fail because there are no actual branches
+        let result = GitService::validate_repo_integrity(&repo_path);
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryCorrupted(msg)) => {
+                // Could fail on HEAD resolution or no branches
+                assert!(msg.contains("HEAD") || msg.contains("branches") || msg.contains("corrupted"));
+            }
+            _ => panic!("Expected RepositoryCorrupted error"),
+        }
+    }
+
+    #[test]
+    fn test_validate_repo_integrity_nonexistent_path() {
+        let temp_dir = TempDir::new().unwrap();
+        let nonexistent = temp_dir.path().join("nonexistent");
+
+        // Validation should fail for non-existent path
+        let result = GitService::validate_repo_integrity(&nonexistent);
+        assert!(result.is_err());
+        match result {
+            Err(GitServiceError::RepositoryCorrupted(msg)) => {
+                assert!(msg.contains("Missing .git directory"));
+            }
+            _ => panic!("Expected RepositoryCorrupted error"),
         }
     }
 }

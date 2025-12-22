@@ -154,10 +154,20 @@ pub fn ensure_story_git_repo(
         ));
     }
 
-    // If git_repo_path is already set and exists, sync the branch name and return
+    // If git_repo_path is already set and exists, validate integrity
     if !story.git_repo_path.is_empty() {
         let path = std::path::Path::new(&story.git_repo_path);
         if path.exists() && path.join(".git").exists() {
+            // Validate repository integrity
+            if let Err(e) = GitService::validate_repo_integrity(path) {
+                return Err(format!(
+                    "Git repository corruption detected at {}: {}. \
+                     To fix this, you can either manually repair the repository or \
+                     delete it and reinitialize by setting git_repo_path to empty string and calling this command again.",
+                    story.git_repo_path, e
+                ));
+            }
+
             // Sync the current branch name from the actual repo
             let actual_branch = GitService::get_current_branch(path)
                 .map_err(|e| format!("Failed to get current branch: {e}"))?;

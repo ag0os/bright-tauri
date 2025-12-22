@@ -144,10 +144,20 @@ pub fn ensure_container_git_repo(
         ));
     }
 
-    // If git_repo_path is already set and exists, sync the branch name and return
+    // If git_repo_path is already set and exists, validate integrity
     if let Some(ref git_repo_path) = container.git_repo_path {
         let path = std::path::Path::new(git_repo_path);
         if path.exists() && path.join(".git").exists() {
+            // Validate repository integrity
+            if let Err(e) = GitService::validate_repo_integrity(path) {
+                return Err(format!(
+                    "Git repository corruption detected at {}: {}. \
+                     To fix this, you can either manually repair the repository or \
+                     delete it and reinitialize by setting git_repo_path to null and calling this command again.",
+                    git_repo_path, e
+                ));
+            }
+
             // Sync the current branch name from the actual repo
             let actual_branch = GitService::get_current_branch(path)
                 .map_err(|e| format!("Failed to get current branch: {e}"))?;
@@ -207,6 +217,70 @@ pub fn ensure_container_git_repo(
 
     // Return the updated container
     ContainerRepository::find_by_id(&db, &container.id).map_err(|e| e.to_string())
+}
+
+/// Check if a container is an empty non-leaf container (edge case detection)
+///
+/// Returns true if the container:
+/// - Has no git_repo_path (is non-leaf)
+/// - Has no child containers
+/// - Has no stories
+///
+/// This edge case occurs when a container had child containers (became non-leaf),
+/// then all children were deleted, leaving it unable to have stories without git initialization.
+#[tauri::command]
+pub fn check_empty_non_leaf_container(
+    db: State<Database>,
+    id: String,
+) -> Result<bool, String> {
+    ContainerRepository::is_empty_non_leaf(&db, &id).map_err(|e| e.to_string())
+}
+
+/// Convert an empty non-leaf container to a leaf container by initializing a git repository
+///
+/// This resolves the edge case where a container had child containers (became non-leaf),
+/// then all children were deleted, leaving it in limbo. This command:
+/// 1. Verifies the container is empty (no children, no stories, no git repo)
+/// 2. Initializes a git repository for the container
+/// 3. Returns the updated container
+///
+/// Returns an error if:
+/// - Container has child containers (not allowed to have git repo)
+/// - Container already has a git repo
+/// - Git initialization fails
+#[tauri::command]
+pub fn convert_to_leaf_container(
+    app: AppHandle,
+    db: State<Database>,
+    id: String,
+) -> Result<Container, String> {
+    // First check if this is actually an empty non-leaf container
+    let is_empty_non_leaf = ContainerRepository::is_empty_non_leaf(&db, &id)
+        .map_err(|e| e.to_string())?;
+
+    if !is_empty_non_leaf {
+        let container = ContainerRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
+
+        if container.git_repo_path.is_some() {
+            return Err("Container already has a git repository (is already a leaf container)".to_string());
+        }
+
+        let child_count = ContainerRepository::get_child_container_count(&db, &id)
+            .map_err(|e| e.to_string())?;
+        if child_count > 0 {
+            return Err(format!(
+                "Container has {} child containers and cannot be converted to a leaf container. \
+                Only empty containers can be converted.",
+                child_count
+            ));
+        }
+
+        return Err("Container does not meet criteria for conversion (unknown state)".to_string());
+    }
+
+    // Container is an empty non-leaf, we can safely initialize git repo
+    // This is the same logic as ensure_container_git_repo, but we know it's safe to call
+    ensure_container_git_repo(app, db, id)
 }
 
 #[cfg(test)]

@@ -63,6 +63,8 @@ pub fn run() {
             commands::delete_container,
             commands::reorder_container_children,
             commands::ensure_container_git_repo,
+            commands::check_empty_non_leaf_container,
+            commands::convert_to_leaf_container,
             // Story commands
             commands::create_story,
             commands::get_story,

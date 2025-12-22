@@ -1,5 +1,5 @@
 use crate::db::Database;
-use crate::models::Container;
+use crate::models::{Container, MAX_NESTING_DEPTH};
 use chrono::Utc;
 use log::warn;
 use rusqlite::{params, Result};
@@ -34,6 +34,17 @@ impl ContainerRepository {
                         .to_string(),
                 ));
             }
+        }
+
+        // Depth Limit: Check if adding this container would exceed max nesting depth
+        let depth = Self::calculate_depth(db, parent_container_id.as_deref())?;
+        if depth >= MAX_NESTING_DEPTH {
+            return Err(rusqlite::Error::InvalidParameterName(
+                format!(
+                    "Maximum container nesting depth of {} levels exceeded. Current depth: {}",
+                    MAX_NESTING_DEPTH, depth
+                ),
+            ));
         }
 
         db.execute(
@@ -263,6 +274,21 @@ impl ContainerRepository {
         Ok(count)
     }
 
+    /// Calculate the depth of a container in the hierarchy by walking up the parent chain
+    /// Returns 0 for root containers (no parent), 1 for direct children of root, etc.
+    fn calculate_depth(db: &Database, parent_container_id: Option<&str>) -> Result<u32> {
+        let mut depth = 0;
+        let mut current_parent = parent_container_id.map(|s| s.to_string());
+
+        while let Some(parent_id) = current_parent {
+            depth += 1;
+            let parent = Self::find_by_id(db, &parent_id)?;
+            current_parent = parent.parent_container_id;
+        }
+
+        Ok(depth)
+    }
+
     /// Update the git repo path for a container (internal use)
     pub fn set_git_repo_path(db: &Database, id: &str, git_repo_path: &str) -> Result<()> {
         db.execute(
@@ -279,6 +305,54 @@ impl ContainerRepository {
             params![branch, id],
         )?;
         Ok(())
+    }
+
+    /// Check if a container is an empty non-leaf container
+    ///
+    /// An empty non-leaf container is one that:
+    /// - Has no git_repo_path (is non-leaf)
+    /// - Has no child containers
+    /// - Has no stories
+    ///
+    /// This is the edge case where a container had child containers (became non-leaf),
+    /// then all children were deleted, leaving it in limbo - can't have stories without
+    /// git initialization.
+    pub fn is_empty_non_leaf(db: &Database, id: &str) -> Result<bool> {
+        let container = Self::find_by_id(db, id)?;
+
+        // If it has a git repo, it's a leaf container, not the edge case
+        if container.git_repo_path.is_some() {
+            return Ok(false);
+        }
+
+        // Check if it has any child containers
+        let child_containers = Self::list_children(db, id)?;
+        if !child_containers.is_empty() {
+            return Ok(false);
+        }
+
+        // Check if it has any stories
+        let story_count = Self::get_story_count(db, id)?;
+        if story_count > 0 {
+            return Ok(false);
+        }
+
+        // It's a non-leaf container with no children and no stories
+        Ok(true)
+    }
+
+    /// Get the count of child containers for a container
+    pub fn get_child_container_count(db: &Database, container_id: &str) -> Result<i32> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let count: i32 = conn.query_row(
+            "SELECT COUNT(*) FROM containers WHERE parent_container_id = ?1",
+            params![container_id],
+            |row| row.get(0),
+        )?;
+
+        Ok(count)
     }
 
     /// Helper function to map a row to Container struct
@@ -304,6 +378,7 @@ impl ContainerRepository {
 mod tests {
     use super::*;
     use crate::db::Database;
+    use crate::models::MAX_NESTING_DEPTH;
     use tempfile::TempDir;
 
     fn setup_test_db() -> (Database, TempDir) {
@@ -928,5 +1003,420 @@ mod tests {
 
         let updated = ContainerRepository::find_by_id(&db, &container.id).unwrap();
         assert_eq!(updated.current_branch, Some("feature-branch".to_string()));
+    }
+
+    #[test]
+    fn test_calculate_depth_root_container() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Root container has depth 0
+        let depth = ContainerRepository::calculate_depth(&db, None).unwrap();
+        assert_eq!(depth, 0);
+    }
+
+    #[test]
+    fn test_calculate_depth_nested_containers() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a chain: root -> level1 -> level2
+        let root = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Root".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let level1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(root.id.clone()),
+            "collection".to_string(),
+            "Level 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let level2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(level1.id.clone()),
+            "novel".to_string(),
+            "Level 2".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Check depths
+        assert_eq!(
+            ContainerRepository::calculate_depth(&db, Some(&root.id)).unwrap(),
+            1
+        ); // Child of root = depth 1
+        assert_eq!(
+            ContainerRepository::calculate_depth(&db, Some(&level1.id)).unwrap(),
+            2
+        ); // Child of level1 = depth 2
+        assert_eq!(
+            ContainerRepository::calculate_depth(&db, Some(&level2.id)).unwrap(),
+            3
+        ); // Child of level2 = depth 3
+    }
+
+    #[test]
+    fn test_max_nesting_depth_enforced() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a chain up to MAX_NESTING_DEPTH (10 levels: 0-9)
+        let mut current_parent: Option<String> = None;
+        let mut containers = Vec::new();
+
+        // Create containers up to depth MAX_NESTING_DEPTH - 1 (should succeed)
+        for i in 0..MAX_NESTING_DEPTH {
+            let container = ContainerRepository::create(
+                &db,
+                "universe-1".to_string(),
+                current_parent.clone(),
+                "container".to_string(),
+                format!("Level {}", i),
+                None,
+                1,
+            )
+            .unwrap();
+
+            containers.push(container.clone());
+            current_parent = Some(container.id);
+        }
+
+        // Verify we created MAX_NESTING_DEPTH containers
+        assert_eq!(containers.len() as u32, MAX_NESTING_DEPTH);
+
+        // Try to create one more level - should fail
+        let result = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            current_parent,
+            "container".to_string(),
+            format!("Level {}", MAX_NESTING_DEPTH),
+            None,
+            1,
+        );
+
+        assert!(result.is_err());
+        match result {
+            Err(rusqlite::Error::InvalidParameterName(msg)) => {
+                assert!(msg.contains("Maximum container nesting depth"));
+                assert!(msg.contains(&MAX_NESTING_DEPTH.to_string()));
+            }
+            _ => panic!("Expected InvalidParameterName error for max depth exceeded"),
+        }
+    }
+
+    #[test]
+    fn test_max_nesting_depth_exact_limit() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create exactly MAX_NESTING_DEPTH levels (0 to MAX_NESTING_DEPTH-1)
+        let mut current_parent: Option<String> = None;
+
+        for i in 0..MAX_NESTING_DEPTH {
+            let container = ContainerRepository::create(
+                &db,
+                "universe-1".to_string(),
+                current_parent.clone(),
+                "container".to_string(),
+                format!("Level {}", i),
+                None,
+                1,
+            )
+            .unwrap();
+
+            // Verify the container was created successfully
+            assert_eq!(container.title, format!("Level {}", i));
+            current_parent = Some(container.id);
+        }
+
+        // The last container should be at depth MAX_NESTING_DEPTH - 1
+        let last_depth =
+            ContainerRepository::calculate_depth(&db, current_parent.as_deref()).unwrap();
+        assert_eq!(last_depth, MAX_NESTING_DEPTH);
+    }
+
+    #[test]
+    fn test_depth_limit_clear_error_message() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create containers up to max depth
+        let mut current_parent: Option<String> = None;
+        for i in 0..MAX_NESTING_DEPTH {
+            let container = ContainerRepository::create(
+                &db,
+                "universe-1".to_string(),
+                current_parent,
+                "container".to_string(),
+                format!("Level {}", i),
+                None,
+                1,
+            )
+            .unwrap();
+            current_parent = Some(container.id);
+        }
+
+        // Try to exceed depth and check error message
+        let result = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            current_parent,
+            "container".to_string(),
+            "Too Deep".to_string(),
+            None,
+            1,
+        );
+
+        match result {
+            Err(rusqlite::Error::InvalidParameterName(msg)) => {
+                // Verify error message contains both max depth and current depth
+                assert!(msg.contains("Maximum container nesting depth"));
+                assert!(msg.contains(&format!("{}", MAX_NESTING_DEPTH)));
+                assert!(msg.contains("Current depth"));
+            }
+            _ => panic!("Expected clear error message about max depth"),
+        }
+    }
+
+    #[test]
+    fn test_is_empty_non_leaf_with_leaf_container() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a container and set git repo (making it a leaf)
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "My Novel".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        ContainerRepository::set_git_repo_path(&db, &container.id, "/path/to/repo").unwrap();
+
+        // Should not be an empty non-leaf (it's a leaf container)
+        let result = ContainerRepository::is_empty_non_leaf(&db, &container.id).unwrap();
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_is_empty_non_leaf_with_child_containers() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container (no git repo)
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Add child container
+        ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Should not be an empty non-leaf (has children)
+        let result = ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap();
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_is_empty_non_leaf_with_stories() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create container (no git repo)
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "My Novel".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Add a story
+        db.execute(
+            "INSERT INTO stories (id, universe_id, container_id, title, last_edited_at, variation_group_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            params!["story-1", "universe-1", &container.id, "Chapter 1", "2024-01-01T00:00:00Z", "vg-1", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+        )
+        .unwrap();
+
+        // Should not be an empty non-leaf (has stories)
+        let result = ContainerRepository::is_empty_non_leaf(&db, &container.id).unwrap();
+        assert!(!result);
+    }
+
+    #[test]
+    fn test_is_empty_non_leaf_true_case() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Add child container (parent becomes non-leaf)
+        let child = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Delete the child container
+        ContainerRepository::delete(&db, &child.id).unwrap();
+
+        // Verify parent has no git repo, no children, no stories
+        let parent_after = ContainerRepository::find_by_id(&db, &parent.id).unwrap();
+        assert!(parent_after.git_repo_path.is_none());
+
+        let children = ContainerRepository::list_children(&db, &parent.id).unwrap();
+        assert_eq!(children.len(), 0);
+
+        let story_count = ContainerRepository::get_story_count(&db, &parent.id).unwrap();
+        assert_eq!(story_count, 0);
+
+        // Should be an empty non-leaf container (the edge case!)
+        let result = ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap();
+        assert!(result);
+    }
+
+    #[test]
+    fn test_get_child_container_count() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Initially no children
+        let count = ContainerRepository::get_child_container_count(&db, &parent.id).unwrap();
+        assert_eq!(count, 0);
+
+        // Add child containers
+        ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        // Should have 2 children
+        let count = ContainerRepository::get_child_container_count(&db, &parent.id).unwrap();
+        assert_eq!(count, 2);
+    }
+
+    #[test]
+    fn test_is_empty_non_leaf_after_deleting_all_children() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent with multiple children
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let child1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let child2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        // Parent is not empty non-leaf (has children)
+        assert!(!ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
+
+        // Delete first child
+        ContainerRepository::delete(&db, &child1.id).unwrap();
+
+        // Still has one child, not empty
+        assert!(!ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
+
+        // Delete second child
+        ContainerRepository::delete(&db, &child2.id).unwrap();
+
+        // Now it should be an empty non-leaf container
+        assert!(ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
     }
 }
