@@ -129,7 +129,7 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
           const children = newChildrenByContainerId[parentId];
           newChildrenByContainerId[parentId] = {
             containers: children.containers.filter((c) => !deletedIds.includes(c.id)),
-            stories: children.stories, // Stories are not deleted with container
+            stories: children.stories, // Stories deleted via database CASCADE, not filtered here
           };
         });
 
