@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2025-12-22 16:29'
-updated_date: '2025-12-22 17:08'
+updated_date: '2025-12-22 17:09'
 labels:
   - backend
   - rust
@@ -32,21 +32,5 @@ Container creation command lacks input validation. Should validate title (non-em
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Added comprehensive input validation to the create_container command:
-
-1. Title validation:
-   - Checks if title is empty after trimming whitespace
-   - Validates title length does not exceed 255 characters
-   - Returns clear error messages for each validation failure
-
-2. Container type validation:
-   - Validates container_type is one of: "novel", "series", or "collection"
-   - Returns descriptive error message listing valid types
-
-3. Tests added:
-   - test_empty_title_detection: Verifies whitespace-only titles are caught
-   - test_title_length_limit: Tests both valid (255 chars) and invalid (256 chars) lengths
-   - test_valid_container_types: Validates all three valid types and several invalid types
-
-All validation happens before any database operations, ensuring early failure with clear error messages. All 200 tests pass including the 3 new validation tests.
+Added validation for empty title, title length (max 255), and container type (novel/series/collection). Added 3 new unit tests. All 200 tests pass.
 <!-- SECTION:NOTES:END -->

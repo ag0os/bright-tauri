@@ -5,7 +5,7 @@ status: Done
 assignee:
   - '@claude'
 created_date: '2025-12-22 16:35'
-updated_date: '2025-12-22 16:52'
+updated_date: '2025-12-22 17:09'
 labels:
   - backend
   - rust
@@ -42,17 +42,5 @@ Container deletion logs filesystem cleanup failures with eprintln but continues 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Replaced all eprintln! usages in the codebase with proper log::warn! macro for better observability.
-
-Changes made:
-1. Added log = "0.4" to Cargo.toml dependencies
-2. Added log::warn import to container.rs and git.rs
-3. Replaced eprintln! in ContainerRepository::delete_recursive with log::warn!
-4. Replaced eprintln! in GitService::initialize_repository with log::warn!
-5. Added TODO comment about future maintenance command to detect orphaned git repos
-6. Improved error messages to be more descriptive
-
-The cleanup behavior is unchanged - filesystem cleanup failures still allow database cleanup to proceed. The warnings are now properly logged for debugging.
-
-Note: Pre-existing test compilation errors in commands/container.rs are unrelated to this change. The library itself compiles successfully (verified with cargo check).
+Replaced eprintln with log::warn! in container.rs and git.rs. Added log crate dependency. Added TODO comment for future maintenance command. Cargo check passes.
 <!-- SECTION:NOTES:END -->
