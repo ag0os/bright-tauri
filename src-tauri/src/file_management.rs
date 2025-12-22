@@ -90,6 +90,7 @@ impl MetadataLock {
         let file = fs::OpenOptions::new()
             .create(true)
             .write(true)
+            .truncate(true)
             .open(&lock_path)?;
 
         // Acquire exclusive lock (blocks if another process has the lock)
@@ -964,7 +965,7 @@ mod tests {
             description: "A test story description".to_string(),
             created_at: "2024-01-01T00:00:00Z".to_string(),
             updated_at: "2024-01-02T00:00:00Z".to_string(),
-            story_type: StoryType::Novel,
+            story_type: StoryType::ShortStory,
             status: StoryStatus::InProgress,
             word_count: 1000,
             target_word_count: Some(50000),
@@ -976,7 +977,7 @@ mod tests {
             color: None,
             favorite: None,
             related_element_ids: None,
-            parent_story_id: None,
+            container_id: None,
             series_name: None,
             last_edited_at: "2024-01-02T00:00:00Z".to_string(),
             version: 1,

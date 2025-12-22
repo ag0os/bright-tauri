@@ -4,10 +4,11 @@
  * Modal component for creating a new story with form validation and error handling.
  */
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { X } from '@phosphor-icons/react';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
+import { useContainersStore } from '@/stores/useContainersStore';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import type { StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -19,63 +20,50 @@ import '@/design-system/tokens/spacing.css';
 
 interface CreateStoryModalProps {
   onClose: () => void;
-  parentStory?: {
-    id: string;
-    title: string;
-    storyType: StoryType;
-  };
+  containerId?: string; // If provided, story will be created in this container
 }
 
-// Determine the default child story type based on parent type
-const getDefaultChildType = (parentType: StoryType): StoryType => {
-  switch (parentType) {
-    case 'screenplay':
-      return 'scene';
-    case 'novel':
-    case 'series':
-    case 'collection':
-    default:
-      return 'chapter';
-  }
-};
+// Content-only story types (no container types like 'novel', 'series')
+const storyTypeOptions: { value: StoryType; label: string }[] = [
+  { value: 'chapter', label: 'Chapter' },
+  { value: 'scene', label: 'Scene' },
+  { value: 'short-story', label: 'Short Story' },
+  { value: 'episode', label: 'Episode' },
+  { value: 'poem', label: 'Poem' },
+  { value: 'outline', label: 'Outline' },
+  { value: 'treatment', label: 'Treatment' },
+  { value: 'screenplay', label: 'Screenplay' },
+];
 
-// Get child type options based on parent type
-const getChildTypeOptions = (parentType: StoryType): { value: StoryType; label: string }[] => {
-  switch (parentType) {
-    case 'screenplay':
-      return [
-        { value: 'scene', label: 'Scene' },
-        { value: 'chapter', label: 'Chapter' },
-      ];
-    default:
-      return [
-        { value: 'chapter', label: 'Chapter' },
-        { value: 'scene', label: 'Scene' },
-      ];
-  }
-};
-
-// Container types that should navigate to chapter management instead of editor
-const CONTAINER_TYPES: StoryType[] = ['novel', 'series', 'screenplay', 'collection'];
-
-export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps) {
+export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
   const currentUniverse = useUniverseStore((state) => state.currentUniverse);
-  const { createStory, invalidateChildren } = useStoriesStore();
-
-  const isCreatingChild = !!parentStory;
-  const defaultChildType = parentStory ? getDefaultChildType(parentStory.storyType) : 'novel';
+  const { createStory } = useStoriesStore();
+  const { containers } = useContainersStore();
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    storyType: isCreatingChild ? defaultChildType : ('novel' as StoryType),
+    storyType: 'chapter' as StoryType,
+    containerId: containerId || '', // Empty string means standalone
     targetWordCount: '',
     tags: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load containers on mount if universe is selected
+  useEffect(() => {
+    if (currentUniverse && containers.length === 0) {
+      useContainersStore.getState().loadContainers(currentUniverse.id);
+    }
+  }, [currentUniverse, containers.length]);
+
+  // Show all containers - backend will validate when creating story
+  // A container can hold stories if it doesn't have child containers
+  // Backend has leaf protection to prevent adding stories to containers with children
+  const availableContainers = containers;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -118,25 +106,18 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
           : null,
         color: null,
         seriesName: null,
-        parentStoryId: parentStory?.id || null,
+        containerId: formData.containerId || null, // null = standalone story
         variationType: null,
         parentVariationId: null,
       });
 
-      // Invalidate parent's children cache if creating a child
-      if (parentStory) {
-        invalidateChildren(parentStory.id);
+      // Invalidate container children cache if story was added to container
+      if (formData.containerId) {
+        useContainersStore.getState().invalidateChildren(formData.containerId);
       }
 
-      // Navigate based on story type
-      // Container types should go to chapter management, others to editor
-      if (!parentStory && CONTAINER_TYPES.includes(story.storyType)) {
-        // Creating a new container story - navigate to chapter management
-        navigate({ screen: 'story-children', parentStoryId: story.id });
-      } else {
-        // Creating a child story or non-container story - navigate to editor
-        navigate({ screen: 'story-editor', storyId: story.id });
-      }
+      // Navigate to story editor
+      navigate({ screen: 'story-editor', storyId: story.id });
       onClose();
     } catch (error) {
       console.error('Failed to create story:', error);
@@ -197,20 +178,8 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
                 margin: 0,
               }}
             >
-              {isCreatingChild ? 'Add Chapter' : 'Create New Story'}
+              Create New Story
             </h2>
-            {isCreatingChild && parentStory && (
-              <p
-                style={{
-                  fontFamily: 'var(--typography-body-font)',
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-text-secondary)',
-                  margin: '4px 0 0 0',
-                }}
-              >
-                Adding to: {parentStory.title}
-              </p>
-            )}
           </div>
           <button
             className="btn btn-ghost btn-sm"
@@ -248,10 +217,45 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
               </div>
             )}
 
+            {/* Container Selection (optional) */}
+            <div className="input-group input-5">
+              <label className="input-label" htmlFor="story-container">
+                Container
+              </label>
+              <div className="input-wrapper">
+                <select
+                  id="story-container"
+                  className="input-field input-base"
+                  value={formData.containerId}
+                  onChange={(e) =>
+                    setFormData({ ...formData, containerId: e.target.value })
+                  }
+                  disabled={!!containerId} // Disable if container was pre-selected
+                  style={{
+                    backgroundColor: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '4px',
+                    padding: 'var(--spacing-2) var(--spacing-3)',
+                    fontFamily: 'var(--typography-body-font)',
+                    fontSize: 'var(--font-size-base)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                >
+                  <option value="">Standalone (no container)</option>
+                  {availableContainers.map((container) => (
+                    <option key={container.id} value={container.id}>
+                      {container.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="input-helper">Optional: Add story to a container</div>
+            </div>
+
             {/* Story Type */}
             <div className="input-group input-5">
               <label className="input-label" htmlFor="story-type">
-                {isCreatingChild ? 'Chapter Type' : 'Story Type'}
+                Story Type
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
@@ -272,27 +276,11 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
                     color: 'var(--color-text-primary)',
                   }}
                 >
-                  {isCreatingChild && parentStory ? (
-                    getChildTypeOptions(parentStory.storyType).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="novel">Novel</option>
-                      <option value="series">Series</option>
-                      <option value="screenplay">Screenplay</option>
-                      <option value="short-story">Short Story</option>
-                      <option value="poem">Poem</option>
-                      <option value="chapter">Chapter</option>
-                      <option value="scene">Scene</option>
-                      <option value="episode">Episode</option>
-                      <option value="outline">Outline</option>
-                      <option value="treatment">Treatment</option>
-                      <option value="collection">Collection</option>
-                    </>
-                  )}
+                  {storyTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -403,7 +391,7 @@ export function CreateStoryModal({ onClose, parentStory }: CreateStoryModalProps
               className="btn btn-primary btn-base"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creating...' : isCreatingChild ? 'Add Chapter' : 'Create Story'}
+              {isSubmitting ? 'Creating...' : 'Create Story'}
             </button>
           </div>
         </form>

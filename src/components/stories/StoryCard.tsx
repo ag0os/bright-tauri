@@ -7,10 +7,8 @@
 
 import React, { useState } from 'react';
 import {
-  BookOpen,
   FileText,
   Scroll,
-  Stack,
   FilmStrip,
   Feather,
   BookBookmark,
@@ -29,21 +27,16 @@ import '@/design-system/tokens/spacing.css';
 
 interface StoryCardProps {
   story: Story;
-  childCount?: number;
   onClick: (story: Story) => void;
   onDelete: (story: Story) => void;
   onToggleFavorite: (story: Story) => void;
 }
 
-// Map story types to icons
+// Map story types to icons (content-only types)
 const getStoryIcon = (type: StoryType): React.ReactNode => {
   const iconClass = 'icon icon-lg';
 
   switch (type) {
-    case 'novel':
-      return <BookOpen className={iconClass} weight="duotone" />;
-    case 'series':
-      return <Stack className={iconClass} weight="duotone" />;
     case 'screenplay':
       return <FilmStrip className={iconClass} weight="duotone" />;
     case 'short-story':
@@ -54,6 +47,12 @@ const getStoryIcon = (type: StoryType): React.ReactNode => {
       return <BookBookmark className={iconClass} weight="duotone" />;
     case 'scene':
       return <Scroll className={iconClass} weight="duotone" />;
+    case 'episode':
+      return <FilmStrip className={iconClass} weight="duotone" />;
+    case 'outline':
+      return <FileText className={iconClass} weight="duotone" />;
+    case 'treatment':
+      return <FileText className={iconClass} weight="duotone" />;
     default:
       return <FileText className={iconClass} weight="duotone" />;
   }
@@ -86,7 +85,6 @@ const formatTimestamp = (timestamp: string): string => {
 
 export function StoryCard({
   story,
-  childCount,
   onClick,
   onDelete,
   onToggleFavorite,
@@ -172,12 +170,6 @@ export function StoryCard({
               }}
             >
               <span>{formatStatus(story.storyType)}</span>
-              {childCount !== undefined && childCount > 0 && (
-                <>
-                  <span>•</span>
-                  <span>{childCount} chapters</span>
-                </>
-              )}
             </div>
           </div>
           {story.favorite && (

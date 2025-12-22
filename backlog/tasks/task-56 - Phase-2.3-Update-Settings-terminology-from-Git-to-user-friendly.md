@@ -1,9 +1,10 @@
 ---
 id: task-56
 title: 'Phase 2.3: Update Settings terminology from Git to user-friendly'
-status: To Do
+status: Done
 assignee: []
 created_date: '2025-12-15 17:09'
+updated_date: '2025-12-19 18:47'
 labels:
   - frontend
   - versioning
@@ -26,3 +27,9 @@ Update the Settings view to use writer-friendly terminology instead of Git terms
 - [ ] #4 Change 'Commit Interval' to 'Save frequency'
 - [ ] #5 Update option labels: 'When leaving editor' and 'Periodically' (instead of 'on-close' and 'timed')
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Already implemented - Settings shows Auto-Save section with save timing, frequency, and user-friendly labels
+<!-- SECTION:NOTES:END -->

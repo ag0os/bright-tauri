@@ -11,6 +11,7 @@
 export type { Universe } from './Universe';
 export type { Story } from './Story';
 export type { Element } from './Element';
+export type { Container } from './Container';
 
 // Universe types
 export type { UniverseStatus } from './UniverseStatus';
@@ -31,6 +32,11 @@ export type { ElementType } from './ElementType';
 export type { ElementRelationship } from './ElementRelationship';
 export type { CreateElementInput } from './CreateElementInput';
 export type { UpdateElementInput } from './UpdateElementInput';
+
+// Container types
+export type { CreateContainerInput } from './CreateContainerInput';
+export type { UpdateContainerInput } from './UpdateContainerInput';
+export type { ContainerChildren } from './ContainerChildren';
 
 // Git types
 export type { CommitInfo } from './CommitInfo';

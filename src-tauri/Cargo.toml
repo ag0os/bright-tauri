@@ -29,6 +29,7 @@ chrono = { version = "0.4", features = ["serde"] }
 git2 = "0.19"
 deunicode = "1.4"
 fs2 = "0.4"
+log = "0.4"
 
 [dev-dependencies]
 tempfile = "3"

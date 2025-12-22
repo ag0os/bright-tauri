@@ -34,7 +34,8 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
 }
 
 /// Initial schema - Version 1
-/// Creates tables for Universe, Story, and Element domain models
+/// Creates tables for Universe and Element domain models
+/// NOTE: Stories table removed - will be recreated in container/story refactor
 fn migrate_v1(conn: &Connection) -> Result<()> {
     // Universes table
     conn.execute(
@@ -56,40 +57,59 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
         [],
     )?;
 
-    // Stories table
+    // Containers table
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS containers (
+            id TEXT PRIMARY KEY,
+            universe_id TEXT NOT NULL,
+            parent_container_id TEXT,
+            container_type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT,
+            \"order\" INTEGER,
+            git_repo_path TEXT,
+            current_branch TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE,
+            FOREIGN KEY (parent_container_id) REFERENCES containers(id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
+
+    // Stories table - Content-only model
     conn.execute(
         "CREATE TABLE IF NOT EXISTS stories (
             id TEXT PRIMARY KEY,
             universe_id TEXT NOT NULL,
+            container_id TEXT,
+            story_type TEXT NOT NULL DEFAULT 'chapter',
+            status TEXT NOT NULL DEFAULT 'draft',
             title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            created_at TEXT NOT NULL,
-            updated_at TEXT NOT NULL,
-            story_type TEXT NOT NULL,
-            status TEXT NOT NULL,
-            word_count INTEGER NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            content TEXT NOT NULL DEFAULT '',
+            word_count INTEGER NOT NULL DEFAULT 0,
             target_word_count INTEGER,
-            content TEXT NOT NULL,
             notes TEXT,
             outline TEXT,
             \"order\" INTEGER,
-            tags TEXT, -- JSON array
+            tags TEXT,  -- JSON array
             color TEXT,
-            favorite INTEGER,
-            related_element_ids TEXT, -- JSON array
-            parent_story_id TEXT,
+            favorite INTEGER DEFAULT 0,
+            related_element_ids TEXT,  -- JSON array
             series_name TEXT,
             last_edited_at TEXT NOT NULL,
-            version INTEGER NOT NULL,
+            version INTEGER NOT NULL DEFAULT 1,
             variation_group_id TEXT NOT NULL,
-            variation_type TEXT NOT NULL,
+            variation_type TEXT NOT NULL DEFAULT 'original',
             parent_variation_id TEXT,
-            git_repo_path TEXT NOT NULL,
-            current_branch TEXT NOT NULL,
-            staged_changes INTEGER NOT NULL,
+            git_repo_path TEXT NOT NULL DEFAULT '',
+            current_branch TEXT NOT NULL DEFAULT 'main',
+            staged_changes INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
             FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE,
-            FOREIGN KEY (parent_story_id) REFERENCES stories(id) ON DELETE SET NULL,
-            FOREIGN KEY (parent_variation_id) REFERENCES stories(id) ON DELETE SET NULL
+            FOREIGN KEY (container_id) REFERENCES containers(id) ON DELETE CASCADE
         )",
         [],
     )?;
@@ -137,7 +157,19 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
 
     // Create indices for better query performance
     conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_containers_universe ON containers(universe_id)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_containers_parent ON containers(parent_container_id)",
+        [],
+    )?;
+    conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_stories_universe ON stories(universe_id)",
+        [],
+    )?;
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_stories_container ON stories(container_id)",
         [],
     )?;
     conn.execute(

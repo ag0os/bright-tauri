@@ -324,6 +324,7 @@ dependencies = [
  "deunicode",
  "fs2",
  "git2",
+ "log",
  "rusqlite",
  "serde",
  "serde_json",

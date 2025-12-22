@@ -9,10 +9,24 @@ use uuid::Uuid;
 pub struct StoryRepository;
 
 impl StoryRepository {
-    /// Create a new Story
+    /// Create a new Story with leaf protection validation
+    ///
+    /// If container_id is provided, this method validates that the container
+    /// doesn't have any child containers (leaf protection). A container can contain
+    /// either child containers OR stories, but not both.
     pub fn create(db: &Database, input: CreateStoryInput) -> Result<Story> {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
+
+        // Leaf Protection: Check if container has child containers
+        if let Some(ref container_id) = input.container_id {
+            let child_count = Self::get_child_container_count(db, container_id)?;
+            if child_count > 0 {
+                return Err(rusqlite::Error::InvalidParameterName(
+                    "Cannot add story to a container that has child containers".to_string(),
+                ));
+            }
+        }
 
         // Generate variation_group_id if this is a new story (not a variation)
         let variation_group_id = Uuid::new_v4().to_string();
@@ -44,7 +58,7 @@ impl StoryRepository {
                 content, variation_group_id, variation_type, parent_variation_id,
                 git_repo_path, current_branch, staged_changes, created_at, updated_at,
                 notes, outline, target_word_count, \"order\", tags, color, favorite,
-                related_element_ids, series_name, parent_story_id, last_edited_at, version
+                related_element_ids, series_name, container_id, last_edited_at, version
             ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)",
             params![
                 &id,
@@ -72,7 +86,7 @@ impl StoryRepository {
                 false,  // favorite
                 None::<String>,  // related_element_ids
                 &input.series_name,
-                &input.parent_story_id,
+                &input.container_id,
                 &now,  // last_edited_at
                 1,  // version
             ],
@@ -91,7 +105,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories WHERE id = ?1",
             params![id],
             Self::map_row_to_story,
@@ -108,7 +122,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
              WHERE universe_id = ?1
              ORDER BY updated_at DESC",
@@ -131,7 +145,7 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
              WHERE variation_group_id = ?1
              ORDER BY created_at ASC",
@@ -144,8 +158,8 @@ impl StoryRepository {
         Ok(stories)
     }
 
-    /// Get all children of a parent story, ordered by story_order
-    pub fn list_children(db: &Database, parent_id: &str) -> Result<Vec<Story>> {
+    /// Get all stories within a container, ordered by story_order
+    pub fn list_by_container(db: &Database, container_id: &str) -> Result<Vec<Story>> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
 
@@ -154,44 +168,64 @@ impl StoryRepository {
                     content, variation_group_id, variation_type, parent_variation_id,
                     git_repo_path, current_branch, staged_changes, created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, parent_story_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version
              FROM stories
-             WHERE parent_story_id = ?1
+             WHERE container_id = ?1
              ORDER BY \"order\" ASC, created_at ASC",
         )?;
 
         let stories = stmt
-            .query_map(params![parent_id], Self::map_row_to_story)?
+            .query_map(params![container_id], Self::map_row_to_story)?
             .collect::<Result<Vec<_>>>()?;
 
         Ok(stories)
     }
 
-    /// Get a parent story with all its children
-    pub fn get_with_children(db: &Database, id: &str) -> Result<(Story, Vec<Story>)> {
-        let parent = Self::find_by_id(db, id)?;
-        let children = Self::list_children(db, id)?;
-        Ok((parent, children))
+    /// Get all standalone stories (stories without a container)
+    pub fn list_standalone_stories(db: &Database, universe_id: &str) -> Result<Vec<Story>> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let mut stmt = conn.prepare(
+            "SELECT id, universe_id, title, description, story_type, status, word_count,
+                    content, variation_group_id, variation_type, parent_variation_id,
+                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    notes, outline, target_word_count, \"order\", tags, color, favorite,
+                    related_element_ids, series_name, container_id, last_edited_at, version
+             FROM stories
+             WHERE universe_id = ?1 AND container_id IS NULL
+             ORDER BY updated_at DESC",
+        )?;
+
+        let stories = stmt
+            .query_map(params![universe_id], Self::map_row_to_story)?
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(stories)
     }
 
-    /// Reorder children by updating their order fields
-    pub fn reorder_children(db: &Database, parent_id: &str, story_ids: Vec<String>) -> Result<()> {
+    /// Reorder stories within a container by updating their order fields
+    pub fn reorder_by_container(
+        db: &Database,
+        container_id: &str,
+        story_ids: Vec<String>,
+    ) -> Result<()> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
 
         // Start transaction
         conn.execute("BEGIN TRANSACTION", [])?;
 
-        // Validate that all story_ids belong to the parent
+        // Validate that all story_ids belong to the container
         for story_id in &story_ids {
-            let parent_check: Result<Option<String>, _> = conn.query_row(
-                "SELECT parent_story_id FROM stories WHERE id = ?1",
+            let container_check: Result<Option<String>, _> = conn.query_row(
+                "SELECT container_id FROM stories WHERE id = ?1",
                 params![story_id],
                 |row| row.get(0),
             );
 
-            match parent_check {
-                Ok(Some(pid)) if pid == parent_id => {}
+            match container_check {
+                Ok(Some(cid)) if cid == container_id => {}
                 Ok(Some(_)) | Ok(None) => {
                     conn.execute("ROLLBACK", [])?;
                     return Err(rusqlite::Error::QueryReturnedNoRows);
@@ -311,45 +345,11 @@ impl StoryRepository {
         Self::find_by_id(db, id)
     }
 
-    /// Delete a Story and all its children recursively
-    /// Returns a list of all deleted story IDs (including the parent)
-    pub fn delete(db: &Database, id: &str) -> Result<Vec<String>> {
-        let mut deleted_ids = Vec::new();
-        Self::delete_recursive(db, id, &mut deleted_ids)?;
-        Ok(deleted_ids)
-    }
-
-    /// Helper function to recursively delete a story and its children
-    fn delete_recursive(db: &Database, id: &str, deleted_ids: &mut Vec<String>) -> Result<()> {
-        // First, get all children of this story
-        let children = Self::list_children(db, id)?;
-
-        // Recursively delete each child
-        for child in children {
-            Self::delete_recursive(db, &child.id, deleted_ids)?;
-        }
-
-        // Delete the story itself from the database
+    /// Delete a Story
+    /// Note: Container hierarchy is managed by the Container repository
+    pub fn delete(db: &Database, id: &str) -> Result<()> {
         db.execute("DELETE FROM stories WHERE id = ?1", params![id])?;
-
-        // Add the ID to the list of deleted IDs
-        deleted_ids.push(id.to_string());
-
         Ok(())
-    }
-
-    /// Get the count of direct children for a story
-    pub fn get_child_count(db: &Database, parent_id: &str) -> Result<i32> {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-
-        let count: i32 = conn.query_row(
-            "SELECT COUNT(*) FROM stories WHERE parent_story_id = ?1",
-            params![parent_id],
-            |row| row.get(0),
-        )?;
-
-        Ok(count)
     }
 
     /// Update the git repo path for a story (internal use)
@@ -368,6 +368,20 @@ impl StoryRepository {
             params![branch, id],
         )?;
         Ok(())
+    }
+
+    /// Get the count of child containers in a container (used for leaf protection)
+    fn get_child_container_count(db: &Database, container_id: &str) -> Result<i32> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let count: i32 = conn.query_row(
+            "SELECT COUNT(*) FROM containers WHERE parent_container_id = ?1",
+            params![container_id],
+            |row| row.get(0),
+        )?;
+
+        Ok(count)
     }
 
     /// Helper function to map a row to Story struct
@@ -411,7 +425,7 @@ impl StoryRepository {
             favorite: row.get(22)?,
             related_element_ids,
             series_name: row.get(24)?,
-            parent_story_id: row.get(25)?,
+            container_id: row.get(25)?,
             last_edited_at: row.get(26)?,
             version: row.get(27)?,
         })
@@ -423,6 +437,7 @@ mod tests {
     use super::*;
     use crate::db::Database;
     use crate::models::{CreateStoryInput, StoryType};
+    use crate::repositories::ContainerRepository;
     use tempfile::TempDir;
 
     fn setup_test_db() -> (Database, TempDir) {
@@ -447,15 +462,15 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_story_without_children() {
+    fn test_delete_story() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a story
+        // Create a standalone story
         let input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
             title: "Test Story".to_string(),
             description: Some("Test".to_string()),
-            story_type: Some(StoryType::Novel),
+            story_type: Some(StoryType::ShortStory),
             content: None,
             notes: None,
             outline: None,
@@ -463,7 +478,7 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            parent_story_id: None,
+            container_id: None,
             variation_type: None,
             parent_variation_id: None,
         };
@@ -471,11 +486,7 @@ mod tests {
         let story = StoryRepository::create(&db, input).unwrap();
 
         // Delete the story
-        let deleted_ids = StoryRepository::delete(&db, &story.id).unwrap();
-
-        // Should return only the deleted story ID
-        assert_eq!(deleted_ids.len(), 1);
-        assert_eq!(deleted_ids[0], story.id);
+        StoryRepository::delete(&db, &story.id).unwrap();
 
         // Story should be deleted
         let result = StoryRepository::find_by_id(&db, &story.id);
@@ -483,222 +494,29 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_story_with_single_child() {
+    fn test_list_by_container() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create parent story
-        let parent_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Parent Story".to_string(),
-            description: Some("Parent".to_string()),
-            story_type: Some(StoryType::Novel),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
 
-        let parent = StoryRepository::create(&db, parent_input).unwrap();
+        let container_id = container.id.clone();
 
-        // Create child story
-        let child_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Child Story".to_string(),
-            description: Some("Child".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: Some(parent.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let child = StoryRepository::create(&db, child_input).unwrap();
-
-        // Delete the parent story
-        let deleted_ids = StoryRepository::delete(&db, &parent.id).unwrap();
-
-        // Should return both IDs (child first, then parent)
-        assert_eq!(deleted_ids.len(), 2);
-        assert!(deleted_ids.contains(&child.id));
-        assert!(deleted_ids.contains(&parent.id));
-
-        // Both should be deleted
-        assert!(StoryRepository::find_by_id(&db, &parent.id).is_err());
-        assert!(StoryRepository::find_by_id(&db, &child.id).is_err());
-    }
-
-    #[test]
-    fn test_delete_story_with_nested_children() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent story
-        let parent_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Novel".to_string(),
-            description: Some("Novel".to_string()),
-            story_type: Some(StoryType::Novel),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let parent = StoryRepository::create(&db, parent_input).unwrap();
-
-        // Create child story (chapter)
-        let child1_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Chapter 1".to_string(),
-            description: Some("Chapter".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: Some(parent.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let child1 = StoryRepository::create(&db, child1_input).unwrap();
-
-        // Create grandchild story (scene)
-        let grandchild_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Scene 1".to_string(),
-            description: Some("Scene".to_string()),
-            story_type: Some(StoryType::Scene),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: Some(child1.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let grandchild = StoryRepository::create(&db, grandchild_input).unwrap();
-
-        // Create second child
-        let child2_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Chapter 2".to_string(),
-            description: Some("Chapter".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: Some(parent.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let child2 = StoryRepository::create(&db, child2_input).unwrap();
-
-        // Delete the parent story
-        let deleted_ids = StoryRepository::delete(&db, &parent.id).unwrap();
-
-        // Should return all IDs (grandchild, child1, child2, parent)
-        assert_eq!(deleted_ids.len(), 4);
-        assert!(deleted_ids.contains(&grandchild.id));
-        assert!(deleted_ids.contains(&child1.id));
-        assert!(deleted_ids.contains(&child2.id));
-        assert!(deleted_ids.contains(&parent.id));
-
-        // All should be deleted
-        assert!(StoryRepository::find_by_id(&db, &parent.id).is_err());
-        assert!(StoryRepository::find_by_id(&db, &child1.id).is_err());
-        assert!(StoryRepository::find_by_id(&db, &child2.id).is_err());
-        assert!(StoryRepository::find_by_id(&db, &grandchild.id).is_err());
-    }
-
-    #[test]
-    fn test_get_child_count_no_children() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create a story without children
-        let input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Test Story".to_string(),
-            description: Some("Test".to_string()),
-            story_type: Some(StoryType::Novel),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let story = StoryRepository::create(&db, input).unwrap();
-
-        // Get child count
-        let count = StoryRepository::get_child_count(&db, &story.id).unwrap();
-        assert_eq!(count, 0);
-    }
-
-    #[test]
-    fn test_get_child_count_with_children() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent story
-        let parent_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Parent Story".to_string(),
-            description: Some("Parent".to_string()),
-            story_type: Some(StoryType::Novel),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            parent_story_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
-        let parent = StoryRepository::create(&db, parent_input).unwrap();
-
-        // Create 3 child stories
+        // Create multiple stories in the same container
         for i in 1..=3 {
-            let child_input = CreateStoryInput {
+            let input = CreateStoryInput {
                 universe_id: "universe-1".to_string(),
-                title: format!("Child {}", i),
-                description: Some("Child".to_string()),
+                title: format!("Story {}", i),
+                description: Some("Test".to_string()),
                 story_type: Some(StoryType::Chapter),
                 content: None,
                 notes: None,
@@ -707,29 +525,103 @@ mod tests {
                 tags: None,
                 color: None,
                 series_name: None,
-                parent_story_id: Some(parent.id.clone()),
+                container_id: Some(container_id.clone()),
                 variation_type: None,
                 parent_variation_id: None,
             };
-
-            StoryRepository::create(&db, child_input).unwrap();
+            StoryRepository::create(&db, input).unwrap();
         }
 
-        // Get child count
-        let count = StoryRepository::get_child_count(&db, &parent.id).unwrap();
-        assert_eq!(count, 3);
+        // List stories by container
+        let stories = StoryRepository::list_by_container(&db, &container_id).unwrap();
+        assert_eq!(stories.len(), 3);
+
+        // All stories should have the same container_id
+        for story in stories {
+            assert_eq!(story.container_id, Some(container_id.clone()));
+        }
     }
 
     #[test]
-    fn test_get_child_count_only_direct_children() {
+    fn test_list_standalone_stories() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create parent story
-        let parent_input = CreateStoryInput {
+        // Create standalone stories (no container)
+        for i in 1..=2 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Standalone Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::ShortStory),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: None,
+                variation_type: None,
+                parent_variation_id: None,
+            };
+            StoryRepository::create(&db, input).unwrap();
+        }
+
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Create stories with container
+        for i in 1..=3 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Container Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::Chapter),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some(container.id.clone()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+            StoryRepository::create(&db, input).unwrap();
+        }
+
+        // List standalone stories only
+        let standalone_stories =
+            StoryRepository::list_standalone_stories(&db, "universe-1").unwrap();
+        assert_eq!(standalone_stories.len(), 2);
+
+        // All stories should have container_id = None
+        for story in standalone_stories {
+            assert!(story.container_id.is_none());
+            assert!(story.should_have_git_repo());
+        }
+    }
+
+    #[test]
+    fn test_create_standalone_story() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a standalone story
+        let input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
-            title: "Novel".to_string(),
-            description: Some("Novel".to_string()),
-            story_type: Some(StoryType::Novel),
+            title: "Test Story".to_string(),
+            description: Some("Test".to_string()),
+            story_type: Some(StoryType::ShortStory),
             content: None,
             notes: None,
             outline: None,
@@ -737,14 +629,98 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            parent_story_id: None,
+            container_id: None,
             variation_type: None,
             parent_variation_id: None,
         };
 
-        let parent = StoryRepository::create(&db, parent_input).unwrap();
+        let story = StoryRepository::create(&db, input).unwrap();
 
-        // Create child story
+        // Verify it was created as standalone
+        assert!(story.container_id.is_none());
+        assert!(story.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_create_stories_with_container() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        let container_id = container.id.clone();
+
+        // Create 3 stories under the same container
+        for i in 1..=3 {
+            let input = CreateStoryInput {
+                universe_id: "universe-1".to_string(),
+                title: format!("Story {}", i),
+                description: Some("Test".to_string()),
+                story_type: Some(StoryType::Chapter),
+                content: None,
+                notes: None,
+                outline: None,
+                target_word_count: None,
+                tags: None,
+                color: None,
+                series_name: None,
+                container_id: Some(container_id.clone()),
+                variation_type: None,
+                parent_variation_id: None,
+            };
+
+            let story = StoryRepository::create(&db, input).unwrap();
+            assert_eq!(story.container_id, Some(container_id.clone()));
+            assert!(!story.should_have_git_repo());
+        }
+    }
+
+    #[test]
+    fn test_mixed_standalone_and_container_stories() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create standalone story (no container)
+        let standalone_input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Standalone Story".to_string(),
+            description: Some("Standalone".to_string()),
+            story_type: Some(StoryType::ShortStory),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let standalone = StoryRepository::create(&db, standalone_input).unwrap();
+
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Create stories with container
         let child_input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
             title: "Chapter".to_string(),
@@ -757,15 +733,14 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            parent_story_id: Some(parent.id.clone()),
+            container_id: Some(container.id.clone()),
             variation_type: None,
             parent_variation_id: None,
         };
 
         let child = StoryRepository::create(&db, child_input).unwrap();
 
-        // Create grandchild story
-        let grandchild_input = CreateStoryInput {
+        let child2_input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
             title: "Scene".to_string(),
             description: Some("Scene".to_string()),
@@ -777,19 +752,186 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            parent_story_id: Some(child.id.clone()),
+            container_id: Some(container.id.clone()),
             variation_type: None,
             parent_variation_id: None,
         };
 
-        StoryRepository::create(&db, grandchild_input).unwrap();
+        let child2 = StoryRepository::create(&db, child2_input).unwrap();
 
-        // Get child count for parent (should only count direct children, not grandchildren)
-        let count = StoryRepository::get_child_count(&db, &parent.id).unwrap();
-        assert_eq!(count, 1);
+        // Verify standalone story
+        assert!(standalone.container_id.is_none());
+        assert!(standalone.should_have_git_repo());
 
-        // Get child count for child (should count the grandchild)
-        let count = StoryRepository::get_child_count(&db, &child.id).unwrap();
-        assert_eq!(count, 1);
+        // Verify container stories
+        assert_eq!(child.container_id, Some(container.id.clone()));
+        assert!(!child.should_have_git_repo());
+        assert_eq!(child2.container_id, Some(container.id.clone()));
+        assert!(!child2.should_have_git_repo());
+    }
+
+    #[test]
+    fn test_set_git_repo_path() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a standalone story
+        let input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Test Story".to_string(),
+            description: Some("Test".to_string()),
+            story_type: Some(StoryType::ShortStory),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, input).unwrap();
+
+        // Initially git_repo_path should be empty
+        assert!(story.git_repo_path.is_empty());
+
+        // Set git repo path
+        StoryRepository::set_git_repo_path(&db, &story.id, "/path/to/repo").unwrap();
+
+        // Verify it was set
+        let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
+        assert_eq!(updated.git_repo_path, "/path/to/repo");
+    }
+
+    #[test]
+    fn test_set_current_branch() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a standalone story
+        let input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Test Story".to_string(),
+            description: Some("Test".to_string()),
+            story_type: Some(StoryType::ShortStory),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, input).unwrap();
+
+        // Default branch should be "main"
+        assert_eq!(story.current_branch, "main");
+
+        // Set current branch
+        StoryRepository::set_current_branch(&db, &story.id, "feature-branch").unwrap();
+
+        // Verify it was set
+        let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
+        assert_eq!(updated.current_branch, "feature-branch");
+    }
+
+    #[test]
+    fn test_leaf_protection_blocks_story_in_non_leaf_container() {
+        use crate::repositories::container::ContainerRepository;
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container (series)
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Test Series".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Add a child container to parent (making parent non-leaf)
+        let _child_container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Child Novel".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Try to create a story in the parent container - should fail with leaf protection
+        let story_input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Chapter".to_string(),
+            description: Some("Test chapter".to_string()),
+            story_type: Some(StoryType::Chapter),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: Some(parent.id.clone()),
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let result = StoryRepository::create(&db, story_input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Cannot add story to a container that has child containers"));
+    }
+
+    #[test]
+    fn test_add_story_to_empty_container_allowed() {
+        use crate::repositories::container::ContainerRepository;
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create container without children
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Novel".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Should be able to add story to empty container
+        let story_input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Chapter 1".to_string(),
+            description: Some("First chapter".to_string()),
+            story_type: Some(StoryType::Chapter),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: Some(container.id.clone()),
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, story_input).unwrap();
+        assert_eq!(story.container_id, Some(container.id));
+        assert_eq!(story.title, "Chapter 1");
     }
 }

@@ -54,6 +54,15 @@ pub fn run() {
             commands::list_universes,
             commands::update_universe,
             commands::delete_universe,
+            // Container commands
+            commands::create_container,
+            commands::get_container,
+            commands::list_containers,
+            commands::list_container_children,
+            commands::update_container,
+            commands::delete_container,
+            commands::reorder_container_children,
+            commands::ensure_container_git_repo,
             // Story commands
             commands::create_story,
             commands::get_story,
@@ -61,11 +70,6 @@ pub fn run() {
             commands::list_story_variations,
             commands::update_story,
             commands::delete_story,
-            // Story hierarchy commands
-            commands::list_story_children,
-            commands::reorder_story_children,
-            commands::get_story_with_children,
-            commands::get_story_child_count,
             commands::ensure_story_git_repo,
             // Element commands
             commands::create_element,

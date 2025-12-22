@@ -13,14 +13,16 @@ export type Route =
   | { screen: 'stories-list' }
   | { screen: 'universe-list' }
   | { screen: 'story-editor'; storyId: string }
-  | { screen: 'story-children'; parentStoryId: string }
   | { screen: 'story-history'; storyId: string }
   | { screen: 'story-variations'; storyId: string }
   | { screen: 'story-compare'; storyId: string; branchA?: string; branchB?: string }
   | { screen: 'story-combine'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
   | { screen: 'story-settings'; storyId: string }
   | { screen: 'element-detail'; elementId: string }
-  | { screen: 'settings' };
+  | { screen: 'settings' }
+  | { screen: 'container-view'; containerId: string }
+  | { screen: 'container-create'; parentContainerId: string | null }
+  | { screen: 'container-settings'; containerId: string };
 
 interface NavigationState {
   // State
@@ -32,6 +34,17 @@ interface NavigationState {
   goBack: () => void;
   canGoBack: () => boolean;
   resetNavigation: () => void;
+
+  // Container Navigation Helpers
+  navigateToContainer: (containerId: string) => void;
+  navigateToContainerCreate: (parentContainerId: string | null) => void;
+  navigateToContainerSettings: (containerId: string) => void;
+
+  // Story Navigation Helpers
+  navigateToStoryEditor: (storyId: string) => void;
+  navigateToStorySettings: (storyId: string) => void;
+  navigateToStoryHistory: (storyId: string) => void;
+  navigateToStoryVariations: (storyId: string) => void;
 }
 
 const initialRoute: Route = { screen: 'universe-selection' };
@@ -71,5 +84,35 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
       currentRoute: initialRoute,
       history: [],
     });
+  },
+
+  // Container Navigation Helpers
+  navigateToContainer: (containerId) => {
+    get().navigate({ screen: 'container-view', containerId });
+  },
+
+  navigateToContainerCreate: (parentContainerId) => {
+    get().navigate({ screen: 'container-create', parentContainerId });
+  },
+
+  navigateToContainerSettings: (containerId) => {
+    get().navigate({ screen: 'container-settings', containerId });
+  },
+
+  // Story Navigation Helpers
+  navigateToStoryEditor: (storyId) => {
+    get().navigate({ screen: 'story-editor', storyId });
+  },
+
+  navigateToStorySettings: (storyId) => {
+    get().navigate({ screen: 'story-settings', storyId });
+  },
+
+  navigateToStoryHistory: (storyId) => {
+    get().navigate({ screen: 'story-history', storyId });
+  },
+
+  navigateToStoryVariations: (storyId) => {
+    get().navigate({ screen: 'story-variations', storyId });
   },
 }));
