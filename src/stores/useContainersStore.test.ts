@@ -16,14 +16,15 @@ vi.mock('@tauri-apps/api/core', () => ({
 describe('useContainersStore - Optimistic Reordering', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset store state before each test
+    // Reset store state before each test (including clearing the cache)
     act(() => {
+      const store = useContainersStore.getState();
+      store._childrenCache.clear();
       useContainersStore.setState({
         containers: [],
         selectedContainer: null,
         isLoading: false,
         error: null,
-        childrenByContainerId: {},
         childrenLoading: {},
       });
     });
@@ -67,11 +68,10 @@ describe('useContainersStore - Optimistic Reordering', () => {
       stories: [],
     };
 
-    // Set up initial state
+    // Set up initial state using cache
     act(() => {
-      useContainersStore.setState({
-        childrenByContainerId: { parent: mockChildren },
-      });
+      const store = useContainersStore.getState();
+      store._childrenCache.set('parent', mockChildren);
     });
 
     // Mock successful backend call
@@ -142,11 +142,10 @@ describe('useContainersStore - Optimistic Reordering', () => {
       stories: [],
     };
 
-    // Set up initial state
+    // Set up initial state using cache
     act(() => {
-      useContainersStore.setState({
-        childrenByContainerId: { parent: mockChildren },
-      });
+      const store = useContainersStore.getState();
+      store._childrenCache.set('parent', mockChildren);
     });
 
     // Mock backend error
@@ -233,11 +232,10 @@ describe('useContainersStore - Optimistic Reordering', () => {
       stories: [mockStories[1], mockStories[0]], // s2, s1
     };
 
-    // Set up initial state
+    // Set up initial state using cache
     act(() => {
-      useContainersStore.setState({
-        childrenByContainerId: { parent: mockChildren },
-      });
+      const store = useContainersStore.getState();
+      store._childrenCache.set('parent', mockChildren);
     });
 
     // Mock successful backend call and loadContainerChildren to return reordered data
@@ -315,15 +313,16 @@ describe('useContainersStore - Optimistic Reordering', () => {
       stories: mockStories,
     };
 
-    // Set up initial state
+    // Set up initial state using cache
     act(() => {
-      useContainersStore.setState({
-        childrenByContainerId: { parent: mockChildren },
-      });
+      const store = useContainersStore.getState();
+      store._childrenCache.set('parent', mockChildren);
     });
 
-    // Mock successful backend call
-    vi.mocked(invoke).mockResolvedValue(undefined);
+    // Mock successful backend call and loadContainerChildren to return same data
+    vi.mocked(invoke)
+      .mockResolvedValueOnce(undefined) // reorder_container_children
+      .mockResolvedValueOnce(mockChildren); // list_container_children
 
     // Get the store functions
     const { reorderChildren, getContainerChildren } = useContainersStore.getState();
@@ -357,7 +356,7 @@ describe('useContainersStore - Optimistic Reordering', () => {
       optimisticReorderChildren('parent', ['c1', 'c2'], []);
     });
 
-    // Verify state was not modified
-    expect(useContainersStore.getState().childrenByContainerId).toEqual({});
+    // Verify state was not modified (cache should be empty)
+    expect(useContainersStore.getState()._childrenCache.size).toBe(0);
   });
 });

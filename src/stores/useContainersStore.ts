@@ -133,14 +133,16 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
         const remainingContainers = state.containers.filter((c) => !deletedIds.includes(c.id));
 
         // Clean up children cache - remove deleted containers from all parent caches
-        const newChildrenByContainerId = { ...state.childrenByContainerId };
-        Object.keys(newChildrenByContainerId).forEach((parentId) => {
-          const children = newChildrenByContainerId[parentId];
-          newChildrenByContainerId[parentId] = {
-            containers: children.containers.filter((c) => !deletedIds.includes(c.id)),
-            stories: children.stories, // Stories deleted via database CASCADE, not filtered here
-          };
-        });
+        // Iterate through cache and update entries that contain deleted containers
+        for (const parentId of state._childrenCache.keys()) {
+          const children = state._childrenCache.get(parentId);
+          if (children) {
+            state._childrenCache.set(parentId, {
+              containers: children.containers.filter((c) => !deletedIds.includes(c.id)),
+              stories: children.stories, // Stories deleted via database CASCADE, not filtered here
+            });
+          }
+        }
 
         // Clear selected container if it was deleted
         const newSelectedContainer = state.selectedContainer && deletedIds.includes(state.selectedContainer.id)
@@ -150,7 +152,6 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
         return {
           containers: remainingContainers,
           selectedContainer: newSelectedContainer,
-          childrenByContainerId: newChildrenByContainerId,
           isLoading: false,
         };
       });
@@ -169,10 +170,12 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
     }));
     try {
       const children = await invoke<ContainerChildren>('list_container_children', { containerId });
-      set((state) => ({
-        childrenByContainerId: { ...state.childrenByContainerId, [containerId]: children },
-        childrenLoading: { ...state.childrenLoading, [containerId]: false },
-      }));
+      set((state) => {
+        state._childrenCache.set(containerId, children);
+        return {
+          childrenLoading: { ...state.childrenLoading, [containerId]: false },
+        };
+      });
       return children;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load container children';
@@ -186,7 +189,7 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
 
   reorderChildren: async (containerId, containerIds, storyIds) => {
     // Save original state for rollback
-    const originalChildren = get().childrenByContainerId[containerId];
+    const originalChildren = get()._childrenCache.get(containerId);
 
     // Apply optimistic update immediately
     get().optimisticReorderChildren(containerId, containerIds, storyIds);
@@ -201,10 +204,10 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
 
       // Rollback to original state
       if (originalChildren) {
-        set((state) => ({
-          childrenByContainerId: { ...state.childrenByContainerId, [containerId]: originalChildren },
-          error: errorMessage,
-        }));
+        set((state) => {
+          state._childrenCache.set(containerId, originalChildren);
+          return { error: errorMessage };
+        });
       } else {
         set({ error: errorMessage });
       }
@@ -214,7 +217,7 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
   },
 
   optimisticReorderChildren: (containerId, containerIds, storyIds) => {
-    const currentChildren = get().childrenByContainerId[containerId];
+    const currentChildren = get()._childrenCache.get(containerId);
     if (!currentChildren) return;
 
     // Create maps for quick lookup
@@ -232,26 +235,23 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
       .filter((s): s is Story => s !== undefined);
 
     // Update state immediately
-    set((state) => ({
-      childrenByContainerId: {
-        ...state.childrenByContainerId,
-        [containerId]: {
-          containers: reorderedContainers,
-          stories: reorderedStories,
-        },
-      },
-    }));
+    set((state) => {
+      state._childrenCache.set(containerId, {
+        containers: reorderedContainers,
+        stories: reorderedStories,
+      });
+      return {};
+    });
   },
 
   getContainerChildren: (containerId) => {
-    return get().childrenByContainerId[containerId] || null;
+    return get()._childrenCache.get(containerId) || null;
   },
 
   invalidateChildren: (containerId) => {
     set((state) => {
-      const newChildrenByContainerId = { ...state.childrenByContainerId };
-      delete newChildrenByContainerId[containerId];
-      return { childrenByContainerId: newChildrenByContainerId };
+      state._childrenCache.delete(containerId);
+      return {};
     });
   },
 
