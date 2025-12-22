@@ -86,6 +86,8 @@ The app provides pre-configured templates for common element types to help write
 - **Metadata Sync**: metadata.json in each Git repo keeps SQLite and filesystem in sync
 - **Design System**: Custom token-first system (not using external component libraries)
 
+**Git Repository Lifecycle**: See `docs/git-repository-lifecycle.md` for detailed documentation on initialization, ownership, transactions, and cleanup.
+
 **Full Roadmap**: See `docs/ideas/roadmap.md` for complete feature list and progress tracking.
 
 ## Architecture
