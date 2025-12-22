@@ -191,7 +191,11 @@ impl StoryRepository {
     }
 
     /// Reorder stories within a container by updating their order fields
-    pub fn reorder_by_container(db: &Database, container_id: &str, story_ids: Vec<String>) -> Result<()> {
+    pub fn reorder_by_container(
+        db: &Database,
+        container_id: &str,
+        story_ids: Vec<String>,
+    ) -> Result<()> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
 
@@ -405,6 +409,7 @@ mod tests {
     use super::*;
     use crate::db::Database;
     use crate::models::{CreateStoryInput, StoryType};
+    use crate::repositories::ContainerRepository;
     use tempfile::TempDir;
 
     fn setup_test_db() -> (Database, TempDir) {
@@ -464,7 +469,19 @@ mod tests {
     fn test_list_by_container() {
         let (db, _temp_dir) = setup_test_db();
 
-        let container_id = "container-123".to_string();
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        let container_id = container.id.clone();
 
         // Create multiple stories in the same container
         for i in 1..=3 {
@@ -522,6 +539,18 @@ mod tests {
             StoryRepository::create(&db, input).unwrap();
         }
 
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
         // Create stories with container
         for i in 1..=3 {
             let input = CreateStoryInput {
@@ -536,7 +565,7 @@ mod tests {
                 tags: None,
                 color: None,
                 series_name: None,
-                container_id: Some("container-123".to_string()),
+                container_id: Some(container.id.clone()),
                 variation_type: None,
                 parent_variation_id: None,
             };
@@ -544,7 +573,8 @@ mod tests {
         }
 
         // List standalone stories only
-        let standalone_stories = StoryRepository::list_standalone_stories(&db, "universe-1").unwrap();
+        let standalone_stories =
+            StoryRepository::list_standalone_stories(&db, "universe-1").unwrap();
         assert_eq!(standalone_stories.len(), 2);
 
         // All stories should have container_id = None
@@ -587,8 +617,19 @@ mod tests {
     fn test_create_stories_with_container() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a container ID for testing
-        let container_id = "container-123".to_string();
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        let container_id = container.id.clone();
 
         // Create 3 stories under the same container
         for i in 1..=3 {
@@ -639,6 +680,18 @@ mod tests {
 
         let standalone = StoryRepository::create(&db, standalone_input).unwrap();
 
+        // Create a test container first
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Container".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
         // Create stories with container
         let child_input = CreateStoryInput {
             universe_id: "universe-1".to_string(),
@@ -652,7 +705,7 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            container_id: Some("container-123".to_string()),
+            container_id: Some(container.id.clone()),
             variation_type: None,
             parent_variation_id: None,
         };
@@ -671,7 +724,7 @@ mod tests {
             tags: None,
             color: None,
             series_name: None,
-            container_id: Some("container-123".to_string()),
+            container_id: Some(container.id.clone()),
             variation_type: None,
             parent_variation_id: None,
         };
@@ -683,9 +736,9 @@ mod tests {
         assert!(standalone.should_have_git_repo());
 
         // Verify container stories
-        assert_eq!(child.container_id, Some("container-123".to_string()));
+        assert_eq!(child.container_id, Some(container.id.clone()));
         assert!(!child.should_have_git_repo());
-        assert_eq!(child2.container_id, Some("container-123".to_string()));
+        assert_eq!(child2.container_id, Some(container.id.clone()));
         assert!(!child2.should_have_git_repo());
     }
 

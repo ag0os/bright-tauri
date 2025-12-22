@@ -25,14 +25,11 @@ pub fn create_story(
     // Stories within containers share their container's git repo
     if story.should_have_git_repo() {
         // Get app data directory for git repos
-        let app_data_dir = app
-            .path()
-            .app_data_dir()
-            .map_err(|e| {
-                // Rollback: Delete the story from database
-                let _ = StoryRepository::delete(&db, &story.id);
-                format!("Failed to get app data directory: {e}")
-            })?;
+        let app_data_dir = app.path().app_data_dir().map_err(|e| {
+            // Rollback: Delete the story from database
+            let _ = StoryRepository::delete(&db, &story.id);
+            format!("Failed to get app data directory: {e}")
+        })?;
 
         // STEP 2: Initialize git repository for the story
         let git_repo_path = GitService::init_repo(&app_data_dir, &story.id).map_err(|e| {
@@ -112,11 +109,7 @@ pub fn update_story(
 }
 
 #[tauri::command]
-pub fn delete_story(
-    app: AppHandle,
-    db: State<Database>,
-    id: String,
-) -> Result<(), String> {
+pub fn delete_story(app: AppHandle, db: State<Database>, id: String) -> Result<(), String> {
     // Delete the story
     StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
 

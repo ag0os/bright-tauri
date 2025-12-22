@@ -90,6 +90,7 @@ impl MetadataLock {
         let file = fs::OpenOptions::new()
             .create(true)
             .write(true)
+            .truncate(true)
             .open(&lock_path)?;
 
         // Acquire exclusive lock (blocks if another process has the lock)

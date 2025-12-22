@@ -6,7 +6,7 @@ use tauri::{AppHandle, Manager, State};
 
 #[tauri::command]
 pub fn create_container(
-    app: AppHandle,
+    _app: AppHandle,
     db: State<Database>,
     input: CreateContainerInput,
 ) -> Result<Container, String> {
@@ -37,10 +37,7 @@ pub fn get_container(db: State<Database>, id: String) -> Result<Container, Strin
 }
 
 #[tauri::command]
-pub fn list_containers(
-    db: State<Database>,
-    universe_id: String,
-) -> Result<Vec<Container>, String> {
+pub fn list_containers(db: State<Database>, universe_id: String) -> Result<Vec<Container>, String> {
     ContainerRepository::list_by_universe(&db, &universe_id).map_err(|e| e.to_string())
 }
 
@@ -82,7 +79,7 @@ pub fn update_container(
 
 #[tauri::command]
 pub fn delete_container(
-    app: AppHandle,
+    _app: AppHandle,
     db: State<Database>,
     id: String,
 ) -> Result<Vec<String>, String> {
@@ -120,7 +117,8 @@ pub fn ensure_container_git_repo(
     let container = ContainerRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
 
     // Verify this container can have a git repo (should not have child containers)
-    let child_containers = ContainerRepository::list_children(&db, &id).map_err(|e| e.to_string())?;
+    let child_containers =
+        ContainerRepository::list_children(&db, &id).map_err(|e| e.to_string())?;
     if !child_containers.is_empty() {
         return Err(format!(
             "Container '{}' has child containers and cannot have its own git repository. \

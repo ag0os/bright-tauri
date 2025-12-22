@@ -183,7 +183,10 @@ mod tests {
         assert_eq!(container.id, deserialized.id);
         assert_eq!(container.title, deserialized.title);
         assert_eq!(container.container_type, deserialized.container_type);
-        assert_eq!(container.parent_container_id, deserialized.parent_container_id);
+        assert_eq!(
+            container.parent_container_id,
+            deserialized.parent_container_id
+        );
     }
 
     #[test]

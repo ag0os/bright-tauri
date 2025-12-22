@@ -29,7 +29,8 @@ impl ContainerRepository {
             let story_count = Self::get_story_count(db, parent_id)?;
             if story_count > 0 {
                 return Err(rusqlite::Error::InvalidParameterName(
-                    "Cannot add child container to a container that already has stories".to_string(),
+                    "Cannot add child container to a container that already has stories"
+                        .to_string(),
                 ));
             }
         }
@@ -414,7 +415,9 @@ mod tests {
         assert!(result.is_err());
         match result {
             Err(rusqlite::Error::InvalidParameterName(msg)) => {
-                assert!(msg.contains("Cannot add child container to a container that already has stories"));
+                assert!(msg.contains(
+                    "Cannot add child container to a container that already has stories"
+                ));
             }
             _ => panic!("Expected InvalidParameterName error"),
         }
