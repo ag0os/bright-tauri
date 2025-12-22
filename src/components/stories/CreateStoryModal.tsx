@@ -60,8 +60,10 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
     }
   }, [currentUniverse, containers.length]);
 
-  // Filter containers to only show leaf containers (those with git repos)
-  const leafContainers = containers.filter((c) => c.gitRepoPath !== null);
+  // Show all containers - backend will validate when creating story
+  // A container can hold stories if it doesn't have child containers
+  // Backend has leaf protection to prevent adding stories to containers with children
+  const availableContainers = containers;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -240,7 +242,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                   }}
                 >
                   <option value="">Standalone (no container)</option>
-                  {leafContainers.map((container) => (
+                  {availableContainers.map((container) => (
                     <option key={container.id} value={container.id}>
                       {container.title}
                     </option>

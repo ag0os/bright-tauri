@@ -9,10 +9,24 @@ use uuid::Uuid;
 pub struct StoryRepository;
 
 impl StoryRepository {
-    /// Create a new Story
+    /// Create a new Story with leaf protection validation
+    ///
+    /// If container_id is provided, this method validates that the container
+    /// doesn't have any child containers (leaf protection). A container can contain
+    /// either child containers OR stories, but not both.
     pub fn create(db: &Database, input: CreateStoryInput) -> Result<Story> {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
+
+        // Leaf Protection: Check if container has child containers
+        if let Some(ref container_id) = input.container_id {
+            let child_count = Self::get_child_container_count(db, container_id)?;
+            if child_count > 0 {
+                return Err(rusqlite::Error::InvalidParameterName(
+                    "Cannot add story to a container that has child containers".to_string(),
+                ));
+            }
+        }
 
         // Generate variation_group_id if this is a new story (not a variation)
         let variation_group_id = Uuid::new_v4().to_string();
@@ -354,6 +368,20 @@ impl StoryRepository {
             params![branch, id],
         )?;
         Ok(())
+    }
+
+    /// Get the count of child containers in a container (used for leaf protection)
+    fn get_child_container_count(db: &Database, container_id: &str) -> Result<i32> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let count: i32 = conn.query_row(
+            "SELECT COUNT(*) FROM containers WHERE parent_container_id = ?1",
+            params![container_id],
+            |row| row.get(0),
+        )?;
+
+        Ok(count)
     }
 
     /// Helper function to map a row to Story struct
@@ -810,5 +838,100 @@ mod tests {
         // Verify it was set
         let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
         assert_eq!(updated.current_branch, "feature-branch");
+    }
+
+    #[test]
+    fn test_leaf_protection_blocks_story_in_non_leaf_container() {
+        use crate::repositories::container::ContainerRepository;
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent container (series)
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Test Series".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Add a child container to parent (making parent non-leaf)
+        let _child_container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Child Novel".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Try to create a story in the parent container - should fail with leaf protection
+        let story_input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Chapter".to_string(),
+            description: Some("Test chapter".to_string()),
+            story_type: Some(StoryType::Chapter),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: Some(parent.id.clone()),
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let result = StoryRepository::create(&db, story_input);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Cannot add story to a container that has child containers"));
+    }
+
+    #[test]
+    fn test_add_story_to_empty_container_allowed() {
+        use crate::repositories::container::ContainerRepository;
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create container without children
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Test Novel".to_string(),
+            None,
+            0,
+        )
+        .unwrap();
+
+        // Should be able to add story to empty container
+        let story_input = CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: "Chapter 1".to_string(),
+            description: Some("First chapter".to_string()),
+            story_type: Some(StoryType::Chapter),
+            content: None,
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: Some(container.id.clone()),
+            variation_type: None,
+            parent_variation_id: None,
+        };
+
+        let story = StoryRepository::create(&db, story_input).unwrap();
+        assert_eq!(story.container_id, Some(container.id));
+        assert_eq!(story.title, "Chapter 1");
     }
 }
