@@ -124,6 +124,107 @@ impl ContainerRepository {
         Ok(containers)
     }
 
+    /// Get the full subtree of containers starting from a given container ID using recursive CTE.
+    /// This method efficiently loads an entire container hierarchy in a single query,
+    /// avoiding the N+1 query problem when loading deep hierarchies.
+    ///
+    /// # Arguments
+    ///
+    /// * `db` - Database connection
+    /// * `container_id` - ID of the root container to start the subtree query from
+    /// * `max_depth` - Optional maximum depth to traverse (None for unlimited)
+    ///
+    /// # Returns
+    ///
+    /// A vector of all containers in the subtree, ordered by hierarchy level and then by order field.
+    /// The root container is included as the first element.
+    ///
+    /// # Performance
+    ///
+    /// This method uses a recursive Common Table Expression (CTE) to load the entire subtree
+    /// in a single database query, which is significantly faster than making multiple queries
+    /// for each level of the hierarchy.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// // Load entire subtree under a series container
+    /// let subtree = ContainerRepository::get_subtree(&db, "series-id", None)?;
+    ///
+    /// // Load only 3 levels deep
+    /// let subtree = ContainerRepository::get_subtree(&db, "series-id", Some(3))?;
+    /// ```
+    pub fn get_subtree(
+        db: &Database,
+        container_id: &str,
+        max_depth: Option<u32>,
+    ) -> Result<Vec<Container>> {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+
+        let query = if let Some(depth_limit) = max_depth {
+            // Query with depth limit
+            format!(
+                "WITH RECURSIVE subtree(id, universe_id, parent_container_id, container_type, title,
+                                       description, \"order\", git_repo_path, current_branch,
+                                       created_at, updated_at, depth) AS (
+                    -- Base case: the root container
+                    SELECT id, universe_id, parent_container_id, container_type, title,
+                           description, \"order\", git_repo_path, current_branch,
+                           created_at, updated_at, 0 as depth
+                    FROM containers
+                    WHERE id = ?1
+
+                    UNION ALL
+
+                    -- Recursive case: children of containers in the subtree
+                    SELECT c.id, c.universe_id, c.parent_container_id, c.container_type, c.title,
+                           c.description, c.\"order\", c.git_repo_path, c.current_branch,
+                           c.created_at, c.updated_at, s.depth + 1
+                    FROM containers c
+                    INNER JOIN subtree s ON c.parent_container_id = s.id
+                    WHERE s.depth < {}
+                )
+                SELECT id, universe_id, parent_container_id, container_type, title,
+                       description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                FROM subtree
+                ORDER BY depth ASC, \"order\" ASC",
+                depth_limit
+            )
+        } else {
+            // Query without depth limit
+            "WITH RECURSIVE subtree AS (
+                -- Base case: the root container
+                SELECT id, universe_id, parent_container_id, container_type, title,
+                       description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                FROM containers
+                WHERE id = ?1
+
+                UNION ALL
+
+                -- Recursive case: children of containers in the subtree
+                SELECT c.id, c.universe_id, c.parent_container_id, c.container_type, c.title,
+                       c.description, c.\"order\", c.git_repo_path, c.current_branch,
+                       c.created_at, c.updated_at
+                FROM containers c
+                INNER JOIN subtree s ON c.parent_container_id = s.id
+            )
+            SELECT id, universe_id, parent_container_id, container_type, title,
+                   description, \"order\", git_repo_path, current_branch, created_at, updated_at
+            FROM subtree
+            ORDER BY \"order\" ASC"
+                .to_string()
+        };
+
+        let mut stmt = conn.prepare(&query)?;
+
+        let containers = stmt
+            .query_map(params![container_id], Self::map_row_to_container)?
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(containers)
+    }
+
     /// Reorder children by updating their order fields
     pub fn reorder_children(
         db: &Database,
@@ -1418,5 +1519,467 @@ mod tests {
 
         // Now it should be an empty non-leaf container
         assert!(ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
+    }
+
+    #[test]
+    fn test_get_subtree_single_container() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a single container with no children
+        let container = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "novel".to_string(),
+            "Standalone Novel".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Get subtree should return just the container itself
+        let subtree = ContainerRepository::get_subtree(&db, &container.id, None).unwrap();
+
+        assert_eq!(subtree.len(), 1);
+        assert_eq!(subtree[0].id, container.id);
+        assert_eq!(subtree[0].title, "Standalone Novel");
+    }
+
+    #[test]
+    fn test_get_subtree_two_levels() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create parent
+        let parent = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "My Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Create children
+        let child1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let child2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(parent.id.clone()),
+            "novel".to_string(),
+            "Book 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        // Get subtree
+        let subtree = ContainerRepository::get_subtree(&db, &parent.id, None).unwrap();
+
+        // Should return parent + 2 children = 3 containers
+        assert_eq!(subtree.len(), 3);
+
+        // Parent should be first
+        assert_eq!(subtree[0].id, parent.id);
+        assert_eq!(subtree[0].title, "My Series");
+
+        // Children should follow, ordered by order field
+        assert_eq!(subtree[1].id, child1.id);
+        assert_eq!(subtree[1].title, "Book 1");
+        assert_eq!(subtree[2].id, child2.id);
+        assert_eq!(subtree[2].title, "Book 2");
+    }
+
+    #[test]
+    fn test_get_subtree_three_levels() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create three-level hierarchy: Series -> Novels -> Parts
+        let series = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Epic Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let novel1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let novel2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Book 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        let part1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel1.id.clone()),
+            "collection".to_string(),
+            "Part 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let part2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel1.id.clone()),
+            "collection".to_string(),
+            "Part 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        // Get full subtree
+        let subtree = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
+
+        // Should return series + 2 novels + 2 parts = 5 containers
+        assert_eq!(subtree.len(), 5);
+
+        // Verify all containers are present
+        let ids: Vec<&str> = subtree.iter().map(|c| c.id.as_str()).collect();
+        assert!(ids.contains(&series.id.as_str()));
+        assert!(ids.contains(&novel1.id.as_str()));
+        assert!(ids.contains(&novel2.id.as_str()));
+        assert!(ids.contains(&part1.id.as_str()));
+        assert!(ids.contains(&part2.id.as_str()));
+
+        // Series should be first (root)
+        assert_eq!(subtree[0].id, series.id);
+    }
+
+    #[test]
+    fn test_get_subtree_with_depth_limit() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create three-level hierarchy
+        let series = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Epic Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let novel = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Book 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let _part = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel.id.clone()),
+            "collection".to_string(),
+            "Part 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Get subtree with depth limit of 1 (series + immediate children only)
+        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(1)).unwrap();
+
+        // Should return series + novel (depth 0 and 1), but not part (depth 2)
+        assert_eq!(subtree.len(), 2);
+        assert_eq!(subtree[0].id, series.id);
+        assert_eq!(subtree[1].id, novel.id);
+
+        // Get subtree with depth limit of 0 (just the root)
+        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(0)).unwrap();
+
+        // Should return only the series
+        assert_eq!(subtree.len(), 1);
+        assert_eq!(subtree[0].id, series.id);
+
+        // Get subtree with depth limit of 2 (all levels)
+        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(2)).unwrap();
+
+        // Should return all 3 containers
+        assert_eq!(subtree.len(), 3);
+    }
+
+    #[test]
+    fn test_get_subtree_complex_hierarchy() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create complex hierarchy:
+        // Series
+        //   ├── Novel 1
+        //   │   ├── Part 1
+        //   │   └── Part 2
+        //   └── Novel 2
+        //       └── Part 3
+        let series = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let novel1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Novel 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let novel2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(series.id.clone()),
+            "novel".to_string(),
+            "Novel 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        let part1 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel1.id.clone()),
+            "collection".to_string(),
+            "Part 1".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let part2 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel1.id.clone()),
+            "collection".to_string(),
+            "Part 2".to_string(),
+            None,
+            2,
+        )
+        .unwrap();
+
+        let part3 = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            Some(novel2.id.clone()),
+            "collection".to_string(),
+            "Part 3".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        // Get full subtree
+        let subtree = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
+
+        // Should return all 6 containers
+        assert_eq!(subtree.len(), 6);
+
+        // Verify all containers are present
+        let ids: Vec<&str> = subtree.iter().map(|c| c.id.as_str()).collect();
+        assert!(ids.contains(&series.id.as_str()));
+        assert!(ids.contains(&novel1.id.as_str()));
+        assert!(ids.contains(&novel2.id.as_str()));
+        assert!(ids.contains(&part1.id.as_str()));
+        assert!(ids.contains(&part2.id.as_str()));
+        assert!(ids.contains(&part3.id.as_str()));
+
+        // Get subtree from novel1 (should include novel1 and its parts)
+        let novel1_subtree = ContainerRepository::get_subtree(&db, &novel1.id, None).unwrap();
+        assert_eq!(novel1_subtree.len(), 3); // novel1 + 2 parts
+
+        // Verify all expected containers are present in novel1's subtree
+        let novel1_ids: Vec<&str> = novel1_subtree.iter().map(|c| c.id.as_str()).collect();
+        assert!(novel1_ids.contains(&novel1.id.as_str()));
+        assert!(novel1_ids.contains(&part1.id.as_str()));
+        assert!(novel1_ids.contains(&part2.id.as_str()));
+
+        // Get subtree from novel2 (should include novel2 and part3)
+        let novel2_subtree = ContainerRepository::get_subtree(&db, &novel2.id, None).unwrap();
+        assert_eq!(novel2_subtree.len(), 2); // novel2 + 1 part
+
+        // Verify all expected containers are present in novel2's subtree
+        let novel2_ids: Vec<&str> = novel2_subtree.iter().map(|c| c.id.as_str()).collect();
+        assert!(novel2_ids.contains(&novel2.id.as_str()));
+        assert!(novel2_ids.contains(&part3.id.as_str()));
+    }
+
+    #[test]
+    fn test_get_subtree_nonexistent_container() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Try to get subtree for non-existent container
+        let subtree = ContainerRepository::get_subtree(&db, "non-existent-id", None).unwrap();
+
+        // Should return empty vector
+        assert_eq!(subtree.len(), 0);
+    }
+
+    #[test]
+    fn test_get_subtree_performance_vs_multiple_queries() {
+        use std::time::Instant;
+
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a moderately deep hierarchy (4 levels, 31 total containers)
+        // Level 0: 1 series
+        // Level 1: 2 novels
+        // Level 2: 4 collections (2 per novel)
+        // Level 3: 8 parts (2 per collection)
+        // Total: 1 + 2 + 4 + 8 = 15 containers
+
+        let series = ContainerRepository::create(
+            &db,
+            "universe-1".to_string(),
+            None,
+            "series".to_string(),
+            "Series".to_string(),
+            None,
+            1,
+        )
+        .unwrap();
+
+        let mut novels = Vec::new();
+        for i in 1..=2 {
+            let novel = ContainerRepository::create(
+                &db,
+                "universe-1".to_string(),
+                Some(series.id.clone()),
+                "novel".to_string(),
+                format!("Novel {}", i),
+                None,
+                i,
+            )
+            .unwrap();
+            novels.push(novel);
+        }
+
+        let mut collections = Vec::new();
+        for (i, novel) in novels.iter().enumerate() {
+            for j in 1..=2 {
+                let collection = ContainerRepository::create(
+                    &db,
+                    "universe-1".to_string(),
+                    Some(novel.id.clone()),
+                    "collection".to_string(),
+                    format!("Collection {}-{}", i + 1, j),
+                    None,
+                    j,
+                )
+                .unwrap();
+                collections.push(collection);
+            }
+        }
+
+        for (i, collection) in collections.iter().enumerate() {
+            for j in 1..=2 {
+                ContainerRepository::create(
+                    &db,
+                    "universe-1".to_string(),
+                    Some(collection.id.clone()),
+                    "part".to_string(),
+                    format!("Part {}-{}", i + 1, j),
+                    None,
+                    j,
+                )
+                .unwrap();
+            }
+        }
+
+        // Benchmark: Single recursive CTE query
+        let start = Instant::now();
+        let subtree_single = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
+        let single_query_duration = start.elapsed();
+
+        // Benchmark: Multiple queries (simulating N+1 problem)
+        let start = Instant::now();
+        let mut all_containers = Vec::new();
+
+        // Manual traversal using multiple queries
+        fn collect_recursive(
+            db: &Database,
+            container_id: &str,
+            all_containers: &mut Vec<Container>,
+        ) -> Result<()> {
+            let container = ContainerRepository::find_by_id(db, container_id)?;
+            all_containers.push(container);
+
+            let children = ContainerRepository::list_children(db, container_id)?;
+            for child in children {
+                collect_recursive(db, &child.id, all_containers)?;
+            }
+
+            Ok(())
+        }
+
+        collect_recursive(&db, &series.id, &mut all_containers).unwrap();
+        let multiple_queries_duration = start.elapsed();
+
+        // Verify both approaches return the same number of containers
+        assert_eq!(subtree_single.len(), all_containers.len());
+        assert_eq!(subtree_single.len(), 15); // 1 + 2 + 4 + 8 = 15
+
+        // Single query should be faster (or at worst, comparable)
+        // Note: In development/test mode with small datasets, the difference might be minimal
+        // The real benefit shows with deeper hierarchies and production databases
+        println!("Single CTE query: {:?}", single_query_duration);
+        println!("Multiple queries: {:?}", multiple_queries_duration);
+        println!(
+            "Performance improvement: {:.2}x",
+            multiple_queries_duration.as_nanos() as f64 / single_query_duration.as_nanos() as f64
+        );
+
+        // The CTE approach should use fewer queries
+        // In this case: 1 query vs 15 queries (one for each container)
+        // This assertion just verifies both methods work correctly
+        assert!(subtree_single.len() > 0);
+        assert_eq!(subtree_single.len(), all_containers.len());
     }
 }

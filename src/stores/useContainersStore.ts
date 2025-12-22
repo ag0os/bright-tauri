@@ -7,7 +7,12 @@
 
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
-import type { Container, CreateContainerInput, UpdateContainerInput, ContainerChildren } from '@/types';
+import type { Container, Story, CreateContainerInput, UpdateContainerInput, ContainerChildren } from '@/types';
+import { LRUCache } from '@/utils/LRUCache';
+
+// Cache configuration
+const CHILDREN_CACHE_SIZE = 100; // Maximum number of container children to cache
+const CHILDREN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL for cached children
 
 interface ContainersState {
   // State
@@ -16,8 +21,8 @@ interface ContainersState {
   isLoading: boolean;
   error: string | null;
 
-  // Child container/story cache
-  childrenByContainerId: Record<string, ContainerChildren>;
+  // Child container/story cache (internal, use getter methods)
+  _childrenCache: LRUCache<string, ContainerChildren>;
   childrenLoading: Record<string, boolean>;
 
   // Actions
@@ -31,6 +36,7 @@ interface ContainersState {
   // Child container actions
   loadContainerChildren: (containerId: string) => Promise<ContainerChildren>;
   reorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => Promise<void>;
+  optimisticReorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => void;
   getContainerChildren: (containerId: string) => ContainerChildren | null;
   invalidateChildren: (containerId: string) => void;
 
@@ -45,8 +51,11 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Child container cache
-  childrenByContainerId: {},
+  // Child container cache (LRU with TTL)
+  _childrenCache: new LRUCache<string, ContainerChildren>({
+    maxSize: CHILDREN_CACHE_SIZE,
+    ttl: CHILDREN_CACHE_TTL,
+  }),
   childrenLoading: {},
 
   // Actions
@@ -176,16 +185,62 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
   },
 
   reorderChildren: async (containerId, containerIds, storyIds) => {
+    // Save original state for rollback
+    const originalChildren = get().childrenByContainerId[containerId];
+
+    // Apply optimistic update immediately
+    get().optimisticReorderChildren(containerId, containerIds, storyIds);
+
     set({ error: null });
     try {
       await invoke('reorder_container_children', { containerId, containerIds, storyIds });
-      // Reload children to get updated order
+      // Success - reload to ensure sync with backend
       await get().loadContainerChildren(containerId);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to reorder children';
-      set({ error: errorMessage });
+
+      // Rollback to original state
+      if (originalChildren) {
+        set((state) => ({
+          childrenByContainerId: { ...state.childrenByContainerId, [containerId]: originalChildren },
+          error: errorMessage,
+        }));
+      } else {
+        set({ error: errorMessage });
+      }
+
       throw error;
     }
+  },
+
+  optimisticReorderChildren: (containerId, containerIds, storyIds) => {
+    const currentChildren = get().childrenByContainerId[containerId];
+    if (!currentChildren) return;
+
+    // Create maps for quick lookup
+    const containerMap = new Map(currentChildren.containers.map(c => [c.id, c]));
+    const storyMap = new Map(currentChildren.stories.map(s => [s.id, s]));
+
+    // Reorder containers based on new order
+    const reorderedContainers = containerIds
+      .map(id => containerMap.get(id))
+      .filter((c): c is Container => c !== undefined);
+
+    // Reorder stories based on new order
+    const reorderedStories = storyIds
+      .map(id => storyMap.get(id))
+      .filter((s): s is Story => s !== undefined);
+
+    // Update state immediately
+    set((state) => ({
+      childrenByContainerId: {
+        ...state.childrenByContainerId,
+        [containerId]: {
+          containers: reorderedContainers,
+          stories: reorderedStories,
+        },
+      },
+    }));
   },
 
   getContainerChildren: (containerId) => {

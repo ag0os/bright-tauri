@@ -86,11 +86,10 @@ export function ContainerView({ containerId }: ContainerViewProps) {
     // Swap with previous
     [containerIds[index], containerIds[index - 1]] = [containerIds[index - 1], containerIds[index]];
 
-    try {
-      await reorderChildren(containerId, containerIds, storyIds);
-    } catch (err) {
-      console.error('Failed to reorder containers:', err);
-    }
+    // Optimistic update handled by store, errors automatically rolled back
+    await reorderChildren(containerId, containerIds, storyIds).catch(() => {
+      // Error is already set in store state and UI automatically reverted
+    });
   };
 
   const handleMoveContainerDown = async (index: number) => {
@@ -102,11 +101,10 @@ export function ContainerView({ containerId }: ContainerViewProps) {
     // Swap with next
     [containerIds[index], containerIds[index + 1]] = [containerIds[index + 1], containerIds[index]];
 
-    try {
-      await reorderChildren(containerId, containerIds, storyIds);
-    } catch (err) {
-      console.error('Failed to reorder containers:', err);
-    }
+    // Optimistic update handled by store, errors automatically rolled back
+    await reorderChildren(containerId, containerIds, storyIds).catch(() => {
+      // Error is already set in store state and UI automatically reverted
+    });
   };
 
   const handleMoveStoryUp = async (index: number) => {
@@ -118,11 +116,10 @@ export function ContainerView({ containerId }: ContainerViewProps) {
     // Swap with previous
     [storyIds[index], storyIds[index - 1]] = [storyIds[index - 1], storyIds[index]];
 
-    try {
-      await reorderChildren(containerId, containerIds, storyIds);
-    } catch (err) {
-      console.error('Failed to reorder stories:', err);
-    }
+    // Optimistic update handled by store, errors automatically rolled back
+    await reorderChildren(containerId, containerIds, storyIds).catch(() => {
+      // Error is already set in store state and UI automatically reverted
+    });
   };
 
   const handleMoveStoryDown = async (index: number) => {
@@ -134,11 +131,10 @@ export function ContainerView({ containerId }: ContainerViewProps) {
     // Swap with next
     [storyIds[index], storyIds[index + 1]] = [storyIds[index + 1], storyIds[index]];
 
-    try {
-      await reorderChildren(containerId, containerIds, storyIds);
-    } catch (err) {
-      console.error('Failed to reorder stories:', err);
-    }
+    // Optimistic update handled by store, errors automatically rolled back
+    await reorderChildren(containerId, containerIds, storyIds).catch(() => {
+      // Error is already set in store state and UI automatically reverted
+    });
   };
 
   if (isLoadingContainer) {
