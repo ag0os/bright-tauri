@@ -1,11 +1,11 @@
 ---
 id: task-83
 title: Remove Dead Code from Story-as-Container Model
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-19 18:42'
-updated_date: '2025-12-19 20:55'
+updated_date: '2025-12-19 20:56'
 labels:
   - container-refactor
   - cleanup

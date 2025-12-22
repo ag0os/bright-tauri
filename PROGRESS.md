@@ -18,7 +18,7 @@ This separates containers (organizational structures) from stories (content enti
 | Phase 6 | State Management | 75, 76 | Complete |
 | Phase 7 | Frontend Views | 77, 78, 79, 80 | Complete |
 | Phase 8 | Git Integration | 81, 82 | Complete |
-| Phase 9 | Cleanup | 83, 84 | Pending |
+| Phase 9 | Cleanup | 83, 84 | Complete |
 
 ## Task Status
 
@@ -60,8 +60,8 @@ This separates containers (organizational structures) from stories (content enti
 - [x] task-82: Implement Leaf Protection Validation (PREVENT Approach) (Completed)
 
 ### Phase 9: Cleanup
-- [ ] task-83: Remove Dead Code from Story-as-Container Model (Pending)
-- [ ] task-84: Update Documentation for Container/Story Architecture (Pending)
+- [x] task-83: Remove Dead Code from Story-as-Container Model (Completed)
+- [x] task-84: Update Documentation for Container/Story Architecture (Completed)
 
 ## Execution Log
 
@@ -301,6 +301,32 @@ This separates containers (organizational structures) from stories (content enti
   - All 16 container repository tests passing
 - Commit: "feat(task-82): Implement leaf protection validation with comprehensive tests"
 
+### Phase 9: Cleanup
+
+#### 2025-12-19 - task-83: Remove Dead Code from Story-as-Container Model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted StoryChildren.tsx (deprecated view replaced by ContainerView)
+  - Deleted ChildStoryList.tsx (component only used by StoryChildren)
+  - Removed story-children route from App.tsx and navigation store
+  - Removed deprecated methods from story.rs: list_children, reorder_children, get_with_children, get_child_count
+  - Total: 925+ lines of dead code removed
+- Commit: "chore(task-83): Remove dead code from story-as-container model"
+
+#### 2025-12-19 - task-84: Update Documentation for Container/Story Architecture
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated CLAUDE.md with Container/Story architecture documentation
+  - Added Container entity documentation with hierarchy rules
+  - Added Story entity documentation with git ownership rules
+  - Documented Leaf Protection Validation (PREVENT approach)
+  - Added transaction handling documentation for git repo creation
+  - Included common patterns and examples for novel/series creation
+  - Updated Backend status to reflect Container/Story separation
+- Commit: "docs(task-84): Update documentation for Container/Story architecture"
+
 ## Blockers
 
 None currently.
@@ -310,3 +336,29 @@ None currently.
 - Database can be completely dropped and recreated (no production data)
 - No migration scripts needed - clean slate approach
 - All tasks are HIGH priority except 72, 83, 84 (MEDIUM)
+
+## Completion Summary
+
+**Container/Story Architecture Refactor: COMPLETE**
+
+All 23 tasks across 9 phases successfully implemented:
+
+| Phase | Tasks | Description |
+|-------|-------|-------------|
+| 1 | 62, 63, 64 | Database schema with containers and stories tables |
+| 2 | 65, 66, 67 | Rust models for Container and Story entities |
+| 3 | 68, 69 | Repositories with leaf protection and CRUD |
+| 4 | 70, 71, 72 | Tauri commands for frontend integration |
+| 5 | 73, 74 | TypeScript type generation and imports |
+| 6 | 75, 76 | Zustand stores for state management |
+| 7 | 77, 78, 79, 80 | Frontend views and components |
+| 8 | 81, 82 | Git integration with transaction handling |
+| 9 | 83, 84 | Dead code removal and documentation |
+
+**Key Outcomes:**
+- Clear separation: Containers organize, Stories contain content
+- Leaf protection prevents invalid container/story mixing
+- Git repos owned by leaf containers and standalone stories
+- Transaction handling ensures data integrity
+- 925+ lines of dead code removed
+- Comprehensive documentation in CLAUDE.md
