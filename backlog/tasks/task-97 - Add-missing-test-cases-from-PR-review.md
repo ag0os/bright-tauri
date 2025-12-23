@@ -1,7 +1,7 @@
 ---
 id: task-97
 title: Add missing test cases from PR review
-status: In Progress
+status: Done
 assignee:
   - '@agent'
 created_date: '2025-12-22 16:36'
