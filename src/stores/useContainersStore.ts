@@ -14,6 +14,11 @@ import { LRUCache } from '@/utils/LRUCache';
 const CHILDREN_CACHE_SIZE = 100; // Maximum number of container children to cache
 const CHILDREN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL for cached children
 
+interface ContainerFilters {
+  containerType: string | null;  // 'novel' | 'series' | 'collection' | null
+  searchQuery: string;
+}
+
 interface ContainersState {
   // State
   containers: Container[];
@@ -24,6 +29,9 @@ interface ContainersState {
   // Child container/story cache (internal, use getter methods)
   _childrenCache: LRUCache<string, ContainerChildren>;
   childrenLoading: Record<string, boolean>;
+
+  // Filters
+  filters: ContainerFilters;
 
   // Actions
   loadContainers: (universeId: string) => Promise<void>;
@@ -39,6 +47,11 @@ interface ContainersState {
   optimisticReorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => void;
   getContainerChildren: (containerId: string) => ContainerChildren | null;
   invalidateChildren: (containerId: string) => void;
+
+  // Filtering
+  setFilter: (key: keyof ContainerFilters, value: string | null) => void;
+  clearFilters: () => void;
+  getFilteredContainers: () => Container[];
 
   // Utility
   clearError: () => void;
@@ -57,6 +70,12 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
     ttl: CHILDREN_CACHE_TTL,
   }),
   childrenLoading: {},
+
+  // Initial filters
+  filters: {
+    containerType: null,
+    searchQuery: '',
+  },
 
   // Actions
   loadContainers: async (universeId) => {
@@ -253,6 +272,48 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
       state._childrenCache.delete(containerId);
       return {};
     });
+  },
+
+  // Filtering
+  setFilter: (key, value) => {
+    set((state) => ({
+      filters: {
+        ...state.filters,
+        [key]: value,
+      },
+    }));
+  },
+
+  clearFilters: () => {
+    set({
+      filters: {
+        containerType: null,
+        searchQuery: '',
+      },
+    });
+  },
+
+  getFilteredContainers: () => {
+    const state = get();
+    let result = [...state.containers];
+
+    // Apply filters
+    if (state.filters.containerType) {
+      result = result.filter((c) => c.containerType === state.filters.containerType);
+    }
+    if (state.filters.searchQuery) {
+      const query = state.filters.searchQuery.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.title.toLowerCase().includes(query) ||
+          (c.description && c.description.toLowerCase().includes(query))
+      );
+    }
+
+    // Default sort by title alphabetically
+    result.sort((a, b) => a.title.localeCompare(b.title));
+
+    return result;
   },
 
   clearError: () => {

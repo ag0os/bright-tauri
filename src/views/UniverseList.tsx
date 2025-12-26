@@ -14,6 +14,7 @@ import { ConfirmDeleteModal } from '@/components/ui/ConfirmDeleteModal';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useElementsStore } from '@/stores/useElementsStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
+import { ELEMENT_TYPE_OPTIONS } from '@/config/filter-options';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -212,15 +213,11 @@ export function UniverseList() {
               }}
             >
               <option value="">All Types</option>
-              <option value="character">Character</option>
-              <option value="location">Location</option>
-              <option value="vehicle">Vehicle</option>
-              <option value="item">Item</option>
-              <option value="organization">Organization</option>
-              <option value="creature">Creature</option>
-              <option value="event">Event</option>
-              <option value="concept">Concept</option>
-              <option value="custom">Custom</option>
+              {ELEMENT_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 

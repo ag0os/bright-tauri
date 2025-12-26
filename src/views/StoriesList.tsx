@@ -14,6 +14,7 @@ import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useContainersStore } from '@/stores/useContainersStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
+import { STORY_TYPE_OPTIONS, STORY_STATUS_OPTIONS, CONTAINER_TYPE_OPTIONS } from '@/config/filter-options';
 import type { Story, StoryType, StoryStatus, Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -46,6 +47,9 @@ export function StoriesList() {
     error: containersError,
     loadContainers,
     deleteContainer,
+    filters: containerFilters,
+    setFilter: setContainerFilter,
+    getFilteredContainers,
   } = useContainersStore();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -168,8 +172,8 @@ export function StoriesList() {
     (story) => !story.containerId
   );
 
-  // Get root-level containers (no parentContainerId)
-  const rootContainers = containers.filter((c) => !c.parentContainerId);
+  // Get root-level containers (no parentContainerId) with filtering applied
+  const rootContainers = getFilteredContainers().filter((c) => !c.parentContainerId);
 
   // Stories no longer have children (that's handled by containers now)
 
@@ -233,7 +237,7 @@ export function StoriesList() {
             flexWrap: 'wrap',
           }}
         >
-          {/* Search */}
+          {/* Search (unified for both containers and stories) */}
           <div className="input-group input-5" style={{ flex: '1', minWidth: '250px' }}>
             <div className="input-wrapper">
               <div className="input-icon-prefix">
@@ -242,14 +246,36 @@ export function StoriesList() {
               <input
                 type="text"
                 className="input-field input-base has-prefix"
-                placeholder="Search stories..."
+                placeholder="Search stories and containers..."
                 value={filters.searchQuery}
-                onChange={(e) => setFilter('searchQuery', e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFilter('searchQuery', value);
+                  setContainerFilter('searchQuery', value);
+                }}
               />
             </div>
           </div>
 
-          {/* Filter by Type */}
+          {/* Filter by Container Type */}
+          <div className="input-group input-5" style={{ minWidth: '150px' }}>
+            <select
+              className="input-field input-base"
+              value={containerFilters.containerType || ''}
+              onChange={(e) =>
+                setContainerFilter('containerType', e.target.value || null)
+              }
+            >
+              <option value="">All Containers</option>
+              {CONTAINER_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter by Story Type */}
           <div className="input-group input-5" style={{ minWidth: '150px' }}>
             <select
               className="input-field input-base"
@@ -258,18 +284,12 @@ export function StoriesList() {
                 setFilter('type', e.target.value ? (e.target.value as StoryType) : null)
               }
             >
-              <option value="">All Types</option>
-              <option value="novel">Novel</option>
-              <option value="series">Series</option>
-              <option value="screenplay">Screenplay</option>
-              <option value="short-story">Short Story</option>
-              <option value="poem">Poem</option>
-              <option value="chapter">Chapter</option>
-              <option value="scene">Scene</option>
-              <option value="episode">Episode</option>
-              <option value="outline">Outline</option>
-              <option value="treatment">Treatment</option>
-              <option value="collection">Collection</option>
+              <option value="">All Story Types</option>
+              {STORY_TYPE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -283,11 +303,11 @@ export function StoriesList() {
               }
             >
               <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="inprogress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
+              {STORY_STATUS_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 
