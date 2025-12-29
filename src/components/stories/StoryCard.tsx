@@ -224,8 +224,6 @@ export function StoryCard({
               color: 'var(--color-text-secondary)',
             }}
           >
-            <span>{story.wordCount.toLocaleString()} words</span>
-            <span>•</span>
             <span
               style={{
                 padding: '2px 8px',
