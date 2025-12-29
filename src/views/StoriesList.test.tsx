@@ -3,7 +3,6 @@
  *
  * Tests for filter UI to prevent regressions:
  * - Story Type filter dropdown only shows valid StoryType options
- * - Status filter dropdown shows all StoryStatus options
  * - Search input updates filters correctly
  * - Sort controls work properly
  */
@@ -65,13 +64,6 @@ describe('StoriesList - Filter UI', () => {
     name: (name, element) => {
       return element instanceof HTMLSelectElement &&
              Array.from(element.options).some(opt => opt.text === 'All Story Types');
-    }
-  });
-
-  const getStatusFilterSelect = () => screen.getByRole('combobox', {
-    name: (name, element) => {
-      return element instanceof HTMLSelectElement &&
-             Array.from(element.options).some(opt => opt.text === 'All Statuses');
     }
   });
 
@@ -137,7 +129,6 @@ describe('StoriesList - Filter UI', () => {
           filters: {
             searchQuery: '',
             type: null,
-            status: null,
           },
           setFilter: mockSetFilter,
           getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -254,7 +245,6 @@ describe('StoriesList - Filter UI', () => {
             filters: {
               searchQuery: '',
               type: 'chapter',
-              status: null,
             },
             setFilter: mockSetFilter,
             getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -310,82 +300,6 @@ describe('StoriesList - Filter UI', () => {
     });
   });
 
-  describe('Status Filter Dropdown', () => {
-    it('renders all valid StoryStatus options', async () => {
-      renderWithProviders(<StoriesList />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Stories' })).toBeInTheDocument();
-      });
-
-      // Status filter options
-      const statusOptions = [
-        'All Statuses',
-        'Draft',
-        'In Progress',
-        'Completed',
-        'Published',
-        'Archived',
-      ];
-
-      statusOptions.forEach((option) => {
-        expect(screen.getByText(option)).toBeInTheDocument();
-      });
-    });
-
-    it('calls setFilter with correct value when status is selected', async () => {
-      const user = userEvent.setup();
-
-      renderWithProviders(<StoriesList />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Stories' })).toBeInTheDocument();
-      });
-
-      const statusSelect = getStatusFilterSelect();
-
-      // Select "In Progress"
-      await user.selectOptions(statusSelect, 'inprogress');
-
-      expect(mockSetFilter).toHaveBeenCalledWith('status', 'inprogress');
-    });
-
-    it('calls setFilter with null when "All Statuses" is selected', async () => {
-      const user = userEvent.setup();
-
-      renderWithProviders(<StoriesList />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Stories' })).toBeInTheDocument();
-      });
-
-      const statusSelect = getStatusFilterSelect();
-
-      // Select "All Statuses" (empty value)
-      await user.selectOptions(statusSelect, '');
-
-      expect(mockSetFilter).toHaveBeenCalledWith('status', null);
-    });
-
-    it('has correct option values matching StoryStatus enum', async () => {
-      renderWithProviders(<StoriesList />);
-
-      await waitFor(() => {
-        expect(screen.getByRole('heading', { name: 'Stories' })).toBeInTheDocument();
-      });
-
-      const statusSelect = getStatusFilterSelect() as HTMLSelectElement;
-
-      const options = Array.from(statusSelect.querySelectorAll('option')) as HTMLOptionElement[];
-
-      // Verify option values match StoryStatus enum values
-      const expectedValues = ['', 'draft', 'inprogress', 'completed', 'published', 'archived'];
-
-      const actualValues = options.map((opt) => opt.value);
-      expect(actualValues).toEqual(expectedValues);
-    });
-  });
-
   describe('Search Input', () => {
     it('renders search input', async () => {
       renderWithProviders(<StoriesList />);
@@ -434,7 +348,6 @@ describe('StoriesList - Filter UI', () => {
             filters: {
               searchQuery: 'existing query',
               type: null,
-              status: null,
             },
             setFilter: mockSetFilter,
             getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -527,7 +440,6 @@ describe('StoriesList - Filter UI', () => {
             filters: {
               searchQuery: '',
               type: null,
-              status: null,
             },
             setFilter: mockSetFilter,
             getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -581,17 +493,12 @@ describe('StoriesList - Filter UI', () => {
       const typeSelect = getTypeFilterSelect();
       await user.selectOptions(typeSelect, 'chapter');
 
-      // Set status filter
-      const statusSelect = getStatusFilterSelect();
-      await user.selectOptions(statusSelect, 'draft');
-
       // Set search query
       const searchInput = screen.getByPlaceholderText('Search stories and containers...');
       await user.type(searchInput, 'test');
 
       // All filters should be set
       expect(mockSetFilter).toHaveBeenCalledWith('type', 'chapter');
-      expect(mockSetFilter).toHaveBeenCalledWith('status', 'draft');
       expect(mockSetFilter).toHaveBeenCalledWith('searchQuery', expect.any(String));
     });
   });
@@ -634,7 +541,6 @@ describe('StoriesList - Filter UI', () => {
             filters: {
               searchQuery: '',
               type: null,
-              status: null,
             },
             setFilter: mockSetFilter,
             getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -655,7 +561,6 @@ describe('StoriesList - Filter UI', () => {
       // Filters should still be visible
       expect(screen.getByPlaceholderText('Search stories and containers...')).toBeInTheDocument();
       expect(screen.getByText('All Story Types')).toBeInTheDocument();
-      expect(screen.getByText('All Statuses')).toBeInTheDocument();
     });
 
     it('renders filters even when there is an error', async () => {
@@ -671,7 +576,6 @@ describe('StoriesList - Filter UI', () => {
             filters: {
               searchQuery: '',
               type: null,
-              status: null,
             },
             setFilter: mockSetFilter,
             getFilteredAndSortedStories: mockGetFilteredAndSortedStories,
@@ -692,7 +596,6 @@ describe('StoriesList - Filter UI', () => {
       // Filters should still be visible
       expect(screen.getByPlaceholderText('Search stories and containers...')).toBeInTheDocument();
       expect(screen.getByText('All Story Types')).toBeInTheDocument();
-      expect(screen.getByText('All Statuses')).toBeInTheDocument();
     });
   });
 });

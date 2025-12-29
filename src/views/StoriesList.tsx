@@ -14,8 +14,8 @@ import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useContainersStore } from '@/stores/useContainersStore';
 import { useUniverseStore } from '@/stores/useUniverseStore';
-import { STORY_TYPE_OPTIONS, STORY_STATUS_OPTIONS, CONTAINER_TYPE_OPTIONS } from '@/config/filter-options';
-import type { Story, StoryType, StoryStatus, Container } from '@/types';
+import { STORY_TYPE_OPTIONS, CONTAINER_TYPE_OPTIONS } from '@/config/filter-options';
+import type { Story, StoryType, Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -293,24 +293,6 @@ export function StoriesList() {
             </select>
           </div>
 
-          {/* Filter by Status */}
-          <div className="input-group input-5" style={{ minWidth: '150px' }}>
-            <select
-              className="input-field input-base"
-              value={filters.status || ''}
-              onChange={(e) =>
-                setFilter('status', e.target.value ? (e.target.value as StoryStatus) : null)
-              }
-            >
-              <option value="">All Statuses</option>
-              {STORY_STATUS_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Sort */}
           <div className="input-group input-5" style={{ minWidth: '150px' }}>
             <select
@@ -387,76 +369,33 @@ export function StoriesList() {
           </div>
         )}
 
-        {/* Containers Section */}
-        {!isLoading && !containersLoading && rootContainers.length > 0 && (
-          <div style={{ marginBottom: 'var(--spacing-6)' }}>
-            <h2
-              style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h3-size)',
-                fontWeight: 'var(--typography-h3-weight)',
-                color: 'var(--color-text-primary)',
-                margin: 0,
-                marginBottom: 'var(--spacing-4)',
-              }}
-            >
-              Containers
-            </h2>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: 'var(--spacing-6)',
-                alignItems: 'start',
-              }}
-            >
-              {rootContainers.map((container) => (
-                <ContainerCard
-                  key={container.id}
-                  container={container}
-                  onClick={handleContainerClick}
-                  onDelete={handleDeleteContainer}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Standalone Stories Section */}
-        {!isLoading && !containersLoading && filteredStories.length > 0 && (
-          <div>
-            {rootContainers.length > 0 && (
-              <h2
-                style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
-                  margin: 0,
-                  marginBottom: 'var(--spacing-4)',
-                }}
-              >
-                Standalone Stories
-              </h2>
-            )}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-                gap: 'var(--spacing-6)',
-                alignItems: 'start',
-              }}
-            >
-              {filteredStories.map((story) => (
-                <StoryCard
-                  key={story.id}
-                  story={story}
-                  onClick={handleStoryClick}
-                  onDelete={handleDeleteStory}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              ))}
-            </div>
+        {/* Content Grid - Containers and Stories together */}
+        {!isLoading && !containersLoading && (rootContainers.length > 0 || filteredStories.length > 0) && (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: 'var(--spacing-6)',
+              alignItems: 'start',
+            }}
+          >
+            {rootContainers.map((container) => (
+              <ContainerCard
+                key={container.id}
+                container={container}
+                onClick={handleContainerClick}
+                onDelete={handleDeleteContainer}
+              />
+            ))}
+            {filteredStories.map((story) => (
+              <StoryCard
+                key={story.id}
+                story={story}
+                onClick={handleStoryClick}
+                onDelete={handleDeleteStory}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            ))}
           </div>
         )}
 
