@@ -1,16 +1,16 @@
 /**
- * Story Settings View
+ * Container Settings View
  *
- * Full-page view for editing story metadata after creation.
- * Allows users to update title, description, story type, and target word count.
+ * Full-page view for editing container metadata.
+ * Allows users to update title, description, and container type.
  */
 
 import { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { useNavigationStore } from '@/stores/useNavigationStore';
-import { useStoriesStore } from '@/stores/useStoriesStore';
+import { useContainersStore } from '@/stores/useContainersStore';
 import { useToastStore } from '@/stores/useToastStore';
-import type { Story, StoryType } from '@/types';
+import type { Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -19,58 +19,62 @@ import '@/design-system/tokens/atoms/input/filled-background.css';
 import '@/design-system/tokens/spacing.css';
 import './SettingsPage.css';
 
-export function StorySettings() {
+const CONTAINER_TYPES = [
+  { value: 'novel', label: 'Novel' },
+  { value: 'series', label: 'Series' },
+  { value: 'collection', label: 'Collection' },
+];
+
+export function ContainerSettings() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const goBack = useNavigationStore((state) => state.goBack);
   const canGoBack = useNavigationStore((state) => state.canGoBack);
   const navigate = useNavigationStore((state) => state.navigate);
-  const getStory = useStoriesStore((state) => state.getStory);
-  const updateStory = useStoriesStore((state) => state.updateStory);
+  const getContainer = useContainersStore((state) => state.getContainer);
+  const updateContainer = useContainersStore((state) => state.updateContainer);
   const showSuccess = useToastStore((state) => state.success);
   const showError = useToastStore((state) => state.error);
 
-  const [story, setStory] = useState<Story | null>(null);
+  const [container, setContainer] = useState<Container | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    storyType: 'novel' as StoryType,
-    targetWordCount: '',
+    containerType: 'novel',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Extract story ID from route
-  const storyId =
-    currentRoute.screen === 'story-settings' ? currentRoute.storyId : null;
+  // Extract container ID from route
+  const containerId =
+    currentRoute.screen === 'container-settings' ? currentRoute.containerId : null;
 
-  // Load story on mount
+  // Load container on mount
   useEffect(() => {
-    if (!storyId) return;
+    if (!containerId) return;
 
-    const loadStoryData = async () => {
+    const loadContainerData = async () => {
       setIsLoading(true);
       try {
-        const loadedStory = await getStory(storyId);
-        setStory(loadedStory);
+        const loadedContainer = await getContainer(containerId);
+        setContainer(loadedContainer);
         setFormData({
-          title: loadedStory.title,
-          description: loadedStory.description,
-          storyType: loadedStory.storyType,
-          targetWordCount: loadedStory.targetWordCount?.toString() || '',
+          title: loadedContainer.title,
+          description: loadedContainer.description || '',
+          containerType: loadedContainer.containerType,
         });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to load story';
+        const message = error instanceof Error ? error.message : 'Failed to load container';
         showError(message);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadStoryData();
-  }, [storyId, getStory, showError]);
+    loadContainerData();
+  }, [containerId, getContainer, showError]);
 
   const handleBack = () => {
     if (canGoBack()) {
@@ -93,17 +97,14 @@ export function StorySettings() {
     if (!formData.title.trim()) {
       newErrors.title = 'Title is required';
     }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    if (!storyId) {
-      showError('Story ID not found');
+    if (!containerId) {
+      showError('Container ID not found');
       return;
     }
 
@@ -112,18 +113,18 @@ export function StorySettings() {
     setErrors({});
 
     try {
-      await updateStory(storyId, {
+      await updateContainer(containerId, {
         title: formData.title.trim(),
-        description: formData.description.trim(),
-        storyType: formData.storyType,
-        targetWordCount: formData.targetWordCount ? parseInt(formData.targetWordCount, 10) : null,
+        description: formData.description.trim() || null,
+        containerType: formData.containerType,
+        order: null, // Don't change order
       });
 
-      showSuccess('Story settings updated');
+      showSuccess('Container settings updated');
       handleBack();
     } catch (error) {
-      console.error('Failed to update story settings:', error);
-      showError(error instanceof Error ? error.message : 'Failed to update story settings');
+      console.error('Failed to update container settings:', error);
+      showError(error instanceof Error ? error.message : 'Failed to update container settings');
       setIsSubmitting(false);
     }
   };
@@ -131,15 +132,15 @@ export function StorySettings() {
   if (isLoading) {
     return (
       <div className="settings-page">
-        <div className="settings-page__loading">Loading story settings...</div>
+        <div className="settings-page__loading">Loading container settings...</div>
       </div>
     );
   }
 
-  if (!story) {
+  if (!container) {
     return (
       <div className="settings-page">
-        <div className="settings-page__error">Story not found</div>
+        <div className="settings-page__error">Container not found</div>
       </div>
     );
   }
@@ -158,8 +159,8 @@ export function StorySettings() {
         </button>
 
         <div className="settings-page__header-content">
-          <h1 className="settings-page__title">Story Settings</h1>
-          <p className="settings-page__subtitle">Edit story metadata</p>
+          <h1 className="settings-page__title">Container Settings</h1>
+          <p className="settings-page__subtitle">Edit container metadata</p>
         </div>
       </div>
 
@@ -174,49 +175,43 @@ export function StorySettings() {
               </div>
             )}
 
-            {/* Story Type */}
+            {/* Container Type */}
             <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-type">
-                Story Type
+              <label className="input-label" htmlFor="container-type">
+                Container Type
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <select
-                  id="story-type"
+                  id="container-type"
                   className="input-field input-base"
-                  value={formData.storyType}
+                  value={formData.containerType}
                   onChange={(e) =>
-                    setFormData({ ...formData, storyType: e.target.value as StoryType })
+                    setFormData({ ...formData, containerType: e.target.value })
                   }
                   disabled={isSubmitting}
                 >
-                  <option value="novel">Novel</option>
-                  <option value="series">Series</option>
-                  <option value="screenplay">Screenplay</option>
-                  <option value="short-story">Short Story</option>
-                  <option value="poem">Poem</option>
-                  <option value="chapter">Chapter</option>
-                  <option value="scene">Scene</option>
-                  <option value="episode">Episode</option>
-                  <option value="outline">Outline</option>
-                  <option value="treatment">Treatment</option>
-                  <option value="collection">Collection</option>
+                  {CONTAINER_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             {/* Title */}
             <div className={`input-group input-5 ${errors.title ? 'has-error' : ''}`}>
-              <label className="input-label" htmlFor="story-title">
+              <label className="input-label" htmlFor="container-title">
                 Title
                 <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <input
-                  id="story-title"
+                  id="container-title"
                   type="text"
                   className="input-field input-base"
-                  placeholder="Enter story title"
+                  placeholder="Enter container title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   disabled={isSubmitting}
@@ -227,48 +222,26 @@ export function StorySettings() {
             </div>
 
             {/* Description */}
-            <div className={`input-group input-5 ${errors.description ? 'has-error' : ''}`}>
-              <label className="input-label" htmlFor="story-description">
+            <div className="input-group input-5">
+              <label className="input-label" htmlFor="container-description">
                 Description
-                <span className="required">*</span>
               </label>
               <div className="input-wrapper">
                 <textarea
-                  id="story-description"
+                  id="container-description"
                   className="input-field input-base"
-                  placeholder="Brief description of your story"
+                  placeholder="Brief description of this container"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
                   disabled={isSubmitting}
-                  required
                   style={{
                     resize: 'vertical',
                     minHeight: '80px',
                   }}
                 />
               </div>
-              {errors.description && <div className="input-helper">{errors.description}</div>}
-            </div>
-
-            {/* Target Word Count */}
-            <div className="input-group input-5">
-              <label className="input-label" htmlFor="story-word-count">
-                Target Word Count
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id="story-word-count"
-                  type="number"
-                  className="input-field input-base"
-                  placeholder="e.g., 80000"
-                  value={formData.targetWordCount}
-                  onChange={(e) => setFormData({ ...formData, targetWordCount: e.target.value })}
-                  disabled={isSubmitting}
-                  min="0"
-                />
-              </div>
-              <div className="input-helper">Optional goal for story length</div>
+              <div className="input-helper">Optional description for organization</div>
             </div>
           </div>
 

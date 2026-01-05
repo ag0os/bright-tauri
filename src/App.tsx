@@ -12,6 +12,7 @@ import { StorySettings } from "./views/StorySettings";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
 import { ContainerView } from "./views/ContainerView";
+import { ContainerSettings } from "./views/ContainerSettings";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { ToastContainer } from "./components/Toast";
 import "./App.css";
@@ -112,11 +113,7 @@ function AppContent() {
     case 'container-settings':
       return (
         <ErrorBoundary name="Container Settings">
-          <div style={{ padding: '2rem' }}>
-            <h1>Container Settings</h1>
-            <p>Container ID: {currentRoute.containerId}</p>
-            <p>This view needs to be implemented.</p>
-          </div>
+          <ContainerSettings />
         </ErrorBoundary>
       );
 

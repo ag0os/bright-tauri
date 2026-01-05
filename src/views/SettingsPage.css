@@ -1,12 +1,12 @@
 /**
- * Story Settings Styles
+ * Settings Page Styles (Shared)
  *
- * Minimalist design for the story settings view.
+ * Shared styles for settings pages (Story Settings, Container Settings, etc.)
  * Uses design system tokens for consistency.
  */
 
 /* Main Container */
-.story-settings {
+.settings-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -14,7 +14,7 @@
 }
 
 /* Header */
-.story-settings__header {
+.settings-page__header {
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
@@ -23,7 +23,7 @@
   background-color: var(--color-surface);
 }
 
-.story-settings__back-button {
+.settings-page__back-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,17 +37,17 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.story-settings__back-button:hover {
+.settings-page__back-button:hover {
   background-color: var(--color-background-hover);
   color: var(--color-text-primary);
 }
 
-.story-settings__header-content {
+.settings-page__header-content {
   flex: 1;
   min-width: 0;
 }
 
-.story-settings__title {
+.settings-page__title {
   margin: 0;
   font-size: var(--font-size-2xl);
   font-weight: 600;
@@ -55,7 +55,7 @@
   line-height: 1.2;
 }
 
-.story-settings__subtitle {
+.settings-page__subtitle {
   margin: var(--spacing-xs) 0 0;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
@@ -63,7 +63,7 @@
 }
 
 /* Content */
-.story-settings__content {
+.settings-page__content {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-xl);
@@ -73,7 +73,7 @@
 }
 
 /* Form Fields */
-.story-settings__form-fields {
+.settings-page__form-fields {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-5);
@@ -81,7 +81,7 @@
 }
 
 /* Error Banner */
-.story-settings__error-banner {
+.settings-page__error-banner {
   padding: var(--spacing-3);
   background-color: var(--color-error-subtle);
   color: var(--color-error);
@@ -91,7 +91,7 @@
 }
 
 /* Footer */
-.story-settings__footer {
+.settings-page__footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-3);
@@ -100,8 +100,8 @@
 }
 
 /* Loading and Error States */
-.story-settings__loading,
-.story-settings__error {
+.settings-page__loading,
+.settings-page__error {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,6 +110,6 @@
   color: var(--color-text-secondary);
 }
 
-.story-settings__error {
+.settings-page__error {
   color: var(--color-error);
 }
