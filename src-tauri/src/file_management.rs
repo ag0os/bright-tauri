@@ -280,16 +280,30 @@ pub fn reorder_story_files(
 /// This struct contains key story information that is stored as metadata.json
 /// in each story's Git repository. It provides context about the story without
 /// including the full content.
+///
+/// Note: This struct is backward compatible with the minimal metadata.json created
+/// by `GitService::init_repo()` which only contains `story_id` and `created_at`.
+/// The `id` field has an alias for `story_id` and all other fields have defaults.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct StoryMetadata {
+    /// Story ID - accepts both "id" and "story_id" from JSON for backward compatibility
+    #[serde(alias = "story_id", default)]
     pub id: String,
+    #[serde(default)]
     pub universe_id: String,
+    #[serde(default)]
     pub title: String,
+    #[serde(default)]
     pub description: String,
+    #[serde(default)]
     pub story_type: String,
+    #[serde(default)]
     pub status: String,
+    #[serde(default)]
     pub created_at: String,
+    #[serde(default)]
     pub updated_at: String,
+    #[serde(default)]
     pub word_count: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
@@ -1194,6 +1208,31 @@ mod tests {
 
         let metadata: StoryMetadata = serde_json::from_str(old_json).unwrap();
         assert_eq!(metadata.id, "test-123");
+        assert_eq!(metadata.variations.len(), 0);
+    }
+
+    #[test]
+    fn test_story_metadata_minimal_init_repo_format() {
+        // Minimal metadata.json created by GitService::init_repo() uses "story_id" not "id"
+        // and only contains story_id + created_at fields
+        let init_repo_json = r#"{
+  "story_id": "test-story-456",
+  "created_at": "2024-01-01T00:00:00Z"
+}"#;
+
+        let metadata: StoryMetadata = serde_json::from_str(init_repo_json).unwrap();
+        // story_id should be aliased to id
+        assert_eq!(metadata.id, "test-story-456");
+        assert_eq!(metadata.created_at, "2024-01-01T00:00:00Z");
+        // All other fields should have defaults
+        assert_eq!(metadata.universe_id, "");
+        assert_eq!(metadata.title, "");
+        assert_eq!(metadata.description, "");
+        assert_eq!(metadata.story_type, "");
+        assert_eq!(metadata.status, "");
+        assert_eq!(metadata.updated_at, "");
+        assert_eq!(metadata.word_count, 0);
+        assert_eq!(metadata.target_word_count, None);
         assert_eq!(metadata.variations.len(), 0);
     }
 
