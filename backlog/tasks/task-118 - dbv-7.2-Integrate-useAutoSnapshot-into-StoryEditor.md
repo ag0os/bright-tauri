@@ -22,9 +22,9 @@ Add useAutoSnapshot hook to StoryEditor component to enable automatic history re
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 useAutoSnapshot imported and used in StoryEditor
-- [ ] #2 Hook receives settings from useSettingsStore (trigger, threshold)
-- [ ] #3 Hook enabled when story is loaded and settings allow
-- [ ] #4 Editor creates snapshots based on user-configured trigger
-- [ ] #5 Snapshot creation works alongside 30s auto-save (two-layer model)
+- [x] #1 useAutoSnapshot imported and used in StoryEditor
+- [x] #2 Hook receives settings from useSettingsStore (trigger, threshold)
+- [x] #3 Hook enabled when story is loaded and settings allow
+- [x] #4 Editor creates snapshots based on user-configured trigger
+- [x] #5 Snapshot creation works alongside 30s auto-save (two-layer model)
 <!-- AC:END -->

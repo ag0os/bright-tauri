@@ -12,7 +12,8 @@ import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
-import { useAutoSave } from '@/hooks/useAutoSave';
+import { useAutoSave, useAutoSnapshot } from '@/hooks';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -29,6 +30,10 @@ export function StoryEditor() {
   const updateStory = useStoriesStore((state) => state.updateStory);
   const getStory = useStoriesStore((state) => state.getStory);
   const showError = useToastStore((state) => state.error);
+
+  // Get snapshot settings from store
+  const snapshotTrigger = useSettingsStore((state) => state.snapshotTrigger);
+  const snapshotCharacterThreshold = useSettingsStore((state) => state.snapshotCharacterThreshold);
 
   const [story, setStory] = useState<Story | null>(null);
   const [content, setContent] = useState<string>('');
@@ -112,10 +117,23 @@ export function StoryEditor() {
   }, [storyId, calculateWordCount]);
 
   // Auto-save content changes to database via DBV system (30s debounce)
+  // This updates the current snapshot in place for crash protection
   const { saveState } = useAutoSave({
     content,
     onSave: handleSaveContent,
     enabled: !isLoadingStory && !!storyId,
+  });
+
+  // Auto-snapshot: creates new snapshots for history restore points
+  // Works alongside useAutoSave (two-layer model):
+  // - useAutoSave (30s): Updates current snapshot in place (crash protection)
+  // - useAutoSnapshot: Creates new snapshots for history restore points
+  useAutoSnapshot({
+    storyId: storyId ?? '',
+    content,
+    enabled: !isLoadingStory && !!storyId,
+    trigger: snapshotTrigger,
+    characterThreshold: snapshotCharacterThreshold,
   });
 
   // Handle title changes
