@@ -10,18 +10,14 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, waitFor, act } from '@testing-library/react';
-import { renderWithProviders, resetTauriMocks } from '@/test/utils';
+import { renderWithProviders, mockTauriInvoke, resetTauriMocks } from '@/test/utils';
 import { StoryEditor } from './StoryEditor';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
-
-// Mock Tauri invoke
-vi.mock('@tauri-apps/api/core', () => ({
-  invoke: vi.fn(),
-}));
+import { invoke } from '@tauri-apps/api/core';
 
 // Mock stores
 vi.mock('@/stores/useNavigationStore');
@@ -52,9 +48,6 @@ vi.mock('@/components/editor/RichTextEditor', () => ({
     </div>
   ),
 }));
-
-// Import after mocking
-import { invoke } from '@tauri-apps/api/core';
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;
 
@@ -112,6 +105,10 @@ describe('StoryEditor', () => {
     vi.clearAllMocks();
     resetTauriMocks();
 
+    // Setup default Tauri invoke responses
+    mockTauriInvoke('update_snapshot_content', undefined);
+    mockTauriInvoke('create_story_snapshot', undefined);
+
     // Mock navigation store
     (useNavigationStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (selector: (state: unknown) => unknown) => {
@@ -124,7 +121,7 @@ describe('StoryEditor', () => {
       }
     );
 
-    // Mock stories store
+    // Mock stories store - use mockResolvedValue for async getStory
     mockGetStory.mockResolvedValue(storyToReturn);
     (useStoriesStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (selector: (state: unknown) => unknown) => {
@@ -156,9 +153,6 @@ describe('StoryEditor', () => {
         return selector(state);
       }
     );
-
-    // Mock Tauri invoke
-    mockInvoke.mockResolvedValue(undefined);
   };
 
   beforeEach(() => {
@@ -167,7 +161,8 @@ describe('StoryEditor', () => {
 
   describe('Content Loading from Active Snapshot', () => {
     it('shows loading state initially', () => {
-      mockGetStory.mockImplementation(() => new Promise(() => {})); // Never resolves
+      // Override mockGetStory to never resolve (for testing loading state)
+      mockGetStory.mockReturnValue(new Promise(() => {}));
 
       renderWithProviders(<StoryEditor />);
 
@@ -235,7 +230,7 @@ describe('StoryEditor', () => {
 
   describe('Auto-Save via story_id (30s Debounce)', () => {
     beforeEach(() => {
-      vi.useFakeTimers();
+      vi.useFakeTimers({ shouldAdvanceTime: true });
     });
 
     afterEach(() => {
@@ -243,16 +238,17 @@ describe('StoryEditor', () => {
     });
 
     it('calls update_snapshot_content after content change with debounce', async () => {
-      setupMocks();
       renderWithProviders(<StoryEditor />);
 
-      // Wait for initial load using runAllTimersAsync for promises
+      // Wait for initial load - need to flush microtasks for the promise to resolve
       await act(async () => {
-        await vi.runAllTimersAsync();
+        await vi.advanceTimersByTimeAsync(0);
       });
 
       // Verify editor is rendered
-      expect(screen.getByTestId('rich-text-editor')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('rich-text-editor')).toBeInTheDocument();
+      });
 
       // Simulate content change
       const changeButton = screen.getByTestId('editor-change');
@@ -265,8 +261,7 @@ describe('StoryEditor', () => {
 
       // Advance time by 30 seconds (default debounce delay)
       await act(async () => {
-        vi.advanceTimersByTime(30000);
-        await vi.runAllTimersAsync();
+        await vi.advanceTimersByTimeAsync(30000);
       });
 
       // Now it should have called update_snapshot_content
@@ -278,14 +273,16 @@ describe('StoryEditor', () => {
     });
 
     it('uses storyId for auto-save (not snapshotId)', async () => {
-      setupMocks();
       renderWithProviders(<StoryEditor />);
 
+      // Wait for initial load
       await act(async () => {
-        await vi.runAllTimersAsync();
+        await vi.advanceTimersByTimeAsync(0);
       });
 
-      expect(screen.getByTestId('rich-text-editor')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('rich-text-editor')).toBeInTheDocument();
+      });
 
       // Simulate content change
       const changeButton = screen.getByTestId('editor-change');
@@ -294,8 +291,7 @@ describe('StoryEditor', () => {
       });
 
       await act(async () => {
-        vi.advanceTimersByTime(30000);
-        await vi.runAllTimersAsync();
+        await vi.advanceTimersByTimeAsync(30000);
       });
 
       // Verify the call uses storyId, which backend resolves to active snapshot
