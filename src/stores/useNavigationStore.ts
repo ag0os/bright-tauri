@@ -15,8 +15,7 @@ export type Route =
   | { screen: 'story-editor'; storyId: string }
   | { screen: 'story-history'; storyId: string }
   | { screen: 'story-versions'; storyId: string }
-  | { screen: 'story-compare'; storyId: string; branchA?: string; branchB?: string }
-  | { screen: 'story-combine'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
+  | { screen: 'story-compare'; storyId: string }
   | { screen: 'story-settings'; storyId: string }
   | { screen: 'element-detail'; elementId: string }
   | { screen: 'settings' }

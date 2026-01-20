@@ -24,9 +24,9 @@ Stub out StoryCompare view (defer diff library decision) and delete StoryCombine
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 StoryCompare.tsx stubbed with placeholder message about diff feature coming later
-- [ ] #2 StoryCombine.tsx deleted
-- [ ] #3 Route for /combine removed
-- [ ] #4 Navigation links to combine removed
-- [ ] #5 All Git merge/diff references removed from codebase
+- [x] #1 StoryCompare.tsx stubbed with placeholder message about diff feature coming later
+- [x] #2 StoryCombine.tsx deleted
+- [x] #3 Route for /combine removed
+- [x] #4 Navigation links to combine removed
+- [x] #5 All Git merge/diff references removed from codebase
 <!-- AC:END -->

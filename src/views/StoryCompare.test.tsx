@@ -1,8 +1,8 @@
 /**
  * StoryCompare View Tests
  *
- * STUB: This view is being refactored as part of the DBV migration.
- * Tests are minimal for the placeholder view (task-113).
+ * STUB: This view will provide version/snapshot comparison functionality.
+ * Tests are minimal for the placeholder view.
  */
 
 import { describe, it, expect, vi } from 'vitest';
@@ -15,7 +15,7 @@ import { useNavigationStore } from '@/stores/useNavigationStore';
 vi.mock('@/stores/useNavigationStore');
 
 describe('StoryCompare (Stub)', () => {
-  it('renders feature unavailable message', () => {
+  it('renders coming soon message', () => {
     const mockGoBack = vi.fn();
     (useNavigationStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
       (selector: (state: { goBack: typeof mockGoBack }) => unknown) => {
@@ -26,8 +26,8 @@ describe('StoryCompare (Stub)', () => {
 
     renderWithProviders(<StoryCompare />);
 
-    expect(screen.getByText('Feature Unavailable')).toBeInTheDocument();
-    expect(screen.getByText(/versioning system migration/)).toBeInTheDocument();
+    expect(screen.getByText('Coming Soon')).toBeInTheDocument();
+    expect(screen.getByText(/Version comparison will be available/)).toBeInTheDocument();
   });
 
   it('renders back button', () => {
