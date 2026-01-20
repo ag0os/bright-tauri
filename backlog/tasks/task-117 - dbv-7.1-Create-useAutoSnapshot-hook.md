@@ -23,10 +23,10 @@ Implement new useAutoSnapshot hook for creating history restore points based on 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Hook accepts storyId, content, enabled, trigger (on_leave | character_count), characterThreshold
-- [ ] #2 Character threshold trigger: creates snapshot when chars increase by threshold (default 500)
-- [ ] #3 On-leave trigger: creates snapshot on component unmount
-- [ ] #4 Tracks lastSnapshotCharCount to avoid duplicate snapshots
-- [ ] #5 Calls create_story_snapshot(storyId, content) on trigger
-- [ ] #6 Unit tests for both trigger modes
+- [x] #1 Hook accepts storyId, content, enabled, trigger (on_leave | character_count), characterThreshold
+- [x] #2 Character threshold trigger: creates snapshot when chars increase by threshold (default 500)
+- [x] #3 On-leave trigger: creates snapshot on component unmount
+- [x] #4 Tracks lastSnapshotCharCount to avoid duplicate snapshots
+- [x] #5 Calls create_story_snapshot(storyId, content) on trigger
+- [x] #6 Unit tests for both trigger modes
 <!-- AC:END -->
