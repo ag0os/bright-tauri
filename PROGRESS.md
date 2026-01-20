@@ -503,13 +503,13 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 ### Phase 2: Backend Rust Models
 - [x] task-100: Create StoryVersion Rust model (Completed)
 - [x] task-101: Create StorySnapshot Rust model (Completed)
-- [ ] task-102: Update Story model for versioning (Pending)
-- [ ] task-103: Create StoryVersionRepository (Pending)
-- [ ] task-104: Create StorySnapshotRepository (Pending)
+- [x] task-102: Update Story model for versioning (Completed)
+- [x] task-103: Create StoryVersionRepository (Completed)
+- [x] task-104: Create StorySnapshotRepository (Completed)
 
 ### Phase 3: Backend Tauri Commands
-- [ ] task-105: Add version Tauri commands (Pending)
-- [ ] task-106: Add snapshot Tauri commands (Pending)
+- [x] task-105: Add version Tauri commands (Completed)
+- [x] task-106: Add snapshot Tauri commands (Completed)
 - [ ] task-107: Update get_story and create_story commands (Pending)
 
 ### Phase 4: Frontend Editor Updates
@@ -576,6 +576,61 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
   - Added derive macros: Debug, Clone, Serialize, Deserialize, TS
   - Generated TypeScript types
 - Commit: (same commit as task-100)
+
+### 2026-01-20 - task-102: Update Story model for versioning
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Story: Added active_version_id, active_snapshot_id, active_version, active_snapshot fields
+  - Story: Removed content, git_repo_path, current_branch, staged_changes fields
+  - Container: Removed git_repo_path, current_branch, staged_changes fields
+  - Story Repository: Updated queries for new schema, added set_active_version/snapshot methods
+  - Removed git-related commands (ensure_story_git_repo, ensure_container_git_repo, etc.)
+  - Regenerated TypeScript types
+- Commit: "feat(task-102): Update Story model for versioning"
+
+### 2026-01-20 - task-103: Create StoryVersionRepository
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_version.rs with CRUD operations
+  - Implemented: create, get, list_by_story, rename, delete, count_by_story
+  - Added last-version deletion protection
+  - 15 unit tests
+- Commit: "feat(task-103): Create StoryVersionRepository"
+
+### 2026-01-20 - task-104: Create StorySnapshotRepository
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_snapshot.rs with CRUD operations
+  - Implemented: create, get, get_latest, list_by_version, update_content, delete, delete_oldest
+  - Added retention policy support (delete_oldest keeps N most recent)
+  - 27 unit tests
+- Commit: "feat(task-104): Create StorySnapshotRepository"
+
+### 2026-01-20 - task-105: Add version Tauri commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created src-tauri/src/commands/story_version.rs
+  - Implemented: create_story_version, list_story_versions, rename_story_version, delete_story_version, switch_story_version
+  - Auto-switch to remaining version when deleting active version
+  - Registered all commands in lib.rs invoke_handler
+  - Unit tests included
+- Commit: "feat(task-105,task-106): Add version and snapshot Tauri commands"
+
+### 2026-01-20 - task-106: Add snapshot Tauri commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created src-tauri/src/commands/story_snapshot.rs
+  - Implemented: create_story_snapshot, list_story_snapshots, update_snapshot_content, switch_story_snapshot, cleanup_old_snapshots
+  - Added word count calculation helper
+  - Retention policy integration (default 50 snapshots max)
+  - Registered all commands in lib.rs invoke_handler
+  - Unit tests included
+- Commit: "feat(task-105,task-106): Add version and snapshot Tauri commands"
 
 ## Blockers
 

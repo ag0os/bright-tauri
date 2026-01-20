@@ -92,6 +92,18 @@ pub fn run() {
             commands::git_resolve_conflict,
             commands::git_abort_merge,
             commands::git_get_conflict_content,
+            // Snapshot commands (DBV)
+            commands::create_story_snapshot,
+            commands::list_story_snapshots,
+            commands::update_snapshot_content,
+            commands::switch_story_snapshot,
+            commands::cleanup_old_snapshots,
+            // Version commands (DBV)
+            commands::create_story_version,
+            commands::list_story_versions,
+            commands::rename_story_version,
+            commands::delete_story_version,
+            commands::switch_story_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
