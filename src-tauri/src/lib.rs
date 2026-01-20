@@ -62,9 +62,6 @@ pub fn run() {
             commands::update_container,
             commands::delete_container,
             commands::reorder_container_children,
-            commands::ensure_container_git_repo,
-            commands::check_empty_non_leaf_container,
-            commands::convert_to_leaf_container,
             // Story commands
             commands::create_story,
             commands::get_story,
@@ -72,7 +69,6 @@ pub fn run() {
             commands::list_story_variations,
             commands::update_story,
             commands::delete_story,
-            commands::ensure_story_git_repo,
             // Element commands
             commands::create_element,
             commands::get_element,

@@ -983,7 +983,6 @@ mod tests {
             status: StoryStatus::InProgress,
             word_count: 1000,
             target_word_count: Some(50000),
-            content: "Story content".to_string(),
             notes: Some("Story notes".to_string()),
             outline: None,
             order: None,
@@ -998,9 +997,10 @@ mod tests {
             variation_group_id: "var-group-789".to_string(),
             variation_type: VariationType::Original,
             parent_variation_id: None,
-            git_repo_path: String::new(),
-            current_branch: "main".to_string(),
-            staged_changes: false,
+            active_version_id: None,
+            active_snapshot_id: None,
+            active_version: None,
+            active_snapshot: None,
         }
     }
 

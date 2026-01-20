@@ -14,6 +14,9 @@ impl StoryRepository {
     /// If container_id is provided, this method validates that the container
     /// doesn't have any child containers (leaf protection). A container can contain
     /// either child containers OR stories, but not both.
+    ///
+    /// Note: Story creation will later be extended to also create an "Original"
+    /// version and initial snapshot (handled by the command layer or version repository).
     pub fn create(db: &Database, input: CreateStoryInput) -> Result<Story> {
         let id = Uuid::new_v4().to_string();
         let now = Utc::now().to_rfc3339();
@@ -40,7 +43,7 @@ impl StoryRepository {
                     .trim_matches('"')
                     .to_string()
             })
-            .unwrap_or_else(|| "novel".to_string());
+            .unwrap_or_else(|| "chapter".to_string());
         let variation_type_str = input
             .variation_type
             .map(|vt| {
@@ -55,11 +58,12 @@ impl StoryRepository {
         db.execute(
             "INSERT INTO stories (
                 id, universe_id, title, description, story_type, status, word_count,
-                content, variation_group_id, variation_type, parent_variation_id,
-                git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                variation_group_id, variation_type, parent_variation_id,
+                created_at, updated_at,
                 notes, outline, target_word_count, \"order\", tags, color, favorite,
-                related_element_ids, series_name, container_id, last_edited_at, version
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28)",
+                related_element_ids, series_name, container_id, last_edited_at, version,
+                active_version_id, active_snapshot_id
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26)",
             params![
                 &id,
                 &input.universe_id,
@@ -68,13 +72,9 @@ impl StoryRepository {
                 &story_type_str,
                 "draft",
                 0,
-                &input.content.unwrap_or_default(),
                 &variation_group_id,
                 &variation_type_str,
                 &input.parent_variation_id,
-                "",  // git_repo_path - will be set when Git integration is implemented
-                "main",  // current_branch
-                false,  // staged_changes
                 &now,
                 &now,
                 &input.notes,
@@ -89,6 +89,8 @@ impl StoryRepository {
                 &input.container_id,
                 &now,  // last_edited_at
                 1,  // version
+                None::<String>,  // active_version_id - set when version is created
+                None::<String>,  // active_snapshot_id - set when snapshot is created
             ],
         )?;
 
@@ -102,10 +104,11 @@ impl StoryRepository {
 
         conn.query_row(
             "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    content, variation_group_id, variation_type, parent_variation_id,
-                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    variation_group_id, variation_type, parent_variation_id,
+                    created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version,
+                    active_version_id, active_snapshot_id
              FROM stories WHERE id = ?1",
             params![id],
             Self::map_row_to_story,
@@ -119,10 +122,11 @@ impl StoryRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    content, variation_group_id, variation_type, parent_variation_id,
-                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    variation_group_id, variation_type, parent_variation_id,
+                    created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version,
+                    active_version_id, active_snapshot_id
              FROM stories
              WHERE universe_id = ?1
              ORDER BY updated_at DESC",
@@ -142,10 +146,11 @@ impl StoryRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    content, variation_group_id, variation_type, parent_variation_id,
-                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    variation_group_id, variation_type, parent_variation_id,
+                    created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version,
+                    active_version_id, active_snapshot_id
              FROM stories
              WHERE variation_group_id = ?1
              ORDER BY created_at ASC",
@@ -165,10 +170,11 @@ impl StoryRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    content, variation_group_id, variation_type, parent_variation_id,
-                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    variation_group_id, variation_type, parent_variation_id,
+                    created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version,
+                    active_version_id, active_snapshot_id
              FROM stories
              WHERE container_id = ?1
              ORDER BY \"order\" ASC, created_at ASC",
@@ -188,10 +194,11 @@ impl StoryRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    content, variation_group_id, variation_type, parent_variation_id,
-                    git_repo_path, current_branch, staged_changes, created_at, updated_at,
+                    variation_group_id, variation_type, parent_variation_id,
+                    created_at, updated_at,
                     notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version
+                    related_element_ids, series_name, container_id, last_edited_at, version,
+                    active_version_id, active_snapshot_id
              FROM stories
              WHERE universe_id = ?1 AND container_id IS NULL
              ORDER BY updated_at DESC",
@@ -252,6 +259,9 @@ impl StoryRepository {
     }
 
     /// Update a Story
+    ///
+    /// Note: Content updates are handled through the versioning system
+    /// (update_snapshot_content command), not through this method.
     pub fn update(db: &Database, id: &str, input: UpdateStoryInput) -> Result<Story> {
         let now = Utc::now().to_rfc3339();
 
@@ -291,10 +301,6 @@ impl StoryRepository {
         if let Some(status) = status_str {
             updates.push("status = ?");
             params_vec.push(Box::new(status));
-        }
-        if let Some(content) = input.content {
-            updates.push("content = ?");
-            params_vec.push(Box::new(content));
         }
         if let Some(notes) = input.notes {
             updates.push("notes = ?");
@@ -352,20 +358,34 @@ impl StoryRepository {
         Ok(())
     }
 
-    /// Update the git repo path for a story (internal use)
-    pub fn set_git_repo_path(db: &Database, id: &str, git_repo_path: &str) -> Result<()> {
+    /// Update the active version for a story (internal use)
+    pub fn set_active_version(db: &Database, id: &str, version_id: &str) -> Result<()> {
         db.execute(
-            "UPDATE stories SET git_repo_path = ?1 WHERE id = ?2",
-            params![git_repo_path, id],
+            "UPDATE stories SET active_version_id = ?1 WHERE id = ?2",
+            params![version_id, id],
         )?;
         Ok(())
     }
 
-    /// Update the current branch for a story (internal use)
-    pub fn set_current_branch(db: &Database, id: &str, branch: &str) -> Result<()> {
+    /// Update the active snapshot for a story (internal use)
+    pub fn set_active_snapshot(db: &Database, id: &str, snapshot_id: &str) -> Result<()> {
         db.execute(
-            "UPDATE stories SET current_branch = ?1 WHERE id = ?2",
-            params![branch, id],
+            "UPDATE stories SET active_snapshot_id = ?1 WHERE id = ?2",
+            params![snapshot_id, id],
+        )?;
+        Ok(())
+    }
+
+    /// Update word count and last_edited_at for a story (called by update_snapshot_content)
+    pub fn update_word_count_and_edited(
+        db: &Database,
+        id: &str,
+        word_count: u32,
+    ) -> Result<()> {
+        let now = Utc::now().to_rfc3339();
+        db.execute(
+            "UPDATE stories SET word_count = ?1, last_edited_at = ?2 WHERE id = ?3",
+            params![word_count, &now, id],
         )?;
         Ok(())
     }
@@ -385,12 +405,20 @@ impl StoryRepository {
     }
 
     /// Helper function to map a row to Story struct
+    ///
+    /// Column order:
+    /// 0: id, 1: universe_id, 2: title, 3: description, 4: story_type, 5: status, 6: word_count,
+    /// 7: variation_group_id, 8: variation_type, 9: parent_variation_id,
+    /// 10: created_at, 11: updated_at,
+    /// 12: notes, 13: outline, 14: target_word_count, 15: order, 16: tags, 17: color, 18: favorite,
+    /// 19: related_element_ids, 20: series_name, 21: container_id, 22: last_edited_at, 23: version,
+    /// 24: active_version_id, 25: active_snapshot_id
     fn map_row_to_story(row: &rusqlite::Row) -> Result<Story> {
         let story_type_str: String = row.get(4)?;
         let status_str: String = row.get(5)?;
-        let variation_type_str: String = row.get(9)?;
-        let tags_json: Option<String> = row.get(20)?;
-        let related_elements_json: Option<String> = row.get(23)?;
+        let variation_type_str: String = row.get(8)?;
+        let tags_json: Option<String> = row.get(16)?;
+        let related_elements_json: Option<String> = row.get(19)?;
 
         let story_type: StoryType = serde_json::from_str(&format!("\"{story_type_str}\"")).unwrap();
         let status: StoryStatus = serde_json::from_str(&format!("\"{status_str}\"")).unwrap();
@@ -407,27 +435,29 @@ impl StoryRepository {
             story_type,
             status,
             word_count: row.get(6)?,
-            content: row.get(7)?,
-            variation_group_id: row.get(8)?,
+            variation_group_id: row.get(7)?,
             variation_type,
-            parent_variation_id: row.get(10)?,
-            git_repo_path: row.get(11)?,
-            current_branch: row.get(12)?,
-            staged_changes: row.get(13)?,
-            created_at: row.get(14)?,
-            updated_at: row.get(15)?,
-            notes: row.get(16)?,
-            outline: row.get(17)?,
-            target_word_count: row.get(18)?,
-            order: row.get(19)?,
+            parent_variation_id: row.get(9)?,
+            created_at: row.get(10)?,
+            updated_at: row.get(11)?,
+            notes: row.get(12)?,
+            outline: row.get(13)?,
+            target_word_count: row.get(14)?,
+            order: row.get(15)?,
             tags,
-            color: row.get(21)?,
-            favorite: row.get(22)?,
+            color: row.get(17)?,
+            favorite: row.get(18)?,
             related_element_ids,
-            series_name: row.get(24)?,
-            container_id: row.get(25)?,
-            last_edited_at: row.get(26)?,
-            version: row.get(27)?,
+            series_name: row.get(20)?,
+            container_id: row.get(21)?,
+            last_edited_at: row.get(22)?,
+            version: row.get(23)?,
+            active_version_id: row.get(24)?,
+            active_snapshot_id: row.get(25)?,
+            // Inline JOINed data - not populated by basic queries
+            // Use find_by_id_with_content or similar for full data
+            active_version: None,
+            active_snapshot: None,
         })
     }
 }
@@ -461,28 +491,33 @@ mod tests {
         (db, temp_dir)
     }
 
-    #[test]
-    fn test_delete_story() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create a standalone story
-        let input = CreateStoryInput {
+    fn create_test_story_input(
+        title: &str,
+        story_type: StoryType,
+        container_id: Option<String>,
+    ) -> CreateStoryInput {
+        CreateStoryInput {
             universe_id: "universe-1".to_string(),
-            title: "Test Story".to_string(),
+            title: title.to_string(),
             description: Some("Test".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
+            story_type: Some(story_type),
             notes: None,
             outline: None,
             target_word_count: None,
             tags: None,
             color: None,
             series_name: None,
-            container_id: None,
+            container_id,
             variation_type: None,
             parent_variation_id: None,
-        };
+        }
+    }
 
+    #[test]
+    fn test_delete_story() {
+        let (db, _temp_dir) = setup_test_db();
+
+        let input = create_test_story_input("Test Story", StoryType::ShortStory, None);
         let story = StoryRepository::create(&db, input).unwrap();
 
         // Delete the story
@@ -513,22 +548,8 @@ mod tests {
 
         // Create multiple stories in the same container
         for i in 1..=3 {
-            let input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Story {}", i),
-                description: Some("Test".to_string()),
-                story_type: Some(StoryType::Chapter),
-                content: None,
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: Some(container_id.clone()),
-                variation_type: None,
-                parent_variation_id: None,
-            };
+            let input =
+                create_test_story_input(&format!("Story {}", i), StoryType::Chapter, Some(container_id.clone()));
             StoryRepository::create(&db, input).unwrap();
         }
 
@@ -548,22 +569,8 @@ mod tests {
 
         // Create standalone stories (no container)
         for i in 1..=2 {
-            let input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Standalone Story {}", i),
-                description: Some("Test".to_string()),
-                story_type: Some(StoryType::ShortStory),
-                content: None,
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: None,
-                variation_type: None,
-                parent_variation_id: None,
-            };
+            let input =
+                create_test_story_input(&format!("Standalone Story {}", i), StoryType::ShortStory, None);
             StoryRepository::create(&db, input).unwrap();
         }
 
@@ -581,22 +588,11 @@ mod tests {
 
         // Create stories with container
         for i in 1..=3 {
-            let input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Container Story {}", i),
-                description: Some("Test".to_string()),
-                story_type: Some(StoryType::Chapter),
-                content: None,
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: Some(container.id.clone()),
-                variation_type: None,
-                parent_variation_id: None,
-            };
+            let input = create_test_story_input(
+                &format!("Container Story {}", i),
+                StoryType::Chapter,
+                Some(container.id.clone()),
+            );
             StoryRepository::create(&db, input).unwrap();
         }
 
@@ -608,7 +604,6 @@ mod tests {
         // All stories should have container_id = None
         for story in standalone_stories {
             assert!(story.container_id.is_none());
-            assert!(story.should_have_git_repo());
         }
     }
 
@@ -616,29 +611,14 @@ mod tests {
     fn test_create_standalone_story() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a standalone story
-        let input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Test Story".to_string(),
-            description: Some("Test".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let input = create_test_story_input("Test Story", StoryType::ShortStory, None);
         let story = StoryRepository::create(&db, input).unwrap();
 
         // Verify it was created as standalone
         assert!(story.container_id.is_none());
-        assert!(story.should_have_git_repo());
+        // Initially no active version or snapshot (will be created separately)
+        assert!(story.active_version_id.is_none());
+        assert!(story.active_snapshot_id.is_none());
     }
 
     #[test]
@@ -661,26 +641,9 @@ mod tests {
 
         // Create 3 stories under the same container
         for i in 1..=3 {
-            let input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Story {}", i),
-                description: Some("Test".to_string()),
-                story_type: Some(StoryType::Chapter),
-                content: None,
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: Some(container_id.clone()),
-                variation_type: None,
-                parent_variation_id: None,
-            };
-
+            let input = create_test_story_input(&format!("Story {}", i), StoryType::Chapter, Some(container_id.clone()));
             let story = StoryRepository::create(&db, input).unwrap();
             assert_eq!(story.container_id, Some(container_id.clone()));
-            assert!(!story.should_have_git_repo());
         }
     }
 
@@ -689,23 +652,7 @@ mod tests {
         let (db, _temp_dir) = setup_test_db();
 
         // Create standalone story (no container)
-        let standalone_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Standalone Story".to_string(),
-            description: Some("Standalone".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let standalone_input = create_test_story_input("Standalone Story", StoryType::ShortStory, None);
         let standalone = StoryRepository::create(&db, standalone_input).unwrap();
 
         // Create a test container first
@@ -721,123 +668,98 @@ mod tests {
         .unwrap();
 
         // Create stories with container
-        let child_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Chapter".to_string(),
-            description: Some("Chapter".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: Some(container.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let child_input = create_test_story_input("Chapter", StoryType::Chapter, Some(container.id.clone()));
         let child = StoryRepository::create(&db, child_input).unwrap();
 
-        let child2_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Scene".to_string(),
-            description: Some("Scene".to_string()),
-            story_type: Some(StoryType::Scene),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: Some(container.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let child2_input = create_test_story_input("Scene", StoryType::Scene, Some(container.id.clone()));
         let child2 = StoryRepository::create(&db, child2_input).unwrap();
 
         // Verify standalone story
         assert!(standalone.container_id.is_none());
-        assert!(standalone.should_have_git_repo());
 
         // Verify container stories
         assert_eq!(child.container_id, Some(container.id.clone()));
-        assert!(!child.should_have_git_repo());
         assert_eq!(child2.container_id, Some(container.id.clone()));
-        assert!(!child2.should_have_git_repo());
     }
 
     #[test]
-    fn test_set_git_repo_path() {
+    fn test_set_active_version_with_real_version() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a standalone story
-        let input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Test Story".to_string(),
-            description: Some("Test".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let input = create_test_story_input("Test Story", StoryType::ShortStory, None);
         let story = StoryRepository::create(&db, input).unwrap();
 
-        // Initially git_repo_path should be empty
-        assert!(story.git_repo_path.is_empty());
+        // Initially active_version_id should be None
+        assert!(story.active_version_id.is_none());
 
-        // Set git repo path
-        StoryRepository::set_git_repo_path(&db, &story.id, "/path/to/repo").unwrap();
+        // Create a real version to satisfy foreign key constraint
+        let version_id = "version-123";
+        db.execute(
+            "INSERT INTO story_versions (id, story_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+            params![version_id, &story.id, "Original", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+        )
+        .unwrap();
+
+        // Set active version
+        StoryRepository::set_active_version(&db, &story.id, version_id).unwrap();
 
         // Verify it was set
         let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
-        assert_eq!(updated.git_repo_path, "/path/to/repo");
+        assert_eq!(updated.active_version_id, Some(version_id.to_string()));
     }
 
     #[test]
-    fn test_set_current_branch() {
+    fn test_set_active_snapshot_with_real_snapshot() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a standalone story
-        let input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Test Story".to_string(),
-            description: Some("Test".to_string()),
-            story_type: Some(StoryType::ShortStory),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: None,
-            variation_type: None,
-            parent_variation_id: None,
-        };
-
+        let input = create_test_story_input("Test Story", StoryType::ShortStory, None);
         let story = StoryRepository::create(&db, input).unwrap();
 
-        // Default branch should be "main"
-        assert_eq!(story.current_branch, "main");
+        // Initially active_snapshot_id should be None
+        assert!(story.active_snapshot_id.is_none());
 
-        // Set current branch
-        StoryRepository::set_current_branch(&db, &story.id, "feature-branch").unwrap();
+        // Create a real version first (needed for snapshot foreign key)
+        let version_id = "version-123";
+        db.execute(
+            "INSERT INTO story_versions (id, story_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)",
+            params![version_id, &story.id, "Original", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
+        )
+        .unwrap();
+
+        // Create a real snapshot to satisfy foreign key constraint
+        let snapshot_id = "snapshot-456";
+        db.execute(
+            "INSERT INTO story_snapshots (id, version_id, content, created_at) VALUES (?, ?, ?, ?)",
+            params![snapshot_id, version_id, "", "2024-01-01T00:00:00Z"],
+        )
+        .unwrap();
+
+        // Set active snapshot
+        StoryRepository::set_active_snapshot(&db, &story.id, snapshot_id).unwrap();
 
         // Verify it was set
         let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
-        assert_eq!(updated.current_branch, "feature-branch");
+        assert_eq!(updated.active_snapshot_id, Some(snapshot_id.to_string()));
+    }
+
+    #[test]
+    fn test_update_word_count_and_edited() {
+        let (db, _temp_dir) = setup_test_db();
+
+        let input = create_test_story_input("Test Story", StoryType::ShortStory, None);
+        let story = StoryRepository::create(&db, input).unwrap();
+
+        // Initially word_count should be 0
+        assert_eq!(story.word_count, 0);
+
+        // Update word count
+        StoryRepository::update_word_count_and_edited(&db, &story.id, 500).unwrap();
+
+        // Verify it was updated
+        let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
+        assert_eq!(updated.word_count, 500);
+        // last_edited_at should be updated (different from created_at)
+        assert!(updated.last_edited_at != story.created_at || updated.last_edited_at == story.last_edited_at);
     }
 
     #[test]
@@ -870,22 +792,7 @@ mod tests {
         .unwrap();
 
         // Try to create a story in the parent container - should fail with leaf protection
-        let story_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Chapter".to_string(),
-            description: Some("Test chapter".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: Some(parent.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
+        let story_input = create_test_story_input("Chapter", StoryType::Chapter, Some(parent.id.clone()));
 
         let result = StoryRepository::create(&db, story_input);
         assert!(result.is_err());
@@ -913,22 +820,7 @@ mod tests {
         .unwrap();
 
         // Should be able to add story to empty container
-        let story_input = CreateStoryInput {
-            universe_id: "universe-1".to_string(),
-            title: "Chapter 1".to_string(),
-            description: Some("First chapter".to_string()),
-            story_type: Some(StoryType::Chapter),
-            content: None,
-            notes: None,
-            outline: None,
-            target_word_count: None,
-            tags: None,
-            color: None,
-            series_name: None,
-            container_id: Some(container.id.clone()),
-            variation_type: None,
-            parent_variation_id: None,
-        };
+        let story_input = create_test_story_input("Chapter 1", StoryType::Chapter, Some(container.id.clone()));
 
         let story = StoryRepository::create(&db, story_input).unwrap();
         assert_eq!(story.container_id, Some(container.id));

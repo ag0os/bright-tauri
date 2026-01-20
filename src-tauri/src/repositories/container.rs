@@ -1,7 +1,6 @@
 use crate::db::Database;
 use crate::models::{Container, MAX_NESTING_DEPTH};
 use chrono::Utc;
-use log::warn;
 use rusqlite::{params, Result};
 use uuid::Uuid;
 
@@ -50,8 +49,8 @@ impl ContainerRepository {
         db.execute(
             "INSERT INTO containers (
                 id, universe_id, parent_container_id, container_type, title,
-                description, \"order\", git_repo_path, current_branch, created_at, updated_at
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                description, \"order\", created_at, updated_at
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![
                 &id,
                 &universe_id,
@@ -60,8 +59,6 @@ impl ContainerRepository {
                 &title,
                 &description,
                 &order,
-                None::<String>, // git_repo_path - will be set when Git is initialized
-                None::<String>, // current_branch - will be set when Git is initialized
                 &now,
                 &now,
             ],
@@ -77,7 +74,7 @@ impl ContainerRepository {
 
         conn.query_row(
             "SELECT id, universe_id, parent_container_id, container_type, title,
-                    description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                    description, \"order\", created_at, updated_at
              FROM containers WHERE id = ?1",
             params![id],
             Self::map_row_to_container,
@@ -91,7 +88,7 @@ impl ContainerRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, parent_container_id, container_type, title,
-                    description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                    description, \"order\", created_at, updated_at
              FROM containers
              WHERE universe_id = ?1
              ORDER BY \"order\" ASC, created_at ASC",
@@ -111,7 +108,7 @@ impl ContainerRepository {
 
         let mut stmt = conn.prepare(
             "SELECT id, universe_id, parent_container_id, container_type, title,
-                    description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                    description, \"order\", created_at, updated_at
              FROM containers
              WHERE parent_container_id = ?1
              ORDER BY \"order\" ASC, created_at ASC",
@@ -144,16 +141,6 @@ impl ContainerRepository {
     /// This method uses a recursive Common Table Expression (CTE) to load the entire subtree
     /// in a single database query, which is significantly faster than making multiple queries
     /// for each level of the hierarchy.
-    ///
-    /// # Example
-    ///
-    /// ```ignore
-    /// // Load entire subtree under a series container
-    /// let subtree = ContainerRepository::get_subtree(&db, "series-id", None)?;
-    ///
-    /// // Load only 3 levels deep
-    /// let subtree = ContainerRepository::get_subtree(&db, "series-id", Some(3))?;
-    /// ```
     pub fn get_subtree(
         db: &Database,
         container_id: &str,
@@ -166,12 +153,10 @@ impl ContainerRepository {
             // Query with depth limit
             format!(
                 "WITH RECURSIVE subtree(id, universe_id, parent_container_id, container_type, title,
-                                       description, \"order\", git_repo_path, current_branch,
-                                       created_at, updated_at, depth) AS (
+                                       description, \"order\", created_at, updated_at, depth) AS (
                     -- Base case: the root container
                     SELECT id, universe_id, parent_container_id, container_type, title,
-                           description, \"order\", git_repo_path, current_branch,
-                           created_at, updated_at, 0 as depth
+                           description, \"order\", created_at, updated_at, 0 as depth
                     FROM containers
                     WHERE id = ?1
 
@@ -179,14 +164,13 @@ impl ContainerRepository {
 
                     -- Recursive case: children of containers in the subtree
                     SELECT c.id, c.universe_id, c.parent_container_id, c.container_type, c.title,
-                           c.description, c.\"order\", c.git_repo_path, c.current_branch,
-                           c.created_at, c.updated_at, s.depth + 1
+                           c.description, c.\"order\", c.created_at, c.updated_at, s.depth + 1
                     FROM containers c
                     INNER JOIN subtree s ON c.parent_container_id = s.id
                     WHERE s.depth < {}
                 )
                 SELECT id, universe_id, parent_container_id, container_type, title,
-                       description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                       description, \"order\", created_at, updated_at
                 FROM subtree
                 ORDER BY depth ASC, \"order\" ASC",
                 depth_limit
@@ -196,7 +180,7 @@ impl ContainerRepository {
             "WITH RECURSIVE subtree AS (
                 -- Base case: the root container
                 SELECT id, universe_id, parent_container_id, container_type, title,
-                       description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                       description, \"order\", created_at, updated_at
                 FROM containers
                 WHERE id = ?1
 
@@ -204,13 +188,12 @@ impl ContainerRepository {
 
                 -- Recursive case: children of containers in the subtree
                 SELECT c.id, c.universe_id, c.parent_container_id, c.container_type, c.title,
-                       c.description, c.\"order\", c.git_repo_path, c.current_branch,
-                       c.created_at, c.updated_at
+                       c.description, c.\"order\", c.created_at, c.updated_at
                 FROM containers c
                 INNER JOIN subtree s ON c.parent_container_id = s.id
             )
             SELECT id, universe_id, parent_container_id, container_type, title,
-                   description, \"order\", git_repo_path, current_branch, created_at, updated_at
+                   description, \"order\", created_at, updated_at
             FROM subtree
             ORDER BY \"order\" ASC"
                 .to_string()
@@ -316,7 +299,6 @@ impl ContainerRepository {
     }
 
     /// Delete a Container and all its children recursively
-    /// Also removes git repo directory from filesystem if git_repo_path is set
     pub fn delete(db: &Database, id: &str) -> Result<Vec<String>> {
         let mut deleted_ids = Vec::new();
         Self::delete_recursive(db, id, &mut deleted_ids)?;
@@ -325,9 +307,6 @@ impl ContainerRepository {
 
     /// Helper function to recursively delete a container and its children
     fn delete_recursive(db: &Database, id: &str, deleted_ids: &mut Vec<String>) -> Result<()> {
-        // Get the container before deletion to check for git repo
-        let container = Self::find_by_id(db, id)?;
-
         // First, get all children of this container
         let children = Self::list_children(db, id)?;
 
@@ -339,21 +318,6 @@ impl ContainerRepository {
         // Delete the container itself from the database
         // CASCADE will handle deleting stories in this container
         db.execute("DELETE FROM containers WHERE id = ?1", params![id])?;
-
-        // If container has a git repo, remove the directory from filesystem
-        if let Some(git_repo_path) = container.git_repo_path {
-            if std::path::Path::new(&git_repo_path).exists() {
-                if let Err(e) = std::fs::remove_dir_all(&git_repo_path) {
-                    warn!(
-                        "Failed to remove git repo directory {}: {}. This may result in orphaned files on disk.",
-                        git_repo_path, e
-                    );
-                    // Continue even if filesystem cleanup fails to allow database cleanup to complete.
-                    // TODO: Implement a maintenance command to find and remove orphaned git repositories.
-                    // This would scan for git repo directories that don't have corresponding database entries.
-                }
-            }
-        }
 
         // Add the ID to the list of deleted IDs
         deleted_ids.push(id.to_string());
@@ -390,58 +354,6 @@ impl ContainerRepository {
         Ok(depth)
     }
 
-    /// Update the git repo path for a container (internal use)
-    pub fn set_git_repo_path(db: &Database, id: &str, git_repo_path: &str) -> Result<()> {
-        db.execute(
-            "UPDATE containers SET git_repo_path = ?1 WHERE id = ?2",
-            params![git_repo_path, id],
-        )?;
-        Ok(())
-    }
-
-    /// Update the current branch for a container (internal use)
-    pub fn set_current_branch(db: &Database, id: &str, branch: &str) -> Result<()> {
-        db.execute(
-            "UPDATE containers SET current_branch = ?1 WHERE id = ?2",
-            params![branch, id],
-        )?;
-        Ok(())
-    }
-
-    /// Check if a container is an empty non-leaf container
-    ///
-    /// An empty non-leaf container is one that:
-    /// - Has no git_repo_path (is non-leaf)
-    /// - Has no child containers
-    /// - Has no stories
-    ///
-    /// This is the edge case where a container had child containers (became non-leaf),
-    /// then all children were deleted, leaving it in limbo - can't have stories without
-    /// git initialization.
-    pub fn is_empty_non_leaf(db: &Database, id: &str) -> Result<bool> {
-        let container = Self::find_by_id(db, id)?;
-
-        // If it has a git repo, it's a leaf container, not the edge case
-        if container.git_repo_path.is_some() {
-            return Ok(false);
-        }
-
-        // Check if it has any child containers
-        let child_containers = Self::list_children(db, id)?;
-        if !child_containers.is_empty() {
-            return Ok(false);
-        }
-
-        // Check if it has any stories
-        let story_count = Self::get_story_count(db, id)?;
-        if story_count > 0 {
-            return Ok(false);
-        }
-
-        // It's a non-leaf container with no children and no stories
-        Ok(true)
-    }
-
     /// Get the count of child containers for a container
     pub fn get_child_container_count(db: &Database, container_id: &str) -> Result<i32> {
         let conn = db.connection();
@@ -457,6 +369,10 @@ impl ContainerRepository {
     }
 
     /// Helper function to map a row to Container struct
+    ///
+    /// Column order:
+    /// 0: id, 1: universe_id, 2: parent_container_id, 3: container_type, 4: title,
+    /// 5: description, 6: order, 7: created_at, 8: updated_at
     fn map_row_to_container(row: &rusqlite::Row) -> Result<Container> {
         Ok(Container {
             id: row.get(0)?,
@@ -466,11 +382,8 @@ impl ContainerRepository {
             title: row.get(4)?,
             description: row.get(5)?,
             order: row.get(6)?,
-            git_repo_path: row.get(7)?,
-            current_branch: row.get(8)?,
-            staged_changes: false, // Not in database yet, default to false
-            created_at: row.get(9)?,
-            updated_at: row.get(10)?,
+            created_at: row.get(7)?,
+            updated_at: row.get(8)?,
         })
     }
 }
@@ -636,7 +549,7 @@ mod tests {
     }
 
     #[test]
-    fn test_container_remains_non_leaf_after_losing_children() {
+    fn test_container_can_accept_stories_after_children_deleted() {
         let (db, _temp_dir) = setup_test_db();
 
         // Create parent container
@@ -651,7 +564,7 @@ mod tests {
         )
         .unwrap();
 
-        // Add child container (parent becomes non-leaf)
+        // Add child container
         let child = ContainerRepository::create(
             &db,
             "universe-1".to_string(),
@@ -663,21 +576,13 @@ mod tests {
         )
         .unwrap();
 
-        // Verify child exists
-        let children_before = ContainerRepository::list_children(&db, &parent.id).unwrap();
-        assert_eq!(children_before.len(), 1);
-
         // Delete the child container
         ContainerRepository::delete(&db, &child.id).unwrap();
 
         // Verify parent still exists and has no children
-        let parent_after = ContainerRepository::find_by_id(&db, &parent.id).unwrap();
+        let _parent_after = ContainerRepository::find_by_id(&db, &parent.id).unwrap();
         let children_after = ContainerRepository::list_children(&db, &parent.id).unwrap();
         assert_eq!(children_after.len(), 0);
-
-        // Parent should still exist but should not automatically get git repo
-        // (git_repo_path should remain None unless explicitly initialized)
-        assert!(parent_after.git_repo_path.is_none());
 
         // Parent can now have stories added (since it has no children)
         let story_insert = db.execute(
@@ -792,71 +697,6 @@ mod tests {
     }
 
     #[test]
-    fn test_reorder_children() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "My Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Create children
-        let child1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let child2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        let child3 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 3".to_string(),
-            None,
-            3,
-        )
-        .unwrap();
-
-        // Reorder: child3, child1, child2
-        ContainerRepository::reorder_children(
-            &db,
-            &parent.id,
-            vec![child3.id.clone(), child1.id.clone(), child2.id.clone()],
-        )
-        .unwrap();
-
-        // Verify new order
-        let children = ContainerRepository::list_children(&db, &parent.id).unwrap();
-        assert_eq!(children[0].id, child3.id);
-        assert_eq!(children[1].id, child1.id);
-        assert_eq!(children[2].id, child2.id);
-    }
-
-    #[test]
     fn test_update_container() {
         let (db, _temp_dir) = setup_test_db();
 
@@ -966,147 +806,6 @@ mod tests {
     }
 
     #[test]
-    fn test_delete_container_with_git_repo() {
-        let (db, temp_dir) = setup_test_db();
-
-        // Create container
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "My Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Create a fake git repo directory
-        let git_repo_path = temp_dir.path().join("test-repo");
-        std::fs::create_dir_all(&git_repo_path).unwrap();
-        std::fs::write(git_repo_path.join("test.txt"), "test content").unwrap();
-
-        // Set git repo path
-        ContainerRepository::set_git_repo_path(&db, &container.id, git_repo_path.to_str().unwrap())
-            .unwrap();
-
-        // Verify directory exists
-        assert!(git_repo_path.exists());
-
-        // Delete container - should remove git repo directory
-        let deleted_ids = ContainerRepository::delete(&db, &container.id).unwrap();
-
-        assert_eq!(deleted_ids.len(), 1);
-        assert_eq!(deleted_ids[0], container.id);
-
-        // Git repo directory should be removed
-        assert!(!git_repo_path.exists());
-
-        // Container should be deleted
-        assert!(ContainerRepository::find_by_id(&db, &container.id).is_err());
-    }
-
-    #[test]
-    fn test_nested_hierarchy_queries() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create three-level hierarchy: Series -> Novel -> (stories would go here)
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "My Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        // Query children of series
-        let series_children = ContainerRepository::list_children(&db, &series.id).unwrap();
-        assert_eq!(series_children.len(), 2);
-        assert_eq!(series_children[0].id, novel1.id);
-        assert_eq!(series_children[1].id, novel2.id);
-
-        // Query children of novels (should be empty)
-        let novel1_children = ContainerRepository::list_children(&db, &novel1.id).unwrap();
-        assert_eq!(novel1_children.len(), 0);
-
-        // Verify hierarchy relationships
-        assert!(series.parent_container_id.is_none());
-        assert_eq!(novel1.parent_container_id, Some(series.id.clone()));
-        assert_eq!(novel2.parent_container_id, Some(series.id.clone()));
-    }
-
-    #[test]
-    fn test_set_git_repo_path() {
-        let (db, _temp_dir) = setup_test_db();
-
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "My Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        assert!(container.git_repo_path.is_none());
-
-        ContainerRepository::set_git_repo_path(&db, &container.id, "/path/to/repo").unwrap();
-
-        let updated = ContainerRepository::find_by_id(&db, &container.id).unwrap();
-        assert_eq!(updated.git_repo_path, Some("/path/to/repo".to_string()));
-    }
-
-    #[test]
-    fn test_set_current_branch() {
-        let (db, _temp_dir) = setup_test_db();
-
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "My Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        assert!(container.current_branch.is_none());
-
-        ContainerRepository::set_current_branch(&db, &container.id, "feature-branch").unwrap();
-
-        let updated = ContainerRepository::find_by_id(&db, &container.id).unwrap();
-        assert_eq!(updated.current_branch, Some("feature-branch".to_string()));
-    }
-
-    #[test]
     fn test_calculate_depth_root_container() {
         let (db, _temp_dir) = setup_test_db();
 
@@ -1172,7 +871,7 @@ mod tests {
     fn test_max_nesting_depth_enforced() {
         let (db, _temp_dir) = setup_test_db();
 
-        // Create a chain up to MAX_NESTING_DEPTH (10 levels: 0-9)
+        // Create a chain up to MAX_NESTING_DEPTH
         let mut current_parent: Option<String> = None;
         let mut containers = Vec::new();
 
@@ -1215,208 +914,6 @@ mod tests {
             }
             _ => panic!("Expected InvalidParameterName error for max depth exceeded"),
         }
-    }
-
-    #[test]
-    fn test_max_nesting_depth_exact_limit() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create exactly MAX_NESTING_DEPTH levels (0 to MAX_NESTING_DEPTH-1)
-        let mut current_parent: Option<String> = None;
-
-        for i in 0..MAX_NESTING_DEPTH {
-            let container = ContainerRepository::create(
-                &db,
-                "universe-1".to_string(),
-                current_parent.clone(),
-                "container".to_string(),
-                format!("Level {}", i),
-                None,
-                1,
-            )
-            .unwrap();
-
-            // Verify the container was created successfully
-            assert_eq!(container.title, format!("Level {}", i));
-            current_parent = Some(container.id);
-        }
-
-        // The last container should be at depth MAX_NESTING_DEPTH - 1
-        let last_depth =
-            ContainerRepository::calculate_depth(&db, current_parent.as_deref()).unwrap();
-        assert_eq!(last_depth, MAX_NESTING_DEPTH);
-    }
-
-    #[test]
-    fn test_depth_limit_clear_error_message() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create containers up to max depth
-        let mut current_parent: Option<String> = None;
-        for i in 0..MAX_NESTING_DEPTH {
-            let container = ContainerRepository::create(
-                &db,
-                "universe-1".to_string(),
-                current_parent,
-                "container".to_string(),
-                format!("Level {}", i),
-                None,
-                1,
-            )
-            .unwrap();
-            current_parent = Some(container.id);
-        }
-
-        // Try to exceed depth and check error message
-        let result = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            current_parent,
-            "container".to_string(),
-            "Too Deep".to_string(),
-            None,
-            1,
-        );
-
-        match result {
-            Err(rusqlite::Error::InvalidParameterName(msg)) => {
-                // Verify error message contains both max depth and current depth
-                assert!(msg.contains("Maximum container nesting depth"));
-                assert!(msg.contains(&format!("{}", MAX_NESTING_DEPTH)));
-                assert!(msg.contains("Current depth"));
-            }
-            _ => panic!("Expected clear error message about max depth"),
-        }
-    }
-
-    #[test]
-    fn test_is_empty_non_leaf_with_leaf_container() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create a container and set git repo (making it a leaf)
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "My Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        ContainerRepository::set_git_repo_path(&db, &container.id, "/path/to/repo").unwrap();
-
-        // Should not be an empty non-leaf (it's a leaf container)
-        let result = ContainerRepository::is_empty_non_leaf(&db, &container.id).unwrap();
-        assert!(!result);
-    }
-
-    #[test]
-    fn test_is_empty_non_leaf_with_child_containers() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent container (no git repo)
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "My Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Add child container
-        ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Should not be an empty non-leaf (has children)
-        let result = ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap();
-        assert!(!result);
-    }
-
-    #[test]
-    fn test_is_empty_non_leaf_with_stories() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create container (no git repo)
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "My Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Add a story
-        db.execute(
-            "INSERT INTO stories (id, universe_id, container_id, title, last_edited_at, variation_group_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            params!["story-1", "universe-1", &container.id, "Chapter 1", "2024-01-01T00:00:00Z", "vg-1", "2024-01-01T00:00:00Z", "2024-01-01T00:00:00Z"],
-        )
-        .unwrap();
-
-        // Should not be an empty non-leaf (has stories)
-        let result = ContainerRepository::is_empty_non_leaf(&db, &container.id).unwrap();
-        assert!(!result);
-    }
-
-    #[test]
-    fn test_is_empty_non_leaf_true_case() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent container
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "My Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Add child container (parent becomes non-leaf)
-        let child = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Delete the child container
-        ContainerRepository::delete(&db, &child.id).unwrap();
-
-        // Verify parent has no git repo, no children, no stories
-        let parent_after = ContainerRepository::find_by_id(&db, &parent.id).unwrap();
-        assert!(parent_after.git_repo_path.is_none());
-
-        let children = ContainerRepository::list_children(&db, &parent.id).unwrap();
-        assert_eq!(children.len(), 0);
-
-        let story_count = ContainerRepository::get_story_count(&db, &parent.id).unwrap();
-        assert_eq!(story_count, 0);
-
-        // Should be an empty non-leaf container (the edge case!)
-        let result = ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap();
-        assert!(result);
     }
 
     #[test]
@@ -1465,60 +962,6 @@ mod tests {
         // Should have 2 children
         let count = ContainerRepository::get_child_container_count(&db, &parent.id).unwrap();
         assert_eq!(count, 2);
-    }
-
-    #[test]
-    fn test_is_empty_non_leaf_after_deleting_all_children() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent with multiple children
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "My Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let child1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let child2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Book 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        // Parent is not empty non-leaf (has children)
-        assert!(!ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
-
-        // Delete first child
-        ContainerRepository::delete(&db, &child1.id).unwrap();
-
-        // Still has one child, not empty
-        assert!(!ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
-
-        // Delete second child
-        ContainerRepository::delete(&db, &child2.id).unwrap();
-
-        // Now it should be an empty non-leaf container
-        assert!(ContainerRepository::is_empty_non_leaf(&db, &parent.id).unwrap());
     }
 
     #[test]
@@ -1599,651 +1042,5 @@ mod tests {
         assert_eq!(subtree[1].title, "Book 1");
         assert_eq!(subtree[2].id, child2.id);
         assert_eq!(subtree[2].title, "Book 2");
-    }
-
-    #[test]
-    fn test_get_subtree_three_levels() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create three-level hierarchy: Series -> Novels -> Parts
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Epic Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        let part1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel1.id.clone()),
-            "collection".to_string(),
-            "Part 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let part2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel1.id.clone()),
-            "collection".to_string(),
-            "Part 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        // Get full subtree
-        let subtree = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
-
-        // Should return series + 2 novels + 2 parts = 5 containers
-        assert_eq!(subtree.len(), 5);
-
-        // Verify all containers are present
-        let ids: Vec<&str> = subtree.iter().map(|c| c.id.as_str()).collect();
-        assert!(ids.contains(&series.id.as_str()));
-        assert!(ids.contains(&novel1.id.as_str()));
-        assert!(ids.contains(&novel2.id.as_str()));
-        assert!(ids.contains(&part1.id.as_str()));
-        assert!(ids.contains(&part2.id.as_str()));
-
-        // Series should be first (root)
-        assert_eq!(subtree[0].id, series.id);
-    }
-
-    #[test]
-    fn test_get_subtree_with_depth_limit() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create three-level hierarchy
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Epic Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let _part = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel.id.clone()),
-            "collection".to_string(),
-            "Part 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Get subtree with depth limit of 1 (series + immediate children only)
-        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(1)).unwrap();
-
-        // Should return series + novel (depth 0 and 1), but not part (depth 2)
-        assert_eq!(subtree.len(), 2);
-        assert_eq!(subtree[0].id, series.id);
-        assert_eq!(subtree[1].id, novel.id);
-
-        // Get subtree with depth limit of 0 (just the root)
-        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(0)).unwrap();
-
-        // Should return only the series
-        assert_eq!(subtree.len(), 1);
-        assert_eq!(subtree[0].id, series.id);
-
-        // Get subtree with depth limit of 2 (all levels)
-        let subtree = ContainerRepository::get_subtree(&db, &series.id, Some(2)).unwrap();
-
-        // Should return all 3 containers
-        assert_eq!(subtree.len(), 3);
-    }
-
-    #[test]
-    fn test_get_subtree_complex_hierarchy() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create complex hierarchy:
-        // Series
-        //   ├── Novel 1
-        //   │   ├── Part 1
-        //   │   └── Part 2
-        //   └── Novel 2
-        //       └── Part 3
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Novel 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let novel2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Novel 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        let part1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel1.id.clone()),
-            "collection".to_string(),
-            "Part 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let part2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel1.id.clone()),
-            "collection".to_string(),
-            "Part 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        let part3 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(novel2.id.clone()),
-            "collection".to_string(),
-            "Part 3".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Get full subtree
-        let subtree = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
-
-        // Should return all 6 containers
-        assert_eq!(subtree.len(), 6);
-
-        // Verify all containers are present
-        let ids: Vec<&str> = subtree.iter().map(|c| c.id.as_str()).collect();
-        assert!(ids.contains(&series.id.as_str()));
-        assert!(ids.contains(&novel1.id.as_str()));
-        assert!(ids.contains(&novel2.id.as_str()));
-        assert!(ids.contains(&part1.id.as_str()));
-        assert!(ids.contains(&part2.id.as_str()));
-        assert!(ids.contains(&part3.id.as_str()));
-
-        // Get subtree from novel1 (should include novel1 and its parts)
-        let novel1_subtree = ContainerRepository::get_subtree(&db, &novel1.id, None).unwrap();
-        assert_eq!(novel1_subtree.len(), 3); // novel1 + 2 parts
-
-        // Verify all expected containers are present in novel1's subtree
-        let novel1_ids: Vec<&str> = novel1_subtree.iter().map(|c| c.id.as_str()).collect();
-        assert!(novel1_ids.contains(&novel1.id.as_str()));
-        assert!(novel1_ids.contains(&part1.id.as_str()));
-        assert!(novel1_ids.contains(&part2.id.as_str()));
-
-        // Get subtree from novel2 (should include novel2 and part3)
-        let novel2_subtree = ContainerRepository::get_subtree(&db, &novel2.id, None).unwrap();
-        assert_eq!(novel2_subtree.len(), 2); // novel2 + 1 part
-
-        // Verify all expected containers are present in novel2's subtree
-        let novel2_ids: Vec<&str> = novel2_subtree.iter().map(|c| c.id.as_str()).collect();
-        assert!(novel2_ids.contains(&novel2.id.as_str()));
-        assert!(novel2_ids.contains(&part3.id.as_str()));
-    }
-
-    #[test]
-    fn test_get_subtree_nonexistent_container() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Try to get subtree for non-existent container
-        let subtree = ContainerRepository::get_subtree(&db, "non-existent-id", None).unwrap();
-
-        // Should return empty vector
-        assert_eq!(subtree.len(), 0);
-    }
-
-    #[test]
-    fn test_get_subtree_performance_vs_multiple_queries() {
-        use std::time::Instant;
-
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create a moderately deep hierarchy (4 levels, 31 total containers)
-        // Level 0: 1 series
-        // Level 1: 2 novels
-        // Level 2: 4 collections (2 per novel)
-        // Level 3: 8 parts (2 per collection)
-        // Total: 1 + 2 + 4 + 8 = 15 containers
-
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let mut novels = Vec::new();
-        for i in 1..=2 {
-            let novel = ContainerRepository::create(
-                &db,
-                "universe-1".to_string(),
-                Some(series.id.clone()),
-                "novel".to_string(),
-                format!("Novel {}", i),
-                None,
-                i,
-            )
-            .unwrap();
-            novels.push(novel);
-        }
-
-        let mut collections = Vec::new();
-        for (i, novel) in novels.iter().enumerate() {
-            for j in 1..=2 {
-                let collection = ContainerRepository::create(
-                    &db,
-                    "universe-1".to_string(),
-                    Some(novel.id.clone()),
-                    "collection".to_string(),
-                    format!("Collection {}-{}", i + 1, j),
-                    None,
-                    j,
-                )
-                .unwrap();
-                collections.push(collection);
-            }
-        }
-
-        for (i, collection) in collections.iter().enumerate() {
-            for j in 1..=2 {
-                ContainerRepository::create(
-                    &db,
-                    "universe-1".to_string(),
-                    Some(collection.id.clone()),
-                    "part".to_string(),
-                    format!("Part {}-{}", i + 1, j),
-                    None,
-                    j,
-                )
-                .unwrap();
-            }
-        }
-
-        // Benchmark: Single recursive CTE query
-        let start = Instant::now();
-        let subtree_single = ContainerRepository::get_subtree(&db, &series.id, None).unwrap();
-        let single_query_duration = start.elapsed();
-
-        // Benchmark: Multiple queries (simulating N+1 problem)
-        let start = Instant::now();
-        let mut all_containers = Vec::new();
-
-        // Manual traversal using multiple queries
-        fn collect_recursive(
-            db: &Database,
-            container_id: &str,
-            all_containers: &mut Vec<Container>,
-        ) -> Result<()> {
-            let container = ContainerRepository::find_by_id(db, container_id)?;
-            all_containers.push(container);
-
-            let children = ContainerRepository::list_children(db, container_id)?;
-            for child in children {
-                collect_recursive(db, &child.id, all_containers)?;
-            }
-
-            Ok(())
-        }
-
-        collect_recursive(&db, &series.id, &mut all_containers).unwrap();
-        let multiple_queries_duration = start.elapsed();
-
-        // Verify both approaches return the same number of containers
-        assert_eq!(subtree_single.len(), all_containers.len());
-        assert_eq!(subtree_single.len(), 15); // 1 + 2 + 4 + 8 = 15
-
-        // Single query should be faster (or at worst, comparable)
-        // Note: In development/test mode with small datasets, the difference might be minimal
-        // The real benefit shows with deeper hierarchies and production databases
-        println!("Single CTE query: {:?}", single_query_duration);
-        println!("Multiple queries: {:?}", multiple_queries_duration);
-        println!(
-            "Performance improvement: {:.2}x",
-            multiple_queries_duration.as_nanos() as f64 / single_query_duration.as_nanos() as f64
-        );
-
-        // The CTE approach should use fewer queries
-        // In this case: 1 query vs 15 queries (one for each container)
-        // This assertion just verifies both methods work correctly
-        assert!(subtree_single.len() > 0);
-        assert_eq!(subtree_single.len(), all_containers.len());
-    }
-
-    #[test]
-    fn test_concurrent_container_creation_same_parent() {
-        use std::sync::Arc;
-        use std::thread;
-
-        let (db, _temp_dir) = setup_test_db();
-        let db = Arc::new(db);
-
-        // Create parent container
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Parent Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let parent_id = Arc::new(parent.id.clone());
-
-        // Spawn multiple threads to create containers concurrently
-        let mut handles = vec![];
-        for i in 0..5 {
-            let db_clone = Arc::clone(&db);
-            let parent_id_clone = Arc::clone(&parent_id);
-
-            let handle = thread::spawn(move || {
-                ContainerRepository::create(
-                    &db_clone,
-                    "universe-1".to_string(),
-                    Some(parent_id_clone.to_string()),
-                    "novel".to_string(),
-                    format!("Novel {}", i),
-                    None,
-                    i,
-                )
-            });
-            handles.push(handle);
-        }
-
-        // Collect results
-        let mut results = vec![];
-        for handle in handles {
-            results.push(handle.join().unwrap());
-        }
-
-        // All should succeed
-        assert_eq!(results.iter().filter(|r| r.is_ok()).count(), 5);
-
-        // Verify all containers were created with unique IDs
-        let children = ContainerRepository::list_children(&db, &parent_id).unwrap();
-        assert_eq!(children.len(), 5);
-
-        // Verify all IDs are unique
-        let mut ids: Vec<String> = children.iter().map(|c| c.id.clone()).collect();
-        ids.sort();
-        ids.dedup();
-        assert_eq!(ids.len(), 5);
-    }
-
-    #[test]
-    fn test_reorder_with_invalid_container_ids() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create parent with children
-        let parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Parent Series".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let child1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Novel 1".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        let _child2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(parent.id.clone()),
-            "novel".to_string(),
-            "Novel 2".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        // Create another parent with a different child
-        let other_parent = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Other Series".to_string(),
-            None,
-            2,
-        )
-        .unwrap();
-
-        let other_child = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(other_parent.id.clone()),
-            "novel".to_string(),
-            "Other Novel".to_string(),
-            None,
-            1,
-        )
-        .unwrap();
-
-        // Try to reorder parent's children using a child from other_parent
-        let result = ContainerRepository::reorder_children(
-            &db,
-            &parent.id,
-            vec![child1.id.clone(), other_child.id.clone()],
-        );
-
-        // Should fail because other_child doesn't belong to parent
-        assert!(result.is_err());
-        assert!(matches!(result, Err(rusqlite::Error::QueryReturnedNoRows)));
-    }
-
-    #[test]
-    fn test_full_series_workflow() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create series container (will have child containers, so no git repo)
-        let series = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "series".to_string(),
-            "Epic Series".to_string(),
-            Some("A grand series of novels".to_string()),
-            1,
-        )
-        .unwrap();
-
-        assert!(series.git_repo_path.is_none());
-
-        // Create 2 novel containers under series (each gets git repo)
-        let novel1 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 1".to_string(),
-            Some("First book".to_string()),
-            1,
-        )
-        .unwrap();
-
-        let novel2 = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            Some(series.id.clone()),
-            "novel".to_string(),
-            "Book 2".to_string(),
-            Some("Second book".to_string()),
-            2,
-        )
-        .unwrap();
-
-        // Verify series has no git repo (non-leaf)
-        let series_after_children = ContainerRepository::find_by_id(&db, &series.id).unwrap();
-        assert!(series_after_children.git_repo_path.is_none());
-
-        // Create chapters (stories) under each novel
-        use crate::models::CreateStoryInput;
-        use crate::models::StoryType;
-        use crate::repositories::StoryRepository;
-
-        // Novel 1 chapters
-        for i in 1..=3 {
-            let story_input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Chapter {}", i),
-                description: Some(format!("Chapter {} of Book 1", i)),
-                story_type: Some(StoryType::Chapter),
-                content: Some(format!("Content of chapter {}", i)),
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: Some(novel1.id.clone()),
-                variation_type: None,
-                parent_variation_id: None,
-            };
-
-            StoryRepository::create(&db, story_input).unwrap();
-        }
-
-        // Novel 2 chapters
-        for i in 1..=2 {
-            let story_input = CreateStoryInput {
-                universe_id: "universe-1".to_string(),
-                title: format!("Chapter {}", i),
-                description: Some(format!("Chapter {} of Book 2", i)),
-                story_type: Some(StoryType::Chapter),
-                content: Some(format!("Content of chapter {}", i)),
-                notes: None,
-                outline: None,
-                target_word_count: None,
-                tags: None,
-                color: None,
-                series_name: None,
-                container_id: Some(novel2.id.clone()),
-                variation_type: None,
-                parent_variation_id: None,
-            };
-
-            StoryRepository::create(&db, story_input).unwrap();
-        }
-
-        // Verify hierarchy
-        let series_children = ContainerRepository::list_children(&db, &series.id).unwrap();
-        assert_eq!(series_children.len(), 2);
-
-        let novel1_stories = StoryRepository::list_by_container(&db, &novel1.id).unwrap();
-        assert_eq!(novel1_stories.len(), 3);
-
-        let novel2_stories = StoryRepository::list_by_container(&db, &novel2.id).unwrap();
-        assert_eq!(novel2_stories.len(), 2);
-
-        // Delete series - should cascade delete all
-        let deleted_ids = ContainerRepository::delete(&db, &series.id).unwrap();
-
-        // Should have deleted: series + novel1 + novel2 = 3 containers
-        assert_eq!(deleted_ids.len(), 3);
-        assert!(deleted_ids.contains(&series.id));
-        assert!(deleted_ids.contains(&novel1.id));
-        assert!(deleted_ids.contains(&novel2.id));
-
-        // Verify all containers are deleted
-        assert!(ContainerRepository::find_by_id(&db, &series.id).is_err());
-        assert!(ContainerRepository::find_by_id(&db, &novel1.id).is_err());
-        assert!(ContainerRepository::find_by_id(&db, &novel2.id).is_err());
-
-        // Verify stories are also deleted (CASCADE)
-        assert_eq!(
-            StoryRepository::list_by_container(&db, &novel1.id).unwrap().len(),
-            0
-        );
-        assert_eq!(
-            StoryRepository::list_by_container(&db, &novel2.id).unwrap().len(),
-            0
-        );
     }
 }

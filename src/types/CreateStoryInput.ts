@@ -4,5 +4,9 @@ import type { VariationType } from "./VariationType";
 
 /**
  * Input for creating a new Story
+ *
+ * Note: `content` is not included because story creation now also creates
+ * an "Original" version with an initial empty snapshot. Content is managed
+ * through the versioning system.
  */
-export type CreateStoryInput = { universeId: string, title: string, description: string | null, storyType: StoryType | null, content: string | null, notes: string | null, outline: string | null, targetWordCount: number | null, tags: Array<string> | null, color: string | null, seriesName: string | null, containerId: string | null, variationType: VariationType | null, parentVariationId: string | null, };
+export type CreateStoryInput = { universeId: string, title: string, description: string | null, storyType: StoryType | null, notes: string | null, outline: string | null, targetWordCount: number | null, tags: Array<string> | null, color: string | null, seriesName: string | null, containerId: string | null, variationType: VariationType | null, parentVariationId: string | null, };

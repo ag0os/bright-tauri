@@ -481,3 +481,106 @@ Implementing 9 tasks identified during PR review. Tasks are organized into paral
 ## PR Review Feedback Implementation: COMPLETE
 
 All 9 tasks from PR review feedback have been successfully implemented across 4 execution waves.
+
+---
+
+# DBV (Database-only Versioning) Implementation
+
+Generated: 2026-01-20
+
+## Overview
+
+Replacing Git-based versioning with a database-only approach using versions and snapshots.
+
+Based on: `docs/plans/database-only-versioning-implementation.md`
+
+## Steps Status
+
+### Phase 1: Database Schema Changes
+- [x] task-98: Create story_versions and story_snapshots tables (Completed)
+- [x] task-99: Modify stories table for versioning (Completed)
+
+### Phase 2: Backend Rust Models
+- [x] task-100: Create StoryVersion Rust model (Completed)
+- [x] task-101: Create StorySnapshot Rust model (Completed)
+- [ ] task-102: Update Story model for versioning (Pending)
+- [ ] task-103: Create StoryVersionRepository (Pending)
+- [ ] task-104: Create StorySnapshotRepository (Pending)
+
+### Phase 3: Backend Tauri Commands
+- [ ] task-105: Add version Tauri commands (Pending)
+- [ ] task-106: Add snapshot Tauri commands (Pending)
+- [ ] task-107: Update get_story and create_story commands (Pending)
+
+### Phase 4: Frontend Editor Updates
+- [ ] task-108: Update StoryEditor to use snapshots (Pending)
+- [ ] task-109: Update useAutoSave hook for 30s debounce (Pending)
+- [ ] task-110: Remove useAutoCommit hook (Pending)
+
+### Phase 5: Frontend Views Updates
+- [ ] task-111: Rename StoryVariations to StoryVersions view (Pending)
+- [ ] task-112: Update StoryHistory view for snapshots (Pending)
+- [ ] task-113: Stub StoryCompare and delete StoryCombine views (Pending)
+
+### Phase 6: Remove Git Code
+- [ ] task-114: Delete Git Rust modules (Pending)
+- [ ] task-115: Remove git2 dependency (Pending)
+- [ ] task-116: Remove Git-related frontend code and types (Pending)
+
+### Phase 7: Auto-Snapshot System
+- [ ] task-117: Create useAutoSnapshot hook (Pending)
+- [ ] task-118: Integrate useAutoSnapshot into StoryEditor (Pending)
+
+### Phase 8: Testing & Verification
+- [ ] task-119: Add backend tests for versioning system (Pending)
+- [ ] task-120: Add frontend tests for versioning system (Pending)
+
+## Execution Log
+
+### 2026-01-20 - task-98: Create story_versions and story_snapshots tables
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated SCHEMA_VERSION from 1 to 2
+  - Created migrate_v2() function
+  - Added story_versions table (id, story_id, name, created_at, updated_at)
+  - Added story_snapshots table (id, version_id, content, created_at)
+  - Added 4 indexes including unique constraint on (story_id, name)
+  - CASCADE DELETE configured for foreign keys
+- Commit: "feat(task-98): Add story_versions and story_snapshots tables"
+
+### 2026-01-20 - task-99: Modify stories table for versioning
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed from containers: git_repo_path, current_branch
+  - Removed from stories: content, git_repo_path, current_branch, staged_changes
+  - Added to stories: active_version_id (FK to story_versions), active_snapshot_id (FK to story_snapshots)
+- Commit: "feat(task-99): Modify stories table for versioning"
+
+### 2026-01-20 - task-100: Create StoryVersion Rust model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_version.rs with StoryVersion struct
+  - Added derive macros: Debug, Clone, Serialize, Deserialize, TS
+  - Added CreateStoryVersionInput and RenameStoryVersionInput helper structs
+  - Generated TypeScript types
+- Commit: "feat(task-100,task-101): Create StoryVersion and StorySnapshot Rust models"
+
+### 2026-01-20 - task-101: Create StorySnapshot Rust model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_snapshot.rs with StorySnapshot struct
+  - Added derive macros: Debug, Clone, Serialize, Deserialize, TS
+  - Generated TypeScript types
+- Commit: (same commit as task-100)
+
+## Blockers
+
+None currently.
+
+## Summary
+
+Ready to begin Phase 1: Database Schema Changes.

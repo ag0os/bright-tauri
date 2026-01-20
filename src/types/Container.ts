@@ -8,6 +8,7 @@
  * Containers support nesting: a "series" can contain "novels", and "novels" can contain
  * "chapters" (which are stories, not containers).
  *
- * Only leaf containers (those containing stories, not child containers) have Git repositories.
+ * With Database-Only Versioning (DBV), containers no longer have Git repositories.
+ * Versioning is handled at the story level through versions and snapshots.
  */
-export type Container = { id: string, universeId: string, parentContainerId: string | null, containerType: string, title: string, description: string | null, order: number, gitRepoPath: string | null, currentBranch: string | null, stagedChanges: boolean, createdAt: string, updatedAt: string, };
+export type Container = { id: string, universeId: string, parentContainerId: string | null, containerType: string, title: string, description: string | null, order: number, createdAt: string, updatedAt: string, };
