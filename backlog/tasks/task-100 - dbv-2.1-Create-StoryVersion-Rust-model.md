@@ -1,7 +1,7 @@
 ---
 id: task-100
 title: 'dbv-2.1: Create StoryVersion Rust model'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-01-15 13:35'
 labels:
@@ -21,8 +21,8 @@ Create StoryVersion model in src-tauri/src/models/story_version.rs with ts-rs ex
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 StoryVersion struct created with id, story_id, name, created_at, updated_at fields
-- [ ] #2 Derive macros added: Debug, Clone, Serialize, Deserialize, TS
-- [ ] #3 ts-rs export directive configured for src/types/
-- [ ] #4 Model registered in models/mod.rs
+- [x] #1 StoryVersion struct created with id, story_id, name, created_at, updated_at fields
+- [x] #2 Derive macros added: Debug, Clone, Serialize, Deserialize, TS
+- [x] #3 ts-rs export directive configured for src/types/
+- [x] #4 Model registered in models/mod.rs
 <!-- AC:END -->
