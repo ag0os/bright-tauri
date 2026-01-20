@@ -22,7 +22,7 @@ Remove the git2 crate dependency from Cargo.toml after Git code is deleted.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 git2 line removed from src-tauri/Cargo.toml dependencies
-- [ ] #2 cargo build succeeds without git2
-- [ ] #3 Binary size reduced (git2 is a large dependency)
+- [x] #1 git2 line removed from src-tauri/Cargo.toml dependencies
+- [x] #2 cargo build succeeds without git2
+- [x] #3 Binary size reduced (git2 is a large dependency)
 <!-- AC:END -->
