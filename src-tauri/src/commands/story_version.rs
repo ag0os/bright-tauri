@@ -428,4 +428,118 @@ mod tests {
         let fetched = StoryVersionRepository::get(&db, &version.id).unwrap().unwrap();
         assert_ne!(fetched.story_id, "story-1");
     }
+
+    // ==========================================================================
+    // AC #4: Version switching updates active pointers test
+    // ==========================================================================
+
+    #[test]
+    fn test_version_switching_updates_both_active_pointers() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create two versions with snapshots
+        let v1 = StoryVersionRepository::create(&db, "story-1", "Original").unwrap();
+        let v2 = StoryVersionRepository::create(&db, "story-1", "Alternate Ending").unwrap();
+
+        // Create snapshots for each version
+        let snap1 = StorySnapshotRepository::create(&db, &v1.id, "Version 1 content").unwrap();
+        let snap2 = StorySnapshotRepository::create(&db, &v2.id, "Version 2 content").unwrap();
+
+        // Set v1 as active initially
+        StoryRepository::set_active_version(&db, "story-1", &v1.id).unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &snap1.id).unwrap();
+
+        // Verify initial state
+        let story_before = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(story_before.active_version_id, Some(v1.id.clone()));
+        assert_eq!(story_before.active_snapshot_id, Some(snap1.id.clone()));
+
+        // === Switch to v2 ===
+        // This simulates the switch_story_version command logic
+        StoryRepository::set_active_version(&db, "story-1", &v2.id).unwrap();
+        let latest_snap = StorySnapshotRepository::get_latest(&db, &v2.id).unwrap().unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &latest_snap.id).unwrap();
+
+        // Verify BOTH pointers are updated
+        let story_after = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(story_after.active_version_id, Some(v2.id.clone()), "active_version_id should be updated");
+        assert_eq!(story_after.active_snapshot_id, Some(snap2.id.clone()), "active_snapshot_id should be updated to latest snapshot of new version");
+
+        // Verify they changed from original values
+        assert_ne!(story_after.active_version_id, Some(v1.id), "active_version_id should have changed");
+        assert_ne!(story_after.active_snapshot_id, Some(snap1.id), "active_snapshot_id should have changed");
+    }
+
+    #[test]
+    fn test_version_switching_selects_latest_snapshot() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create two versions
+        let v1 = StoryVersionRepository::create(&db, "story-1", "Original").unwrap();
+        let v2 = StoryVersionRepository::create(&db, "story-1", "Alternate").unwrap();
+
+        // Create multiple snapshots for v2 with delays
+        let snap1 = StorySnapshotRepository::create(&db, &v1.id, "V1 content").unwrap();
+        let _snap2_old = StorySnapshotRepository::create(&db, &v2.id, "V2 old content").unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        let _snap2_mid = StorySnapshotRepository::create(&db, &v2.id, "V2 mid content").unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        let snap2_latest = StorySnapshotRepository::create(&db, &v2.id, "V2 latest content").unwrap();
+
+        // Set v1 as active
+        StoryRepository::set_active_version(&db, "story-1", &v1.id).unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &snap1.id).unwrap();
+
+        // Switch to v2 - should automatically select the LATEST snapshot
+        StoryRepository::set_active_version(&db, "story-1", &v2.id).unwrap();
+        let latest = StorySnapshotRepository::get_latest(&db, &v2.id).unwrap().unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &latest.id).unwrap();
+
+        // Verify the latest snapshot was selected
+        let story = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(story.active_snapshot_id, Some(snap2_latest.id));
+    }
+
+    #[test]
+    fn test_switch_back_and_forth_between_versions() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create two versions with snapshots
+        let v1 = StoryVersionRepository::create(&db, "story-1", "Version A").unwrap();
+        let v2 = StoryVersionRepository::create(&db, "story-1", "Version B").unwrap();
+
+        let snap1 = StorySnapshotRepository::create(&db, &v1.id, "Content A").unwrap();
+        let snap2 = StorySnapshotRepository::create(&db, &v2.id, "Content B").unwrap();
+
+        // Start with v1
+        StoryRepository::set_active_version(&db, "story-1", &v1.id).unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &snap1.id).unwrap();
+
+        // Switch to v2
+        StoryRepository::set_active_version(&db, "story-1", &v2.id).unwrap();
+        let latest = StorySnapshotRepository::get_latest(&db, &v2.id).unwrap().unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &latest.id).unwrap();
+
+        let after_first_switch = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(after_first_switch.active_version_id, Some(v2.id.clone()));
+        assert_eq!(after_first_switch.active_snapshot_id, Some(snap2.id.clone()));
+
+        // Switch back to v1
+        StoryRepository::set_active_version(&db, "story-1", &v1.id).unwrap();
+        let latest = StorySnapshotRepository::get_latest(&db, &v1.id).unwrap().unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &latest.id).unwrap();
+
+        let after_second_switch = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(after_second_switch.active_version_id, Some(v1.id.clone()));
+        assert_eq!(after_second_switch.active_snapshot_id, Some(snap1.id.clone()));
+
+        // Switch to v2 again
+        StoryRepository::set_active_version(&db, "story-1", &v2.id).unwrap();
+        let latest = StorySnapshotRepository::get_latest(&db, &v2.id).unwrap().unwrap();
+        StoryRepository::set_active_snapshot(&db, "story-1", &latest.id).unwrap();
+
+        let after_third_switch = StoryRepository::find_by_id(&db, "story-1").unwrap();
+        assert_eq!(after_third_switch.active_version_id, Some(v2.id));
+        assert_eq!(after_third_switch.active_snapshot_id, Some(snap2.id));
+    }
 }

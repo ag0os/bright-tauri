@@ -24,14 +24,14 @@ Implement comprehensive backend tests for the database versioning system coverin
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 StoryVersionRepository CRUD tests
-- [ ] #2 StorySnapshotRepository CRUD tests
-- [ ] #3 Story creation auto-creates version + snapshot test
-- [ ] #4 Version switching updates active pointers test
-- [ ] #5 Snapshot switching updates active pointer test
-- [ ] #6 Cascade delete (story → versions → snapshots) test
-- [ ] #7 Retention policy deletes oldest snapshots test
-- [ ] #8 update_snapshot_content updates word_count and last_edited_at test
-- [ ] #9 Delete last version returns error test
-- [ ] #10 Delete active version auto-switches test
+- [x] #1 StoryVersionRepository CRUD tests
+- [x] #2 StorySnapshotRepository CRUD tests
+- [x] #3 Story creation auto-creates version + snapshot test
+- [x] #4 Version switching updates active pointers test
+- [x] #5 Snapshot switching updates active pointer test
+- [x] #6 Cascade delete (story → versions → snapshots) test
+- [x] #7 Retention policy deletes oldest snapshots test
+- [x] #8 update_snapshot_content updates word_count and last_edited_at test
+- [x] #9 Delete last version returns error test
+- [x] #10 Delete active version auto-switches test
 <!-- AC:END -->
