@@ -1,7 +1,7 @@
 ---
 id: task-99
 title: 'dbv-1.2: Modify stories table for versioning'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-01-15 13:35'
 labels:
@@ -21,10 +21,10 @@ Update stories table schema: add active_version_id and active_snapshot_id column
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 active_version_id column added with FK to story_versions
-- [ ] #2 active_snapshot_id column added with FK to story_snapshots
-- [ ] #3 content column removed from stories table
-- [ ] #4 git_repo_path column removed
-- [ ] #5 current_branch column removed
-- [ ] #6 staged_changes column removed
+- [x] #1 active_version_id column added with FK to story_versions
+- [x] #2 active_snapshot_id column added with FK to story_snapshots
+- [x] #3 content column removed from stories table
+- [x] #4 git_repo_path column removed
+- [x] #5 current_branch column removed
+- [x] #6 staged_changes column removed
 <!-- AC:END -->
