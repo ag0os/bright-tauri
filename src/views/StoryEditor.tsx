@@ -111,11 +111,10 @@ export function StoryEditor() {
     });
   }, [storyId, calculateWordCount]);
 
-  // Auto-save content changes to database via DBV system
+  // Auto-save content changes to database via DBV system (30s debounce)
   const { saveState } = useAutoSave({
     content,
     onSave: handleSaveContent,
-    delay: 2000,
     enabled: !isLoadingStory && !!storyId,
   });
 

@@ -22,7 +22,7 @@ Modify useAutoSave hook to use 30s debounce delay and prepare for snapshot-based
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Default delay changed from 2000ms to 30000ms
-- [ ] #2 Hook works with new save signature (storyId, content, wordCount)
-- [ ] #3 Existing tests updated for new delay
+- [x] #1 Default delay changed from 2000ms to 30000ms
+- [x] #2 Hook works with new save signature (storyId, content, wordCount)
+- [x] #3 Existing tests updated for new delay
 <!-- AC:END -->
