@@ -44,14 +44,6 @@ export type { CreateContainerInput } from './CreateContainerInput';
 export type { UpdateContainerInput } from './UpdateContainerInput';
 export type { ContainerChildren } from './ContainerChildren';
 
-// Git types
-export type { CommitInfo } from './CommitInfo';
-export type { DiffResult } from './DiffResult';
-export type { FileChange } from './FileChange';
-export type { ChangeStatus } from './ChangeStatus';
-export type { MergeResult } from './MergeResult';
-export type { VariationInfo } from './VariationInfo';
-
 // Utility types for partial updates
 // These convert `field: T | null` types to `field?: T | null` for easier usage
 import type { UpdateStoryInput as _UpdateStoryInput } from './UpdateStoryInput';

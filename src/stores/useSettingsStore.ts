@@ -7,26 +7,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-/** Auto-commit mode: when to create Git commits */
-export type AutoCommitMode = 'on-close' | 'timed';
+/** Snapshot trigger mode: when to create automatic snapshots */
+export type SnapshotTrigger = 'on_leave' | 'character_count';
 
 interface SettingsState {
-  // Auto-commit settings
-  autoCommitEnabled: boolean;
-  autoCommitMode: AutoCommitMode;
-  autoCommitDelay: number; // milliseconds (only used when mode is 'timed')
+  // Snapshot settings (DBV: replaces Git auto-commit settings)
+  snapshotTrigger: SnapshotTrigger;
+  snapshotCharacterThreshold: number; // characters typed before auto-snapshot (only when trigger is 'character_count')
+  maxSnapshotsPerVersion: number; // maximum snapshots to keep per version
 
   // Actions
-  setAutoCommitEnabled: (enabled: boolean) => void;
-  setAutoCommitMode: (mode: AutoCommitMode) => void;
-  setAutoCommitDelay: (delay: number) => void;
+  setSnapshotTrigger: (trigger: SnapshotTrigger) => void;
+  setSnapshotCharacterThreshold: (threshold: number) => void;
+  setMaxSnapshotsPerVersion: (max: number) => void;
   resetToDefaults: () => void;
 }
 
 const DEFAULT_SETTINGS = {
-  autoCommitEnabled: true,
-  autoCommitMode: 'on-close' as AutoCommitMode, // Default: commit when leaving editor
-  autoCommitDelay: 30000, // 30 seconds (only used when mode is 'timed')
+  snapshotTrigger: 'character_count' as SnapshotTrigger, // Default: create snapshot after typing threshold
+  snapshotCharacterThreshold: 500, // Create snapshot every 500 characters
+  maxSnapshotsPerVersion: 50, // Keep up to 50 snapshots per version
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -36,16 +36,16 @@ export const useSettingsStore = create<SettingsState>()(
       ...DEFAULT_SETTINGS,
 
       // Actions
-      setAutoCommitEnabled: (enabled) => {
-        set({ autoCommitEnabled: enabled });
+      setSnapshotTrigger: (trigger) => {
+        set({ snapshotTrigger: trigger });
       },
 
-      setAutoCommitMode: (mode) => {
-        set({ autoCommitMode: mode });
+      setSnapshotCharacterThreshold: (threshold) => {
+        set({ snapshotCharacterThreshold: threshold });
       },
 
-      setAutoCommitDelay: (delay) => {
-        set({ autoCommitDelay: delay });
+      setMaxSnapshotsPerVersion: (max) => {
+        set({ maxSnapshotsPerVersion: max });
       },
 
       resetToDefaults: () => {

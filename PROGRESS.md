@@ -523,9 +523,9 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 - [x] task-113: Stub StoryCompare and delete StoryCombine views (Completed)
 
 ### Phase 6: Remove Git Code
-- [ ] task-114: Delete Git Rust modules (Pending)
-- [ ] task-115: Remove git2 dependency (Pending)
-- [ ] task-116: Remove Git-related frontend code and types (Pending)
+- [x] task-114: Delete Git Rust modules (Completed)
+- [x] task-115: Remove git2 dependency (Completed)
+- [x] task-116: Remove Git-related frontend code and types (Completed)
 
 ### Phase 7: Auto-Snapshot System
 - [ ] task-117: Create useAutoSnapshot hook (Pending)

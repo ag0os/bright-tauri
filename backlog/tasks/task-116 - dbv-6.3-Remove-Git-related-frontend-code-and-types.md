@@ -1,7 +1,7 @@
 ---
 id: task-116
 title: 'dbv-6.3: Remove Git-related frontend code and types'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-01-15 13:40'
 labels:
@@ -22,9 +22,9 @@ Clean up all Git-related frontend code including types, settings, and any remain
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Git-related TypeScript types removed from src/types/
-- [ ] #2 useSettingsStore updated to remove git settings (autoCommitMode, autoCommitDelay, etc.)
-- [ ] #3 New snapshot settings added to useSettingsStore (snapshotTrigger, snapshotCharacterThreshold, maxSnapshotsPerVersion)
-- [ ] #4 All Git imports and references removed from frontend
-- [ ] #5 TypeScript compiles without errors
+- [x] #1 Git-related TypeScript types removed from src/types/
+- [x] #2 useSettingsStore updated to remove git settings (autoCommitMode, autoCommitDelay, etc.)
+- [x] #3 New snapshot settings added to useSettingsStore (snapshotTrigger, snapshotCharacterThreshold, maxSnapshotsPerVersion)
+- [x] #4 All Git imports and references removed from frontend
+- [x] #5 TypeScript compiles without errors
 <!-- AC:END -->
