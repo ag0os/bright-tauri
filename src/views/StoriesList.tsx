@@ -42,7 +42,6 @@ export function StoriesList() {
   } = useStoriesStore();
 
   const {
-    containers,
     isLoading: containersLoading,
     error: containersError,
     loadContainers,
@@ -115,21 +114,9 @@ export function StoriesList() {
 
   const handleToggleFavorite = async (story: Story) => {
     try {
+      // Note: Only pass favorite field - content is managed via DBV (versions/snapshots)
       await updateStory(story.id, {
-        title: null,
-        description: null,
-        storyType: null,
-        status: null,
-        content: null,
-        notes: null,
-        outline: null,
-        targetWordCount: null,
-        order: null,
-        tags: null,
-        color: null,
         favorite: !story.favorite,
-        relatedElementIds: null,
-        seriesName: null,
       });
     } catch (error) {
       console.error('Failed to toggle favorite:', error);

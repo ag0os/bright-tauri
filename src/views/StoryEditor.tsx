@@ -5,16 +5,14 @@
  * Provides a distraction-free writing experience.
  */
 
-import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, GitBranch, Gear } from '@phosphor-icons/react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, Gear } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { useAutoSave } from '@/hooks/useAutoSave';
-import { useAutoCommit } from '@/hooks/useAutoCommit';
-import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -31,9 +29,6 @@ export function StoryEditor() {
   const updateStory = useStoriesStore((state) => state.updateStory);
   const getStory = useStoriesStore((state) => state.getStory);
   const showError = useToastStore((state) => state.error);
-  const autoCommitEnabled = useSettingsStore((state) => state.autoCommitEnabled);
-  const autoCommitMode = useSettingsStore((state) => state.autoCommitMode);
-  const autoCommitDelay = useSettingsStore((state) => state.autoCommitDelay);
 
   const [story, setStory] = useState<Story | null>(null);
   const [content, setContent] = useState<string>('');
@@ -41,14 +36,11 @@ export function StoryEditor() {
   const [isLoadingStory, setIsLoadingStory] = useState(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
-  // Track initial content for commit-on-close comparison
-  const initialContentRef = useRef<string>('');
-
   // Extract story ID from route
   const storyId =
     currentRoute.screen === 'story-editor' ? currentRoute.storyId : null;
 
-  // Load story on mount
+  // Load story on mount - content comes from activeSnapshot (DBV system)
   useEffect(() => {
     if (!storyId) return;
 
@@ -57,10 +49,10 @@ export function StoryEditor() {
       try {
         const loadedStory = await getStory(storyId);
         setStory(loadedStory);
-        setContent(loadedStory.content || '');
+        // Load content from active snapshot (DBV) - null means empty content
+        const snapshotContent = loadedStory.activeSnapshot?.content || '';
+        setContent(snapshotContent);
         setTitle(loadedStory.title);
-        // Store initial content to track changes for commit-on-close
-        initialContentRef.current = loadedStory.content || '';
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to load story';
         showError(message);
@@ -72,65 +64,60 @@ export function StoryEditor() {
     loadStoryData();
   }, [storyId, getStory]);
 
-  // Memoized save callback to prevent unnecessary re-renders
+  // Calculate word count from Lexical editor state JSON
+  const calculateWordCount = useCallback((editorContent: string): number => {
+    if (!editorContent) return 0;
+
+    try {
+      const editorState = JSON.parse(editorContent);
+
+      // Recursively extract text from Lexical nodes
+      const extractText = (node: unknown): string => {
+        if (!node || typeof node !== 'object') return '';
+
+        const n = node as Record<string, unknown>;
+
+        // If node has text property, return it
+        if (typeof n.text === 'string') {
+          return n.text;
+        }
+
+        // If node has children, recursively extract text
+        if (Array.isArray(n.children)) {
+          return n.children.map(extractText).join(' ');
+        }
+
+        return '';
+      };
+
+      const text = extractText(editorState.root);
+
+      // Split by whitespace and filter empty strings
+      return text.split(/\s+/).filter((word) => word.length > 0).length;
+    } catch {
+      return 0;
+    }
+  }, []);
+
+  // Memoized save callback - saves to snapshot via DBV system
+  // Backend resolves the active snapshot internally from storyId
   const handleSaveContent = useCallback(async (newContent: string) => {
     if (!storyId) return;
-    await updateStory(storyId, { content: newContent });
-  }, [storyId, updateStory]);
+    const wordCountValue = calculateWordCount(newContent);
+    await invoke('update_snapshot_content', {
+      storyId,
+      content: newContent,
+      wordCount: wordCountValue,
+    });
+  }, [storyId, calculateWordCount]);
 
-  // Auto-save content changes
+  // Auto-save content changes to database via DBV system
   const { saveState } = useAutoSave({
     content,
     onSave: handleSaveContent,
     delay: 2000,
     enabled: !isLoadingStory && !!storyId,
   });
-
-  // Auto-commit content changes to Git (only when mode is 'timed')
-  useAutoCommit({
-    storyId: storyId || '',
-    gitRepoPath: story?.gitRepoPath || null,
-    filePath: 'content.md',
-    content,
-    delay: autoCommitDelay,
-    enabled: autoCommitEnabled && autoCommitMode === 'timed' && !isLoadingStory && !!storyId && !!story?.gitRepoPath,
-  });
-
-  // Commit on close: create a Git commit when leaving the editor
-  // Uses refs to access latest values in cleanup function
-  const contentRef = useRef(content);
-  const storyRef = useRef(story);
-  contentRef.current = content;
-  storyRef.current = story;
-
-  useEffect(() => {
-    // Only setup commit-on-close when mode is 'on-close'
-    if (!autoCommitEnabled || autoCommitMode !== 'on-close') return;
-
-    return () => {
-      // Cleanup function runs when component unmounts (user leaves editor)
-      const currentStory = storyRef.current;
-      const currentContent = contentRef.current;
-
-      // Only commit if there's a Git repo and content has changed
-      if (currentStory?.gitRepoPath && currentContent !== initialContentRef.current) {
-        const timestamp = new Date().toISOString();
-        const message = `Auto-save on close: ${timestamp}`;
-
-        // Fire and forget - we're unmounting so we can't await
-        invoke('git_commit_file', {
-          repoPath: currentStory.gitRepoPath,
-          filePath: 'content.md',
-          content: currentContent,
-          message,
-        }).then(() => {
-          console.log(`[CommitOnClose] Committed story ${currentStory.id}`);
-        }).catch((error) => {
-          console.error('[CommitOnClose] Failed to commit:', error);
-        });
-      }
-    };
-  }, [autoCommitEnabled, autoCommitMode]);
 
   // Handle title changes
   const handleTitleBlur = async () => {
@@ -165,39 +152,7 @@ export function StoryEditor() {
   };
 
   // Calculate word count by extracting text from Lexical editor state
-  const wordCount = useMemo(() => {
-    if (!content) return 0;
-
-    try {
-      const editorState = JSON.parse(content);
-
-      // Recursively extract text from Lexical nodes
-      const extractText = (node: unknown): string => {
-        if (!node || typeof node !== 'object') return '';
-
-        const n = node as Record<string, unknown>;
-
-        // If node has text property, return it
-        if (typeof n.text === 'string') {
-          return n.text;
-        }
-
-        // If node has children, recursively extract text
-        if (Array.isArray(n.children)) {
-          return n.children.map(extractText).join(' ');
-        }
-
-        return '';
-      };
-
-      const text = extractText(editorState.root);
-
-      // Split by whitespace and filter empty strings
-      return text.split(/\s+/).filter((word) => word.length > 0).length;
-    } catch {
-      return 0;
-    }
-  }, [content]);
+  const wordCount = useMemo(() => calculateWordCount(content), [content, calculateWordCount]);
 
   // Render save state indicator
   const renderSaveIndicator = () => {
@@ -292,17 +247,6 @@ export function StoryEditor() {
           >
             <Gear size={18} weight="duotone" />
           </button>
-
-          {story.gitRepoPath && (
-            <button
-              className="icon-button"
-              onClick={() => storyId && navigate({ screen: 'story-variations', storyId })}
-              aria-label="Manage branches"
-              title="Story variations (branches)"
-            >
-              <GitBranch size={18} />
-            </button>
-          )}
 
           <button
             className="icon-button"

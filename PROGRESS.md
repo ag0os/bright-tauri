@@ -510,7 +510,7 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 ### Phase 3: Backend Tauri Commands
 - [x] task-105: Add version Tauri commands (Completed)
 - [x] task-106: Add snapshot Tauri commands (Completed)
-- [ ] task-107: Update get_story and create_story commands (Pending)
+- [x] task-107: Update get_story and create_story commands (Completed)
 
 ### Phase 4: Frontend Editor Updates
 - [ ] task-108: Update StoryEditor to use snapshots (Pending)
@@ -632,10 +632,20 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
   - Unit tests included
 - Commit: "feat(task-105,task-106): Add version and snapshot Tauri commands"
 
+### 2026-01-20 - task-107: Update get_story and create_story commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated get_story: Populates active_version and active_snapshot via JOINs
+  - Updated create_story: Creates "Original" version + empty snapshot in transaction
+  - Sets active_version_id and active_snapshot_id automatically
+  - All operations wrapped in transaction for atomicity
+- Commit: "feat(task-107): Update get_story and create_story for versioning"
+
 ## Blockers
 
 None currently.
 
 ## Summary
 
-Ready to begin Phase 1: Database Schema Changes.
+Phases 1-3 complete. Backend implementation finished. Ready to begin Phase 4: Frontend Editor Updates.

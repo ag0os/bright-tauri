@@ -8,7 +8,7 @@ import { useStoriesStore } from './useStoriesStore';
 import type { Story } from '@/types';
 
 describe('useStoriesStore - Filter and Sort Functionality', () => {
-  // Helper function to create mock stories
+  // Helper function to create mock stories (DBV: no content/git fields)
   const createMockStory = (overrides: Partial<Story> = {}): Story => ({
     id: 'story-1',
     universeId: 'universe-1',
@@ -20,7 +20,6 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
     status: 'draft',
     wordCount: 1000,
     targetWordCount: null,
-    content: '',
     notes: null,
     outline: null,
     order: null,
@@ -35,9 +34,10 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
     variationGroupId: 'group-1',
     variationType: 'original',
     parentVariationId: null,
-    gitRepoPath: '/path/to/repo',
-    currentBranch: 'main',
-    stagedChanges: false,
+    activeVersionId: 'version-1',
+    activeSnapshotId: 'snapshot-1',
+    activeVersion: null,
+    activeSnapshot: null,
     ...overrides,
   });
 
@@ -782,8 +782,8 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       act(() => {
         useStoriesStore.setState({ stories });
-        // @ts-expect-error - Testing invalid type that should not filter anything
-        useStoriesStore.getState().setFilter('type', 'novel');
+        // 'novel' is not a valid StoryType, so this should filter out all stories
+        useStoriesStore.getState().setFilter('type', 'novel' as never);
       });
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();

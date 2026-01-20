@@ -10,7 +10,6 @@ import {
   Book,
   Books,
   FolderOpen,
-  GitBranch,
   Gear,
   Trash,
 } from '@phosphor-icons/react';
@@ -76,9 +75,6 @@ export function ContainerCard({
 }: ContainerCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
-
-  // A leaf container has a git repo (contains stories)
-  const isLeaf = !!container.gitRepoPath;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger card click if clicking action buttons
@@ -167,17 +163,6 @@ export function ContainerCard({
               >
                 {formatContainerType(container.containerType)}
               </span>
-              {isLeaf && (
-                <>
-                  <span>•</span>
-                  <GitBranch
-                    className="icon icon-sm"
-                    weight="duotone"
-                    style={{ color: 'var(--color-success)' }}
-                  />
-                  <span style={{ fontSize: 'var(--font-size-xs)' }}>Leaf</span>
-                </>
-              )}
             </div>
           </div>
         </div>

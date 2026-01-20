@@ -5,7 +5,7 @@ import { renderWithProviders } from '@/test/utils';
 import { DeleteStoryModal } from './DeleteStoryModal';
 import type { Story } from '@/types/Story';
 
-// Mock story data
+// Mock story data (DBV: content is in activeSnapshot, no git fields)
 const mockStory: Story = {
   id: 'story-1',
   universeId: 'universe-1',
@@ -17,7 +17,6 @@ const mockStory: Story = {
   status: 'inprogress',
   wordCount: 1000,
   targetWordCount: 5000,
-  content: 'Test content',
   notes: null,
   outline: null,
   order: null,
@@ -32,9 +31,10 @@ const mockStory: Story = {
   variationGroupId: 'group-1',
   variationType: 'original',
   parentVariationId: null,
-  gitRepoPath: '/path/to/repo',
-  currentBranch: 'main',
-  stagedChanges: false,
+  activeVersionId: 'version-1',
+  activeSnapshotId: 'snapshot-1',
+  activeVersion: null,
+  activeSnapshot: null,
 };
 
 describe('DeleteStoryModal', () => {

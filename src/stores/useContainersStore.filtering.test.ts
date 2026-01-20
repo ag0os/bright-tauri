@@ -6,62 +6,63 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useContainersStore } from './useContainersStore';
 import type { Container } from '@/types';
 
+// Helper to create mock Container (DBV: no git fields)
+const createMockContainer = (overrides: Partial<Container> = {}): Container => ({
+  id: 'container-1',
+  universeId: 'universe-1',
+  parentContainerId: null,
+  containerType: 'novel',
+  title: 'Test Container',
+  description: '',
+  order: 0,
+  createdAt: '2024-01-01T00:00:00Z',
+  updatedAt: '2024-01-01T00:00:00Z',
+  ...overrides,
+});
+
 // Mock containers for testing
 const mockContainers: Container[] = [
-  {
+  createMockContainer({
     id: 'container-1',
-    universeId: 'universe-1',
-    parentContainerId: null,
     title: 'The Adventure Series',
     description: 'An epic adventure series',
     containerType: 'series',
     order: 0,
-    gitRepoPath: null,
     createdAt: '2024-01-01T00:00:00Z',
-    lastEditedAt: '2024-01-01T00:00:00Z',
-  },
-  {
+    updatedAt: '2024-01-01T00:00:00Z',
+  }),
+  createMockContainer({
     id: 'container-2',
-    universeId: 'universe-1',
-    parentContainerId: null,
     title: 'Mystery Novel',
     description: 'A thrilling mystery novel',
     containerType: 'novel',
     order: 1,
-    gitRepoPath: '/path/to/repo',
     createdAt: '2024-01-02T00:00:00Z',
-    lastEditedAt: '2024-01-02T00:00:00Z',
-  },
-  {
+    updatedAt: '2024-01-02T00:00:00Z',
+  }),
+  createMockContainer({
     id: 'container-3',
-    universeId: 'universe-1',
-    parentContainerId: null,
     title: 'Short Stories Collection',
     description: 'A collection of short stories',
     containerType: 'collection',
     order: 2,
-    gitRepoPath: null,
     createdAt: '2024-01-03T00:00:00Z',
-    lastEditedAt: '2024-01-03T00:00:00Z',
-  },
-  {
+    updatedAt: '2024-01-03T00:00:00Z',
+  }),
+  createMockContainer({
     id: 'container-4',
-    universeId: 'universe-1',
-    parentContainerId: null,
     title: 'Another Novel',
     description: 'Another fantastic novel',
     containerType: 'novel',
     order: 3,
-    gitRepoPath: '/path/to/repo2',
     createdAt: '2024-01-04T00:00:00Z',
-    lastEditedAt: '2024-01-04T00:00:00Z',
-  },
+    updatedAt: '2024-01-04T00:00:00Z',
+  }),
 ];
 
 describe('useContainersStore - Filtering', () => {
   beforeEach(() => {
     // Reset store state
-    const state = useContainersStore.getState();
     useContainersStore.setState({
       containers: mockContainers,
       filters: {
@@ -133,7 +134,7 @@ describe('useContainersStore - Filtering', () => {
 
       const result = getFilteredContainers();
       expect(result).toHaveLength(1);
-      expect(result[0].description.toLowerCase()).toContain('adventure');
+      expect(result[0].description?.toLowerCase()).toContain('adventure');
       expect(result[0].title).toBe('The Adventure Series');
     });
 
@@ -159,7 +160,7 @@ describe('useContainersStore - Filtering', () => {
 
   describe('setFilter', () => {
     it('sets containerType filter', () => {
-      const { setFilter, filters } = useContainersStore.getState();
+      const { setFilter } = useContainersStore.getState();
       setFilter('containerType', 'novel');
 
       const updatedFilters = useContainersStore.getState().filters;
