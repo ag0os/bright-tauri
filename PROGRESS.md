@@ -513,9 +513,9 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 - [x] task-107: Update get_story and create_story commands (Completed)
 
 ### Phase 4: Frontend Editor Updates
-- [ ] task-108: Update StoryEditor to use snapshots (Pending)
-- [ ] task-109: Update useAutoSave hook for 30s debounce (Pending)
-- [ ] task-110: Remove useAutoCommit hook (Pending)
+- [x] task-108: Update StoryEditor to use snapshots (Completed)
+- [x] task-109: Update useAutoSave hook for 30s debounce (Completed)
+- [x] task-110: Remove useAutoCommit hook (Completed)
 
 ### Phase 5: Frontend Views Updates
 - [ ] task-111: Rename StoryVariations to StoryVersions view (Pending)
@@ -642,10 +642,40 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
   - All operations wrapped in transaction for atomicity
 - Commit: "feat(task-107): Update get_story and create_story for versioning"
 
+### 2026-01-20 - task-108: Update StoryEditor to use snapshots
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Load content from story.activeSnapshot?.content
+  - Save via update_snapshot_content(storyId, content, wordCount)
+  - Removed useAutoCommit hook usage
+  - Stubbed Git-dependent views (StoryHistory, StoryVariations, StoryCombine, StoryCompare)
+  - Updated test mocks for DBV types
+  - All 182 tests passing
+- Commit: "feat(task-108): Update StoryEditor to use snapshots"
+
+### 2026-01-20 - task-109: Update useAutoSave hook for 30s debounce
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Changed default delay from 2000ms to 30000ms
+  - Updated JSDoc and example for DBV signature
+  - Removed explicit delay from StoryEditor (uses new default)
+- Commit: "feat(task-109): Update useAutoSave hook for 30s debounce"
+
+### 2026-01-20 - task-110: Remove useAutoCommit hook
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted src/hooks/useAutoCommit.ts (125 lines)
+  - Deleted src/hooks/useAutoCommit.test.ts (234 lines)
+  - No remaining imports found
+- Commit: "feat(task-110): Remove useAutoCommit hook"
+
 ## Blockers
 
 None currently.
 
 ## Summary
 
-Phases 1-3 complete. Backend implementation finished. Ready to begin Phase 4: Frontend Editor Updates.
+Phases 1-4 complete. Backend and editor updates finished. Ready to begin Phase 5: Frontend Views Updates.

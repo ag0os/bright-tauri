@@ -1,8 +1,8 @@
 /**
- * StoryVariations Styles
+ * StoryVersions Styles
  */
 
-.story-branches {
+.story-versions {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -10,7 +10,7 @@
 }
 
 /* Header */
-.story-branches-header {
+.story-versions-header {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -19,7 +19,7 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.story-branches-title {
+.story-versions-title {
   flex: 1;
   margin: 0;
   font-size: var(--font-size-h2);
@@ -44,7 +44,7 @@
 }
 
 /* Content */
-.story-branches-content {
+.story-versions-content {
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-lg);
@@ -67,8 +67,16 @@
   color: var(--color-text-secondary);
 }
 
-/* Create Variation Form */
-.create-branch-form {
+/* Create Version Button */
+.create-version-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Create Version Form */
+.create-version-form {
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
   background-color: var(--color-surface);
@@ -76,7 +84,7 @@
   border: 1px solid var(--color-border);
 }
 
-.create-branch-form h3 {
+.create-version-form h3 {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-h4);
   font-weight: var(--font-weight-semibold);
@@ -108,31 +116,24 @@
   font-weight: var(--font-weight-medium);
 }
 
-.slug-preview {
-  margin-top: var(--spacing-xs);
-  font-size: var(--font-size-small);
-  color: var(--color-text-tertiary);
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-}
-
 .form-actions {
   display: flex;
   gap: var(--spacing-sm);
 }
 
-/* Variations Section */
-.branches-section {
+/* Versions Section */
+.versions-section {
   margin-bottom: var(--spacing-lg);
 }
 
-.branches-section h3 {
+.versions-section h3 {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-h4);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
-.branches-list {
+.versions-list {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
@@ -145,8 +146,8 @@
   font-size: var(--font-size-body);
 }
 
-/* Variation Item */
-.branch-item {
+/* Version Item */
+.version-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -157,26 +158,35 @@
   transition: all 0.2s ease;
 }
 
-.branch-item:hover {
+.version-item:hover {
   border-color: var(--color-primary);
 }
 
-.branch-item.current {
+.version-item.current {
   border-color: var(--color-primary);
   background-color: var(--color-primary-light);
 }
 
-.branch-info {
+.version-info {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   flex: 1;
+  min-width: 0;
 }
 
-.branch-name {
+.version-name {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.version-rename-input {
+  flex: 1;
+  min-width: 0;
 }
 
 .current-badge {
@@ -189,29 +199,27 @@
   color: var(--color-primary);
   background-color: var(--color-primary-ultralight);
   border-radius: var(--border-radius-sm);
+  flex-shrink: 0;
 }
 
-.original-badge {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-accent);
-  background-color: var(--color-accent-light);
-  border-radius: var(--border-radius-sm);
-}
-
-.branch-actions {
+.version-actions {
   display: flex;
   gap: var(--spacing-sm);
   align-items: center;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  padding: var(--spacing-xs);
+}
+
+.delete-btn:hover {
+  color: var(--color-error);
 }
 
 /* Loading States */
-.story-branches-loading,
-.story-branches-error {
+.story-versions-loading,
+.story-versions-error {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -221,26 +229,94 @@
   text-align: center;
 }
 
-.story-branches-error svg {
+.story-versions-error svg {
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-lg);
 }
 
-.story-branches-error h2 {
+.story-versions-error h2 {
   margin: 0 0 var(--spacing-md);
   font-size: var(--font-size-h2);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
 }
 
-.story-branches-error p {
+.story-versions-error p {
   margin: 0 0 var(--spacing-sm);
   font-size: var(--font-size-body);
   color: var(--color-text-secondary);
 }
 
-.story-branches-error p:last-of-type {
+.story-versions-error p:last-of-type {
   margin-bottom: var(--spacing-lg);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.warning-icon {
+  color: var(--color-warning);
+}
+
+.modal-body {
+  margin-bottom: var(--spacing-lg);
+}
+
+.modal-body p {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-sm);
+}
+
+/* Danger button */
+.btn-danger {
+  background-color: var(--color-error);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: var(--color-error-dark, #c53030);
 }
 
 /* Switching Overlay */

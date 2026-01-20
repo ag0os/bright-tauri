@@ -27,6 +27,12 @@ export type { VariationType } from './VariationType';
 export type { CreateStoryInput } from './CreateStoryInput';
 export type { UpdateStoryInput } from './UpdateStoryInput';
 
+// DBV (Database-Only Versioning) types
+export type { StoryVersion } from './StoryVersion';
+export type { StorySnapshot } from './StorySnapshot';
+export type { CreateStoryVersionInput } from './CreateStoryVersionInput';
+export type { RenameStoryVersionInput } from './RenameStoryVersionInput';
+
 // Element types
 export type { ElementType } from './ElementType';
 export type { ElementRelationship } from './ElementRelationship';
