@@ -1,8 +1,6 @@
 mod commands;
 mod db;
-mod file_management;
 mod file_naming;
-mod git;
 mod models;
 mod repositories;
 
@@ -62,9 +60,6 @@ pub fn run() {
             commands::update_container,
             commands::delete_container,
             commands::reorder_container_children,
-            commands::ensure_container_git_repo,
-            commands::check_empty_non_leaf_container,
-            commands::convert_to_leaf_container,
             // Story commands
             commands::create_story,
             commands::get_story,
@@ -72,7 +67,6 @@ pub fn run() {
             commands::list_story_variations,
             commands::update_story,
             commands::delete_story,
-            commands::ensure_story_git_repo,
             // Element commands
             commands::create_element,
             commands::get_element,
@@ -81,21 +75,18 @@ pub fn run() {
             commands::get_related_elements,
             commands::update_element,
             commands::delete_element,
-            // Git commands
-            commands::git_init_repo,
-            commands::git_commit_file,
-            commands::git_commit_all,
-            commands::git_create_branch,
-            commands::git_checkout_branch,
-            commands::git_diff_branches,
-            commands::git_merge_branches,
-            commands::git_get_history,
-            commands::git_restore_commit,
-            commands::git_list_branches,
-            commands::git_get_current_branch,
-            commands::git_resolve_conflict,
-            commands::git_abort_merge,
-            commands::git_get_conflict_content,
+            // Snapshot commands (DBV)
+            commands::create_story_snapshot,
+            commands::list_story_snapshots,
+            commands::update_snapshot_content,
+            commands::switch_story_snapshot,
+            commands::cleanup_old_snapshots,
+            // Version commands (DBV)
+            commands::create_story_version,
+            commands::list_story_versions,
+            commands::rename_story_version,
+            commands::delete_story_version,
+            commands::switch_story_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

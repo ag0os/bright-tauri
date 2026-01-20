@@ -4,5 +4,8 @@ import type { StoryType } from "./StoryType";
 
 /**
  * Input for updating an existing Story
+ *
+ * Note: `content` is not included because content is managed through
+ * the versioning system (update_snapshot_content command).
  */
-export type UpdateStoryInput = { title: string | null, description: string | null, storyType: StoryType | null, status: StoryStatus | null, content: string | null, notes: string | null, outline: string | null, targetWordCount: number | null, order: number | null, tags: Array<string> | null, color: string | null, favorite: boolean | null, relatedElementIds: Array<string> | null, seriesName: string | null, };
+export type UpdateStoryInput = { title: string | null, description: string | null, storyType: StoryType | null, status: StoryStatus | null, notes: string | null, outline: string | null, targetWordCount: number | null, order: number | null, tags: Array<string> | null, color: string | null, favorite: boolean | null, relatedElementIds: Array<string> | null, seriesName: string | null, };

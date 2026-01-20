@@ -10,7 +10,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockTauriInvoke } from '@/test/utils';
+import { renderWithProviders } from '@/test/utils';
 import { StoriesList } from './StoriesList';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useContainersStore } from '@/stores/useContainersStore';
@@ -35,13 +35,21 @@ vi.mock('@/hooks', () => ({
   }),
 }));
 
-// Mock data
+// Mock data (complete Universe with all required fields)
 const mockUniverse: Universe = {
   id: 'universe-1',
   name: 'Test Universe',
   description: 'A test universe',
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
+  genre: 'fantasy',
+  tone: 'serious',
+  worldbuildingNotes: null,
+  themes: null,
+  status: 'active',
+  color: null,
+  icon: null,
+  tags: null,
 };
 
 describe('StoriesList - Filter UI', () => {
@@ -61,14 +69,14 @@ describe('StoriesList - Filter UI', () => {
 
   // Helper functions to find specific filter dropdowns
   const getTypeFilterSelect = () => screen.getByRole('combobox', {
-    name: (name, element) => {
+    name: (_, element) => {
       return element instanceof HTMLSelectElement &&
              Array.from(element.options).some(opt => opt.text === 'All Story Types');
     }
   });
 
   const getSortSelect = () => screen.getByRole('combobox', {
-    name: (name, element) => {
+    name: (_, element) => {
       return element instanceof HTMLSelectElement &&
              Array.from(element.options).some(opt => opt.text === 'Last Edited');
     }

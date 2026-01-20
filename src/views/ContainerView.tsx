@@ -282,13 +282,6 @@ export function ContainerView({ containerId }: ContainerViewProps) {
               }}
             >
               Type: {container.containerType}
-              {container.gitRepoPath && (
-                <>
-                  {' · '}
-                  Git: {container.currentBranch || 'No branch'}
-                  {container.stagedChanges && ' (changes)'}
-                </>
-              )}
             </p>
           </div>
 

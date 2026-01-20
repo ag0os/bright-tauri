@@ -481,3 +481,329 @@ Implementing 9 tasks identified during PR review. Tasks are organized into paral
 ## PR Review Feedback Implementation: COMPLETE
 
 All 9 tasks from PR review feedback have been successfully implemented across 4 execution waves.
+
+---
+
+# DBV (Database-only Versioning) Implementation
+
+Generated: 2026-01-20
+
+## Overview
+
+Replacing Git-based versioning with a database-only approach using versions and snapshots.
+
+Based on: `docs/plans/database-only-versioning-implementation.md`
+
+## Steps Status
+
+### Phase 1: Database Schema Changes
+- [x] task-98: Create story_versions and story_snapshots tables (Completed)
+- [x] task-99: Modify stories table for versioning (Completed)
+
+### Phase 2: Backend Rust Models
+- [x] task-100: Create StoryVersion Rust model (Completed)
+- [x] task-101: Create StorySnapshot Rust model (Completed)
+- [x] task-102: Update Story model for versioning (Completed)
+- [x] task-103: Create StoryVersionRepository (Completed)
+- [x] task-104: Create StorySnapshotRepository (Completed)
+
+### Phase 3: Backend Tauri Commands
+- [x] task-105: Add version Tauri commands (Completed)
+- [x] task-106: Add snapshot Tauri commands (Completed)
+- [x] task-107: Update get_story and create_story commands (Completed)
+
+### Phase 4: Frontend Editor Updates
+- [x] task-108: Update StoryEditor to use snapshots (Completed)
+- [x] task-109: Update useAutoSave hook for 30s debounce (Completed)
+- [x] task-110: Remove useAutoCommit hook (Completed)
+
+### Phase 5: Frontend Views Updates
+- [x] task-111: Rename StoryVariations to StoryVersions view (Completed)
+- [x] task-112: Update StoryHistory view for snapshots (Completed)
+- [x] task-113: Stub StoryCompare and delete StoryCombine views (Completed)
+
+### Phase 6: Remove Git Code
+- [x] task-114: Delete Git Rust modules (Completed)
+- [x] task-115: Remove git2 dependency (Completed)
+- [x] task-116: Remove Git-related frontend code and types (Completed)
+
+### Phase 7: Auto-Snapshot System
+- [x] task-117: Create useAutoSnapshot hook (Completed)
+- [x] task-118: Integrate useAutoSnapshot into StoryEditor (Completed)
+
+### Phase 8: Testing & Verification
+- [x] task-119: Add backend tests for versioning system (Completed)
+- [x] task-120: Add frontend tests for versioning system (Completed)
+
+## Execution Log
+
+### 2026-01-20 - task-98: Create story_versions and story_snapshots tables
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated SCHEMA_VERSION from 1 to 2
+  - Created migrate_v2() function
+  - Added story_versions table (id, story_id, name, created_at, updated_at)
+  - Added story_snapshots table (id, version_id, content, created_at)
+  - Added 4 indexes including unique constraint on (story_id, name)
+  - CASCADE DELETE configured for foreign keys
+- Commit: "feat(task-98): Add story_versions and story_snapshots tables"
+
+### 2026-01-20 - task-99: Modify stories table for versioning
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed from containers: git_repo_path, current_branch
+  - Removed from stories: content, git_repo_path, current_branch, staged_changes
+  - Added to stories: active_version_id (FK to story_versions), active_snapshot_id (FK to story_snapshots)
+- Commit: "feat(task-99): Modify stories table for versioning"
+
+### 2026-01-20 - task-100: Create StoryVersion Rust model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_version.rs with StoryVersion struct
+  - Added derive macros: Debug, Clone, Serialize, Deserialize, TS
+  - Added CreateStoryVersionInput and RenameStoryVersionInput helper structs
+  - Generated TypeScript types
+- Commit: "feat(task-100,task-101): Create StoryVersion and StorySnapshot Rust models"
+
+### 2026-01-20 - task-101: Create StorySnapshot Rust model
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_snapshot.rs with StorySnapshot struct
+  - Added derive macros: Debug, Clone, Serialize, Deserialize, TS
+  - Generated TypeScript types
+- Commit: (same commit as task-100)
+
+### 2026-01-20 - task-102: Update Story model for versioning
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Story: Added active_version_id, active_snapshot_id, active_version, active_snapshot fields
+  - Story: Removed content, git_repo_path, current_branch, staged_changes fields
+  - Container: Removed git_repo_path, current_branch, staged_changes fields
+  - Story Repository: Updated queries for new schema, added set_active_version/snapshot methods
+  - Removed git-related commands (ensure_story_git_repo, ensure_container_git_repo, etc.)
+  - Regenerated TypeScript types
+- Commit: "feat(task-102): Update Story model for versioning"
+
+### 2026-01-20 - task-103: Create StoryVersionRepository
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_version.rs with CRUD operations
+  - Implemented: create, get, list_by_story, rename, delete, count_by_story
+  - Added last-version deletion protection
+  - 15 unit tests
+- Commit: "feat(task-103): Create StoryVersionRepository"
+
+### 2026-01-20 - task-104: Create StorySnapshotRepository
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created story_snapshot.rs with CRUD operations
+  - Implemented: create, get, get_latest, list_by_version, update_content, delete, delete_oldest
+  - Added retention policy support (delete_oldest keeps N most recent)
+  - 27 unit tests
+- Commit: "feat(task-104): Create StorySnapshotRepository"
+
+### 2026-01-20 - task-105: Add version Tauri commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created src-tauri/src/commands/story_version.rs
+  - Implemented: create_story_version, list_story_versions, rename_story_version, delete_story_version, switch_story_version
+  - Auto-switch to remaining version when deleting active version
+  - Registered all commands in lib.rs invoke_handler
+  - Unit tests included
+- Commit: "feat(task-105,task-106): Add version and snapshot Tauri commands"
+
+### 2026-01-20 - task-106: Add snapshot Tauri commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created src-tauri/src/commands/story_snapshot.rs
+  - Implemented: create_story_snapshot, list_story_snapshots, update_snapshot_content, switch_story_snapshot, cleanup_old_snapshots
+  - Added word count calculation helper
+  - Retention policy integration (default 50 snapshots max)
+  - Registered all commands in lib.rs invoke_handler
+  - Unit tests included
+- Commit: "feat(task-105,task-106): Add version and snapshot Tauri commands"
+
+### 2026-01-20 - task-107: Update get_story and create_story commands
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Updated get_story: Populates active_version and active_snapshot via JOINs
+  - Updated create_story: Creates "Original" version + empty snapshot in transaction
+  - Sets active_version_id and active_snapshot_id automatically
+  - All operations wrapped in transaction for atomicity
+- Commit: "feat(task-107): Update get_story and create_story for versioning"
+
+### 2026-01-20 - task-108: Update StoryEditor to use snapshots
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Load content from story.activeSnapshot?.content
+  - Save via update_snapshot_content(storyId, content, wordCount)
+  - Removed useAutoCommit hook usage
+  - Stubbed Git-dependent views (StoryHistory, StoryVariations, StoryCombine, StoryCompare)
+  - Updated test mocks for DBV types
+  - All 182 tests passing
+- Commit: "feat(task-108): Update StoryEditor to use snapshots"
+
+### 2026-01-20 - task-109: Update useAutoSave hook for 30s debounce
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Changed default delay from 2000ms to 30000ms
+  - Updated JSDoc and example for DBV signature
+  - Removed explicit delay from StoryEditor (uses new default)
+- Commit: "feat(task-109): Update useAutoSave hook for 30s debounce"
+
+### 2026-01-20 - task-110: Remove useAutoCommit hook
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted src/hooks/useAutoCommit.ts (125 lines)
+  - Deleted src/hooks/useAutoCommit.test.ts (234 lines)
+  - No remaining imports found
+- Commit: "feat(task-110): Remove useAutoCommit hook"
+
+### 2026-01-20 - task-111: Rename StoryVariations to StoryVersions view
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Renamed StoryVariations.tsx → StoryVersions.tsx
+  - Updated route from /variations to /versions
+  - Implemented version CRUD: list, create, switch, rename, delete
+  - Warning for deleting active version, error for last version
+  - 17 tests, all 194 tests passing
+- Commit: "feat(task-111): Rename StoryVariations to StoryVersions view"
+
+### 2026-01-20 - task-112: Update StoryHistory view for snapshots
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - List snapshots via list_story_snapshots(active_version_id)
+  - Absolute timestamps (e.g., "Jan 20, 2026 2:30 PM")
+  - Restore via switch_story_snapshot(story_id, snapshot_id)
+  - No delete UI (retention policy handles cleanup)
+  - Empty state for no snapshots
+  - 7 new tests, all 196 tests passing
+- Commit: "feat(task-112): Update StoryHistory view for snapshots"
+
+### 2026-01-20 - task-113: Stub StoryCompare and delete StoryCombine views
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - StoryCompare stubbed with "Coming Soon" message
+  - Deleted StoryCombine.tsx, .test.tsx, .css
+  - Removed story-combine route from App.tsx
+  - Removed story-combine from navigation store
+  - All 192 tests passing
+- Commit: "feat(task-113): Stub StoryCompare and delete StoryCombine views"
+
+### 2026-01-20 - task-114: Delete Git Rust modules
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted git.rs (~1916 lines), file_management.rs (~1829 lines), commands/git.rs (~299 lines)
+  - Removed 14 Git commands from invoke_handler
+  - Total ~4000 lines of Git Rust code removed
+- Commit: "feat(task-114): Delete Git Rust modules"
+
+### 2026-01-20 - task-115: Remove git2 dependency
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed git2 = "0.19" from Cargo.toml
+  - Removed transitive deps: libgit2-sys, libssh2-sys, libz-sys, openssl-sys, etc.
+  - Significantly reduced compile time and binary size
+- Commit: "feat(task-115): Remove git2 dependency"
+
+### 2026-01-20 - task-116: Remove Git-related frontend code and types
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted 6 Git TypeScript types (CommitInfo, DiffResult, FileChange, etc.)
+  - Replaced git settings with snapshot settings in useSettingsStore
+  - Added snapshotTrigger, snapshotCharacterThreshold, maxSnapshotsPerVersion
+  - Updated Settings.tsx UI for snapshot settings
+  - All 192 tests passing
+- Commit: "feat(task-116): Remove Git-related frontend code and types"
+
+### 2026-01-20 - task-117: Create useAutoSnapshot hook
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created useAutoSnapshot.ts with character_count and on_leave triggers
+  - Only triggers on content INCREASE (deletions don't create snapshots)
+  - Tracks lastSnapshotCharCount to avoid duplicates
+  - 15 unit tests
+  - All 207 tests passing
+- Commit: "feat(task-117): Create useAutoSnapshot hook"
+
+### 2026-01-20 - task-118: Integrate useAutoSnapshot into StoryEditor
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Imported useAutoSnapshot and useSettingsStore
+  - Added snapshotTrigger and snapshotCharacterThreshold from settings
+  - Two-layer model: useAutoSave (30s) + useAutoSnapshot
+  - All 207 tests passing
+- Commit: "feat(task-118): Integrate useAutoSnapshot into StoryEditor"
+
+### 2026-01-20 - task-119: Add backend tests for versioning system
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Verified existing tests for repositories
+  - Added tests for story creation auto-creates version + snapshot
+  - Added tests for cascade delete (story → versions → snapshots)
+  - Added tests for version/snapshot switching
+  - Added tests for update_snapshot_content updates word_count/last_edited_at
+  - All 194 backend tests pass
+- Commit: "feat(task-119): Add backend tests for versioning system"
+
+### 2026-01-20 - task-120: Add frontend tests for versioning system
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created useAutoSave.test.ts (17 tests)
+  - Created StoryEditor.test.tsx (17 tests)
+  - Verified existing tests in StoryVersions, StoryHistory, useAutoSnapshot
+  - All 241 frontend tests pass
+- Commit: "feat(task-120): Add frontend tests for versioning system"
+
+## Blockers
+
+None currently.
+
+## Summary
+
+**DBV (Database-only Versioning) Implementation: COMPLETE**
+
+All 23 tasks across 8 phases successfully implemented:
+
+| Phase | Tasks | Description |
+|-------|-------|-------------|
+| 1 | 98-99 | Database schema changes (story_versions, story_snapshots tables) |
+| 2 | 100-104 | Backend Rust models (StoryVersion, StorySnapshot, updated Story) |
+| 3 | 105-107 | Tauri commands (version/snapshot CRUD, updated story commands) |
+| 4 | 108-110 | Frontend editor updates (snapshot-based saving, 30s auto-save) |
+| 5 | 111-113 | Frontend views (StoryVersions, StoryHistory, cleanup) |
+| 6 | 114-116 | Git code removal (~4000 lines Rust, git2 dep, frontend types) |
+| 7 | 117-118 | Auto-snapshot system (useAutoSnapshot hook, StoryEditor integration) |
+| 8 | 119-120 | Testing & verification (194 backend + 241 frontend tests) |
+
+**Key Outcomes:**
+- Git-based versioning replaced with database-only approach
+- Two-layer save model: 30s auto-save + character-threshold snapshots
+- Version management: create, switch, rename, delete with protection
+- Snapshot history: view, restore previous states
+- ~4000 lines of Git Rust code removed
+- git2 dependency removed (reduced binary size)
+- Comprehensive test coverage

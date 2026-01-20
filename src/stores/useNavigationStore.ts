@@ -14,9 +14,8 @@ export type Route =
   | { screen: 'universe-list' }
   | { screen: 'story-editor'; storyId: string }
   | { screen: 'story-history'; storyId: string }
-  | { screen: 'story-variations'; storyId: string }
-  | { screen: 'story-compare'; storyId: string; branchA?: string; branchB?: string }
-  | { screen: 'story-combine'; storyId: string; fromBranch: string; intoBranch: string; conflicts: string[] }
+  | { screen: 'story-versions'; storyId: string }
+  | { screen: 'story-compare'; storyId: string }
   | { screen: 'story-settings'; storyId: string }
   | { screen: 'element-detail'; elementId: string }
   | { screen: 'settings' }
@@ -44,7 +43,7 @@ interface NavigationState {
   navigateToStoryEditor: (storyId: string) => void;
   navigateToStorySettings: (storyId: string) => void;
   navigateToStoryHistory: (storyId: string) => void;
-  navigateToStoryVariations: (storyId: string) => void;
+  navigateToStoryVersions: (storyId: string) => void;
 }
 
 const initialRoute: Route = { screen: 'universe-selection' };
@@ -112,7 +111,7 @@ export const useNavigationStore = create<NavigationState>((set, get) => ({
     get().navigate({ screen: 'story-history', storyId });
   },
 
-  navigateToStoryVariations: (storyId) => {
-    get().navigate({ screen: 'story-variations', storyId });
+  navigateToStoryVersions: (storyId) => {
+    get().navigate({ screen: 'story-versions', storyId });
   },
 }));

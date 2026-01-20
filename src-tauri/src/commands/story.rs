@@ -1,86 +1,116 @@
 use crate::db::Database;
-use crate::git::GitService;
 use crate::models::{CreateStoryInput, Story, UpdateStoryInput};
-use crate::repositories::StoryRepository;
-use tauri::{AppHandle, Manager, State};
+use crate::repositories::{StoryRepository, StorySnapshotRepository, StoryVersionRepository};
+use tauri::State;
 
+/// Create a new story.
+///
+/// This command creates a story and initializes the versioning system:
+/// 1. Creates the story record
+/// 2. Creates an "Original" version
+/// 3. Creates an initial empty snapshot
+/// 4. Sets active_version_id and active_snapshot_id on the story
+///
+/// All operations are wrapped in a transaction for atomicity.
 #[tauri::command]
-pub fn create_story(
-    app: AppHandle,
-    db: State<Database>,
-    input: CreateStoryInput,
-) -> Result<Story, String> {
-    // Transaction sequence:
-    // 1. Insert DB row (story)
-    // 2. If entity should have git repo (standalone story):
-    //    - Initialize git repo
-    //    - If git init fails → rollback DB insert, return error
-    //    - Update git_repo_path in DB
-    //    - If path update fails → delete git repo dir, rollback DB, return error
-
-    // STEP 1: Create the story in the database
-    let story = StoryRepository::create(&db, input).map_err(|e| e.to_string())?;
-
-    // Only initialize git repository for standalone stories (container_id = None)
-    // Stories within containers share their container's git repo
-    if story.should_have_git_repo() {
-        // Get app data directory for git repos
-        let app_data_dir = app.path().app_data_dir().map_err(|e| {
-            // Rollback: Delete the story from database
-            let _ = StoryRepository::delete(&db, &story.id);
-            format!("Failed to get app data directory: {e}")
-        })?;
-
-        // STEP 2: Initialize git repository for the story
-        let git_repo_path = GitService::init_repo(&app_data_dir, &story.id).map_err(|e| {
-            // Rollback: Delete the story from database
-            let _ = StoryRepository::delete(&db, &story.id);
-            format!("Failed to initialize git repository: {e}")
-        })?;
-
-        // STEP 3: Update the story with the git repo path
-        let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
-        if let Err(e) = StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str) {
-            // Rollback: Delete the git repo directory
-            if git_repo_path.exists() {
-                let _ = std::fs::remove_dir_all(&git_repo_path);
-            }
-            // Rollback: Delete the story from database
-            let _ = StoryRepository::delete(&db, &story.id);
-            return Err(format!("Failed to update git repo path: {e}"));
-        }
-
-        // Get current branch from the newly created repo
-        let current_branch = GitService::get_current_branch(&git_repo_path).map_err(|e| {
-            // Rollback: Delete git repo and story
-            if git_repo_path.exists() {
-                let _ = std::fs::remove_dir_all(&git_repo_path);
-            }
-            let _ = StoryRepository::delete(&db, &story.id);
-            format!("Failed to get current branch: {e}")
-        })?;
-
-        // Update the current branch
-        if let Err(e) = StoryRepository::set_current_branch(&db, &story.id, &current_branch) {
-            // Rollback: Delete git repo and story
-            if git_repo_path.exists() {
-                let _ = std::fs::remove_dir_all(&git_repo_path);
-            }
-            let _ = StoryRepository::delete(&db, &story.id);
-            return Err(format!("Failed to update current branch: {e}"));
-        }
-
-        // Return the updated story
-        return StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string());
+pub fn create_story(db: State<Database>, input: CreateStoryInput) -> Result<Story, String> {
+    // Begin transaction
+    {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+        conn.execute("BEGIN TRANSACTION", [])
+            .map_err(|e| e.to_string())?;
     }
 
-    // For stories within containers, just return the created story
-    Ok(story)
+    // Create the story (this doesn't set active_version_id or active_snapshot_id yet)
+    let story = match StoryRepository::create(&db, input) {
+        Ok(s) => s,
+        Err(e) => {
+            // Rollback on error
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            let _ = conn.execute("ROLLBACK", []);
+            return Err(e.to_string());
+        }
+    };
+
+    // Create the "Original" version
+    let version = match StoryVersionRepository::create(&db, &story.id, "Original") {
+        Ok(v) => v,
+        Err(e) => {
+            // Rollback on error
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            let _ = conn.execute("ROLLBACK", []);
+            return Err(e.to_string());
+        }
+    };
+
+    // Create the initial empty snapshot
+    let snapshot = match StorySnapshotRepository::create(&db, &version.id, "") {
+        Ok(s) => s,
+        Err(e) => {
+            // Rollback on error
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            let _ = conn.execute("ROLLBACK", []);
+            return Err(e.to_string());
+        }
+    };
+
+    // Update the story's active_version_id and active_snapshot_id
+    if let Err(e) = StoryRepository::set_active_version(&db, &story.id, &version.id) {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+        let _ = conn.execute("ROLLBACK", []);
+        return Err(e.to_string());
+    }
+
+    if let Err(e) = StoryRepository::set_active_snapshot(&db, &story.id, &snapshot.id) {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+        let _ = conn.execute("ROLLBACK", []);
+        return Err(e.to_string());
+    }
+
+    // Commit transaction
+    {
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+        conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
+    }
+
+    // Return the story with inline version and snapshot data populated
+    let mut result = StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string())?;
+    result.active_version = Some(version);
+    result.active_snapshot = Some(snapshot);
+
+    Ok(result)
 }
 
+/// Get a story by ID with active version and snapshot populated.
+///
+/// This command fetches the story and also loads the active_version and active_snapshot
+/// inline data so the frontend gets everything in one request.
 #[tauri::command]
 pub fn get_story(db: State<Database>, id: String) -> Result<Story, String> {
-    StoryRepository::find_by_id(&db, &id).map_err(|e| e.to_string())
+    let mut story = StoryRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
+
+    // Populate active_version if present
+    if let Some(ref version_id) = story.active_version_id {
+        if let Ok(Some(version)) = StoryVersionRepository::get(&db, version_id) {
+            story.active_version = Some(version);
+        }
+    }
+
+    // Populate active_snapshot if present
+    if let Some(ref snapshot_id) = story.active_snapshot_id {
+        if let Ok(Some(snapshot)) = StorySnapshotRepository::get(&db, snapshot_id) {
+            story.active_snapshot = Some(snapshot);
+        }
+    }
+
+    Ok(story)
 }
 
 #[tauri::command]
@@ -109,94 +139,274 @@ pub fn update_story(
 }
 
 #[tauri::command]
-pub fn delete_story(app: AppHandle, db: State<Database>, id: String) -> Result<(), String> {
-    // Delete the story
-    StoryRepository::delete(&db, &id).map_err(|e| e.to_string())?;
-
-    // Get app data directory for git repos
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
-
-    // Delete git repository for the story (if it exists)
-    let git_repos_dir = app_data_dir.join("git-repos");
-    let repo_path = git_repos_dir.join(&id);
-    if repo_path.exists() {
-        std::fs::remove_dir_all(&repo_path)
-            .map_err(|e| format!("Failed to delete git repo for {id}: {e}"))?;
-    }
-
-    Ok(())
+pub fn delete_story(db: State<Database>, id: String) -> Result<(), String> {
+    // Delete the story (CASCADE will delete associated versions and snapshots)
+    StoryRepository::delete(&db, &id).map_err(|e| e.to_string())
 }
 
-/// Ensure a story has a git repository initialized.
-/// This is useful for stories created before git integration was added.
-/// Also syncs the current_branch field with the actual git branch.
-/// Returns the updated story with the git repo path set.
-///
-/// Note: Only standalone stories (container_id = None) have their own git repos.
-/// Stories within containers share their container's git repo.
-#[tauri::command]
-pub fn ensure_story_git_repo(
-    app: AppHandle,
-    db: State<Database>,
-    id: String,
-) -> Result<Story, String> {
-    // Get the story
-    let story = StoryRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db::Database;
+    use crate::models::{CreateStoryInput, StoryType};
+    use rusqlite::params;
+    use tempfile::TempDir;
 
-    // Only standalone stories should have their own git repos
-    if !story.should_have_git_repo() {
-        return Err(format!(
-            "Story '{}' is within a container and shares the container's git repo",
-            story.id
-        ));
+    fn setup_test_db() -> (Database, TempDir) {
+        let temp_dir = TempDir::new().unwrap();
+        let db_path = temp_dir.path().join("test.db");
+        let db = Database::new(db_path).unwrap();
+
+        // Run migrations
+        let conn = db.connection();
+        let conn = conn.lock().unwrap();
+        crate::db::migrations::run_migrations(&conn).unwrap();
+        drop(conn);
+
+        // Create a test universe
+        db.execute(
+            "INSERT INTO universes (id, name, description, created_at, updated_at, status)
+             VALUES (?, ?, ?, ?, ?, ?)",
+            params![
+                "universe-1",
+                "Test Universe",
+                "Test",
+                "2024-01-01T00:00:00Z",
+                "2024-01-01T00:00:00Z",
+                "active"
+            ],
+        )
+        .unwrap();
+
+        (db, temp_dir)
     }
 
-    // If git_repo_path is already set and exists, validate integrity
-    if !story.git_repo_path.is_empty() {
-        let path = std::path::Path::new(&story.git_repo_path);
-        if path.exists() && path.join(".git").exists() {
-            // Validate repository integrity
-            if let Err(e) = GitService::validate_repo_integrity(path) {
-                return Err(format!(
-                    "Git repository corruption detected at {}: {}. \
-                     To fix this, you can either manually repair the repository or \
-                     delete it and reinitialize by setting git_repo_path to empty string and calling this command again.",
-                    story.git_repo_path, e
-                ));
-            }
-
-            // Sync the current branch name from the actual repo
-            let actual_branch = GitService::get_current_branch(path)
-                .map_err(|e| format!("Failed to get current branch: {e}"))?;
-
-            if actual_branch != story.current_branch {
-                StoryRepository::set_current_branch(&db, &story.id, &actual_branch)
-                    .map_err(|e| format!("Failed to update current branch: {e}"))?;
-                return StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string());
-            }
-
-            return Ok(story);
+    fn create_test_story_input(title: &str) -> CreateStoryInput {
+        CreateStoryInput {
+            universe_id: "universe-1".to_string(),
+            title: title.to_string(),
+            description: Some("Test story".to_string()),
+            story_type: Some(StoryType::Chapter),
+            notes: None,
+            outline: None,
+            target_word_count: None,
+            tags: None,
+            color: None,
+            series_name: None,
+            container_id: None,
+            variation_type: None,
+            parent_variation_id: None,
         }
     }
 
-    // Get app data directory for git repos
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
+    /// Simulates the create_story command logic for testing without Tauri State
+    fn create_story_internal(db: &Database, input: CreateStoryInput) -> Result<Story, String> {
+        // Begin transaction
+        {
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            conn.execute("BEGIN TRANSACTION", [])
+                .map_err(|e| e.to_string())?;
+        }
 
-    // Initialize git repository for the story
-    let git_repo_path = GitService::init_repo(&app_data_dir, &story.id)
-        .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
+        // Create the story
+        let story = match StoryRepository::create(db, input) {
+            Ok(s) => s,
+            Err(e) => {
+                let conn = db.connection();
+                let conn = conn.lock().unwrap();
+                let _ = conn.execute("ROLLBACK", []);
+                return Err(e.to_string());
+            }
+        };
 
-    // Update the story with the git repo path
-    let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
-    StoryRepository::set_git_repo_path(&db, &story.id, &git_repo_path_str)
-        .map_err(|e| format!("Failed to update git repo path: {e}"))?;
+        // Create the "Original" version
+        let version = match StoryVersionRepository::create(db, &story.id, "Original") {
+            Ok(v) => v,
+            Err(e) => {
+                let conn = db.connection();
+                let conn = conn.lock().unwrap();
+                let _ = conn.execute("ROLLBACK", []);
+                return Err(e.to_string());
+            }
+        };
 
-    // Return the updated story
-    StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string())
+        // Create the initial empty snapshot
+        let snapshot = match StorySnapshotRepository::create(db, &version.id, "") {
+            Ok(s) => s,
+            Err(e) => {
+                let conn = db.connection();
+                let conn = conn.lock().unwrap();
+                let _ = conn.execute("ROLLBACK", []);
+                return Err(e.to_string());
+            }
+        };
+
+        // Update the story's active_version_id and active_snapshot_id
+        if let Err(e) = StoryRepository::set_active_version(db, &story.id, &version.id) {
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            let _ = conn.execute("ROLLBACK", []);
+            return Err(e.to_string());
+        }
+
+        if let Err(e) = StoryRepository::set_active_snapshot(db, &story.id, &snapshot.id) {
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            let _ = conn.execute("ROLLBACK", []);
+            return Err(e.to_string());
+        }
+
+        // Commit transaction
+        {
+            let conn = db.connection();
+            let conn = conn.lock().unwrap();
+            conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
+        }
+
+        // Return the story with inline version and snapshot data populated
+        let mut result = StoryRepository::find_by_id(db, &story.id).map_err(|e| e.to_string())?;
+        result.active_version = Some(version);
+        result.active_snapshot = Some(snapshot);
+
+        Ok(result)
+    }
+
+    // ==========================================================================
+    // AC #3: Story creation auto-creates version + snapshot test
+    // ==========================================================================
+
+    #[test]
+    fn test_create_story_auto_creates_version_and_snapshot() {
+        let (db, _temp_dir) = setup_test_db();
+
+        let input = create_test_story_input("My New Story");
+        let story = create_story_internal(&db, input).unwrap();
+
+        // Story should have active_version_id set
+        assert!(story.active_version_id.is_some(), "active_version_id should be set");
+
+        // Story should have active_snapshot_id set
+        assert!(story.active_snapshot_id.is_some(), "active_snapshot_id should be set");
+
+        // active_version should be populated with "Original" version
+        assert!(story.active_version.is_some(), "active_version should be populated");
+        let version = story.active_version.unwrap();
+        assert_eq!(version.name, "Original");
+        assert_eq!(version.story_id, story.id);
+
+        // active_snapshot should be populated with empty content
+        assert!(story.active_snapshot.is_some(), "active_snapshot should be populated");
+        let snapshot = story.active_snapshot.unwrap();
+        assert_eq!(snapshot.content, "");
+        assert_eq!(snapshot.version_id, version.id);
+
+        // Verify version exists in database
+        let versions = StoryVersionRepository::list_by_story(&db, &story.id).unwrap();
+        assert_eq!(versions.len(), 1);
+        assert_eq!(versions[0].name, "Original");
+
+        // Verify snapshot exists in database
+        let snapshots = StorySnapshotRepository::list_by_version(&db, &version.id).unwrap();
+        assert_eq!(snapshots.len(), 1);
+        assert_eq!(snapshots[0].content, "");
+    }
+
+    #[test]
+    fn test_create_story_version_and_snapshot_ids_match() {
+        let (db, _temp_dir) = setup_test_db();
+
+        let input = create_test_story_input("Test Story");
+        let story = create_story_internal(&db, input).unwrap();
+
+        // Verify the IDs match between story pointers and inline data
+        assert_eq!(
+            story.active_version_id,
+            story.active_version.as_ref().map(|v| v.id.clone())
+        );
+        assert_eq!(
+            story.active_snapshot_id,
+            story.active_snapshot.as_ref().map(|s| s.id.clone())
+        );
+    }
+
+    // ==========================================================================
+    // AC #6: Cascade delete (story -> versions -> snapshots) test
+    // ==========================================================================
+
+    #[test]
+    fn test_delete_story_cascades_to_versions_and_snapshots() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a story with version and snapshot
+        let input = create_test_story_input("Story To Delete");
+        let story = create_story_internal(&db, input).unwrap();
+
+        let version_id = story.active_version_id.clone().unwrap();
+        let snapshot_id = story.active_snapshot_id.clone().unwrap();
+
+        // Verify version exists
+        let version_before = StoryVersionRepository::get(&db, &version_id).unwrap();
+        assert!(version_before.is_some());
+
+        // Verify snapshot exists
+        let snapshot_before = StorySnapshotRepository::get(&db, &snapshot_id).unwrap();
+        assert!(snapshot_before.is_some());
+
+        // Delete the story
+        StoryRepository::delete(&db, &story.id).unwrap();
+
+        // Verify story is deleted
+        let story_result = StoryRepository::find_by_id(&db, &story.id);
+        assert!(story_result.is_err());
+
+        // Verify version is cascade deleted
+        let version_after = StoryVersionRepository::get(&db, &version_id).unwrap();
+        assert!(version_after.is_none(), "Version should be cascade deleted");
+
+        // Verify snapshot is cascade deleted
+        let snapshot_after = StorySnapshotRepository::get(&db, &snapshot_id).unwrap();
+        assert!(snapshot_after.is_none(), "Snapshot should be cascade deleted");
+    }
+
+    #[test]
+    fn test_delete_story_cascades_multiple_versions_and_snapshots() {
+        let (db, _temp_dir) = setup_test_db();
+
+        // Create a story
+        let input = create_test_story_input("Complex Story");
+        let story = create_story_internal(&db, input).unwrap();
+
+        let version1_id = story.active_version_id.clone().unwrap();
+
+        // Add a second version
+        let version2 = StoryVersionRepository::create(&db, &story.id, "Alternate Ending").unwrap();
+
+        // Add multiple snapshots to each version
+        let _snap1_2 = StorySnapshotRepository::create(&db, &version1_id, "Version 1 snapshot 2").unwrap();
+        let _snap2_1 = StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 1").unwrap();
+        let _snap2_2 = StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 2").unwrap();
+
+        // Verify we have multiple versions and snapshots
+        let versions_before = StoryVersionRepository::list_by_story(&db, &story.id).unwrap();
+        assert_eq!(versions_before.len(), 2);
+
+        let snapshots_v1 = StorySnapshotRepository::list_by_version(&db, &version1_id).unwrap();
+        let snapshots_v2 = StorySnapshotRepository::list_by_version(&db, &version2.id).unwrap();
+        assert_eq!(snapshots_v1.len(), 2); // original + one more
+        assert_eq!(snapshots_v2.len(), 2);
+
+        // Delete the story
+        StoryRepository::delete(&db, &story.id).unwrap();
+
+        // Verify all versions are deleted
+        let versions_after = StoryVersionRepository::list_by_story(&db, &story.id).unwrap();
+        assert_eq!(versions_after.len(), 0);
+
+        // Verify all snapshots are deleted
+        let snapshots_v1_after = StorySnapshotRepository::list_by_version(&db, &version1_id).unwrap();
+        let snapshots_v2_after = StorySnapshotRepository::list_by_version(&db, &version2.id).unwrap();
+        assert_eq!(snapshots_v1_after.len(), 0);
+        assert_eq!(snapshots_v2_after.len(), 0);
+    }
 }

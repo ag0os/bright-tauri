@@ -97,7 +97,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
         title: formData.title.trim(),
         description: formData.description.trim(),
         storyType: formData.storyType,
-        content: null,
+        // Note: content is managed via DBV (versions/snapshots), not CreateStoryInput
         notes: null,
         outline: null,
         targetWordCount: formData.targetWordCount ? parseInt(formData.targetWordCount, 10) : null,

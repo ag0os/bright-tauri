@@ -12,6 +12,9 @@ import type { Story, CreateStoryInput, UpdateStoryInput, StoryStatus, StoryType,
 /**
  * Convert partial update to full UpdateStoryInput with null values for missing fields.
  * This allows callers to only specify the fields they want to update.
+ *
+ * Note: `content` is not included because content is managed through
+ * the versioning system (update_snapshot_content command in DBV).
  */
 function toUpdateStoryInput(partial: StoryUpdate): UpdateStoryInput {
   return {
@@ -19,7 +22,6 @@ function toUpdateStoryInput(partial: StoryUpdate): UpdateStoryInput {
     description: partial.description ?? null,
     storyType: partial.storyType ?? null,
     status: partial.status ?? null,
-    content: partial.content ?? null,
     notes: partial.notes ?? null,
     outline: partial.outline ?? null,
     targetWordCount: partial.targetWordCount ?? null,

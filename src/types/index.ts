@@ -27,6 +27,12 @@ export type { VariationType } from './VariationType';
 export type { CreateStoryInput } from './CreateStoryInput';
 export type { UpdateStoryInput } from './UpdateStoryInput';
 
+// DBV (Database-Only Versioning) types
+export type { StoryVersion } from './StoryVersion';
+export type { StorySnapshot } from './StorySnapshot';
+export type { CreateStoryVersionInput } from './CreateStoryVersionInput';
+export type { RenameStoryVersionInput } from './RenameStoryVersionInput';
+
 // Element types
 export type { ElementType } from './ElementType';
 export type { ElementRelationship } from './ElementRelationship';
@@ -37,14 +43,6 @@ export type { UpdateElementInput } from './UpdateElementInput';
 export type { CreateContainerInput } from './CreateContainerInput';
 export type { UpdateContainerInput } from './UpdateContainerInput';
 export type { ContainerChildren } from './ContainerChildren';
-
-// Git types
-export type { CommitInfo } from './CommitInfo';
-export type { DiffResult } from './DiffResult';
-export type { FileChange } from './FileChange';
-export type { ChangeStatus } from './ChangeStatus';
-export type { MergeResult } from './MergeResult';
-export type { VariationInfo } from './VariationInfo';
 
 // Utility types for partial updates
 // These convert `field: T | null` types to `field?: T | null` for easier usage

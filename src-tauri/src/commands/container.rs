@@ -1,15 +1,10 @@
 use crate::db::Database;
-use crate::git::GitService;
 use crate::models::{Container, ContainerChildren, CreateContainerInput, UpdateContainerInput};
 use crate::repositories::{ContainerRepository, StoryRepository};
-use tauri::{AppHandle, Manager, State};
+use tauri::State;
 
 #[tauri::command]
-pub fn create_container(
-    _app: AppHandle,
-    db: State<Database>,
-    input: CreateContainerInput,
-) -> Result<Container, String> {
+pub fn create_container(db: State<Database>, input: CreateContainerInput) -> Result<Container, String> {
     // Validate inputs
     let trimmed_title = input.title.trim();
     if trimmed_title.is_empty() {
@@ -28,7 +23,7 @@ pub fn create_container(
     }
 
     // Create the container in the database
-    let container = ContainerRepository::create(
+    ContainerRepository::create(
         &db,
         input.universe_id,
         input.parent_container_id,
@@ -37,15 +32,7 @@ pub fn create_container(
         input.description,
         input.order.unwrap_or(0),
     )
-    .map_err(|e| e.to_string())?;
-
-    // If this is a leaf container (has no parent or will contain stories),
-    // initialize a git repository for it
-    // Note: Git initialization will happen when the first story is added,
-    // or can be done explicitly by the frontend
-    // For now, we just return the container as created
-
-    Ok(container)
+    .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -95,13 +82,8 @@ pub fn update_container(
 }
 
 #[tauri::command]
-pub fn delete_container(
-    _app: AppHandle,
-    db: State<Database>,
-    id: String,
-) -> Result<Vec<String>, String> {
-    // Delete the container and all its children
-    // The repository handles cascade deletion and git repo cleanup
+pub fn delete_container(db: State<Database>, id: String) -> Result<Vec<String>, String> {
+    // Delete the container and all its children (CASCADE handles stories)
     ContainerRepository::delete(&db, &id).map_err(|e| e.to_string())
 }
 
@@ -112,175 +94,6 @@ pub fn reorder_container_children(
     child_ids: Vec<String>,
 ) -> Result<(), String> {
     ContainerRepository::reorder_children(&db, &parent_id, child_ids).map_err(|e| e.to_string())
-}
-
-/// Ensure a container has a git repository initialized.
-/// This is useful for containers that will contain stories (leaf containers).
-/// Returns the updated container with the git repo path set.
-///
-/// Transaction sequence:
-/// 1. Container already exists in DB (called after creation)
-/// 2. Initialize git repo
-/// 3. If git init fails → return error (container remains without git repo)
-/// 4. Update git_repo_path in DB
-/// 5. If path update fails → delete git repo dir, return error
-#[tauri::command]
-pub fn ensure_container_git_repo(
-    app: AppHandle,
-    db: State<Database>,
-    id: String,
-) -> Result<Container, String> {
-    // Get the container
-    let container = ContainerRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
-
-    // Verify this container can have a git repo (should not have child containers)
-    let child_containers =
-        ContainerRepository::list_children(&db, &id).map_err(|e| e.to_string())?;
-    if !child_containers.is_empty() {
-        return Err(format!(
-            "Container '{}' has child containers and cannot have its own git repository. \
-             Only leaf containers (those containing stories) should have git repositories.",
-            container.title
-        ));
-    }
-
-    // If git_repo_path is already set and exists, validate integrity
-    if let Some(ref git_repo_path) = container.git_repo_path {
-        let path = std::path::Path::new(git_repo_path);
-        if path.exists() && path.join(".git").exists() {
-            // Validate repository integrity
-            if let Err(e) = GitService::validate_repo_integrity(path) {
-                return Err(format!(
-                    "Git repository corruption detected at {}: {}. \
-                     To fix this, you can either manually repair the repository or \
-                     delete it and reinitialize by setting git_repo_path to null and calling this command again.",
-                    git_repo_path, e
-                ));
-            }
-
-            // Sync the current branch name from the actual repo
-            let actual_branch = GitService::get_current_branch(path)
-                .map_err(|e| format!("Failed to get current branch: {e}"))?;
-
-            if let Some(ref current_branch) = container.current_branch {
-                if actual_branch != *current_branch {
-                    ContainerRepository::set_current_branch(&db, &container.id, &actual_branch)
-                        .map_err(|e| format!("Failed to update current branch: {e}"))?;
-                    return ContainerRepository::find_by_id(&db, &container.id)
-                        .map_err(|e| e.to_string());
-                }
-            }
-
-            return Ok(container);
-        }
-    }
-
-    // Get app data directory for git repos
-    let app_data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| format!("Failed to get app data directory: {e}"))?;
-
-    // STEP 2: Initialize git repository for the container
-    let git_repo_path = GitService::init_repo(&app_data_dir, &container.id)
-        .map_err(|e| format!("Failed to initialize git repository: {e}"))?;
-
-    // STEP 3: Update the container with the git repo path
-    let git_repo_path_str = git_repo_path.to_string_lossy().to_string();
-    if let Err(e) = ContainerRepository::set_git_repo_path(&db, &container.id, &git_repo_path_str) {
-        // Rollback: Delete the git repo directory
-        if git_repo_path.exists() {
-            let _ = std::fs::remove_dir_all(&git_repo_path);
-        }
-        return Err(format!("Failed to update git repo path: {e}"));
-    }
-
-    // Get current branch from the newly created repo
-    let current_branch = GitService::get_current_branch(&git_repo_path).map_err(|e| {
-        // Rollback: Delete git repo and clear git_repo_path from DB
-        if git_repo_path.exists() {
-            let _ = std::fs::remove_dir_all(&git_repo_path);
-        }
-        let _ = ContainerRepository::set_git_repo_path(&db, &container.id, "");
-        format!("Failed to get current branch: {e}")
-    })?;
-
-    // Update the current branch
-    if let Err(e) = ContainerRepository::set_current_branch(&db, &container.id, &current_branch) {
-        // Rollback: Delete git repo and clear git_repo_path from DB
-        if git_repo_path.exists() {
-            let _ = std::fs::remove_dir_all(&git_repo_path);
-        }
-        let _ = ContainerRepository::set_git_repo_path(&db, &container.id, "");
-        return Err(format!("Failed to update current branch: {e}"));
-    }
-
-    // Return the updated container
-    ContainerRepository::find_by_id(&db, &container.id).map_err(|e| e.to_string())
-}
-
-/// Check if a container is an empty non-leaf container (edge case detection)
-///
-/// Returns true if the container:
-/// - Has no git_repo_path (is non-leaf)
-/// - Has no child containers
-/// - Has no stories
-///
-/// This edge case occurs when a container had child containers (became non-leaf),
-/// then all children were deleted, leaving it unable to have stories without git initialization.
-#[tauri::command]
-pub fn check_empty_non_leaf_container(
-    db: State<Database>,
-    id: String,
-) -> Result<bool, String> {
-    ContainerRepository::is_empty_non_leaf(&db, &id).map_err(|e| e.to_string())
-}
-
-/// Convert an empty non-leaf container to a leaf container by initializing a git repository
-///
-/// This resolves the edge case where a container had child containers (became non-leaf),
-/// then all children were deleted, leaving it in limbo. This command:
-/// 1. Verifies the container is empty (no children, no stories, no git repo)
-/// 2. Initializes a git repository for the container
-/// 3. Returns the updated container
-///
-/// Returns an error if:
-/// - Container has child containers (not allowed to have git repo)
-/// - Container already has a git repo
-/// - Git initialization fails
-#[tauri::command]
-pub fn convert_to_leaf_container(
-    app: AppHandle,
-    db: State<Database>,
-    id: String,
-) -> Result<Container, String> {
-    // First check if this is actually an empty non-leaf container
-    let is_empty_non_leaf = ContainerRepository::is_empty_non_leaf(&db, &id)
-        .map_err(|e| e.to_string())?;
-
-    if !is_empty_non_leaf {
-        let container = ContainerRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
-
-        if container.git_repo_path.is_some() {
-            return Err("Container already has a git repository (is already a leaf container)".to_string());
-        }
-
-        let child_count = ContainerRepository::get_child_container_count(&db, &id)
-            .map_err(|e| e.to_string())?;
-        if child_count > 0 {
-            return Err(format!(
-                "Container has {} child containers and cannot be converted to a leaf container. \
-                Only empty containers can be converted.",
-                child_count
-            ));
-        }
-
-        return Err("Container does not meet criteria for conversion (unknown state)".to_string());
-    }
-
-    // Container is an empty non-leaf, we can safely initialize git repo
-    // This is the same logic as ensure_container_git_repo, but we know it's safe to call
-    ensure_container_git_repo(app, db, id)
 }
 
 #[cfg(test)]

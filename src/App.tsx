@@ -5,9 +5,8 @@ import { StoriesList } from "./views/StoriesList";
 import { UniverseList } from "./views/UniverseList";
 import { StoryEditor } from "./views/StoryEditor";
 import { StoryHistory } from "./views/StoryHistory";
-import { StoryVariations } from "./views/StoryVariations";
+import { StoryVersions } from "./views/StoryVersions";
 import { StoryCompare } from "./views/StoryCompare";
-import { StoryCombine } from "./views/StoryCombine";
 import { StorySettings } from "./views/StorySettings";
 import { ElementDetailPage } from "./views/ElementDetailPage";
 import { Settings } from "./views/Settings";
@@ -57,10 +56,10 @@ function AppContent() {
         </ErrorBoundary>
       );
 
-    case 'story-variations':
+    case 'story-versions':
       return (
-        <ErrorBoundary name="Story Variations">
-          <StoryVariations />
+        <ErrorBoundary name="Story Versions">
+          <StoryVersions />
         </ErrorBoundary>
       );
 
@@ -68,13 +67,6 @@ function AppContent() {
       return (
         <ErrorBoundary name="Story Compare">
           <StoryCompare />
-        </ErrorBoundary>
-      );
-
-    case 'story-combine':
-      return (
-        <ErrorBoundary name="Story Combine">
-          <StoryCombine />
         </ErrorBoundary>
       );
 

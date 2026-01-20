@@ -60,8 +60,7 @@ The app provides pre-configured templates for common element types to help write
 - Container/Story separation with leaf protection and transaction handling
 - Full CRUD operations via repository layer
 - Container hierarchy support with unlimited nesting depth
-- Git integration complete: init, commit, branch, diff, merge, history
-- File management: naming strategy, creation, reordering, metadata.json
+- Database-Only Versioning (DBV): versions, snapshots, auto-save
 - All features exposed via Tauri commands to frontend
 
 **Design System (100% Complete)**:
@@ -70,23 +69,19 @@ The app provides pre-configured templates for common element types to help write
 - Storybook documentation with 100+ component variants
 - See Design System section below for details
 
-**What's Next**: Frontend UI implementation (tasks 20-26)
-- Chapter/child story management UI (task-21, MEDIUM priority)
-- Auto-save with debouncing (task-20)
-- Git UI: branch management, diff viewer, merge conflict resolution, history timeline (tasks 23-26)
+**What's Next**: Frontend UI implementation
+- Chapter/child story management UI
+- Version and snapshot management UI
+- History timeline and diff viewer
 
 **Not Yet Started**: AI integration, Voice dictation
 
 ### Key Architectural Decisions
 
-- **Git Backend**: Using `git2` Rust library for version control
+- **Database-Only Versioning (DBV)**: All content stored in SQLite with versions and snapshots (see `docs/decisions/002-database-only-versioning.md`)
 - **Container/Story Separation**: Clear distinction between organizational entities (Containers) and content entities (Stories)
 - **Leaf Protection**: Containers can contain either child containers OR stories, but not both (enforced at creation)
-- **Git Repository Ownership**: Only leaf containers and standalone stories have Git repositories
-- **Metadata Sync**: metadata.json in each Git repo keeps SQLite and filesystem in sync
 - **Design System**: Custom token-first system (not using external component libraries)
-
-**Git Repository Lifecycle**: See `docs/git-repository-lifecycle.md` for detailed documentation on initialization, ownership, transactions, and cleanup.
 
 **Full Roadmap**: See `docs/ideas/roadmap.md` for complete feature list and progress tracking.
 
@@ -126,30 +121,27 @@ The application uses a clear separation between organizational entities (Contain
 **Key Characteristics**:
 - Containers can nest other containers (e.g., Series → Novels → Chapters)
 - Containers are classified as either **leaf** or **non-leaf**:
-  - **Leaf containers**: Contain stories, have their own Git repository
-  - **Non-leaf containers**: Contain child containers, no Git repository
-- Leaf status is determined by presence of `git_repo_path`
+  - **Leaf containers**: Contain stories directly
+  - **Non-leaf containers**: Contain child containers
+- Leaf status is determined by whether the container has stories or child containers
 
 **Hierarchy Rules**:
 1. A container can contain either child containers OR stories, but not both (enforced by leaf protection)
-2. Only leaf containers (containing stories) have Git repositories
-3. Non-leaf containers (containing child containers) do NOT have Git repositories
-4. Containers support unlimited nesting depth
+2. Containers support unlimited nesting depth
 
 **Leaf Protection Validation (PREVENT approach)**:
 - When creating a child container, the system validates the parent doesn't already have stories
 - If the parent has stories, creation fails with error: "Cannot add child container to a container that already has stories"
-- This prevents breaking the Git repository structure
 - Implemented in `ContainerRepository::create()` with `get_story_count()` validation
 
 **Example Hierarchy**:
 ```
-Series (non-leaf, no git repo)
-├── Novel 1 (leaf, has git repo)
+Series (non-leaf)
+├── Novel 1 (leaf)
 │   ├── Chapter 1 (story)
 │   ├── Chapter 2 (story)
 │   └── Chapter 3 (story)
-└── Novel 2 (leaf, has git repo)
+└── Novel 2 (leaf)
     ├── Chapter 1 (story)
     └── Chapter 2 (story)
 ```
@@ -172,45 +164,28 @@ Series (non-leaf, no git repo)
 **Key Characteristics**:
 - Stories are pure content entities - they do NOT contain other stories
 - Stories can exist standalone or within a container
-- Stories support variations (original, alternate-ending, screenplay, etc.)
-- Stories have Git versioning for tracking changes
+- Stories support versions (named alternate versions like "Alternate Ending", "Screenplay")
+- Stories have automatic snapshots for history/undo functionality
 
-**Git Repository Ownership Rules**:
-1. **Standalone stories** (`container_id = None`): Have their own Git repository
-2. **Child stories** (`container_id = Some(id)`): Share parent container's Git repository
+**Versioning System (DBV)**:
 
-**Example**:
-```rust
-// Standalone story - has own git repo
-Story {
-    container_id: None,
-    git_repo_path: "/path/to/story-repo",
-    ...
-}
+Stories use Database-Only Versioning with two related concepts:
 
-// Child story - shares container's git repo
-Story {
-    container_id: Some("novel-1"),
-    git_repo_path: "/path/to/novel-1-repo", // Same as parent container
-    ...
-}
-```
+1. **Versions** (`StoryVersion`): Named alternate versions of a story
+   - User-created with meaningful names (e.g., "Alternate Ending", "What if Sarah lived?")
+   - Each version has its own content that can be edited independently
+   - Switch between versions to work on different approaches
 
-#### Transaction Handling
+2. **Snapshots** (`StorySnapshot`): Automatic save points for history
+   - Created automatically based on character count threshold or time interval
+   - Used for undo/restore functionality
+   - Each snapshot belongs to a specific version
 
-**Git Repository Creation**:
-- Creating a container with Git repo is atomic with database operations
-- Uses database transactions: `BEGIN TRANSACTION` → create container → init git → `COMMIT`
-- On failure, transaction rolls back automatically
-- Ensures data integrity between SQLite and filesystem
+**Related Models**:
+- `StoryVersion`: `src-tauri/src/models/story_version.rs`
+- `StorySnapshot`: `src-tauri/src/models/story_snapshot.rs`
 
-**Implementation** (`ContainerRepository::create`):
-```rust
-conn.execute("BEGIN TRANSACTION", [])?;
-// Create container in database
-// Initialize Git repository (if leaf)
-conn.execute("COMMIT", [])?;
-```
+See `docs/decisions/002-database-only-versioning.md` for the full architectural decision record.
 
 #### Migration Strategy
 
@@ -225,16 +200,18 @@ conn.execute("COMMIT", [])?;
 #### Common Patterns
 
 **Creating a Novel with Chapters**:
-1. Create container: `type: "novel"` → Gets Git repo (leaf container)
-2. Add stories: `container_id: novel.id, story_type: Chapter` → Share container's Git repo
+1. Create container: `type: "novel"` (becomes a leaf container)
+2. Add stories: `container_id: novel.id, story_type: Chapter`
+3. Each story automatically gets a default version with auto-snapshots
 
 **Creating a Series of Novels**:
-1. Create container: `type: "series"` → No Git repo (will contain child containers)
-2. Create child containers: `type: "novel", parent_container_id: series.id` → Each gets own Git repo
-3. Add chapters to each novel → Share respective novel's Git repo
+1. Create container: `type: "series"` (non-leaf, will contain child containers)
+2. Create child containers: `type: "novel", parent_container_id: series.id`
+3. Add chapters to each novel
 
 **Standalone Short Story**:
-1. Create story: `container_id: None, story_type: ShortStory` → Gets own Git repo
+1. Create story: `container_id: None, story_type: ShortStory`
+2. Story gets a default version with auto-snapshots enabled
 
 ### Configuration
 - **Tauri Config**: `src-tauri/tauri.conf.json`

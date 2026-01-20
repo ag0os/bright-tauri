@@ -15,7 +15,7 @@ export interface UseAutoSaveOptions<T> {
   content: T;
   /** Callback function to save the content */
   onSave: (content: T) => Promise<void>;
-  /** Debounce delay in milliseconds (default: 2000ms) */
+  /** Debounce delay in milliseconds (default: 30000ms = 30 seconds) */
   delay?: number;
   /** Whether auto-save is enabled (default: true) */
   enabled?: boolean;
@@ -43,16 +43,16 @@ export interface UseAutoSaveReturn {
  * const { saveState } = useAutoSave({
  *   content: editorContent,
  *   onSave: async (content) => {
- *     await updateStory(storyId, { content });
+ *     await invoke('update_snapshot_content', { storyId, content, wordCount });
  *   },
- *   delay: 2000,
+ *   delay: 30000, // 30 seconds
  * });
  * ```
  */
 export function useAutoSave<T>({
   content,
   onSave,
-  delay = 2000,
+  delay = 30000,
   enabled = true,
 }: UseAutoSaveOptions<T>): UseAutoSaveReturn {
   const [saveState, setSaveState] = useState<SaveState>('idle');
