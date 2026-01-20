@@ -1,8 +1,6 @@
 mod commands;
 mod db;
-mod file_management;
 mod file_naming;
-mod git;
 mod models;
 mod repositories;
 
@@ -77,21 +75,6 @@ pub fn run() {
             commands::get_related_elements,
             commands::update_element,
             commands::delete_element,
-            // Git commands
-            commands::git_init_repo,
-            commands::git_commit_file,
-            commands::git_commit_all,
-            commands::git_create_branch,
-            commands::git_checkout_branch,
-            commands::git_diff_branches,
-            commands::git_merge_branches,
-            commands::git_get_history,
-            commands::git_restore_commit,
-            commands::git_list_branches,
-            commands::git_get_current_branch,
-            commands::git_resolve_conflict,
-            commands::git_abort_merge,
-            commands::git_get_conflict_content,
             // Snapshot commands (DBV)
             commands::create_story_snapshot,
             commands::list_story_snapshots,

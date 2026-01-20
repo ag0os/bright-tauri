@@ -518,9 +518,9 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 - [x] task-110: Remove useAutoCommit hook (Completed)
 
 ### Phase 5: Frontend Views Updates
-- [ ] task-111: Rename StoryVariations to StoryVersions view (Pending)
-- [ ] task-112: Update StoryHistory view for snapshots (Pending)
-- [ ] task-113: Stub StoryCompare and delete StoryCombine views (Pending)
+- [x] task-111: Rename StoryVariations to StoryVersions view (Completed)
+- [x] task-112: Update StoryHistory view for snapshots (Completed)
+- [x] task-113: Stub StoryCompare and delete StoryCombine views (Completed)
 
 ### Phase 6: Remove Git Code
 - [ ] task-114: Delete Git Rust modules (Pending)
@@ -671,6 +671,40 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
   - Deleted src/hooks/useAutoCommit.test.ts (234 lines)
   - No remaining imports found
 - Commit: "feat(task-110): Remove useAutoCommit hook"
+
+### 2026-01-20 - task-111: Rename StoryVariations to StoryVersions view
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Renamed StoryVariations.tsx → StoryVersions.tsx
+  - Updated route from /variations to /versions
+  - Implemented version CRUD: list, create, switch, rename, delete
+  - Warning for deleting active version, error for last version
+  - 17 tests, all 194 tests passing
+- Commit: "feat(task-111): Rename StoryVariations to StoryVersions view"
+
+### 2026-01-20 - task-112: Update StoryHistory view for snapshots
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - List snapshots via list_story_snapshots(active_version_id)
+  - Absolute timestamps (e.g., "Jan 20, 2026 2:30 PM")
+  - Restore via switch_story_snapshot(story_id, snapshot_id)
+  - No delete UI (retention policy handles cleanup)
+  - Empty state for no snapshots
+  - 7 new tests, all 196 tests passing
+- Commit: "feat(task-112): Update StoryHistory view for snapshots"
+
+### 2026-01-20 - task-113: Stub StoryCompare and delete StoryCombine views
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - StoryCompare stubbed with "Coming Soon" message
+  - Deleted StoryCombine.tsx, .test.tsx, .css
+  - Removed story-combine route from App.tsx
+  - Removed story-combine from navigation store
+  - All 192 tests passing
+- Commit: "feat(task-113): Stub StoryCompare and delete StoryCombine views"
 
 ## Blockers
 
