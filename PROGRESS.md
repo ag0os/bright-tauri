@@ -528,12 +528,12 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
 - [x] task-116: Remove Git-related frontend code and types (Completed)
 
 ### Phase 7: Auto-Snapshot System
-- [ ] task-117: Create useAutoSnapshot hook (Pending)
-- [ ] task-118: Integrate useAutoSnapshot into StoryEditor (Pending)
+- [x] task-117: Create useAutoSnapshot hook (Completed)
+- [x] task-118: Integrate useAutoSnapshot into StoryEditor (Completed)
 
 ### Phase 8: Testing & Verification
-- [ ] task-119: Add backend tests for versioning system (Pending)
-- [ ] task-120: Add frontend tests for versioning system (Pending)
+- [x] task-119: Add backend tests for versioning system (Completed)
+- [x] task-120: Add frontend tests for versioning system (Completed)
 
 ## Execution Log
 
@@ -706,10 +706,104 @@ Based on: `docs/plans/database-only-versioning-implementation.md`
   - All 192 tests passing
 - Commit: "feat(task-113): Stub StoryCompare and delete StoryCombine views"
 
+### 2026-01-20 - task-114: Delete Git Rust modules
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted git.rs (~1916 lines), file_management.rs (~1829 lines), commands/git.rs (~299 lines)
+  - Removed 14 Git commands from invoke_handler
+  - Total ~4000 lines of Git Rust code removed
+- Commit: "feat(task-114): Delete Git Rust modules"
+
+### 2026-01-20 - task-115: Remove git2 dependency
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Removed git2 = "0.19" from Cargo.toml
+  - Removed transitive deps: libgit2-sys, libssh2-sys, libz-sys, openssl-sys, etc.
+  - Significantly reduced compile time and binary size
+- Commit: "feat(task-115): Remove git2 dependency"
+
+### 2026-01-20 - task-116: Remove Git-related frontend code and types
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Deleted 6 Git TypeScript types (CommitInfo, DiffResult, FileChange, etc.)
+  - Replaced git settings with snapshot settings in useSettingsStore
+  - Added snapshotTrigger, snapshotCharacterThreshold, maxSnapshotsPerVersion
+  - Updated Settings.tsx UI for snapshot settings
+  - All 192 tests passing
+- Commit: "feat(task-116): Remove Git-related frontend code and types"
+
+### 2026-01-20 - task-117: Create useAutoSnapshot hook
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created useAutoSnapshot.ts with character_count and on_leave triggers
+  - Only triggers on content INCREASE (deletions don't create snapshots)
+  - Tracks lastSnapshotCharCount to avoid duplicates
+  - 15 unit tests
+  - All 207 tests passing
+- Commit: "feat(task-117): Create useAutoSnapshot hook"
+
+### 2026-01-20 - task-118: Integrate useAutoSnapshot into StoryEditor
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Imported useAutoSnapshot and useSettingsStore
+  - Added snapshotTrigger and snapshotCharacterThreshold from settings
+  - Two-layer model: useAutoSave (30s) + useAutoSnapshot
+  - All 207 tests passing
+- Commit: "feat(task-118): Integrate useAutoSnapshot into StoryEditor"
+
+### 2026-01-20 - task-119: Add backend tests for versioning system
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Verified existing tests for repositories
+  - Added tests for story creation auto-creates version + snapshot
+  - Added tests for cascade delete (story → versions → snapshots)
+  - Added tests for version/snapshot switching
+  - Added tests for update_snapshot_content updates word_count/last_edited_at
+  - All 194 backend tests pass
+- Commit: "feat(task-119): Add backend tests for versioning system"
+
+### 2026-01-20 - task-120: Add frontend tests for versioning system
+- Status: Completed
+- Agent Type: general-purpose
+- Changes:
+  - Created useAutoSave.test.ts (17 tests)
+  - Created StoryEditor.test.tsx (17 tests)
+  - Verified existing tests in StoryVersions, StoryHistory, useAutoSnapshot
+  - All 241 frontend tests pass
+- Commit: "feat(task-120): Add frontend tests for versioning system"
+
 ## Blockers
 
 None currently.
 
 ## Summary
 
-Phases 1-4 complete. Backend and editor updates finished. Ready to begin Phase 5: Frontend Views Updates.
+**DBV (Database-only Versioning) Implementation: COMPLETE**
+
+All 23 tasks across 8 phases successfully implemented:
+
+| Phase | Tasks | Description |
+|-------|-------|-------------|
+| 1 | 98-99 | Database schema changes (story_versions, story_snapshots tables) |
+| 2 | 100-104 | Backend Rust models (StoryVersion, StorySnapshot, updated Story) |
+| 3 | 105-107 | Tauri commands (version/snapshot CRUD, updated story commands) |
+| 4 | 108-110 | Frontend editor updates (snapshot-based saving, 30s auto-save) |
+| 5 | 111-113 | Frontend views (StoryVersions, StoryHistory, cleanup) |
+| 6 | 114-116 | Git code removal (~4000 lines Rust, git2 dep, frontend types) |
+| 7 | 117-118 | Auto-snapshot system (useAutoSnapshot hook, StoryEditor integration) |
+| 8 | 119-120 | Testing & verification (194 backend + 241 frontend tests) |
+
+**Key Outcomes:**
+- Git-based versioning replaced with database-only approach
+- Two-layer save model: 30s auto-save + character-threshold snapshots
+- Version management: create, switch, rename, delete with protection
+- Snapshot history: view, restore previous states
+- ~4000 lines of Git Rust code removed
+- git2 dependency removed (reduced binary size)
+- Comprehensive test coverage
