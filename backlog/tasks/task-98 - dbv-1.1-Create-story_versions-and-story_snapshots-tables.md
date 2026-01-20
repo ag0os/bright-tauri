@@ -20,9 +20,9 @@ Add new database tables for versioning system: story_versions (id, story_id, nam
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 story_versions table created with id, story_id, name, created_at, updated_at columns
-- [ ] #2 story_snapshots table created with id, version_id, content, created_at columns
-- [ ] #3 Indexes created for story_id and version_id lookups
-- [ ] #4 Unique constraint on (story_id, name) for versions
-- [ ] #5 CASCADE DELETE configured for foreign keys
+- [x] #1 story_versions table created with id, story_id, name, created_at, updated_at columns
+- [x] #2 story_snapshots table created with id, version_id, content, created_at columns
+- [x] #3 Indexes created for story_id and version_id lookups
+- [x] #4 Unique constraint on (story_id, name) for versions
+- [x] #5 CASCADE DELETE configured for foreign keys
 <!-- AC:END -->
