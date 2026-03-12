@@ -103,10 +103,7 @@ impl StorySnapshotRepository {
 
     /// Delete a single snapshot by ID
     pub fn delete(db: &Database, id: &str) -> Result<()> {
-        let rows_affected = db.execute(
-            "DELETE FROM story_snapshots WHERE id = ?1",
-            params![id],
-        )?;
+        let rows_affected = db.execute("DELETE FROM story_snapshots WHERE id = ?1", params![id])?;
 
         if rows_affected == 0 {
             return Err(rusqlite::Error::QueryReturnedNoRows);
@@ -214,7 +211,8 @@ mod tests {
     fn test_create_snapshot() {
         let (db, _temp_dir) = setup_test_db();
 
-        let snapshot = StorySnapshotRepository::create(&db, "version-1", "Once upon a time...").unwrap();
+        let snapshot =
+            StorySnapshotRepository::create(&db, "version-1", "Once upon a time...").unwrap();
 
         assert!(!snapshot.id.is_empty());
         assert_eq!(snapshot.version_id, "version-1");
@@ -335,8 +333,10 @@ mod tests {
         StorySnapshotRepository::create(&db, "version-1", "Version 1 content").unwrap();
         StorySnapshotRepository::create(&db, "version-2", "Version 2 content").unwrap();
 
-        let version1_snapshots = StorySnapshotRepository::list_by_version(&db, "version-1").unwrap();
-        let version2_snapshots = StorySnapshotRepository::list_by_version(&db, "version-2").unwrap();
+        let version1_snapshots =
+            StorySnapshotRepository::list_by_version(&db, "version-1").unwrap();
+        let version2_snapshots =
+            StorySnapshotRepository::list_by_version(&db, "version-2").unwrap();
 
         assert_eq!(version1_snapshots.len(), 1);
         assert_eq!(version2_snapshots.len(), 1);
@@ -349,11 +349,14 @@ mod tests {
     fn test_update_content() {
         let (db, _temp_dir) = setup_test_db();
 
-        let snapshot = StorySnapshotRepository::create(&db, "version-1", "Original content").unwrap();
+        let snapshot =
+            StorySnapshotRepository::create(&db, "version-1", "Original content").unwrap();
 
         StorySnapshotRepository::update_content(&db, &snapshot.id, "Updated content").unwrap();
 
-        let updated = StorySnapshotRepository::get(&db, &snapshot.id).unwrap().unwrap();
+        let updated = StorySnapshotRepository::get(&db, &snapshot.id)
+            .unwrap()
+            .unwrap();
         assert_eq!(updated.content, "Updated content");
     }
 
@@ -365,7 +368,9 @@ mod tests {
 
         StorySnapshotRepository::update_content(&db, &snapshot.id, "").unwrap();
 
-        let updated = StorySnapshotRepository::get(&db, &snapshot.id).unwrap().unwrap();
+        let updated = StorySnapshotRepository::get(&db, &snapshot.id)
+            .unwrap()
+            .unwrap();
         assert_eq!(updated.content, "");
     }
 
@@ -485,8 +490,10 @@ mod tests {
 
         // Create snapshots for both versions
         for i in 1..=3 {
-            StorySnapshotRepository::create(&db, "version-1", &format!("V1 Content {}", i)).unwrap();
-            StorySnapshotRepository::create(&db, "version-2", &format!("V2 Content {}", i)).unwrap();
+            StorySnapshotRepository::create(&db, "version-1", &format!("V1 Content {}", i))
+                .unwrap();
+            StorySnapshotRepository::create(&db, "version-2", &format!("V2 Content {}", i))
+                .unwrap();
         }
 
         // Delete oldest from version-1 only
@@ -510,7 +517,11 @@ mod tests {
         StorySnapshotRepository::create(&db, "version-1", "Snapshot 2").unwrap();
 
         // Delete the version - should cascade delete snapshots
-        db.execute("DELETE FROM story_versions WHERE id = ?1", params!["version-1"]).unwrap();
+        db.execute(
+            "DELETE FROM story_versions WHERE id = ?1",
+            params!["version-1"],
+        )
+        .unwrap();
 
         let remaining = StorySnapshotRepository::list_by_version(&db, "version-1").unwrap();
         assert!(remaining.is_empty());
@@ -524,7 +535,9 @@ mod tests {
         let large_content = "A".repeat(100_000);
         let snapshot = StorySnapshotRepository::create(&db, "version-1", &large_content).unwrap();
 
-        let retrieved = StorySnapshotRepository::get(&db, &snapshot.id).unwrap().unwrap();
+        let retrieved = StorySnapshotRepository::get(&db, &snapshot.id)
+            .unwrap()
+            .unwrap();
         assert_eq!(retrieved.content.len(), 100_000);
         assert_eq!(retrieved.content, large_content);
     }

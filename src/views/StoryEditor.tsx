@@ -6,7 +6,7 @@
  */
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, Gear } from '@phosphor-icons/react';
+import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, Gear, StackSimple } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
@@ -15,6 +15,7 @@ import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { useAutoSave, useAutoSnapshot } from '@/hooks';
 import { useSettingsStore } from '@/stores/useSettingsStore';
 import type { Story } from '@/types';
+import { countLexicalWords } from '@/utils/lexicalWordCount';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -34,6 +35,7 @@ export function StoryEditor() {
   // Get snapshot settings from store
   const snapshotTrigger = useSettingsStore((state) => state.snapshotTrigger);
   const snapshotCharacterThreshold = useSettingsStore((state) => state.snapshotCharacterThreshold);
+  const maxSnapshotsPerVersion = useSettingsStore((state) => state.maxSnapshotsPerVersion);
 
   const [story, setStory] = useState<Story | null>(null);
   const [content, setContent] = useState<string>('');
@@ -69,52 +71,17 @@ export function StoryEditor() {
     loadStoryData();
   }, [storyId, getStory]);
 
-  // Calculate word count from Lexical editor state JSON
-  const calculateWordCount = useCallback((editorContent: string): number => {
-    if (!editorContent) return 0;
-
-    try {
-      const editorState = JSON.parse(editorContent);
-
-      // Recursively extract text from Lexical nodes
-      const extractText = (node: unknown): string => {
-        if (!node || typeof node !== 'object') return '';
-
-        const n = node as Record<string, unknown>;
-
-        // If node has text property, return it
-        if (typeof n.text === 'string') {
-          return n.text;
-        }
-
-        // If node has children, recursively extract text
-        if (Array.isArray(n.children)) {
-          return n.children.map(extractText).join(' ');
-        }
-
-        return '';
-      };
-
-      const text = extractText(editorState.root);
-
-      // Split by whitespace and filter empty strings
-      return text.split(/\s+/).filter((word) => word.length > 0).length;
-    } catch {
-      return 0;
-    }
-  }, []);
-
   // Memoized save callback - saves to snapshot via DBV system
   // Backend resolves the active snapshot internally from storyId
   const handleSaveContent = useCallback(async (newContent: string) => {
     if (!storyId) return;
-    const wordCountValue = calculateWordCount(newContent);
+    const wordCountValue = countLexicalWords(newContent);
     await invoke('update_snapshot_content', {
       storyId,
       content: newContent,
       wordCount: wordCountValue,
     });
-  }, [storyId, calculateWordCount]);
+  }, [storyId]);
 
   // Auto-save content changes to database via DBV system (30s debounce)
   // This updates the current snapshot in place for crash protection
@@ -124,6 +91,9 @@ export function StoryEditor() {
     enabled: !isLoadingStory && !!storyId,
   });
 
+  // Calculate word count by extracting text from Lexical editor state
+  const wordCount = useMemo(() => countLexicalWords(content), [content]);
+
   // Auto-snapshot: creates new snapshots for history restore points
   // Works alongside useAutoSave (two-layer model):
   // - useAutoSave (30s): Updates current snapshot in place (crash protection)
@@ -131,9 +101,11 @@ export function StoryEditor() {
   useAutoSnapshot({
     storyId: storyId ?? '',
     content,
+    wordCount,
     enabled: !isLoadingStory && !!storyId,
     trigger: snapshotTrigger,
     characterThreshold: snapshotCharacterThreshold,
+    maxSnapshots: maxSnapshotsPerVersion,
   });
 
   // Handle title changes
@@ -167,9 +139,6 @@ export function StoryEditor() {
       }
     }
   };
-
-  // Calculate word count by extracting text from Lexical editor state
-  const wordCount = useMemo(() => calculateWordCount(content), [content, calculateWordCount]);
 
   // Render save state indicator
   const renderSaveIndicator = () => {
@@ -255,6 +224,15 @@ export function StoryEditor() {
 
         <div className="header-actions">
           {renderSaveIndicator()}
+
+          <button
+            className="icon-button"
+            onClick={() => storyId && navigate({ screen: 'story-versions', storyId })}
+            aria-label="Manage versions"
+            title="Manage versions"
+          >
+            <StackSimple size={18} />
+          </button>
 
           <button
             className="icon-button"

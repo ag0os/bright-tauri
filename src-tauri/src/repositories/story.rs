@@ -377,11 +377,7 @@ impl StoryRepository {
     }
 
     /// Update word count and last_edited_at for a story (called by update_snapshot_content)
-    pub fn update_word_count_and_edited(
-        db: &Database,
-        id: &str,
-        word_count: u32,
-    ) -> Result<()> {
+    pub fn update_word_count_and_edited(db: &Database, id: &str, word_count: u32) -> Result<()> {
         let now = Utc::now().to_rfc3339();
         db.execute(
             "UPDATE stories SET word_count = ?1, last_edited_at = ?2 WHERE id = ?3",
@@ -548,8 +544,11 @@ mod tests {
 
         // Create multiple stories in the same container
         for i in 1..=3 {
-            let input =
-                create_test_story_input(&format!("Story {}", i), StoryType::Chapter, Some(container_id.clone()));
+            let input = create_test_story_input(
+                &format!("Story {}", i),
+                StoryType::Chapter,
+                Some(container_id.clone()),
+            );
             StoryRepository::create(&db, input).unwrap();
         }
 
@@ -569,8 +568,11 @@ mod tests {
 
         // Create standalone stories (no container)
         for i in 1..=2 {
-            let input =
-                create_test_story_input(&format!("Standalone Story {}", i), StoryType::ShortStory, None);
+            let input = create_test_story_input(
+                &format!("Standalone Story {}", i),
+                StoryType::ShortStory,
+                None,
+            );
             StoryRepository::create(&db, input).unwrap();
         }
 
@@ -641,7 +643,11 @@ mod tests {
 
         // Create 3 stories under the same container
         for i in 1..=3 {
-            let input = create_test_story_input(&format!("Story {}", i), StoryType::Chapter, Some(container_id.clone()));
+            let input = create_test_story_input(
+                &format!("Story {}", i),
+                StoryType::Chapter,
+                Some(container_id.clone()),
+            );
             let story = StoryRepository::create(&db, input).unwrap();
             assert_eq!(story.container_id, Some(container_id.clone()));
         }
@@ -652,7 +658,8 @@ mod tests {
         let (db, _temp_dir) = setup_test_db();
 
         // Create standalone story (no container)
-        let standalone_input = create_test_story_input("Standalone Story", StoryType::ShortStory, None);
+        let standalone_input =
+            create_test_story_input("Standalone Story", StoryType::ShortStory, None);
         let standalone = StoryRepository::create(&db, standalone_input).unwrap();
 
         // Create a test container first
@@ -668,10 +675,12 @@ mod tests {
         .unwrap();
 
         // Create stories with container
-        let child_input = create_test_story_input("Chapter", StoryType::Chapter, Some(container.id.clone()));
+        let child_input =
+            create_test_story_input("Chapter", StoryType::Chapter, Some(container.id.clone()));
         let child = StoryRepository::create(&db, child_input).unwrap();
 
-        let child2_input = create_test_story_input("Scene", StoryType::Scene, Some(container.id.clone()));
+        let child2_input =
+            create_test_story_input("Scene", StoryType::Scene, Some(container.id.clone()));
         let child2 = StoryRepository::create(&db, child2_input).unwrap();
 
         // Verify standalone story
@@ -759,7 +768,10 @@ mod tests {
         let updated = StoryRepository::find_by_id(&db, &story.id).unwrap();
         assert_eq!(updated.word_count, 500);
         // last_edited_at should be updated (different from created_at)
-        assert!(updated.last_edited_at != story.created_at || updated.last_edited_at == story.last_edited_at);
+        assert!(
+            updated.last_edited_at != story.created_at
+                || updated.last_edited_at == story.last_edited_at
+        );
     }
 
     #[test]
@@ -792,7 +804,8 @@ mod tests {
         .unwrap();
 
         // Try to create a story in the parent container - should fail with leaf protection
-        let story_input = create_test_story_input("Chapter", StoryType::Chapter, Some(parent.id.clone()));
+        let story_input =
+            create_test_story_input("Chapter", StoryType::Chapter, Some(parent.id.clone()));
 
         let result = StoryRepository::create(&db, story_input);
         assert!(result.is_err());
@@ -820,7 +833,8 @@ mod tests {
         .unwrap();
 
         // Should be able to add story to empty container
-        let story_input = create_test_story_input("Chapter 1", StoryType::Chapter, Some(container.id.clone()));
+        let story_input =
+            create_test_story_input("Chapter 1", StoryType::Chapter, Some(container.id.clone()));
 
         let story = StoryRepository::create(&db, story_input).unwrap();
         assert_eq!(story.container_id, Some(container.id));

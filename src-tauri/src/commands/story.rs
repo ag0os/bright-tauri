@@ -284,19 +284,31 @@ mod tests {
         let story = create_story_internal(&db, input).unwrap();
 
         // Story should have active_version_id set
-        assert!(story.active_version_id.is_some(), "active_version_id should be set");
+        assert!(
+            story.active_version_id.is_some(),
+            "active_version_id should be set"
+        );
 
         // Story should have active_snapshot_id set
-        assert!(story.active_snapshot_id.is_some(), "active_snapshot_id should be set");
+        assert!(
+            story.active_snapshot_id.is_some(),
+            "active_snapshot_id should be set"
+        );
 
         // active_version should be populated with "Original" version
-        assert!(story.active_version.is_some(), "active_version should be populated");
+        assert!(
+            story.active_version.is_some(),
+            "active_version should be populated"
+        );
         let version = story.active_version.unwrap();
         assert_eq!(version.name, "Original");
         assert_eq!(version.story_id, story.id);
 
         // active_snapshot should be populated with empty content
-        assert!(story.active_snapshot.is_some(), "active_snapshot should be populated");
+        assert!(
+            story.active_snapshot.is_some(),
+            "active_snapshot should be populated"
+        );
         let snapshot = story.active_snapshot.unwrap();
         assert_eq!(snapshot.content, "");
         assert_eq!(snapshot.version_id, version.id);
@@ -366,7 +378,10 @@ mod tests {
 
         // Verify snapshot is cascade deleted
         let snapshot_after = StorySnapshotRepository::get(&db, &snapshot_id).unwrap();
-        assert!(snapshot_after.is_none(), "Snapshot should be cascade deleted");
+        assert!(
+            snapshot_after.is_none(),
+            "Snapshot should be cascade deleted"
+        );
     }
 
     #[test]
@@ -383,9 +398,12 @@ mod tests {
         let version2 = StoryVersionRepository::create(&db, &story.id, "Alternate Ending").unwrap();
 
         // Add multiple snapshots to each version
-        let _snap1_2 = StorySnapshotRepository::create(&db, &version1_id, "Version 1 snapshot 2").unwrap();
-        let _snap2_1 = StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 1").unwrap();
-        let _snap2_2 = StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 2").unwrap();
+        let _snap1_2 =
+            StorySnapshotRepository::create(&db, &version1_id, "Version 1 snapshot 2").unwrap();
+        let _snap2_1 =
+            StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 1").unwrap();
+        let _snap2_2 =
+            StorySnapshotRepository::create(&db, &version2.id, "Version 2 snapshot 2").unwrap();
 
         // Verify we have multiple versions and snapshots
         let versions_before = StoryVersionRepository::list_by_story(&db, &story.id).unwrap();
@@ -404,8 +422,10 @@ mod tests {
         assert_eq!(versions_after.len(), 0);
 
         // Verify all snapshots are deleted
-        let snapshots_v1_after = StorySnapshotRepository::list_by_version(&db, &version1_id).unwrap();
-        let snapshots_v2_after = StorySnapshotRepository::list_by_version(&db, &version2.id).unwrap();
+        let snapshots_v1_after =
+            StorySnapshotRepository::list_by_version(&db, &version1_id).unwrap();
+        let snapshots_v2_after =
+            StorySnapshotRepository::list_by_version(&db, &version2.id).unwrap();
         assert_eq!(snapshots_v1_after.len(), 0);
         assert_eq!(snapshots_v2_after.len(), 0);
     }

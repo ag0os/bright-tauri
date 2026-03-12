@@ -4,7 +4,10 @@ use crate::repositories::{ContainerRepository, StoryRepository};
 use tauri::State;
 
 #[tauri::command]
-pub fn create_container(db: State<Database>, input: CreateContainerInput) -> Result<Container, String> {
+pub fn create_container(
+    db: State<Database>,
+    input: CreateContainerInput,
+) -> Result<Container, String> {
     // Validate inputs
     let trimmed_title = input.title.trim();
     if trimmed_title.is_empty() {
@@ -103,16 +106,26 @@ mod tests {
     fn test_empty_title_detection() {
         let title = "   ";
         let trimmed = title.trim();
-        assert!(trimmed.is_empty(), "Whitespace-only title should be empty after trim");
+        assert!(
+            trimmed.is_empty(),
+            "Whitespace-only title should be empty after trim"
+        );
     }
 
     #[test]
     fn test_title_length_limit() {
         let valid_title = "a".repeat(255);
-        assert_eq!(valid_title.len(), 255, "Valid title should be exactly 255 chars");
+        assert_eq!(
+            valid_title.len(),
+            255,
+            "Valid title should be exactly 255 chars"
+        );
 
         let invalid_title = "a".repeat(256);
-        assert!(invalid_title.len() > 255, "Invalid title should exceed 255 chars");
+        assert!(
+            invalid_title.len() > 255,
+            "Invalid title should exceed 255 chars"
+        );
     }
 
     #[test]

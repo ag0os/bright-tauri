@@ -10,12 +10,14 @@ import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockTauriInvoke, resetTauriMocks } from '@/test/utils';
 import { StoryHistory } from './StoryHistory';
 import { useNavigationStore } from '@/stores/useNavigationStore';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import type { Story, StorySnapshot } from '@/types';
 
 // Mock stores
 vi.mock('@/stores/useNavigationStore');
+vi.mock('@/stores/useSettingsStore');
 vi.mock('@/stores/useStoriesStore');
 vi.mock('@/stores/useToastStore');
 
@@ -92,6 +94,15 @@ describe('StoryHistory', () => {
       (selector: (state: unknown) => unknown) => {
         const state = {
           getStory: mockGetStory,
+        };
+        return selector(state);
+      }
+    );
+
+    (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      (selector: (state: unknown) => unknown) => {
+        const state = {
+          maxSnapshotsPerVersion: 50,
         };
         return selector(state);
       }

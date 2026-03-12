@@ -1,4 +1,5 @@
-use rusqlite::{Connection, Result};
+use rusqlite::{params, Connection, Result};
+use uuid::Uuid;
 
 /// Current database schema version
 #[allow(dead_code)]
@@ -237,5 +238,243 @@ fn migrate_v2(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    add_story_column_if_missing(
+        conn,
+        "active_version_id",
+        "TEXT REFERENCES story_versions(id)",
+    )?;
+    add_story_column_if_missing(
+        conn,
+        "active_snapshot_id",
+        "TEXT REFERENCES story_snapshots(id)",
+    )?;
+
+    backfill_existing_stories(conn)?;
+
     Ok(())
+}
+
+fn add_story_column_if_missing(
+    conn: &Connection,
+    column_name: &str,
+    definition: &str,
+) -> Result<()> {
+    if !table_has_column(conn, "stories", column_name)? {
+        conn.execute(
+            &format!("ALTER TABLE stories ADD COLUMN {column_name} {definition}"),
+            [],
+        )?;
+    }
+
+    Ok(())
+}
+
+fn table_has_column(conn: &Connection, table_name: &str, column_name: &str) -> Result<bool> {
+    let mut stmt = conn.prepare(&format!("PRAGMA table_info({table_name})"))?;
+    let columns = stmt.query_map([], |row| row.get::<_, String>(1))?;
+
+    for column in columns {
+        if column? == column_name {
+            return Ok(true);
+        }
+    }
+
+    Ok(false)
+}
+
+fn backfill_existing_stories(conn: &Connection) -> Result<()> {
+    let has_legacy_content = table_has_column(conn, "stories", "content")?;
+
+    let select_sql = if has_legacy_content {
+        "SELECT id, COALESCE(content, ''), created_at, updated_at, last_edited_at
+         FROM stories
+         WHERE active_version_id IS NULL OR active_snapshot_id IS NULL"
+    } else {
+        "SELECT id, '', created_at, updated_at, last_edited_at
+         FROM stories
+         WHERE active_version_id IS NULL OR active_snapshot_id IS NULL"
+    };
+
+    let stories: Vec<(String, String, String, String, String)> = {
+        let mut stmt = conn.prepare(select_sql)?;
+        let rows = stmt.query_map([], |row| {
+            Ok((
+                row.get(0)?,
+                row.get(1)?,
+                row.get(2)?,
+                row.get(3)?,
+                row.get(4)?,
+            ))
+        })?;
+
+        rows.collect::<Result<Vec<_>>>()?
+    };
+
+    for (story_id, content, created_at, updated_at, last_edited_at) in stories {
+        let version_id = Uuid::new_v4().to_string();
+        let snapshot_id = Uuid::new_v4().to_string();
+
+        conn.execute(
+            "INSERT INTO story_versions (id, story_id, name, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![&version_id, &story_id, "Original", &created_at, &updated_at],
+        )?;
+
+        conn.execute(
+            "INSERT INTO story_snapshots (id, version_id, content, created_at)
+             VALUES (?1, ?2, ?3, ?4)",
+            params![&snapshot_id, &version_id, &content, &last_edited_at],
+        )?;
+
+        conn.execute(
+            "UPDATE stories
+             SET active_version_id = ?1, active_snapshot_id = ?2
+             WHERE id = ?3",
+            params![&version_id, &snapshot_id, &story_id],
+        )?;
+    }
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn setup_legacy_v1_database(conn: &Connection) -> Result<()> {
+        conn.execute(
+            "CREATE TABLE schema_version (
+                version INTEGER PRIMARY KEY,
+                applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )",
+            [],
+        )?;
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)", [])?;
+
+        conn.execute(
+            "CREATE TABLE universes (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                status TEXT NOT NULL
+            )",
+            [],
+        )?;
+        conn.execute(
+            "CREATE TABLE stories (
+                id TEXT PRIMARY KEY,
+                universe_id TEXT NOT NULL,
+                container_id TEXT,
+                story_type TEXT NOT NULL DEFAULT 'chapter',
+                status TEXT NOT NULL DEFAULT 'draft',
+                title TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                content TEXT NOT NULL DEFAULT '',
+                word_count INTEGER NOT NULL DEFAULT 0,
+                target_word_count INTEGER,
+                notes TEXT,
+                outline TEXT,
+                \"order\" INTEGER,
+                tags TEXT,
+                color TEXT,
+                favorite INTEGER DEFAULT 0,
+                related_element_ids TEXT,
+                series_name TEXT,
+                last_edited_at TEXT NOT NULL,
+                version INTEGER NOT NULL DEFAULT 1,
+                variation_group_id TEXT NOT NULL,
+                variation_type TEXT NOT NULL DEFAULT 'original',
+                parent_variation_id TEXT,
+                git_repo_path TEXT NOT NULL DEFAULT '',
+                current_branch TEXT NOT NULL DEFAULT 'main',
+                staged_changes INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (universe_id) REFERENCES universes(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
+        conn.execute(
+            "INSERT INTO universes (id, name, description, created_at, updated_at, status)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            params![
+                "universe-1",
+                "Test Universe",
+                "Test",
+                "2024-01-01T00:00:00Z",
+                "2024-01-01T00:00:00Z",
+                "active"
+            ],
+        )?;
+
+        conn.execute(
+            "INSERT INTO stories (
+                id, universe_id, title, description, content, story_type, status, word_count,
+                last_edited_at, version, variation_group_id, variation_type, created_at, updated_at
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+            params![
+                "story-1",
+                "universe-1",
+                "Legacy Story",
+                "Migrated from v1",
+                "{\"root\":{\"children\":[{\"children\":[{\"text\":\"Legacy content\"}]}]}}",
+                "chapter",
+                "draft",
+                2,
+                "2024-01-02T00:00:00Z",
+                1,
+                "variation-group-1",
+                "original",
+                "2024-01-01T00:00:00Z",
+                "2024-01-02T00:00:00Z"
+            ],
+        )?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_run_migrations_backfills_existing_v1_stories() {
+        let conn = Connection::open_in_memory().unwrap();
+        setup_legacy_v1_database(&conn).unwrap();
+
+        run_migrations(&conn).unwrap();
+
+        let has_active_version = table_has_column(&conn, "stories", "active_version_id").unwrap();
+        let has_active_snapshot = table_has_column(&conn, "stories", "active_snapshot_id").unwrap();
+        assert!(has_active_version);
+        assert!(has_active_snapshot);
+
+        let (active_version_id, active_snapshot_id): (String, String) = conn
+            .query_row(
+                "SELECT active_version_id, active_snapshot_id FROM stories WHERE id = ?1",
+                params!["story-1"],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .unwrap();
+
+        let version_name: String = conn
+            .query_row(
+                "SELECT name FROM story_versions WHERE id = ?1",
+                params![&active_version_id],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(version_name, "Original");
+
+        let snapshot_content: String = conn
+            .query_row(
+                "SELECT content FROM story_snapshots WHERE id = ?1",
+                params![&active_snapshot_id],
+                |row| row.get(0),
+            )
+            .unwrap();
+        assert_eq!(
+            snapshot_content,
+            "{\"root\":{\"children\":[{\"children\":[{\"text\":\"Legacy content\"}]}]}}"
+        );
+    }
 }

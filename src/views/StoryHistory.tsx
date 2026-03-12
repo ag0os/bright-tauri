@@ -15,9 +15,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, Clock, ArrowCounterClockwise, SpinnerGap } from '@phosphor-icons/react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '@/stores/useNavigationStore';
+import { useSettingsStore } from '@/stores/useSettingsStore';
 import { useStoriesStore } from '@/stores/useStoriesStore';
 import { useToastStore } from '@/stores/useToastStore';
 import type { Story, StorySnapshot } from '@/types';
+import { countLexicalWords } from '@/utils/lexicalWordCount';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -44,6 +46,7 @@ function formatTimestamp(isoString: string): string {
 export function StoryHistory() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);
   const goBack = useNavigationStore((state) => state.goBack);
+  const maxSnapshotsPerVersion = useSettingsStore((state) => state.maxSnapshotsPerVersion);
   const getStory = useStoriesStore((state) => state.getStory);
   const showSuccess = useToastStore((state) => state.success);
   const showError = useToastStore((state) => state.error);
@@ -97,13 +100,29 @@ export function StoryHistory() {
     async (snapshotId: string) => {
       if (!storyId || restoringId) return;
 
+      const snapshotToRestore = snapshots.find((snapshot) => snapshot.id === snapshotId);
+      if (!snapshotToRestore) {
+        showError('Snapshot not found');
+        return;
+      }
+
       setRestoringId(snapshotId);
 
       try {
         const updatedStory = await invoke<Story>('switch_story_snapshot', {
           storyId,
           snapshotId,
+          wordCount: countLexicalWords(snapshotToRestore.content),
+          maxSnapshots: maxSnapshotsPerVersion,
         });
+
+        if (updatedStory.activeVersionId) {
+          const refreshedSnapshots = await invoke<StorySnapshot[]>('list_story_snapshots', {
+            versionId: updatedStory.activeVersionId,
+          });
+          setSnapshots(refreshedSnapshots);
+        }
+
         setStory(updatedStory);
         showSuccess('Snapshot restored successfully');
       } catch (err) {
@@ -113,7 +132,7 @@ export function StoryHistory() {
         setRestoringId(null);
       }
     },
-    [storyId, restoringId, showSuccess, showError]
+    [storyId, restoringId, snapshots, maxSnapshotsPerVersion, showSuccess, showError]
   );
 
   // Loading state

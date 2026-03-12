@@ -149,6 +149,7 @@ describe('StoryEditor', () => {
         const state = {
           snapshotTrigger: 'character_count',
           snapshotCharacterThreshold: 500,
+          maxSnapshotsPerVersion: 50,
         };
         return selector(state);
       }
@@ -338,6 +339,14 @@ describe('StoryEditor', () => {
 
       await waitFor(() => {
         expect(screen.getByLabelText('Story settings')).toBeInTheDocument();
+      });
+    });
+
+    it('renders versions button that navigates to story-versions', async () => {
+      renderWithProviders(<StoryEditor />);
+
+      await waitFor(() => {
+        expect(screen.getByLabelText('Manage versions')).toBeInTheDocument();
       });
     });
   });

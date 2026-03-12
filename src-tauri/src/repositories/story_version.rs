@@ -336,7 +336,9 @@ mod tests {
 
         StoryVersionRepository::rename(&db, &version.id, "Final Draft").unwrap();
 
-        let updated = StoryVersionRepository::get(&db, &version.id).unwrap().unwrap();
+        let updated = StoryVersionRepository::get(&db, &version.id)
+            .unwrap()
+            .unwrap();
         assert_eq!(updated.name, "Final Draft");
         // updated_at should have changed
         assert_ne!(updated.updated_at, original_updated_at);
@@ -445,7 +447,9 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(10));
         StoryVersionRepository::rename(&db, &version.id, "Renamed").unwrap();
 
-        let updated = StoryVersionRepository::get(&db, &version.id).unwrap().unwrap();
+        let updated = StoryVersionRepository::get(&db, &version.id)
+            .unwrap()
+            .unwrap();
         assert_eq!(updated.created_at, version.created_at);
         assert_ne!(updated.updated_at, version.updated_at);
     }

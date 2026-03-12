@@ -16,12 +16,16 @@ export interface UseAutoSnapshotProps {
   storyId: string;
   /** The current content to snapshot */
   content: string;
+  /** Current word count for the editor content */
+  wordCount?: number;
   /** Whether auto-snapshot is enabled */
   enabled: boolean;
   /** Trigger mode: 'on_leave' or 'character_count' */
   trigger: SnapshotTrigger;
   /** Character count threshold for 'character_count' trigger (default: 500) */
   characterThreshold?: number;
+  /** Maximum snapshots to keep for the current version */
+  maxSnapshots?: number;
 }
 
 /**
@@ -50,50 +54,88 @@ export interface UseAutoSnapshotProps {
 export function useAutoSnapshot({
   storyId,
   content,
+  wordCount,
   enabled,
   trigger,
   characterThreshold = 500,
+  maxSnapshots,
 }: UseAutoSnapshotProps): void {
-  // Track the character count at the time of last snapshot
-  const lastSnapshotCharCount = useRef(content.length);
-
-  // Track if this is the initial render (to avoid immediate snapshot)
-  const isInitialRender = useRef(true);
+  // Track the character count and content at the time of last snapshot
+  const lastSnapshotCharCount = useRef(0);
+  const lastSnapshotContentRef = useRef(content);
+  const hasInitializedBaseline = useRef(false);
+  const previousEnabledRef = useRef(enabled);
+  const previousStoryIdRef = useRef(storyId);
 
   // Store latest values in refs to avoid stale closures in cleanup
   const storyIdRef = useRef(storyId);
   const contentRef = useRef(content);
+  const wordCountRef = useRef(wordCount);
   const enabledRef = useRef(enabled);
   const triggerRef = useRef(trigger);
+  const maxSnapshotsRef = useRef(maxSnapshots);
 
   // Update refs when values change
   storyIdRef.current = storyId;
   contentRef.current = content;
+  wordCountRef.current = wordCount;
   enabledRef.current = enabled;
   triggerRef.current = trigger;
+  maxSnapshotsRef.current = maxSnapshots;
 
   // Create snapshot function
-  const createSnapshot = useCallback(async (snapshotContent: string, snapshotStoryId: string) => {
+  const createSnapshot = useCallback(async (
+    snapshotContent: string,
+    snapshotStoryId: string,
+    snapshotWordCount?: number,
+    snapshotMaxSnapshots?: number
+  ) => {
     try {
-      await invoke('create_story_snapshot', {
+      const payload: Record<string, unknown> = {
         storyId: snapshotStoryId,
         content: snapshotContent,
-      });
+      };
+
+      if (typeof snapshotWordCount === 'number') {
+        payload.wordCount = snapshotWordCount;
+      }
+
+      if (typeof snapshotMaxSnapshots === 'number') {
+        payload.maxSnapshots = snapshotMaxSnapshots;
+      }
+
+      await invoke('create_story_snapshot', payload);
     } catch (error) {
       console.error('Auto-snapshot error:', error);
     }
   }, []);
 
-  // Character count trigger: create snapshot when chars increase by threshold
+  // Rebase the snapshot baseline when a story finishes loading or tracking is re-enabled.
   useEffect(() => {
-    // Skip if disabled or not using character_count trigger
-    if (!enabled || trigger !== 'character_count') {
+    const storyChanged = previousStoryIdRef.current !== storyId;
+    const enabledChanged = previousEnabledRef.current !== enabled;
+
+    previousStoryIdRef.current = storyId;
+    previousEnabledRef.current = enabled;
+
+    if (!enabled) {
+      hasInitializedBaseline.current = false;
+      lastSnapshotCharCount.current = content.length;
+      lastSnapshotContentRef.current = content;
       return;
     }
 
-    // Skip initial render to avoid immediate snapshot on load
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
+    if (storyChanged || enabledChanged || !hasInitializedBaseline.current) {
+      lastSnapshotCharCount.current = content.length;
+      lastSnapshotContentRef.current = content;
+      hasInitializedBaseline.current = true;
+    }
+  }, [storyId, content, enabled]);
+
+  // Character count trigger: create snapshot when chars increase by threshold
+  useEffect(() => {
+    // Skip if disabled or not using character_count trigger
+    if (!enabled || trigger !== 'character_count' || !hasInitializedBaseline.current) {
       return;
     }
 
@@ -102,11 +144,12 @@ export function useAutoSnapshot({
 
     // Only trigger on content INCREASE (positive delta) meeting threshold
     if (charsDelta >= characterThreshold) {
-      createSnapshot(content, storyId).then(() => {
+      createSnapshot(content, storyId, wordCount, maxSnapshots).then(() => {
         lastSnapshotCharCount.current = content.length;
+        lastSnapshotContentRef.current = content;
       });
     }
-  }, [content, storyId, enabled, trigger, characterThreshold, createSnapshot]);
+  }, [content, storyId, enabled, trigger, characterThreshold, wordCount, maxSnapshots, createSnapshot]);
 
   // On-leave trigger: create snapshot on component unmount
   useEffect(() => {
@@ -121,33 +164,26 @@ export function useAutoSnapshot({
       const shouldSnapshot =
         triggerRef.current === 'on_leave' ||
         // Also snapshot if there are unsaved changes (content changed since last snapshot)
-        contentRef.current.length !== lastSnapshotCharCount.current;
+        contentRef.current !== lastSnapshotContentRef.current;
 
       if (shouldSnapshot) {
-        // Use sync-compatible approach for cleanup
-        // Note: invoke returns a Promise, but we're in a cleanup function
-        // The snapshot will be attempted but may not complete if the component
-        // unmounts due to navigation. This is intentional - on_leave is best-effort.
-        invoke('create_story_snapshot', {
+        const payload: Record<string, unknown> = {
           storyId: storyIdRef.current,
           content: contentRef.current,
-        }).catch((error) => {
+        };
+
+        if (typeof wordCountRef.current === 'number') {
+          payload.wordCount = wordCountRef.current;
+        }
+
+        if (typeof maxSnapshotsRef.current === 'number') {
+          payload.maxSnapshots = maxSnapshotsRef.current;
+        }
+
+        invoke('create_story_snapshot', payload).catch((error) => {
           console.error('Auto-snapshot cleanup error:', error);
         });
       }
     };
   }, []); // Empty deps - cleanup only runs on unmount
-
-  // Track the previous storyId to detect changes (not just initial mount)
-  const prevStoryIdRef = useRef(storyId);
-
-  // Reset tracking when storyId changes (switching to different story)
-  // This should NOT run on initial mount, only when storyId actually changes
-  useEffect(() => {
-    if (prevStoryIdRef.current !== storyId) {
-      lastSnapshotCharCount.current = content.length;
-      isInitialRender.current = true;
-      prevStoryIdRef.current = storyId;
-    }
-  }, [storyId, content.length]);
 }

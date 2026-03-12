@@ -20,6 +20,8 @@ pub fn create_story_snapshot(
     db: State<Database>,
     story_id: String,
     content: String,
+    word_count: Option<u32>,
+    max_snapshots: Option<i32>,
 ) -> Result<StorySnapshot, String> {
     // Get the story to find active version
     let story = StoryRepository::find_by_id(&db, &story_id).map_err(|e| e.to_string())?;
@@ -30,7 +32,8 @@ pub fn create_story_snapshot(
         .ok_or_else(|| "Story has no active version".to_string())?;
 
     // Calculate word count from content
-    let word_count = count_words(&content);
+    let word_count = word_count.unwrap_or_else(|| count_words(&content));
+    let max_snapshots = max_snapshots.unwrap_or(DEFAULT_MAX_SNAPSHOTS);
 
     // Create the new snapshot
     let snapshot = StorySnapshotRepository::create(&db, &active_version_id, &content)
@@ -45,8 +48,7 @@ pub fn create_story_snapshot(
         .map_err(|e| e.to_string())?;
 
     // Apply retention policy (delete oldest if over limit)
-    // Using default since settings are stored in frontend localStorage
-    StorySnapshotRepository::delete_oldest(&db, &active_version_id, DEFAULT_MAX_SNAPSHOTS)
+    StorySnapshotRepository::delete_oldest(&db, &active_version_id, max_snapshots)
         .map_err(|e| e.to_string())?;
 
     Ok(snapshot)
@@ -95,15 +97,18 @@ pub fn update_snapshot_content(
     Ok(())
 }
 
-/// Switch to a different snapshot, restoring its content as the active state.
+/// Switch to a different snapshot, restoring its content into a new working copy.
 ///
-/// Updates the story's active_snapshot_id to the specified snapshot.
+/// Creates a fresh snapshot containing the restored content so historical
+/// snapshots remain immutable, then updates the story's active_snapshot_id.
 /// Returns the updated Story with inline version/snapshot data.
 #[tauri::command]
 pub fn switch_story_snapshot(
     db: State<Database>,
     story_id: String,
     snapshot_id: String,
+    word_count: Option<u32>,
+    max_snapshots: Option<i32>,
 ) -> Result<Story, String> {
     // Verify the snapshot exists
     let snapshot = StorySnapshotRepository::get(&db, &snapshot_id)
@@ -122,9 +127,27 @@ pub fn switch_story_snapshot(
         return Err("Snapshot does not belong to the story's active version".to_string());
     }
 
-    // Update story's active_snapshot_id
-    StoryRepository::set_active_snapshot(&db, &story_id, &snapshot_id)
+    let restored_snapshot =
+        StorySnapshotRepository::create(&db, &active_version_id, &snapshot.content)
+            .map_err(|e| e.to_string())?;
+
+    // Update story's active_snapshot_id to the new working copy
+    StoryRepository::set_active_snapshot(&db, &story_id, &restored_snapshot.id)
         .map_err(|e| e.to_string())?;
+
+    StoryRepository::update_word_count_and_edited(
+        &db,
+        &story_id,
+        word_count.unwrap_or_else(|| count_words(&snapshot.content)),
+    )
+    .map_err(|e| e.to_string())?;
+
+    StorySnapshotRepository::delete_oldest(
+        &db,
+        &active_version_id,
+        max_snapshots.unwrap_or(DEFAULT_MAX_SNAPSHOTS),
+    )
+    .map_err(|e| e.to_string())?;
 
     // Return updated story
     StoryRepository::find_by_id(&db, &story_id).map_err(|e| e.to_string())
@@ -274,14 +297,17 @@ mod tests {
 
         // Create a second snapshot
         std::thread::sleep(std::time::Duration::from_millis(10));
-        let snapshot2 = StorySnapshotRepository::create(&db, &version_id, "Second version").unwrap();
+        let snapshot2 =
+            StorySnapshotRepository::create(&db, &version_id, "Second version").unwrap();
 
-        // Switch to the second snapshot
-        StoryRepository::set_active_snapshot(&db, &story_id, &snapshot2.id).unwrap();
+        // Switch to the second snapshot by creating a fresh working copy
+        let restored =
+            StorySnapshotRepository::create(&db, &version_id, &snapshot2.content).unwrap();
+        StoryRepository::set_active_snapshot(&db, &story_id, &restored.id).unwrap();
 
         // Verify active_snapshot_id is updated
         let updated_story = StoryRepository::find_by_id(&db, &story_id).unwrap();
-        assert_eq!(updated_story.active_snapshot_id, Some(snapshot2.id.clone()));
+        assert_eq!(updated_story.active_snapshot_id, Some(restored.id.clone()));
         assert_ne!(updated_story.active_snapshot_id, Some(snapshot1_id.clone()));
     }
 
@@ -294,7 +320,7 @@ mod tests {
 
         // Create additional snapshots
         std::thread::sleep(std::time::Duration::from_millis(10));
-        let snapshot2 = StorySnapshotRepository::create(&db, &version_id, "Second").unwrap();
+        let _snapshot2 = StorySnapshotRepository::create(&db, &version_id, "Second").unwrap();
         std::thread::sleep(std::time::Duration::from_millis(10));
         let snapshot3 = StorySnapshotRepository::create(&db, &version_id, "Third").unwrap();
 
@@ -305,12 +331,17 @@ mod tests {
         let story = StoryRepository::find_by_id(&db, &story_id).unwrap();
         assert_eq!(story.active_snapshot_id, Some(snapshot3.id.clone()));
 
-        // Switch back to snapshot1 (oldest)
-        StoryRepository::set_active_snapshot(&db, &story_id, &snapshot1_id).unwrap();
+        // Switch back to snapshot1 by creating a fresh working copy
+        let snapshot1 = StorySnapshotRepository::get(&db, &snapshot1_id)
+            .unwrap()
+            .unwrap();
+        let restored =
+            StorySnapshotRepository::create(&db, &version_id, &snapshot1.content).unwrap();
+        StoryRepository::set_active_snapshot(&db, &story_id, &restored.id).unwrap();
 
-        // Verify active_snapshot_id is now snapshot1
+        // Verify active_snapshot_id points to the new restored working copy
         let updated_story = StoryRepository::find_by_id(&db, &story_id).unwrap();
-        assert_eq!(updated_story.active_snapshot_id, Some(snapshot1_id));
+        assert_eq!(updated_story.active_snapshot_id, Some(restored.id));
     }
 
     #[test]
@@ -324,7 +355,8 @@ mod tests {
         let (_story2_id, version2_id, _snapshot2_id) = create_story_with_versioning(&db, "Story 2");
 
         // Create a snapshot for story2's version
-        let foreign_snapshot = StorySnapshotRepository::create(&db, &version2_id, "Foreign").unwrap();
+        let foreign_snapshot =
+            StorySnapshotRepository::create(&db, &version2_id, "Foreign").unwrap();
 
         // Get story1's active version
         let story1 = StoryRepository::find_by_id(&db, &story1_id).unwrap();
@@ -332,6 +364,36 @@ mod tests {
 
         // Verify the foreign snapshot does NOT belong to story1's active version
         assert_ne!(foreign_snapshot.version_id, active_version_id);
+    }
+
+    #[test]
+    fn test_restore_creates_new_snapshot_without_overwriting_history() {
+        let (db, _temp_dir) = setup_test_db();
+        let (story_id, version_id, original_snapshot_id) =
+            create_story_with_versioning(&db, "Test Story");
+
+        StorySnapshotRepository::update_content(&db, &original_snapshot_id, "Original content")
+            .unwrap();
+        let historical_snapshot =
+            StorySnapshotRepository::create(&db, &version_id, "Historical content").unwrap();
+
+        let restored_snapshot =
+            StorySnapshotRepository::create(&db, &version_id, "Historical content").unwrap();
+        StoryRepository::set_active_snapshot(&db, &story_id, &restored_snapshot.id).unwrap();
+        StoryRepository::update_word_count_and_edited(&db, &story_id, 2).unwrap();
+
+        let historical_after = StorySnapshotRepository::get(&db, &historical_snapshot.id)
+            .unwrap()
+            .unwrap();
+        let restored_after = StorySnapshotRepository::get(&db, &restored_snapshot.id)
+            .unwrap()
+            .unwrap();
+        let story_after = StoryRepository::find_by_id(&db, &story_id).unwrap();
+
+        assert_eq!(historical_after.content, "Historical content");
+        assert_eq!(restored_after.content, "Historical content");
+        assert_ne!(historical_after.id, restored_after.id);
+        assert_eq!(story_after.active_snapshot_id, Some(restored_snapshot.id));
     }
 
     // ==========================================================================
@@ -365,7 +427,9 @@ mod tests {
         assert_eq!(story_after.word_count, 9); // "Once upon a time in a galaxy far away" = 9 words
 
         // Verify snapshot content is updated
-        let snapshot = StorySnapshotRepository::get(&db, &active_snapshot_id).unwrap().unwrap();
+        let snapshot = StorySnapshotRepository::get(&db, &active_snapshot_id)
+            .unwrap()
+            .unwrap();
         assert_eq!(snapshot.content, new_content);
     }
 
@@ -410,7 +474,9 @@ mod tests {
             StoryRepository::update_word_count_and_edited(&db, &story_id, word_count).unwrap();
 
             // Verify content is correctly updated each time
-            let snapshot = StorySnapshotRepository::get(&db, &active_snapshot_id).unwrap().unwrap();
+            let snapshot = StorySnapshotRepository::get(&db, &active_snapshot_id)
+                .unwrap()
+                .unwrap();
             assert_eq!(snapshot.content, content);
 
             // Verify word count is correctly updated each time
@@ -430,7 +496,9 @@ mod tests {
         let active_snapshot_id = story.active_snapshot_id.clone().unwrap();
 
         // Verify initial empty content
-        let snapshot_before = StorySnapshotRepository::get(&db, &active_snapshot_id).unwrap().unwrap();
+        let snapshot_before = StorySnapshotRepository::get(&db, &active_snapshot_id)
+            .unwrap()
+            .unwrap();
         assert_eq!(snapshot_before.content, "");
 
         // Update to non-empty content
@@ -441,7 +509,9 @@ mod tests {
         StoryRepository::update_word_count_and_edited(&db, &story_id, word_count).unwrap();
 
         // Verify update
-        let snapshot_after = StorySnapshotRepository::get(&db, &active_snapshot_id).unwrap().unwrap();
+        let snapshot_after = StorySnapshotRepository::get(&db, &active_snapshot_id)
+            .unwrap()
+            .unwrap();
         assert_eq!(snapshot_after.content, new_content);
 
         let story_after = StoryRepository::find_by_id(&db, &story_id).unwrap();
@@ -471,7 +541,9 @@ mod tests {
         StoryRepository::update_word_count_and_edited(&db, &story_id, 0).unwrap();
 
         // Verify content is cleared
-        let snapshot_after = StorySnapshotRepository::get(&db, &active_snapshot_id).unwrap().unwrap();
+        let snapshot_after = StorySnapshotRepository::get(&db, &active_snapshot_id)
+            .unwrap()
+            .unwrap();
         assert_eq!(snapshot_after.content, "");
 
         let story_after = StoryRepository::find_by_id(&db, &story_id).unwrap();

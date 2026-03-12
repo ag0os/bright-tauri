@@ -308,10 +308,7 @@ mod tests {
 
         assert!(deserialized.active_version.is_some());
         assert!(deserialized.active_snapshot.is_some());
-        assert_eq!(
-            deserialized.active_version.unwrap().name,
-            "Original"
-        );
+        assert_eq!(deserialized.active_version.unwrap().name, "Original");
         assert_eq!(
             deserialized.active_snapshot.unwrap().content,
             "Once upon a time..."

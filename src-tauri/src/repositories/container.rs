@@ -38,12 +38,10 @@ impl ContainerRepository {
         // Depth Limit: Check if adding this container would exceed max nesting depth
         let depth = Self::calculate_depth(db, parent_container_id.as_deref())?;
         if depth >= MAX_NESTING_DEPTH {
-            return Err(rusqlite::Error::InvalidParameterName(
-                format!(
-                    "Maximum container nesting depth of {} levels exceeded. Current depth: {}",
-                    MAX_NESTING_DEPTH, depth
-                ),
-            ));
+            return Err(rusqlite::Error::InvalidParameterName(format!(
+                "Maximum container nesting depth of {} levels exceeded. Current depth: {}",
+                MAX_NESTING_DEPTH, depth
+            )));
         }
 
         db.execute(

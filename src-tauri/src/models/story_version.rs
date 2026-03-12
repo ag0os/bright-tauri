@@ -12,9 +12,9 @@ use ts_rs::TS;
 pub struct StoryVersion {
     pub id: String,
     pub story_id: String,
-    pub name: String,        // "Original", "Alternate Ending", etc.
-    pub created_at: String,  // ISO 8601 timestamp
-    pub updated_at: String,  // ISO 8601 timestamp
+    pub name: String,       // "Original", "Alternate Ending", etc.
+    pub created_at: String, // ISO 8601 timestamp
+    pub updated_at: String, // ISO 8601 timestamp
 }
 
 /// Input for creating a new StoryVersion

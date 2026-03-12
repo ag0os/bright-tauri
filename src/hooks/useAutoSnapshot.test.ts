@@ -283,21 +283,48 @@ describe('useAutoSnapshot', () => {
       // Change to a different story
       rerender({ storyId: 'story-2', content: 'New story content' });
 
-      // Now add content - this should NOT trigger because we reset on story change
-      // The initial render flag is reset, so the next content change is treated as initial
+      // Small change after story switch should not trigger because it is below threshold.
       mockInvoke.mockClear();
-      rerender({ storyId: 'story-2', content: 'New story content with more' });
+      rerender({ storyId: 'story-2', content: 'New story content!' });
 
-      // Should not have triggered because first render after storyId change is skipped
       expect(mockInvoke).not.toHaveBeenCalled();
 
-      // But the next change should work
+      // A larger follow-up change should use the new story baseline.
       rerender({ storyId: 'story-2', content: 'New story content with more and even more text' });
 
       await vi.waitFor(() => {
         expect(mockInvoke).toHaveBeenCalledWith('create_story_snapshot', {
           storyId: 'story-2',
           content: 'New story content with more and even more text',
+        });
+      });
+    });
+
+    it('rebases the baseline when content loads after tracking is enabled', async () => {
+      const { rerender } = renderHook(
+        ({ content, enabled }) =>
+          useAutoSnapshot({
+            storyId: 'story-1',
+            content,
+            enabled,
+            trigger: 'character_count',
+            characterThreshold: 10,
+          }),
+        { initialProps: { content: '', enabled: false } }
+      );
+
+      rerender({ content: 'Existing story body', enabled: true });
+      expect(mockInvoke).not.toHaveBeenCalled();
+
+      rerender({ content: 'Existing story body!', enabled: true });
+      expect(mockInvoke).not.toHaveBeenCalled();
+
+      rerender({ content: 'Existing story body with enough extra text', enabled: true });
+
+      await vi.waitFor(() => {
+        expect(mockInvoke).toHaveBeenCalledWith('create_story_snapshot', {
+          storyId: 'story-1',
+          content: 'Existing story body with enough extra text',
         });
       });
     });
