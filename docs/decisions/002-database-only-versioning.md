@@ -58,35 +58,42 @@ Both of these are just **labeled copies of text** - no complex version control s
 Replace the Git-based versioning system with a database-only approach:
 
 - **Single source of truth**: All content lives in SQLite
-- **Variations**: Stored in a `story_variations` table as named content snapshots
-- **History**: Stored in a `story_history` table as timestamped content snapshots
+- **Versions**: Stored in a `story_versions` table as named variations
+- **Snapshots**: Stored in a `story_snapshots` table as timestamped content saves within a version
 - **No Git**: Remove the `git2` dependency and all Git-related code
 
 ### New Data Model
 
-A single `story_contents` table stores all content - the original, variations, and snapshots. The `stories` table points to whichever content record is currently active.
+Two tables implement the versioning hierarchy: `story_versions` (named variations) and `story_snapshots` (point-in-time content saves within a version). The `stories` table points to both the active version and the active snapshot.
 
 ```
 stories (modified)
 ├── id, title, universe_id, ...
-├── active_content_id          -- Points to current content record
+├── active_version_id          -- Points to current version (FK → story_versions)
+├── active_snapshot_id         -- Points to current snapshot (FK → story_snapshots)
 └── [REMOVED: content, git_repo_path, current_branch, staged_changes]
 
-story_contents (new)
+story_versions (new)
 ├── id                         -- Primary key
 ├── story_id                   -- Parent story
-├── content                    -- The actual text
-├── label                      -- "Original", "Alternate Ending", or null for snapshots
+├── name                       -- "Original", "Alternate Ending", etc.
 ├── created_at                 -- When created
 ├── updated_at                 -- Last edit time
+
+story_snapshots (new)
+├── id                         -- Primary key
+├── version_id                 -- Parent version (FK → story_versions)
+├── content                    -- The actual text
+├── created_at                 -- When created
 ```
 
-**The `label` field determines what the record represents:**
-- `"Original"` → The main version (created with the story)
-- `"Some Name"` → A user-created variation
-- `null` → An auto-snapshot (UI shows timestamp instead)
+**The hierarchy: Story → Version → Snapshot**
+- A **version** is a named variation (e.g., "Original", "Alternate Ending")
+- A **snapshot** is a point-in-time save of content within a version
+- Each version can have many snapshots (auto-saved over time)
+- The story tracks both the active version and the active snapshot within it
 
-**Key insight:** Content lives in exactly one place. No copying, no syncing, no duplication.
+**Key insight:** Content lives in exactly one place (snapshots). Versions are organizational, snapshots hold the actual text. No copying, no syncing, no duplication.
 
 ### Simplified Workflows
 
@@ -94,33 +101,34 @@ Four independent systems, each with a single responsibility:
 
 **1. Editing System:**
 ```
-User types → Update the content record pointed to by active_content_id
-(Just update one record, debounced)
+User types → Update the snapshot pointed to by active_snapshot_id
+(Just update one snapshot record, debounced)
 ```
 
 **2. Versioning System (user-controlled):**
 ```
-User creates variation → Insert new story_contents record with user's label
-(User explicitly decides when to create variations)
+User creates version → Insert new story_versions record with user's name
+                      → Insert initial story_snapshots record within it
+(User explicitly decides when to create versions)
 ```
 
 **3. History System (automatic):**
 ```
-Timer fires → Insert new story_contents record with label=null
-(System creates snapshots at configured interval)
+Timer fires → Insert new story_snapshots record under the active version
+(System creates snapshots at configured interval within the current version)
 ```
 
 **4. Switching System:**
 ```
-User switches → Update stories.active_content_id to new content record
-(Just update one pointer - no content copying, no side effects)
+User switches version → Update stories.active_version_id and active_snapshot_id
+(Just update two pointers - no content copying, no side effects)
 ```
 
-**Restoring from snapshot** is the same as switching - just point to a different content record.
+**Restoring from snapshot** updates `active_snapshot_id` to point to a different snapshot within the same version.
 
-**Comparing versions:**
+**Comparing snapshots:**
 ```
-Load two content strings from database → Use JavaScript diff library
+Load two snapshot content strings from database → Use JavaScript diff library
 (Simple string comparison, no Git diff parsing)
 ```
 
@@ -167,13 +175,13 @@ Replace `git2` with a simpler version control approach:
 
 ### Positive
 
-1. **Single Source of Truth**: All content in one table, no sync issues
+1. **Single Source of Truth**: All content in SQLite (story_versions + story_snapshots), no sync issues
 2. **Content Lives in One Place**: No copying between tables, just pointer changes
-3. **Switching is O(1)**: Just update `active_content_id`, no data movement
-4. **Unified Model**: Variations and snapshots are the same thing (content records), just labeled differently
+3. **Switching is O(1)**: Just update `active_version_id` and `active_snapshot_id`, no data movement
+4. **Clean Hierarchy**: Story → Version → Snapshot maps directly to user concepts
 5. **Clear Separation of Concerns**: Four systems (editing, versioning, history, switching) each do one thing
-6. **Simpler Mental Model**: Everything is a "version" - some named by user, some auto-created
-7. **Configurable Retention**: Easy to implement "keep last N snapshots"
+6. **Simpler Mental Model**: Versions are user-named variations, snapshots are automatic saves within them
+7. **Configurable Retention**: Easy to implement "keep last N snapshots per version"
 8. **Faster**: No file I/O, no content copying
 9. **Portable**: Everything in one database file
 10. **Less Code**: Remove ~1500 lines of Git code, replace with ~200 lines of simple DB operations
@@ -197,27 +205,27 @@ Replace `git2` with a simpler version control approach:
 ## Implementation Plan
 
 ### Phase 1: Backend - New Schema
-- Create `story_contents` table
-- Add `active_content_id` to stories table
+- Create `story_versions` and `story_snapshots` tables
+- Add `active_version_id` and `active_snapshot_id` to stories table
 - Remove Git-related fields from stories table (`content`, `git_repo_path`, `current_branch`, `staged_changes`)
-- Migration: create initial "Original" content record for each existing story
+- Migration: create initial "Original" version and snapshot for each existing story
 
-### Phase 2: Backend - Content Repository & Commands
-- Create `StoryContentRepository` with CRUD operations
-- Commands: create content, get content, update content, delete content
-- Commands: list variations (labeled content), list snapshots (unlabeled content)
-- Commands: switch active content (update pointer)
+### Phase 2: Backend - Version/Snapshot Repository & Commands
+- Create `StoryVersionRepository` and `StorySnapshotRepository` with CRUD operations
+- Commands: create/get/update/delete versions and snapshots
+- Commands: list versions for a story, list snapshots for a version
+- Commands: switch active version/snapshot (update pointers)
 
 ### Phase 3: Frontend - Update Editor
-- Update `StoryEditor` to work with content records instead of story.content
-- Load content via `active_content_id`
-- Save edits to the active content record
+- Update `StoryEditor` to work with versions/snapshots instead of story.content
+- Load content via `active_version_id` / `active_snapshot_id`
+- Save edits to the active snapshot
 - Remove all Git-related logic
 
 ### Phase 4: Frontend - Update Views
-- Simplify `StoryVariations` view (list labeled content, create, switch, delete)
-- Simplify `StoryHistory` view (list unlabeled content, restore)
-- Simplify `StoryCompare` view (JS-based diff between any two content records)
+- Simplify `StoryVariations` view (list versions, create, switch, delete)
+- Simplify `StoryHistory` view (list snapshots within a version, restore)
+- Simplify `StoryCompare` view (JS-based diff between any two snapshots)
 - Remove `StoryCombine` view (merge conflicts don't exist)
 
 ### Phase 5: Remove Git Code
@@ -228,8 +236,8 @@ Replace `git2` with a simpler version control approach:
 - Clean up unused TypeScript types
 
 ### Phase 6: History System
-- Implement auto-snapshot service (creates unlabeled content records at interval)
-- Implement retention policy (keep last N snapshots per story/variation)
+- Implement auto-snapshot service (creates new snapshot records within the active version at interval)
+- Implement retention policy (keep last N snapshots per version)
 - Add settings UI for snapshot interval and retention count
 
 ## When Would We Choose Differently?

@@ -3,7 +3,7 @@ use ts_rs::TS;
 
 use super::{StorySnapshot, StoryVersion};
 
-/// Story domain model
+/// Story domain model (internal, used by repository layer)
 ///
 /// A Story is a written work within a Universe. It can be a novel, script, screenplay,
 /// or any other type of creative writing. Stories support variations and database-based versioning.
@@ -12,6 +12,8 @@ use super::{StorySnapshot, StoryVersion};
 /// - Story → Version → Snapshot hierarchy
 /// - active_version_id and active_snapshot_id point to the current working state
 /// - active_version and active_snapshot are inline JOINed data for convenience
+///
+/// For API responses, use `StorySummary` (list endpoints) or `StoryDetail` (get endpoint).
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/")]
 #[serde(rename_all = "camelCase")]
@@ -76,6 +78,198 @@ pub struct Story {
     pub active_version: Option<StoryVersion>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub active_snapshot: Option<StorySnapshot>,
+}
+
+/// Lightweight Story representation for list endpoints.
+///
+/// Excludes hydrated version/snapshot data to keep list responses lean.
+/// Used by `list_stories_by_universe`, `list_stories_by_container`, etc.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
+#[serde(rename_all = "camelCase")]
+pub struct StorySummary {
+    // Core Identity
+    pub id: String,
+    pub universe_id: String,
+    pub title: String,
+    pub description: String,
+    pub created_at: String,
+    pub updated_at: String,
+
+    // Story Type & Status
+    pub story_type: StoryType,
+    pub status: StoryStatus,
+    pub word_count: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_word_count: Option<u32>,
+
+    // Organization
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub favorite: Option<bool>,
+
+    // Context & Relationships
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub series_name: Option<String>,
+
+    // Metadata
+    pub last_edited_at: String,
+    pub version: u32,
+
+    // Variations
+    pub variation_group_id: String,
+    pub variation_type: VariationType,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_variation_id: Option<String>,
+}
+
+impl From<Story> for StorySummary {
+    fn from(story: Story) -> Self {
+        StorySummary {
+            id: story.id,
+            universe_id: story.universe_id,
+            title: story.title,
+            description: story.description,
+            created_at: story.created_at,
+            updated_at: story.updated_at,
+            story_type: story.story_type,
+            status: story.status,
+            word_count: story.word_count,
+            target_word_count: story.target_word_count,
+            order: story.order,
+            tags: story.tags,
+            color: story.color,
+            favorite: story.favorite,
+            container_id: story.container_id,
+            series_name: story.series_name,
+            last_edited_at: story.last_edited_at,
+            version: story.version,
+            variation_group_id: story.variation_group_id,
+            variation_type: story.variation_type,
+            parent_variation_id: story.parent_variation_id,
+        }
+    }
+}
+
+/// Rich Story representation for single-story endpoints (get_story).
+///
+/// Includes the active version and snapshot data inline, guaranteeing
+/// they are present (non-optional) for a properly initialized story.
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export, export_to = "../../src/types/")]
+#[serde(rename_all = "camelCase")]
+pub struct StoryDetail {
+    // Core Identity
+    pub id: String,
+    pub universe_id: String,
+    pub title: String,
+    pub description: String,
+    pub created_at: String,
+    pub updated_at: String,
+
+    // Story Type & Status
+    pub story_type: StoryType,
+    pub status: StoryStatus,
+    pub word_count: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub target_word_count: Option<u32>,
+
+    // Notes & Outline (not versioned)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub notes: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub outline: Option<String>,
+
+    // Organization
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub order: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub tags: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub color: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub favorite: Option<bool>,
+
+    // Context & Relationships
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub related_element_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub container_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub series_name: Option<String>,
+
+    // Metadata
+    pub last_edited_at: String,
+    pub version: u32,
+
+    // Variations
+    pub variation_group_id: String,
+    pub variation_type: VariationType,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_variation_id: Option<String>,
+
+    // Database Versioning (DBV) - guaranteed present for initialized stories
+    pub active_version_id: String,
+    pub active_snapshot_id: String,
+    pub active_version: StoryVersion,
+    pub active_snapshot: StorySnapshot,
+}
+
+impl StoryDetail {
+    /// Build a StoryDetail from a Story with its hydrated version and snapshot.
+    /// Returns an error if active version or snapshot are missing.
+    pub fn from_story(story: Story) -> Result<Self, String> {
+        let active_version_id = story
+            .active_version_id
+            .ok_or_else(|| format!("Story {} has no active_version_id", story.id))?;
+        let active_snapshot_id = story
+            .active_snapshot_id
+            .ok_or_else(|| format!("Story {} has no active_snapshot_id", story.id))?;
+        let active_version = story
+            .active_version
+            .ok_or_else(|| format!("Story {} has no active_version populated", story.id))?;
+        let active_snapshot = story
+            .active_snapshot
+            .ok_or_else(|| format!("Story {} has no active_snapshot populated", story.id))?;
+
+        Ok(StoryDetail {
+            id: story.id,
+            universe_id: story.universe_id,
+            title: story.title,
+            description: story.description,
+            created_at: story.created_at,
+            updated_at: story.updated_at,
+            story_type: story.story_type,
+            status: story.status,
+            word_count: story.word_count,
+            target_word_count: story.target_word_count,
+            notes: story.notes,
+            outline: story.outline,
+            order: story.order,
+            tags: story.tags,
+            color: story.color,
+            favorite: story.favorite,
+            related_element_ids: story.related_element_ids,
+            container_id: story.container_id,
+            series_name: story.series_name,
+            last_edited_at: story.last_edited_at,
+            version: story.version,
+            variation_group_id: story.variation_group_id,
+            variation_type: story.variation_type,
+            parent_variation_id: story.parent_variation_id,
+            active_version_id,
+            active_snapshot_id,
+            active_version,
+            active_snapshot,
+        })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
@@ -331,6 +525,111 @@ mod tests {
         assert!(!json.contains("activeSnapshotId"));
         assert!(!json.contains("activeVersion"));
         assert!(!json.contains("activeSnapshot"));
+    }
+
+    #[test]
+    fn test_story_summary_from_story() {
+        let story = create_test_story();
+        let summary = StorySummary::from(story.clone());
+
+        assert_eq!(summary.id, story.id);
+        assert_eq!(summary.title, story.title);
+        assert_eq!(summary.word_count, story.word_count);
+        assert_eq!(summary.variation_type, story.variation_type);
+        // StorySummary should not have active_version/active_snapshot fields
+        let json = serde_json::to_string(&summary).unwrap();
+        assert!(!json.contains("activeVersion"));
+        assert!(!json.contains("activeSnapshot"));
+        assert!(!json.contains("notes"));
+        assert!(!json.contains("outline"));
+        assert!(!json.contains("relatedElementIds"));
+    }
+
+    #[test]
+    fn test_story_summary_serialization_uses_camel_case() {
+        let summary = StorySummary::from(create_test_story());
+        let json = serde_json::to_string(&summary).unwrap();
+        assert!(json.contains("universeId"));
+        assert!(json.contains("wordCount"));
+        assert!(json.contains("storyType"));
+        assert!(json.contains("variationGroupId"));
+        assert!(json.contains("lastEditedAt"));
+    }
+
+    #[test]
+    fn test_story_detail_from_story_success() {
+        let version = StoryVersion {
+            id: "version-1".to_string(),
+            story_id: "story-1".to_string(),
+            name: "Original".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+        let snapshot = StorySnapshot {
+            id: "snapshot-1".to_string(),
+            version_id: "version-1".to_string(),
+            content: "Once upon a time...".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+
+        let story = Story {
+            active_version: Some(version),
+            active_snapshot: Some(snapshot),
+            ..create_test_story()
+        };
+
+        let detail = StoryDetail::from_story(story).unwrap();
+        assert_eq!(detail.id, "story-1");
+        assert_eq!(detail.active_version_id, "version-1");
+        assert_eq!(detail.active_snapshot_id, "snapshot-1");
+        assert_eq!(detail.active_version.name, "Original");
+        assert_eq!(detail.active_snapshot.content, "Once upon a time...");
+    }
+
+    #[test]
+    fn test_story_detail_from_story_missing_version() {
+        let story = Story {
+            active_version_id: None,
+            active_snapshot_id: None,
+            active_version: None,
+            active_snapshot: None,
+            ..create_test_story()
+        };
+
+        let result = StoryDetail::from_story(story);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("no active_version_id"));
+    }
+
+    #[test]
+    fn test_story_detail_serialization_uses_camel_case() {
+        let version = StoryVersion {
+            id: "version-1".to_string(),
+            story_id: "story-1".to_string(),
+            name: "Original".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+            updated_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+        let snapshot = StorySnapshot {
+            id: "snapshot-1".to_string(),
+            version_id: "version-1".to_string(),
+            content: "".to_string(),
+            created_at: "2024-01-01T00:00:00Z".to_string(),
+        };
+
+        let story = Story {
+            active_version: Some(version),
+            active_snapshot: Some(snapshot),
+            ..create_test_story()
+        };
+
+        let detail = StoryDetail::from_story(story).unwrap();
+        let json = serde_json::to_string(&detail).unwrap();
+        assert!(json.contains("activeVersionId"));
+        assert!(json.contains("activeSnapshotId"));
+        assert!(json.contains("activeVersion"));
+        assert!(json.contains("activeSnapshot"));
+        assert!(json.contains("universeId"));
     }
 
     fn create_test_story() -> Story {

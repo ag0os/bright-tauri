@@ -26,6 +26,8 @@ export type { StoryType } from './StoryType';
 export type { VariationType } from './VariationType';
 export type { CreateStoryInput } from './CreateStoryInput';
 export type { UpdateStoryInput } from './UpdateStoryInput';
+export type { StorySummary } from './StorySummary';
+export type { StoryDetail } from './StoryDetail';
 
 // DBV (Database-Only Versioning) types
 export type { StoryVersion } from './StoryVersion';

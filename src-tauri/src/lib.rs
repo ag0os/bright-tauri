@@ -3,6 +3,7 @@ mod db;
 mod file_naming;
 mod models;
 mod repositories;
+mod services;
 
 use tauri::Manager;
 

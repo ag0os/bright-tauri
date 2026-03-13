@@ -11,7 +11,10 @@ pub use container::{
 pub use element::{
     CreateElementInput, Element, ElementRelationship, ElementType, UpdateElementInput,
 };
-pub use story::{CreateStoryInput, Story, StoryStatus, StoryType, UpdateStoryInput, VariationType};
+pub use story::{
+    CreateStoryInput, Story, StoryDetail, StoryStatus, StorySummary, StoryType, UpdateStoryInput,
+    VariationType,
+};
 pub use story_snapshot::StorySnapshot;
 pub use story_version::{CreateStoryVersionInput, RenameStoryVersionInput, StoryVersion};
 pub use universe::{CreateUniverseInput, Universe, UniverseStatus, UpdateUniverseInput};

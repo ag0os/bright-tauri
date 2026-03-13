@@ -76,7 +76,7 @@ pub struct UpdateContainerInput {
 #[serde(rename_all = "camelCase")]
 pub struct ContainerChildren {
     pub containers: Vec<Container>,
-    pub stories: Vec<crate::models::Story>,
+    pub stories: Vec<crate::models::StorySummary>,
 }
 
 #[cfg(test)]

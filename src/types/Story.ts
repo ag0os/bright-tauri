@@ -6,7 +6,7 @@ import type { StoryVersion } from "./StoryVersion";
 import type { VariationType } from "./VariationType";
 
 /**
- * Story domain model
+ * Story domain model (internal, used by repository layer)
  *
  * A Story is a written work within a Universe. It can be a novel, script, screenplay,
  * or any other type of creative writing. Stories support variations and database-based versioning.
@@ -15,5 +15,7 @@ import type { VariationType } from "./VariationType";
  * - Story → Version → Snapshot hierarchy
  * - active_version_id and active_snapshot_id point to the current working state
  * - active_version and active_snapshot are inline JOINed data for convenience
+ *
+ * For API responses, use `StorySummary` (list endpoints) or `StoryDetail` (get endpoint).
  */
 export type Story = { id: string, universeId: string, title: string, description: string, createdAt: string, updatedAt: string, storyType: StoryType, status: StoryStatus, wordCount: number, targetWordCount: number | null, notes: string | null, outline: string | null, order: number | null, tags: Array<string> | null, color: string | null, favorite: boolean | null, relatedElementIds: Array<string> | null, containerId: string | null, seriesName: string | null, lastEditedAt: string, version: number, variationGroupId: string, variationType: VariationType, parentVariationId: string | null, activeVersionId: string | null, activeSnapshotId: string | null, activeVersion: StoryVersion | null, activeSnapshot: StorySnapshot | null, };

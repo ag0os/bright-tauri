@@ -1,5 +1,7 @@
 use crate::db::Database;
-use crate::models::{Container, ContainerChildren, CreateContainerInput, UpdateContainerInput};
+use crate::models::{
+    Container, ContainerChildren, CreateContainerInput, StorySummary, UpdateContainerInput,
+};
 use crate::repositories::{ContainerRepository, StoryRepository};
 use tauri::State;
 
@@ -57,13 +59,15 @@ pub fn list_container_children(
     let containers =
         ContainerRepository::list_children(&db, &container_id).map_err(|e| e.to_string())?;
 
-    // Get stories in this container
+    // Get stories in this container and convert to summaries
     let stories =
         StoryRepository::list_by_container(&db, &container_id).map_err(|e| e.to_string())?;
+    let story_summaries: Vec<StorySummary> =
+        stories.into_iter().map(StorySummary::from).collect();
 
     Ok(ContainerChildren {
         containers,
-        stories,
+        stories: story_summaries,
     })
 }
 

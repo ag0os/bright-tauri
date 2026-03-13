@@ -1,16 +1,9 @@
 use crate::db::Database;
 use crate::models::{Story, StoryVersion};
-use crate::repositories::{StoryRepository, StorySnapshotRepository, StoryVersionRepository};
+use crate::repositories::StoryVersionRepository;
+use crate::services::story_version_service;
 use tauri::State;
 
-/// Create a new story version with an initial snapshot containing the provided content.
-///
-/// This command:
-/// 1. Creates a new StoryVersion with the given name
-/// 2. Creates an initial snapshot with the provided content
-/// 3. Updates the story's active_version_id and active_snapshot_id to point to the new version/snapshot
-///
-/// Returns the newly created StoryVersion.
 #[tauri::command]
 pub fn create_story_version(
     db: State<Database>,
@@ -18,23 +11,9 @@ pub fn create_story_version(
     name: String,
     content: String,
 ) -> Result<StoryVersion, String> {
-    // Create the new version
-    let version =
-        StoryVersionRepository::create(&db, &story_id, &name).map_err(|e| e.to_string())?;
-
-    // Create the initial snapshot with the provided content
-    let snapshot =
-        StorySnapshotRepository::create(&db, &version.id, &content).map_err(|e| e.to_string())?;
-
-    // Update the story's active version and snapshot pointers
-    StoryRepository::set_active_version(&db, &story_id, &version.id).map_err(|e| e.to_string())?;
-    StoryRepository::set_active_snapshot(&db, &story_id, &snapshot.id)
-        .map_err(|e| e.to_string())?;
-
-    Ok(version)
+    story_version_service::create_story_version(&db, &story_id, &name, &content)
 }
 
-/// List all versions for a story, ordered by creation date (oldest first).
 #[tauri::command]
 pub fn list_story_versions(
     db: State<Database>,
@@ -43,7 +22,6 @@ pub fn list_story_versions(
     StoryVersionRepository::list_by_story(&db, &story_id).map_err(|e| e.to_string())
 }
 
-/// Rename an existing story version.
 #[tauri::command]
 pub fn rename_story_version(
     db: State<Database>,
@@ -53,118 +31,24 @@ pub fn rename_story_version(
     StoryVersionRepository::rename(&db, &version_id, &new_name).map_err(|e| e.to_string())
 }
 
-/// Delete a story version.
-///
-/// This command:
-/// - Prevents deletion if this is the last version of the story (returns error)
-/// - If deleting the active version, auto-switches to the most recent remaining version BEFORE deleting
-///
-/// Returns an error if:
-/// - The version doesn't exist
-/// - This is the last version of the story ("Cannot delete the last version of a story")
 #[tauri::command]
 pub fn delete_story_version(db: State<Database>, version_id: String) -> Result<(), String> {
-    // First, get the version to find its story_id and check if it's active
-    let version = StoryVersionRepository::get(&db, &version_id)
-        .map_err(|e| e.to_string())?
-        .ok_or_else(|| "Version not found".to_string())?;
-
-    let story_id = version.story_id.clone();
-
-    // Check version count before attempting deletion
-    let version_count =
-        StoryVersionRepository::count_by_story(&db, &story_id).map_err(|e| e.to_string())?;
-
-    if version_count <= 1 {
-        return Err("Cannot delete the last version of a story".to_string());
-    }
-
-    // Get the story to check if this version is active
-    let story = StoryRepository::find_by_id(&db, &story_id).map_err(|e| e.to_string())?;
-
-    let is_active_version = story.active_version_id.as_ref() == Some(&version_id);
-
-    // If deleting the active version, switch to another version BEFORE deleting
-    // This avoids foreign key constraint errors when cascade delete removes snapshots
-    if is_active_version {
-        // Get all versions except the one being deleted
-        let all_versions =
-            StoryVersionRepository::list_by_story(&db, &story_id).map_err(|e| e.to_string())?;
-
-        let new_active = all_versions
-            .iter()
-            .filter(|v| v.id != version_id)
-            .last()
-            .ok_or_else(|| "No other version to switch to".to_string())?;
-
-        // Update active version pointer first
-        StoryRepository::set_active_version(&db, &story_id, &new_active.id)
-            .map_err(|e| e.to_string())?;
-
-        // Set active snapshot to latest snapshot of the new version
-        if let Some(latest_snapshot) =
-            StorySnapshotRepository::get_latest(&db, &new_active.id).map_err(|e| e.to_string())?
-        {
-            StoryRepository::set_active_snapshot(&db, &story_id, &latest_snapshot.id)
-                .map_err(|e| e.to_string())?;
-        } else {
-            // If no snapshot exists, we need to clear the active_snapshot_id
-            // This shouldn't normally happen as versions should have at least one snapshot
-            db.execute(
-                "UPDATE stories SET active_snapshot_id = NULL WHERE id = ?1",
-                rusqlite::params![&story_id],
-            )
-            .map_err(|e| e.to_string())?;
-        }
-    }
-
-    // Now safe to delete the version (cascade will delete snapshots)
-    StoryVersionRepository::delete(&db, &version_id).map_err(|e| e.to_string())?;
-
-    Ok(())
+    story_version_service::delete_story_version(&db, &version_id)
 }
 
-/// Switch the active version for a story.
-///
-/// This command:
-/// 1. Updates the story's active_version_id to the specified version
-/// 2. Sets active_snapshot_id to the latest snapshot of the new version
-///
-/// Returns the updated Story.
 #[tauri::command]
 pub fn switch_story_version(
     db: State<Database>,
     story_id: String,
     version_id: String,
 ) -> Result<Story, String> {
-    // Verify the version exists and belongs to the story
-    let version = StoryVersionRepository::get(&db, &version_id)
-        .map_err(|e| e.to_string())?
-        .ok_or_else(|| "Version not found".to_string())?;
-
-    if version.story_id != story_id {
-        return Err("Version does not belong to this story".to_string());
-    }
-
-    // Update the story's active version
-    StoryRepository::set_active_version(&db, &story_id, &version_id).map_err(|e| e.to_string())?;
-
-    // Get the latest snapshot for this version and set it as active
-    let latest_snapshot = StorySnapshotRepository::get_latest(&db, &version_id)
-        .map_err(|e| e.to_string())?
-        .ok_or_else(|| "No snapshots found for version".to_string())?;
-
-    StoryRepository::set_active_snapshot(&db, &story_id, &latest_snapshot.id)
-        .map_err(|e| e.to_string())?;
-
-    // Return the updated story
-    StoryRepository::find_by_id(&db, &story_id).map_err(|e| e.to_string())
+    story_version_service::switch_story_version(&db, &story_id, &version_id)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::db::Database;
+    use crate::repositories::{StoryRepository, StorySnapshotRepository, StoryVersionRepository};
     use rusqlite::params;
     use tempfile::TempDir;
 

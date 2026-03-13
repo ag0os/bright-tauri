@@ -1,132 +1,36 @@
 use crate::db::Database;
-use crate::models::{CreateStoryInput, Story, UpdateStoryInput};
-use crate::repositories::{StoryRepository, StorySnapshotRepository, StoryVersionRepository};
+use crate::models::{CreateStoryInput, Story, StoryDetail, StorySummary, UpdateStoryInput};
+use crate::repositories::StoryRepository;
+use crate::services::story_service;
 use tauri::State;
 
-/// Create a new story.
-///
-/// This command creates a story and initializes the versioning system:
-/// 1. Creates the story record
-/// 2. Creates an "Original" version
-/// 3. Creates an initial empty snapshot
-/// 4. Sets active_version_id and active_snapshot_id on the story
-///
-/// All operations are wrapped in a transaction for atomicity.
 #[tauri::command]
-pub fn create_story(db: State<Database>, input: CreateStoryInput) -> Result<Story, String> {
-    // Begin transaction
-    {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-        conn.execute("BEGIN TRANSACTION", [])
-            .map_err(|e| e.to_string())?;
-    }
-
-    // Create the story (this doesn't set active_version_id or active_snapshot_id yet)
-    let story = match StoryRepository::create(&db, input) {
-        Ok(s) => s,
-        Err(e) => {
-            // Rollback on error
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            let _ = conn.execute("ROLLBACK", []);
-            return Err(e.to_string());
-        }
-    };
-
-    // Create the "Original" version
-    let version = match StoryVersionRepository::create(&db, &story.id, "Original") {
-        Ok(v) => v,
-        Err(e) => {
-            // Rollback on error
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            let _ = conn.execute("ROLLBACK", []);
-            return Err(e.to_string());
-        }
-    };
-
-    // Create the initial empty snapshot
-    let snapshot = match StorySnapshotRepository::create(&db, &version.id, "") {
-        Ok(s) => s,
-        Err(e) => {
-            // Rollback on error
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            let _ = conn.execute("ROLLBACK", []);
-            return Err(e.to_string());
-        }
-    };
-
-    // Update the story's active_version_id and active_snapshot_id
-    if let Err(e) = StoryRepository::set_active_version(&db, &story.id, &version.id) {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-        let _ = conn.execute("ROLLBACK", []);
-        return Err(e.to_string());
-    }
-
-    if let Err(e) = StoryRepository::set_active_snapshot(&db, &story.id, &snapshot.id) {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-        let _ = conn.execute("ROLLBACK", []);
-        return Err(e.to_string());
-    }
-
-    // Commit transaction
-    {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-        conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
-    }
-
-    // Return the story with inline version and snapshot data populated
-    let mut result = StoryRepository::find_by_id(&db, &story.id).map_err(|e| e.to_string())?;
-    result.active_version = Some(version);
-    result.active_snapshot = Some(snapshot);
-
-    Ok(result)
+pub fn create_story(db: State<Database>, input: CreateStoryInput) -> Result<StoryDetail, String> {
+    story_service::create_story(&db, input)
 }
 
-/// Get a story by ID with active version and snapshot populated.
-///
-/// This command fetches the story and also loads the active_version and active_snapshot
-/// inline data so the frontend gets everything in one request.
 #[tauri::command]
-pub fn get_story(db: State<Database>, id: String) -> Result<Story, String> {
-    let mut story = StoryRepository::find_by_id(&db, &id).map_err(|e| e.to_string())?;
-
-    // Populate active_version if present
-    if let Some(ref version_id) = story.active_version_id {
-        if let Ok(Some(version)) = StoryVersionRepository::get(&db, version_id) {
-            story.active_version = Some(version);
-        }
-    }
-
-    // Populate active_snapshot if present
-    if let Some(ref snapshot_id) = story.active_snapshot_id {
-        if let Ok(Some(snapshot)) = StorySnapshotRepository::get(&db, snapshot_id) {
-            story.active_snapshot = Some(snapshot);
-        }
-    }
-
-    Ok(story)
+pub fn get_story(db: State<Database>, id: String) -> Result<StoryDetail, String> {
+    story_service::get_story(&db, &id)
 }
 
 #[tauri::command]
 pub fn list_stories_by_universe(
     db: State<Database>,
     universe_id: String,
-) -> Result<Vec<Story>, String> {
-    StoryRepository::list_by_universe(&db, &universe_id).map_err(|e| e.to_string())
+) -> Result<Vec<StorySummary>, String> {
+    let stories = StoryRepository::list_by_universe(&db, &universe_id).map_err(|e| e.to_string())?;
+    Ok(stories.into_iter().map(StorySummary::from).collect())
 }
 
 #[tauri::command]
 pub fn list_story_variations(
     db: State<Database>,
     variation_group_id: String,
-) -> Result<Vec<Story>, String> {
-    StoryRepository::list_by_variation_group(&db, &variation_group_id).map_err(|e| e.to_string())
+) -> Result<Vec<StorySummary>, String> {
+    let stories = StoryRepository::list_by_variation_group(&db, &variation_group_id)
+        .map_err(|e| e.to_string())?;
+    Ok(stories.into_iter().map(StorySummary::from).collect())
 }
 
 #[tauri::command]
@@ -146,9 +50,10 @@ pub fn delete_story(db: State<Database>, id: String) -> Result<(), String> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::db::Database;
-    use crate::models::{CreateStoryInput, StoryType};
+    use crate::models::{CreateStoryInput, StoryDetail, StoryType};
+    use crate::repositories::{StoryRepository, StorySnapshotRepository, StoryVersionRepository};
+    use crate::services::story_service;
     use rusqlite::params;
     use tempfile::TempDir;
 
@@ -199,77 +104,8 @@ mod tests {
         }
     }
 
-    /// Simulates the create_story command logic for testing without Tauri State
-    fn create_story_internal(db: &Database, input: CreateStoryInput) -> Result<Story, String> {
-        // Begin transaction
-        {
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            conn.execute("BEGIN TRANSACTION", [])
-                .map_err(|e| e.to_string())?;
-        }
-
-        // Create the story
-        let story = match StoryRepository::create(db, input) {
-            Ok(s) => s,
-            Err(e) => {
-                let conn = db.connection();
-                let conn = conn.lock().unwrap();
-                let _ = conn.execute("ROLLBACK", []);
-                return Err(e.to_string());
-            }
-        };
-
-        // Create the "Original" version
-        let version = match StoryVersionRepository::create(db, &story.id, "Original") {
-            Ok(v) => v,
-            Err(e) => {
-                let conn = db.connection();
-                let conn = conn.lock().unwrap();
-                let _ = conn.execute("ROLLBACK", []);
-                return Err(e.to_string());
-            }
-        };
-
-        // Create the initial empty snapshot
-        let snapshot = match StorySnapshotRepository::create(db, &version.id, "") {
-            Ok(s) => s,
-            Err(e) => {
-                let conn = db.connection();
-                let conn = conn.lock().unwrap();
-                let _ = conn.execute("ROLLBACK", []);
-                return Err(e.to_string());
-            }
-        };
-
-        // Update the story's active_version_id and active_snapshot_id
-        if let Err(e) = StoryRepository::set_active_version(db, &story.id, &version.id) {
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            let _ = conn.execute("ROLLBACK", []);
-            return Err(e.to_string());
-        }
-
-        if let Err(e) = StoryRepository::set_active_snapshot(db, &story.id, &snapshot.id) {
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            let _ = conn.execute("ROLLBACK", []);
-            return Err(e.to_string());
-        }
-
-        // Commit transaction
-        {
-            let conn = db.connection();
-            let conn = conn.lock().unwrap();
-            conn.execute("COMMIT", []).map_err(|e| e.to_string())?;
-        }
-
-        // Return the story with inline version and snapshot data populated
-        let mut result = StoryRepository::find_by_id(db, &story.id).map_err(|e| e.to_string())?;
-        result.active_version = Some(version);
-        result.active_snapshot = Some(snapshot);
-
-        Ok(result)
+    fn create_story_internal(db: &Database, input: CreateStoryInput) -> Result<StoryDetail, String> {
+        story_service::create_story(db, input)
     }
 
     // ==========================================================================
@@ -283,35 +119,19 @@ mod tests {
         let input = create_test_story_input("My New Story");
         let story = create_story_internal(&db, input).unwrap();
 
-        // Story should have active_version_id set
-        assert!(
-            story.active_version_id.is_some(),
-            "active_version_id should be set"
-        );
+        // StoryDetail guarantees active_version_id is set (non-optional)
+        assert!(!story.active_version_id.is_empty(), "active_version_id should be set");
 
-        // Story should have active_snapshot_id set
-        assert!(
-            story.active_snapshot_id.is_some(),
-            "active_snapshot_id should be set"
-        );
+        // StoryDetail guarantees active_snapshot_id is set (non-optional)
+        assert!(!story.active_snapshot_id.is_empty(), "active_snapshot_id should be set");
 
-        // active_version should be populated with "Original" version
-        assert!(
-            story.active_version.is_some(),
-            "active_version should be populated"
-        );
-        let version = story.active_version.unwrap();
-        assert_eq!(version.name, "Original");
-        assert_eq!(version.story_id, story.id);
+        // active_version is guaranteed populated in StoryDetail
+        assert_eq!(story.active_version.name, "Original");
+        assert_eq!(story.active_version.story_id, story.id);
 
-        // active_snapshot should be populated with empty content
-        assert!(
-            story.active_snapshot.is_some(),
-            "active_snapshot should be populated"
-        );
-        let snapshot = story.active_snapshot.unwrap();
-        assert_eq!(snapshot.content, "");
-        assert_eq!(snapshot.version_id, version.id);
+        // active_snapshot is guaranteed populated in StoryDetail
+        assert_eq!(story.active_snapshot.content, "");
+        assert_eq!(story.active_snapshot.version_id, story.active_version.id);
 
         // Verify version exists in database
         let versions = StoryVersionRepository::list_by_story(&db, &story.id).unwrap();
@@ -319,7 +139,7 @@ mod tests {
         assert_eq!(versions[0].name, "Original");
 
         // Verify snapshot exists in database
-        let snapshots = StorySnapshotRepository::list_by_version(&db, &version.id).unwrap();
+        let snapshots = StorySnapshotRepository::list_by_version(&db, &story.active_version.id).unwrap();
         assert_eq!(snapshots.len(), 1);
         assert_eq!(snapshots[0].content, "");
     }
@@ -331,15 +151,9 @@ mod tests {
         let input = create_test_story_input("Test Story");
         let story = create_story_internal(&db, input).unwrap();
 
-        // Verify the IDs match between story pointers and inline data
-        assert_eq!(
-            story.active_version_id,
-            story.active_version.as_ref().map(|v| v.id.clone())
-        );
-        assert_eq!(
-            story.active_snapshot_id,
-            story.active_snapshot.as_ref().map(|s| s.id.clone())
-        );
+        // StoryDetail has non-optional fields, so IDs are guaranteed to match
+        assert_eq!(story.active_version_id, story.active_version.id);
+        assert_eq!(story.active_snapshot_id, story.active_snapshot.id);
     }
 
     // ==========================================================================
@@ -354,8 +168,8 @@ mod tests {
         let input = create_test_story_input("Story To Delete");
         let story = create_story_internal(&db, input).unwrap();
 
-        let version_id = story.active_version_id.clone().unwrap();
-        let snapshot_id = story.active_snapshot_id.clone().unwrap();
+        let version_id = story.active_version_id.clone();
+        let snapshot_id = story.active_snapshot_id.clone();
 
         // Verify version exists
         let version_before = StoryVersionRepository::get(&db, &version_id).unwrap();
@@ -392,7 +206,7 @@ mod tests {
         let input = create_test_story_input("Complex Story");
         let story = create_story_internal(&db, input).unwrap();
 
-        let version1_id = story.active_version_id.clone().unwrap();
+        let version1_id = story.active_version_id.clone();
 
         // Add a second version
         let version2 = StoryVersionRepository::create(&db, &story.id, "Alternate Ending").unwrap();
