@@ -4,17 +4,17 @@
  * Displays all elements in the current universe with filtering, sorting, and search.
  */
 
+import { CircleNotch, GlobeHemisphereWest, MagnifyingGlass, Plus } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
-import { Plus, MagnifyingGlass, CircleNotch, GlobeHemisphereWest } from '@phosphor-icons/react';
-import { PageLayout } from '@/shared/components/PageLayout';
-import { ElementCard } from '@/features/elements/components/ElementCard';
 import { CreateElementModal } from '@/features/elements/components/CreateElementModal';
 import { EditElementModal } from '@/features/elements/components/EditElementModal';
-import { ConfirmDeleteModal } from '@/shared/components/ConfirmDeleteModal';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { ElementCard } from '@/features/elements/components/ElementCard';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
+import { ConfirmDeleteModal } from '@/shared/components/ConfirmDeleteModal';
+import { PageLayout } from '@/shared/components/PageLayout';
 import { ELEMENT_TYPE_OPTIONS } from '@/shared/config/filter-options';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -160,10 +160,7 @@ export function UniverseList() {
           >
             Universe Elements
           </h1>
-          <button
-            className="btn btn-primary btn-base"
-            onClick={() => setShowCreateModal(true)}
-          >
+          <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(true)}>
             <Plus className="icon icon-base" />
             New Element
           </button>
@@ -337,10 +334,7 @@ export function UniverseList() {
                 : 'Build your universe by creating your first element!'}
             </p>
             {!filters.searchQuery && !filters.type && (
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={() => setShowCreateModal(true)}
-              >
+              <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
                 <Plus className="icon icon-base" />
                 Create Your First Element
               </button>

@@ -7,9 +7,9 @@
  * Part of Database-Only Versioning (DBV) implementation.
  */
 
-import { useEffect, useRef, useCallback } from 'react';
-import { createStorySnapshot } from '@/features/stories/api/snapshots';
+import { useCallback, useEffect, useRef } from 'react';
 import type { SnapshotTrigger } from '@/features/settings/stores/useSettingsStore';
+import { createStorySnapshot } from '@/features/stories/api/snapshots';
 
 export interface UseAutoSnapshotProps {
   /** The story ID to create snapshots for */
@@ -84,23 +84,26 @@ export function useAutoSnapshot({
   maxSnapshotsRef.current = maxSnapshots;
 
   // Create snapshot function
-  const createSnapshot = useCallback(async (
-    snapshotContent: string,
-    snapshotStoryId: string,
-    snapshotWordCount?: number,
-    snapshotMaxSnapshots?: number
-  ) => {
-    try {
-      await createStorySnapshot({
-        storyId: snapshotStoryId,
-        content: snapshotContent,
-        wordCount: snapshotWordCount,
-        maxSnapshots: snapshotMaxSnapshots,
-      });
-    } catch (error) {
-      console.error('Auto-snapshot error:', error);
-    }
-  }, []);
+  const createSnapshot = useCallback(
+    async (
+      snapshotContent: string,
+      snapshotStoryId: string,
+      snapshotWordCount?: number,
+      snapshotMaxSnapshots?: number,
+    ) => {
+      try {
+        await createStorySnapshot({
+          storyId: snapshotStoryId,
+          content: snapshotContent,
+          wordCount: snapshotWordCount,
+          maxSnapshots: snapshotMaxSnapshots,
+        });
+      } catch (error) {
+        console.error('Auto-snapshot error:', error);
+      }
+    },
+    [],
+  );
 
   // Rebase the snapshot baseline when a story finishes loading or tracking is re-enabled.
   useEffect(() => {
@@ -141,7 +144,16 @@ export function useAutoSnapshot({
         lastSnapshotContentRef.current = content;
       });
     }
-  }, [content, storyId, enabled, trigger, characterThreshold, wordCount, maxSnapshots, createSnapshot]);
+  }, [
+    content,
+    storyId,
+    enabled,
+    trigger,
+    characterThreshold,
+    wordCount,
+    maxSnapshots,
+    createSnapshot,
+  ]);
 
   // On-leave trigger: create snapshot on component unmount
   useEffect(() => {

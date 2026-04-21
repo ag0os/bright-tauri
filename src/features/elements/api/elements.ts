@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Element, CreateElementInput, UpdateElementInput } from '@/types';
+import type { CreateElementInput, Element, UpdateElementInput } from '@/types';
 
 export function listElementsByUniverse(universeId: string): Promise<Element[]> {
   return invoke<Element[]>('list_elements_by_universe', { universeId });

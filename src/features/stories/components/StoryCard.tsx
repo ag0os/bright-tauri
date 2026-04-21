@@ -5,19 +5,20 @@
  * Uses Elevated Shadow card design from design system.
  */
 
-import React, { useState } from 'react';
 import {
-  FileText,
-  Scroll,
-  FilmStrip,
-  Feather,
   BookBookmark,
-  Star,
+  Feather,
+  FileText,
+  FilmStrip,
   Gear,
+  Scroll,
+  Star,
   Trash,
 } from '@phosphor-icons/react';
-import type { StorySummary, StoryType } from '@/types';
+import type React from 'react';
+import { useState } from 'react';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import type { StorySummary, StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -83,12 +84,7 @@ const formatTimestamp = (timestamp: string): string => {
   return date.toLocaleDateString();
 };
 
-export function StoryCard({
-  story,
-  onClick,
-  onDelete,
-  onToggleFavorite,
-}: StoryCardProps) {
+export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
 
@@ -232,14 +228,14 @@ export function StoryCard({
                   story.status === 'completed'
                     ? 'var(--color-success-bg)'
                     : story.status === 'inprogress'
-                    ? 'var(--color-primary-bg)'
-                    : 'var(--color-surface)',
+                      ? 'var(--color-primary-bg)'
+                      : 'var(--color-surface)',
                 color:
                   story.status === 'completed'
                     ? 'var(--color-success)'
                     : story.status === 'inprogress'
-                    ? 'var(--color-primary)'
-                    : 'var(--color-text-secondary)',
+                      ? 'var(--color-primary)'
+                      : 'var(--color-text-secondary)',
                 fontWeight: 'var(--font-weight-medium)',
               }}
             >

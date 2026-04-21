@@ -22,12 +22,7 @@ export function StoryCompare() {
   return (
     <div className="story-compare">
       <div className="story-compare-header">
-        <button
-          className="back-button"
-          onClick={goBack}
-          aria-label="Go back"
-          title="Go back"
-        >
+        <button className="back-button" onClick={goBack} aria-label="Go back" title="Go back">
           <ArrowLeft size={20} />
         </button>
         <h1 className="story-compare-title">Compare Versions</h1>
@@ -38,8 +33,8 @@ export function StoryCompare() {
           <Clock size={48} weight="duotone" />
           <h2>Coming Soon</h2>
           <p className="story-subtitle">
-            Version comparison will be available in a future update.
-            You'll be able to see differences between versions and snapshots of your story.
+            Version comparison will be available in a future update. You'll be able to see
+            differences between versions and snapshots of your story.
           </p>
         </div>
       </div>

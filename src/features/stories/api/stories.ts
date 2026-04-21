@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Story, StorySummary, StoryDetail, CreateStoryInput, UpdateStoryInput } from '@/types';
+import type { CreateStoryInput, Story, StoryDetail, StorySummary, UpdateStoryInput } from '@/types';
 
 export function listStoriesByUniverse(universeId: string): Promise<StorySummary[]> {
   return invoke<StorySummary[]>('list_stories_by_universe', { universeId });

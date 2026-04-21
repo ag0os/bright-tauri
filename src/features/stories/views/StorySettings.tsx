@@ -5,10 +5,10 @@
  * Allows users to update title, description, story type, and target word count.
  */
 
-import { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
 import type { StoryDetail, StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -43,8 +43,7 @@ export function StorySettings() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Extract story ID from route
-  const storyId =
-    currentRoute.screen === 'story-settings' ? currentRoute.storyId : null;
+  const storyId = currentRoute.screen === 'story-settings' ? currentRoute.storyId : null;
 
   // Load story on mount
   useEffect(() => {
@@ -168,11 +167,7 @@ export function StorySettings() {
         <form onSubmit={handleSubmit}>
           <div className="settings-page__form-fields">
             {/* General Error */}
-            {errors.general && (
-              <div className="settings-page__error-banner">
-                {errors.general}
-              </div>
-            )}
+            {errors.general && <div className="settings-page__error-banner">{errors.general}</div>}
 
             {/* Story Type */}
             <div className="input-group input-5">
@@ -282,11 +277,7 @@ export function StorySettings() {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-base"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>

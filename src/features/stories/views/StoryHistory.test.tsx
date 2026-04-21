@@ -4,16 +4,16 @@
  * Tests for the snapshot history view (Database-Only Versioning).
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockTauriInvoke, resetTauriMocks } from '@/test/utils';
-import { StoryHistory } from './StoryHistory';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
+import { mockTauriInvoke, renderWithProviders, resetTauriMocks } from '@/test/utils';
 import type { StoryDetail, StorySnapshot } from '@/types';
+import { StoryHistory } from './StoryHistory';
 
 // Mock stores
 vi.mock('@/shared/stores/useNavigationStore');
@@ -97,7 +97,7 @@ describe('StoryHistory', () => {
           goBack: mockGoBack,
         };
         return selector(state);
-      }
+      },
     );
 
     // Mock stories store
@@ -107,7 +107,7 @@ describe('StoryHistory', () => {
           getStory: mockGetStory,
         };
         return selector(state);
-      }
+      },
     );
 
     (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
@@ -116,7 +116,7 @@ describe('StoryHistory', () => {
           maxSnapshotsPerVersion: 50,
         };
         return selector(state);
-      }
+      },
     );
 
     // Mock toast store
@@ -127,7 +127,7 @@ describe('StoryHistory', () => {
           error: mockShowError,
         };
         return selector(state);
-      }
+      },
     );
   });
 

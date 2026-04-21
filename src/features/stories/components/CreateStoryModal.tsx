@@ -4,11 +4,11 @@
  * Modal component for creating a new story with form validation and error handling.
  */
 
-import { useState, FormEvent, useEffect } from 'react';
 import { X } from '@phosphor-icons/react';
+import { type FormEvent, useEffect, useState } from 'react';
+import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
-import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import type { StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -102,7 +102,10 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
         outline: null,
         targetWordCount: formData.targetWordCount ? parseInt(formData.targetWordCount, 10) : null,
         tags: formData.tags
-          ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+          ? formData.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
           : null,
         color: null,
         seriesName: null,
@@ -227,9 +230,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                   id="story-container"
                   className="input-field input-base"
                   value={formData.containerId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, containerId: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, containerId: e.target.value })}
                   disabled={!!containerId} // Disable if container was pre-selected
                   style={{
                     backgroundColor: 'var(--color-surface)',
@@ -386,11 +387,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-base"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
               {isSubmitting ? 'Creating...' : 'Create Story'}
             </button>
           </div>

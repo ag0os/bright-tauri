@@ -1,9 +1,9 @@
-import { useNavigationStore } from "@/shared/stores/useNavigationStore";
-import { useToastStore } from "@/shared/stores/useToastStore";
-import { routeRegistry, defaultScreen } from "@/shared/navigation/routes";
-import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
-import { ToastContainer } from "@/shared/components/Toast";
-import "./App.css";
+import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
+import { ToastContainer } from '@/shared/components/Toast';
+import { defaultScreen, routeRegistry } from '@/shared/navigation/routes';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { useToastStore } from '@/shared/stores/useToastStore';
+import './App.css';
 
 function AppContent() {
   const currentRoute = useNavigationStore((state) => state.currentRoute);

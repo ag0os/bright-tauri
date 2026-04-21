@@ -5,8 +5,8 @@
  * Prevents the entire app from crashing due to errors in individual views.
  */
 
-import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { WarningCircle, ArrowClockwise } from '@phosphor-icons/react';
+import { ArrowClockwise, WarningCircle } from '@phosphor-icons/react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 
@@ -71,9 +71,7 @@ export class ErrorBoundary extends Component<Props, State> {
             weight="duotone"
             style={{ color: 'var(--color-semantic-error)' }}
           />
-          <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>
-            Something went wrong
-          </h2>
+          <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Something went wrong</h2>
           {name && (
             <p style={{ margin: 0 }}>
               An error occurred in <strong>{name}</strong>

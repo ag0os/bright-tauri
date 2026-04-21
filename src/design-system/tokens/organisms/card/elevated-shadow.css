@@ -17,7 +17,9 @@
   --card-footer-padding: 12px 20px;
   --card-content-padding: 20px;
   --card-content-gap: 12px;
-  --card-transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  --card-transition:
+    background-color 150ms var(--ease-out), border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
 }
 
 /* Card Base */

@@ -5,8 +5,8 @@
  * This hook updates the current snapshot in place (30s debounce) for crash protection.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAutoSave } from './useAutoSave';
 
 describe('useAutoSave', () => {
@@ -27,7 +27,7 @@ describe('useAutoSave', () => {
         useAutoSave({
           content: 'Initial content',
           onSave,
-        })
+        }),
       );
 
       expect(result.current.saveState).toBe('idle');
@@ -41,7 +41,7 @@ describe('useAutoSave', () => {
         useAutoSave({
           content: 'Initial content',
           onSave,
-        })
+        }),
       );
 
       expect(onSave).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 1000,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // Change content
@@ -86,7 +86,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 1000,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // Rapid changes
@@ -120,7 +120,7 @@ describe('useAutoSave', () => {
             onSave,
             // No delay specified - should default to 30000ms
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -143,7 +143,10 @@ describe('useAutoSave', () => {
     it('transitions to saving state when saving', async () => {
       let resolvePromise: () => void;
       const onSave = vi.fn().mockImplementation(
-        () => new Promise<void>((resolve) => { resolvePromise = resolve; })
+        () =>
+          new Promise<void>((resolve) => {
+            resolvePromise = resolve;
+          }),
       );
 
       const { result, rerender } = renderHook(
@@ -153,7 +156,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -180,7 +183,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -202,7 +205,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -229,7 +232,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -257,7 +260,7 @@ describe('useAutoSave', () => {
             delay: 100,
             enabled,
           }),
-        { initialProps: { content: 'Initial', enabled: false } }
+        { initialProps: { content: 'Initial', enabled: false } },
       );
 
       rerender({ content: 'Updated', enabled: false });
@@ -280,7 +283,7 @@ describe('useAutoSave', () => {
             delay: 100,
             enabled,
           }),
-        { initialProps: { content: 'Initial', enabled: false } }
+        { initialProps: { content: 'Initial', enabled: false } },
       );
 
       // Enable and change content
@@ -305,7 +308,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 30000, // Long delay
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated content' });
@@ -329,7 +332,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 1000,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -365,7 +368,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -394,7 +397,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 1000,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });
@@ -422,7 +425,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // First change
@@ -454,7 +457,7 @@ describe('useAutoSave', () => {
             onSave,
             delay: 1000,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Updated' });

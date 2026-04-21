@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { List, CaretLeft, CaretRight, Command, MagnifyingGlass, Plus } from '@phosphor-icons/react';
+import { CaretLeft, CaretRight, Command, List, MagnifyingGlass, Plus } from '@phosphor-icons/react';
+import type React from 'react';
+import { useState } from 'react';
 import './minimal-topbar.css';
 
 export interface MinimalTopBarProps {
@@ -34,7 +35,9 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
             <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
             <span className="nav-3__breadcrumb-item">Part One</span>
             <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
-            <span className="nav-3__breadcrumb-item nav-3__breadcrumb-item--current">Chapter 3</span>
+            <span className="nav-3__breadcrumb-item nav-3__breadcrumb-item--current">
+              Chapter 3
+            </span>
           </div>
         </div>
 

@@ -1,9 +1,9 @@
 /* Import design system tokens */
-@import '../../../design-system/tokens/colors/modern-indigo.css';
-@import '../../../design-system/tokens/typography/classic-serif.css';
-@import '../../../design-system/tokens/atoms/button/minimal-squared.css';
-@import '../../../design-system/tokens/atoms/input/filled-background.css';
-@import '../../../design-system/tokens/spacing.css';
+@import "../../../design-system/tokens/colors/modern-indigo.css";
+@import "../../../design-system/tokens/typography/classic-serif.css";
+@import "../../../design-system/tokens/atoms/button/minimal-squared.css";
+@import "../../../design-system/tokens/atoms/input/filled-background.css";
+@import "../../../design-system/tokens/spacing.css";
 
 /* Modal overlay */
 .modal-overlay {

@@ -5,16 +5,11 @@
  * Shows container type, child count, and leaf/non-leaf status.
  */
 
-import React, { useState } from 'react';
-import {
-  Book,
-  Books,
-  FolderOpen,
-  Gear,
-  Trash,
-} from '@phosphor-icons/react';
-import type { Container } from '@/types';
+import { Book, Books, FolderOpen, Gear, Trash } from '@phosphor-icons/react';
+import type React from 'react';
+import { useState } from 'react';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import type { Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -67,12 +62,7 @@ const formatTimestamp = (timestamp: string): string => {
   return date.toLocaleDateString();
 };
 
-export function ContainerCard({
-  container,
-  childCount,
-  onClick,
-  onDelete,
-}: ContainerCardProps) {
+export function ContainerCard({ container, childCount, onClick, onDelete }: ContainerCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
 
@@ -94,9 +84,7 @@ export function ContainerCard({
     navigate({ screen: 'container-settings', containerId: container.id });
   };
 
-  const totalChildren = childCount
-    ? childCount.containers + childCount.stories
-    : 0;
+  const totalChildren = childCount ? childCount.containers + childCount.stories : 0;
 
   return (
     <div
@@ -211,13 +199,18 @@ export function ContainerCard({
               <>
                 {childCount.containers > 0 && (
                   <>
-                    <span>{childCount.containers} {childCount.containers === 1 ? 'container' : 'containers'}</span>
+                    <span>
+                      {childCount.containers}{' '}
+                      {childCount.containers === 1 ? 'container' : 'containers'}
+                    </span>
                   </>
                 )}
                 {childCount.stories > 0 && (
                   <>
                     {childCount.containers > 0 && <span>•</span>}
-                    <span>{childCount.stories} {childCount.stories === 1 ? 'story' : 'stories'}</span>
+                    <span>
+                      {childCount.stories} {childCount.stories === 1 ? 'story' : 'stories'}
+                    </span>
                   </>
                 )}
                 {totalChildren > 0 && <span>•</span>}

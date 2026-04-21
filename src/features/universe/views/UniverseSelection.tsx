@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon } from '@phosphor-icons/react';
-import { UniverseCard } from '../components/UniverseCard';
-import { CreateUniverseModal } from '../components/CreateUniverseModal';
-import type { Universe } from '@/types/Universe';
+import { Moon, Sun } from '@phosphor-icons/react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useTheme } from '@/shared/hooks/useTheme';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import type { Universe } from '@/types/Universe';
+import { CreateUniverseModal } from '../components/CreateUniverseModal';
+import { UniverseCard } from '../components/UniverseCard';
 import './UniverseSelection.css';
 
 export const UniverseSelection: React.FC = () => {
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { universes, isLoading, loadUniverses, createUniverse, setCurrentUniverse } = useUniverseStore();
+  const { universes, isLoading, loadUniverses, createUniverse, setCurrentUniverse } =
+    useUniverseStore();
   const navigate = useNavigationStore((state) => state.navigate);
   const { isDark, toggleTheme } = useTheme();
 
@@ -140,11 +142,7 @@ export const UniverseSelection: React.FC = () => {
           <p className="universe-selection__subtitle">
             Start your creative journey by creating your first universe
           </p>
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={handleOpenCreateModal}
-            autoFocus
-          >
+          <button className="btn btn-primary btn-lg" onClick={handleOpenCreateModal} autoFocus>
             Create Universe
           </button>
         </div>

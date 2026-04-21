@@ -9,7 +9,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import * as api from '@/features/universe/api/universes';
-import type { Universe, CreateUniverseInput } from '@/types';
+import type { CreateUniverseInput, Universe } from '@/types';
 
 interface UniverseState {
   // State
@@ -127,6 +127,6 @@ export const useUniverseStore = create<UniverseState>()(
       partialize: (state) => ({
         currentUniverse: state.currentUniverse,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
 import { ConfirmationModal } from './ConfirmationModal';
 
@@ -16,7 +16,7 @@ describe('ConfirmationModal', () => {
         message="Test message"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -35,7 +35,7 @@ describe('ConfirmationModal', () => {
         message="Test message"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -54,7 +54,7 @@ describe('ConfirmationModal', () => {
         confirmText="Confirm"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const confirmButton = screen.getByRole('button', { name: 'Confirm' });
@@ -75,7 +75,7 @@ describe('ConfirmationModal', () => {
         message="Test message"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
@@ -96,7 +96,7 @@ describe('ConfirmationModal', () => {
         message="Test message"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     await user.keyboard('{Escape}');
@@ -117,7 +117,7 @@ describe('ConfirmationModal', () => {
         cancelText="No, go back"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('button', { name: 'Yes, proceed' })).toBeInTheDocument();
@@ -136,7 +136,7 @@ describe('ConfirmationModal', () => {
         variant="danger"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -149,7 +149,7 @@ describe('ConfirmationModal', () => {
         variant="warning"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -162,7 +162,7 @@ describe('ConfirmationModal', () => {
         variant="info"
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -180,7 +180,7 @@ describe('ConfirmationModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         isProcessing={true}
-      />
+      />,
     );
 
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
@@ -203,7 +203,7 @@ describe('ConfirmationModal', () => {
         }
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByText('First paragraph')).toBeInTheDocument();

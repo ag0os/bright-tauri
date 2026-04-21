@@ -5,11 +5,11 @@
  * Tests are minimal for the placeholder view.
  */
 
-import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { renderWithProviders } from '@/test/utils';
 import { StoryCompare } from './StoryCompare';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 
 // Mock stores
 vi.mock('@/shared/stores/useNavigationStore');
@@ -21,7 +21,7 @@ describe('StoryCompare (Stub)', () => {
       (selector: (state: { goBack: typeof mockGoBack }) => unknown) => {
         const state = { goBack: mockGoBack };
         return selector(state);
-      }
+      },
     );
 
     renderWithProviders(<StoryCompare />);
@@ -36,7 +36,7 @@ describe('StoryCompare (Stub)', () => {
       (selector: (state: { goBack: typeof mockGoBack }) => unknown) => {
         const state = { goBack: mockGoBack };
         return selector(state);
-      }
+      },
     );
 
     renderWithProviders(<StoryCompare />);

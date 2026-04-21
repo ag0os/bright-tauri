@@ -5,8 +5,8 @@
  * Can be used as a standalone component or embedded in other views.
  */
 
-import { FolderOpen, FileText, CaretUp, CaretDown, CircleNotch } from '@phosphor-icons/react';
-import type { Container, StorySummary, ContainerChildren } from '@/types';
+import { CaretDown, CaretUp, CircleNotch, FileText, FolderOpen } from '@phosphor-icons/react';
+import type { Container, ContainerChildren, StorySummary } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -156,11 +156,7 @@ export function ContainerChildrenView({
                   e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
                 }}
               >
-                <FolderOpen
-                  size={24}
-                  weight="duotone"
-                  style={{ color: 'var(--color-primary)' }}
-                />
+                <FolderOpen size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{
@@ -265,11 +261,7 @@ export function ContainerChildrenView({
                   e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
                 }}
               >
-                <FileText
-                  size={24}
-                  weight="duotone"
-                  style={{ color: 'var(--color-accent)' }}
-                />
+                <FileText size={24} weight="duotone" style={{ color: 'var(--color-accent)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{

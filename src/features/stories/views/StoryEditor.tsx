@@ -5,18 +5,26 @@
  * Provides a distraction-free writing experience.
  */
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { ArrowLeft, FloppyDisk, Check, WarningCircle, Clock, Gear, StackSimple } from '@phosphor-icons/react';
-import { updateSnapshotContent } from '@/features/stories/api/snapshots';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
-import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
-import { useToastStore } from '@/shared/stores/useToastStore';
+import {
+  ArrowLeft,
+  Check,
+  Clock,
+  FloppyDisk,
+  Gear,
+  StackSimple,
+  WarningCircle,
+} from '@phosphor-icons/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RichTextEditor } from '@/editor/RichTextEditor';
+import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
+import { updateSnapshotContent } from '@/features/stories/api/snapshots';
 import { useAutoSave } from '@/features/stories/hooks/useAutoSave';
 import { useAutoSnapshot } from '@/features/stories/hooks/useAutoSnapshot';
-import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
-import type { StoryDetail } from '@/types';
+import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { useToastStore } from '@/shared/stores/useToastStore';
 import { countLexicalWords } from '@/shared/utils/lexicalWordCount';
+import type { StoryDetail } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -45,8 +53,7 @@ export function StoryEditor() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   // Extract story ID from route
-  const storyId =
-    currentRoute.screen === 'story-editor' ? currentRoute.storyId : null;
+  const storyId = currentRoute.screen === 'story-editor' ? currentRoute.storyId : null;
 
   // Load story on mount - content comes from activeSnapshot (DBV system)
   useEffect(() => {
@@ -74,11 +81,14 @@ export function StoryEditor() {
 
   // Memoized save callback - saves to snapshot via DBV system
   // Backend resolves the active snapshot internally from storyId
-  const handleSaveContent = useCallback(async (newContent: string) => {
-    if (!storyId) return;
-    const wordCountValue = countLexicalWords(newContent);
-    await updateSnapshotContent(storyId, newContent, wordCountValue);
-  }, [storyId]);
+  const handleSaveContent = useCallback(
+    async (newContent: string) => {
+      if (!storyId) return;
+      const wordCountValue = countLexicalWords(newContent);
+      await updateSnapshotContent(storyId, newContent, wordCountValue);
+    },
+    [storyId],
+  );
 
   // Auto-save content changes to database via DBV system (30s debounce)
   // This updates the current snapshot in place for crash protection

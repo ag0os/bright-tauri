@@ -11,13 +11,13 @@
 
   /* Spacing Scale */
   --spacing-0: 0;
-  --spacing-1: 4px;   /* 0.25rem */
-  --spacing-2: 8px;   /* 0.5rem */
-  --spacing-3: 12px;  /* 0.75rem */
-  --spacing-4: 16px;  /* 1rem */
-  --spacing-5: 20px;  /* 1.25rem */
-  --spacing-6: 24px;  /* 1.5rem */
-  --spacing-8: 32px;  /* 2rem */
+  --spacing-1: 4px; /* 0.25rem */
+  --spacing-2: 8px; /* 0.5rem */
+  --spacing-3: 12px; /* 0.75rem */
+  --spacing-4: 16px; /* 1rem */
+  --spacing-5: 20px; /* 1.25rem */
+  --spacing-6: 24px; /* 1.5rem */
+  --spacing-8: 32px; /* 2rem */
   --spacing-10: 40px; /* 2.5rem */
   --spacing-12: 48px; /* 3rem */
   --spacing-16: 64px; /* 4rem */
@@ -25,63 +25,63 @@
   --spacing-24: 96px; /* 6rem */
 
   /* Semantic Spacing */
-  --spacing-xs: var(--spacing-2);    /* 8px */
-  --spacing-sm: var(--spacing-3);    /* 12px */
-  --spacing-md: var(--spacing-4);    /* 16px */
-  --spacing-lg: var(--spacing-6);    /* 24px */
-  --spacing-xl: var(--spacing-8);    /* 32px */
-  --spacing-2xl: var(--spacing-12);  /* 48px */
-  --spacing-3xl: var(--spacing-16);  /* 64px */
+  --spacing-xs: var(--spacing-2); /* 8px */
+  --spacing-sm: var(--spacing-3); /* 12px */
+  --spacing-md: var(--spacing-4); /* 16px */
+  --spacing-lg: var(--spacing-6); /* 24px */
+  --spacing-xl: var(--spacing-8); /* 32px */
+  --spacing-2xl: var(--spacing-12); /* 48px */
+  --spacing-3xl: var(--spacing-16); /* 64px */
 
   /* Layout Spacing */
-  --layout-padding-sm: var(--spacing-4);   /* 16px */
-  --layout-padding-md: var(--spacing-6);   /* 24px */
-  --layout-padding-lg: var(--spacing-8);   /* 32px */
-  --layout-padding-xl: var(--spacing-12);  /* 48px */
+  --layout-padding-sm: var(--spacing-4); /* 16px */
+  --layout-padding-md: var(--spacing-6); /* 24px */
+  --layout-padding-lg: var(--spacing-8); /* 32px */
+  --layout-padding-xl: var(--spacing-12); /* 48px */
 
   /* Component Spacing */
-  --component-gap-sm: var(--spacing-2);  /* 8px */
-  --component-gap-md: var(--spacing-4);  /* 16px */
-  --component-gap-lg: var(--spacing-6);  /* 24px */
+  --component-gap-sm: var(--spacing-2); /* 8px */
+  --component-gap-md: var(--spacing-4); /* 16px */
+  --component-gap-lg: var(--spacing-6); /* 24px */
 
   /* Section Spacing */
-  --section-spacing-sm: var(--spacing-8);   /* 32px */
-  --section-spacing-md: var(--spacing-12);  /* 48px */
-  --section-spacing-lg: var(--spacing-16);  /* 64px */
+  --section-spacing-sm: var(--spacing-8); /* 32px */
+  --section-spacing-md: var(--spacing-12); /* 48px */
+  --section-spacing-lg: var(--spacing-16); /* 64px */
 
   /* Elevation / Shadow Scale — Ink & Paper: minimal, no colored shadows */
   --shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.04);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.06);
   --shadow-base: 0 1px 2px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 6px 18px -6px rgba(0, 0, 0, 0.30), 0 2px 4px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 6px 18px -6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 18px 40px -12px rgba(0, 0, 0, 0.45), 0 6px 12px rgba(0, 0, 0, 0.18);
   --shadow-xl: 0 18px 40px -12px rgba(0, 0, 0, 0.45), 0 6px 12px rgba(0, 0, 0, 0.18);
   --shadow-hover: var(--shadow-sm);
 
   /* Radii — 4/6/8/12/16/999 */
-  --radius-xs:   4px;   /* tags, small pills */
-  --radius-sm:   6px;
-  --radius-md:   8px;   /* buttons, inputs, menus */
-  --radius-lg:   12px;  /* cards, modals */
-  --radius-xl:   16px;  /* major panels */
+  --radius-xs: 4px; /* tags, small pills */
+  --radius-sm: 6px;
+  --radius-md: 8px; /* buttons, inputs, menus */
+  --radius-lg: 12px; /* cards, modals */
+  --radius-xl: 16px; /* major panels */
   --radius-full: 999px;
 
   /* Motion */
-  --ease-out:    cubic-bezier(0.2, 0, 0, 1);
-  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --dur-fast:  120ms;
-  --dur-base:  150ms;
-  --dur-slow:  200ms;
+  --dur-fast: 120ms;
+  --dur-base: 150ms;
+  --dur-slow: 200ms;
   --dur-modal: 240ms;
 
   /* Layout */
-  --layout-topbar-h:  48px;
+  --layout-topbar-h: 48px;
   --layout-sidebar-w: 280px;
   --layout-content-w: 1200px;
   --layout-reading-w: 720px;
-  --layout-gutter:    24px;
+  --layout-gutter: 24px;
 }
 
 /* Light-theme shadow override — softer lift on warm paper */
@@ -89,7 +89,7 @@
   --shadow-xs: 0 1px 0 rgba(21, 18, 14, 0.03);
   --shadow-sm: 0 1px 2px rgba(21, 18, 14, 0.06), 0 1px 1px rgba(21, 18, 14, 0.04);
   --shadow-base: 0 1px 2px rgba(21, 18, 14, 0.06), 0 1px 1px rgba(21, 18, 14, 0.04);
-  --shadow-md: 0 6px 18px -6px rgba(21, 18, 14, 0.10), 0 2px 4px rgba(21, 18, 14, 0.05);
+  --shadow-md: 0 6px 18px -6px rgba(21, 18, 14, 0.1), 0 2px 4px rgba(21, 18, 14, 0.05);
   --shadow-lg: 0 18px 40px -12px rgba(21, 18, 14, 0.16), 0 6px 12px rgba(21, 18, 14, 0.06);
   --shadow-xl: 0 18px 40px -12px rgba(21, 18, 14, 0.16), 0 6px 12px rgba(21, 18, 14, 0.06);
   --shadow-hover: var(--shadow-sm);

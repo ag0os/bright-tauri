@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '@/test/utils';
-import { DeleteStoryModal } from './DeleteStoryModal';
 import type { StorySummary } from '@/types/StorySummary';
+import { DeleteStoryModal } from './DeleteStoryModal';
 
 // Mock story data as StorySummary (lightweight for list/delete operations)
 const mockStory: StorySummary = {
@@ -42,14 +42,16 @@ describe('DeleteStoryModal', () => {
         childCount={0}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Delete Story' })).toBeInTheDocument();
     expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
     expect(screen.getByText(/Test Story/)).toBeInTheDocument();
-    expect(screen.getByText(/This will permanently remove the story and all its version history/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This will permanently remove the story and all its version history/),
+    ).toBeInTheDocument();
   });
 
   it('renders with story with chapters and shows warning', () => {
@@ -63,7 +65,7 @@ describe('DeleteStoryModal', () => {
         childCount={3}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -83,7 +85,7 @@ describe('DeleteStoryModal', () => {
         childCount={1}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.getByText(/1 chapter/)).toBeInTheDocument();
@@ -101,7 +103,7 @@ describe('DeleteStoryModal', () => {
         childCount={0}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const deleteButton = screen.getByRole('button', { name: 'Delete Story' });
@@ -122,7 +124,7 @@ describe('DeleteStoryModal', () => {
         childCount={0}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     const cancelButton = screen.getByRole('button', { name: 'Cancel' });
@@ -142,7 +144,7 @@ describe('DeleteStoryModal', () => {
         childCount={0}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -159,7 +161,7 @@ describe('DeleteStoryModal', () => {
         childCount={0}
         onConfirm={onConfirm}
         onCancel={onCancel}
-      />
+      />,
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -177,7 +179,7 @@ describe('DeleteStoryModal', () => {
         onConfirm={onConfirm}
         onCancel={onCancel}
         isDeleting={true}
-      />
+      />,
     );
 
     const processingButton = screen.getByRole('button', { name: 'Processing...' });

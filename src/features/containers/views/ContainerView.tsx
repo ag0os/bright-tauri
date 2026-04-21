@@ -5,12 +5,21 @@
  * Provides navigation to child containers and stories, with reordering capabilities.
  */
 
+import {
+  ArrowLeft,
+  CaretDown,
+  CaretUp,
+  CircleNotch,
+  FileText,
+  FolderOpen,
+  Gear,
+  Plus,
+} from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Plus, CircleNotch, FolderOpen, FileText, Gear, CaretUp, CaretDown } from '@phosphor-icons/react';
-import { PageLayout } from '@/shared/components/PageLayout';
 import { CreateContainerModal } from '@/features/containers/components/CreateContainerModal';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useContainersStore } from '@/features/containers/stores/useContainersStore';
+import { PageLayout } from '@/shared/components/PageLayout';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import type { Container, StorySummary } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -82,8 +91,8 @@ export function ContainerView({ containerId }: ContainerViewProps) {
   const handleMoveContainerUp = async (index: number) => {
     if (!children || index === 0) return;
 
-    const containerIds = [...children.containers.map(c => c.id)];
-    const storyIds = [...children.stories.map(s => s.id)];
+    const containerIds = [...children.containers.map((c) => c.id)];
+    const storyIds = [...children.stories.map((s) => s.id)];
 
     // Swap with previous
     [containerIds[index], containerIds[index - 1]] = [containerIds[index - 1], containerIds[index]];
@@ -97,8 +106,8 @@ export function ContainerView({ containerId }: ContainerViewProps) {
   const handleMoveContainerDown = async (index: number) => {
     if (!children || index === children.containers.length - 1) return;
 
-    const containerIds = [...children.containers.map(c => c.id)];
-    const storyIds = [...children.stories.map(s => s.id)];
+    const containerIds = [...children.containers.map((c) => c.id)];
+    const storyIds = [...children.stories.map((s) => s.id)];
 
     // Swap with next
     [containerIds[index], containerIds[index + 1]] = [containerIds[index + 1], containerIds[index]];
@@ -112,8 +121,8 @@ export function ContainerView({ containerId }: ContainerViewProps) {
   const handleMoveStoryUp = async (index: number) => {
     if (!children || index === 0) return;
 
-    const containerIds = [...children.containers.map(c => c.id)];
-    const storyIds = [...children.stories.map(s => s.id)];
+    const containerIds = [...children.containers.map((c) => c.id)];
+    const storyIds = [...children.stories.map((s) => s.id)];
 
     // Swap with previous
     [storyIds[index], storyIds[index - 1]] = [storyIds[index - 1], storyIds[index]];
@@ -127,8 +136,8 @@ export function ContainerView({ containerId }: ContainerViewProps) {
   const handleMoveStoryDown = async (index: number) => {
     if (!children || index === children.stories.length - 1) return;
 
-    const containerIds = [...children.containers.map(c => c.id)];
-    const storyIds = [...children.stories.map(s => s.id)];
+    const containerIds = [...children.containers.map((c) => c.id)];
+    const storyIds = [...children.stories.map((s) => s.id)];
 
     // Swap with next
     [storyIds[index], storyIds[index + 1]] = [storyIds[index + 1], storyIds[index]];
@@ -246,11 +255,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
           {/* Title and Description */}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-              <FolderOpen
-                size={24}
-                weight="duotone"
-                style={{ color: 'var(--color-primary)' }}
-              />
+              <FolderOpen size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
               <h1
                 style={{
                   fontFamily: 'var(--typography-heading-font)',
@@ -297,10 +302,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
             >
               <Gear size={18} weight="duotone" />
             </button>
-            <button
-              className="btn btn-primary btn-base"
-              onClick={() => setShowCreateModal(true)}
-            >
+            <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(true)}>
               <Plus className="icon icon-base" />
               Add Child
             </button>
@@ -596,10 +598,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                 >
                   Add child containers or stories to organize your content.
                 </p>
-                <button
-                  className="btn btn-primary btn-lg"
-                  onClick={() => setShowCreateModal(true)}
-                >
+                <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
                   <Plus className="icon icon-base" />
                   Add First Child
                 </button>

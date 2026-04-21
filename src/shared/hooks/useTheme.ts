@@ -5,7 +5,7 @@
  * Applies theme to document root via data-theme attribute.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
 

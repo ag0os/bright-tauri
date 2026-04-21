@@ -4,7 +4,7 @@
  * Uses existing indigo colors from design system
  */
 
-@import './modern-indigo.css';
+@import "./modern-indigo.css";
 
 :root {
   /* Gradient variations using design system indigo colors - lighter for better contrast */

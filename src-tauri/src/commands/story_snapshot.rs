@@ -12,7 +12,13 @@ pub fn create_story_snapshot(
     word_count: Option<u32>,
     max_snapshots: Option<i32>,
 ) -> Result<StorySnapshot, String> {
-    story_snapshot_service::create_story_snapshot(&db, &story_id, &content, word_count, max_snapshots)
+    story_snapshot_service::create_story_snapshot(
+        &db,
+        &story_id,
+        &content,
+        word_count,
+        max_snapshots,
+    )
 }
 
 #[tauri::command]
@@ -41,7 +47,13 @@ pub fn switch_story_snapshot(
     word_count: Option<u32>,
     max_snapshots: Option<i32>,
 ) -> Result<Story, String> {
-    story_snapshot_service::switch_story_snapshot(&db, &story_id, &snapshot_id, word_count, max_snapshots)
+    story_snapshot_service::switch_story_snapshot(
+        &db,
+        &story_id,
+        &snapshot_id,
+        word_count,
+        max_snapshots,
+    )
 }
 
 #[tauri::command]

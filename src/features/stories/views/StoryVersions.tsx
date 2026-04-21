@@ -10,9 +10,9 @@
  * - Delete versions (with warnings for active version, error for last version)
  */
 
-import { ArrowLeft, Plus, Check, Pencil, Trash, StackSimple, Warning } from '@phosphor-icons/react';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { ArrowLeft, Check, Pencil, Plus, StackSimple, Trash, Warning } from '@phosphor-icons/react';
 import { useStoryVersions } from '@/features/stories/hooks/useStoryVersions';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -85,12 +85,7 @@ export function StoryVersions() {
     <div className="story-versions">
       {/* Header */}
       <div className="story-versions-header">
-        <button
-          className="back-button"
-          onClick={goBack}
-          aria-label="Go back"
-          title="Go back"
-        >
+        <button className="back-button" onClick={goBack} aria-label="Go back" title="Go back">
           <ArrowLeft size={20} />
         </button>
         <h1 className="page-title">Versions</h1>
@@ -172,10 +167,7 @@ export function StoryVersions() {
                 const isSwitching = switching === version.id;
 
                 return (
-                  <div
-                    key={version.id}
-                    className={`version-item ${isActive ? 'current' : ''}`}
-                  >
+                  <div key={version.id} className={`version-item ${isActive ? 'current' : ''}`}>
                     <div className="version-info">
                       {isEditing ? (
                         <input
@@ -270,15 +262,13 @@ export function StoryVersions() {
             <div className="modal-body">
               {deleteConfirm.isActive ? (
                 <p>
-                  <strong>"{deleteConfirm.versionName}"</strong> is your active version.
-                  Deleting it will automatically switch to another version.
-                  Are you sure you want to continue?
+                  <strong>"{deleteConfirm.versionName}"</strong> is your active version. Deleting it
+                  will automatically switch to another version. Are you sure you want to continue?
                 </p>
               ) : (
                 <p>
                   Are you sure you want to delete version{' '}
-                  <strong>"{deleteConfirm.versionName}"</strong>?
-                  This action cannot be undone.
+                  <strong>"{deleteConfirm.versionName}"</strong>? This action cannot be undone.
                 </p>
               )}
               {deleteError && <p className="form-error">{deleteError}</p>}

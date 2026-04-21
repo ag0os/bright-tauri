@@ -1,17 +1,17 @@
 import type { ComponentType } from 'react';
-import type { Route } from '@/shared/stores/useNavigationStore';
-import { UniverseSelection } from '@/features/universe/views/UniverseSelection';
+import { ContainerSettings } from '@/features/containers/views/ContainerSettings';
+import { ContainerView } from '@/features/containers/views/ContainerView';
+import { ElementDetailPage } from '@/features/elements/views/ElementDetailPage';
+import { Settings } from '@/features/settings/views/Settings';
 import { StoriesList } from '@/features/stories/views/StoriesList';
-import { UniverseList } from '@/features/universe/views/UniverseList';
+import { StoryCompare } from '@/features/stories/views/StoryCompare';
 import { StoryEditor } from '@/features/stories/views/StoryEditor';
 import { StoryHistory } from '@/features/stories/views/StoryHistory';
-import { StoryVersions } from '@/features/stories/views/StoryVersions';
-import { StoryCompare } from '@/features/stories/views/StoryCompare';
 import { StorySettings } from '@/features/stories/views/StorySettings';
-import { ElementDetailPage } from '@/features/elements/views/ElementDetailPage';
-import { ContainerView } from '@/features/containers/views/ContainerView';
-import { ContainerSettings } from '@/features/containers/views/ContainerSettings';
-import { Settings } from '@/features/settings/views/Settings';
+import { StoryVersions } from '@/features/stories/views/StoryVersions';
+import { UniverseList } from '@/features/universe/views/UniverseList';
+import { UniverseSelection } from '@/features/universe/views/UniverseSelection';
+import type { Route } from '@/shared/stores/useNavigationStore';
 
 interface RouteEntry {
   component: ComponentType<Record<string, unknown>>;

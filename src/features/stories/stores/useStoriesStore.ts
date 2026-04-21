@@ -7,7 +7,15 @@
 
 import { create } from 'zustand';
 import * as api from '@/features/stories/api/stories';
-import type { StorySummary, StoryDetail, CreateStoryInput, UpdateStoryInput, StoryStatus, StoryType, StoryUpdate } from '@/types';
+import type {
+  CreateStoryInput,
+  StoryDetail,
+  StoryStatus,
+  StorySummary,
+  StoryType,
+  StoryUpdate,
+  UpdateStoryInput,
+} from '@/types';
 
 /**
  * Convert partial update to full UpdateStoryInput with null values for missing fields.
@@ -242,7 +250,8 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
   setSorting: (sortBy, sortOrder) => {
     set((state) => ({
       sortBy,
-      sortOrder: sortOrder || (state.sortBy === sortBy && state.sortOrder === 'asc' ? 'desc' : 'asc'),
+      sortOrder:
+        sortOrder || (state.sortBy === sortBy && state.sortOrder === 'asc' ? 'desc' : 'asc'),
     }));
   },
 
@@ -260,9 +269,7 @@ export const useStoriesStore = create<StoriesState>((set, get) => ({
     if (state.filters.searchQuery) {
       const query = state.filters.searchQuery.toLowerCase();
       result = result.filter(
-        (s) =>
-          s.title.toLowerCase().includes(query) ||
-          s.description.toLowerCase().includes(query)
+        (s) => s.title.toLowerCase().includes(query) || s.description.toLowerCase().includes(query),
       );
     }
 

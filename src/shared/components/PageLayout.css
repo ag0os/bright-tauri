@@ -5,8 +5,8 @@
  * Provides a fixed top bar with scrollable content area.
  */
 
-@import '../../design-system/tokens/spacing.css';
-@import '../../design-system/tokens/colors/modern-indigo.css';
+@import "../../design-system/tokens/spacing.css";
+@import "../../design-system/tokens/colors/modern-indigo.css";
 
 .page-layout {
   display: flex;

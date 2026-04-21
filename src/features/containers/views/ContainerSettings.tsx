@@ -5,10 +5,10 @@
  * Allows users to update title, description, and container type.
  */
 
-import { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft } from '@phosphor-icons/react';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useContainersStore } from '@/features/containers/stores/useContainersStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
 import type { Container } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -169,11 +169,7 @@ export function ContainerSettings() {
         <form onSubmit={handleSubmit}>
           <div className="settings-page__form-fields">
             {/* General Error */}
-            {errors.general && (
-              <div className="settings-page__error-banner">
-                {errors.general}
-              </div>
-            )}
+            {errors.general && <div className="settings-page__error-banner">{errors.general}</div>}
 
             {/* Container Type */}
             <div className="input-group input-5">
@@ -186,9 +182,7 @@ export function ContainerSettings() {
                   id="container-type"
                   className="input-field input-base"
                   value={formData.containerType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, containerType: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, containerType: e.target.value })}
                   disabled={isSubmitting}
                 >
                   {CONTAINER_TYPES.map((type) => (
@@ -255,11 +249,7 @@ export function ContainerSettings() {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-base"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save'}
             </button>
           </div>

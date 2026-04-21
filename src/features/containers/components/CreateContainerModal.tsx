@@ -4,8 +4,8 @@
  * Modal component for creating a new container (Novel, Series, Collection).
  */
 
-import { useState, FormEvent } from 'react';
 import { X } from '@phosphor-icons/react';
+import { type FormEvent, useState } from 'react';
 import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
@@ -287,11 +287,7 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-base"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
               {isSubmitting ? 'Creating...' : 'Create Container'}
             </button>
           </div>

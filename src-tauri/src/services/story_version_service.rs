@@ -10,15 +10,13 @@ pub fn create_story_version(
     name: &str,
     content: &str,
 ) -> Result<StoryVersion, String> {
-    let version =
-        StoryVersionRepository::create(db, story_id, name).map_err(|e| e.to_string())?;
+    let version = StoryVersionRepository::create(db, story_id, name).map_err(|e| e.to_string())?;
 
     let snapshot =
         StorySnapshotRepository::create(db, &version.id, content).map_err(|e| e.to_string())?;
 
     StoryRepository::set_active_version(db, story_id, &version.id).map_err(|e| e.to_string())?;
-    StoryRepository::set_active_snapshot(db, story_id, &snapshot.id)
-        .map_err(|e| e.to_string())?;
+    StoryRepository::set_active_snapshot(db, story_id, &snapshot.id).map_err(|e| e.to_string())?;
 
     Ok(version)
 }

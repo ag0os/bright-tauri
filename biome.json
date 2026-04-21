@@ -12,9 +12,9 @@
       "!**/dist",
       "!**/coverage",
       "!**/storybook-static",
-      "!src/types/**",
-      "!src-tauri/target/**",
-      "!src-tauri/gen/**"
+      "!src/types",
+      "!src-tauri/target",
+      "!src-tauri/gen"
     ]
   },
   "formatter": {

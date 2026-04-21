@@ -2,11 +2,11 @@
  * Tests for useContainersStore - Optimistic Reordering
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { act } from '@testing-library/react';
-import { useContainersStore } from './useContainersStore';
 import { invoke } from '@tauri-apps/api/core';
-import type { Container, StorySummary, ContainerChildren } from '@/types';
+import { act } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Container, ContainerChildren, StorySummary } from '@/types';
+import { useContainersStore } from './useContainersStore';
 
 // Mock Tauri invoke
 vi.mock('@tauri-apps/api/core', () => ({
@@ -73,8 +73,18 @@ describe('useContainersStore - Optimistic Reordering', () => {
   it('optimistically updates container order immediately', async () => {
     // Setup: Create mock containers
     const mockContainers: Container[] = [
-      createMockContainer({ id: 'c1', title: 'Container 1', parentContainerId: 'parent', order: 0 }),
-      createMockContainer({ id: 'c2', title: 'Container 2', parentContainerId: 'parent', order: 1 }),
+      createMockContainer({
+        id: 'c1',
+        title: 'Container 1',
+        parentContainerId: 'parent',
+        order: 0,
+      }),
+      createMockContainer({
+        id: 'c2',
+        title: 'Container 2',
+        parentContainerId: 'parent',
+        order: 1,
+      }),
     ];
 
     const mockChildren: ContainerChildren = {
@@ -120,8 +130,18 @@ describe('useContainersStore - Optimistic Reordering', () => {
   it('reverts to original order on backend error', async () => {
     // Setup: Create mock containers
     const mockContainers: Container[] = [
-      createMockContainer({ id: 'c1', title: 'Container 1', parentContainerId: 'parent', order: 0 }),
-      createMockContainer({ id: 'c2', title: 'Container 2', parentContainerId: 'parent', order: 1 }),
+      createMockContainer({
+        id: 'c1',
+        title: 'Container 1',
+        parentContainerId: 'parent',
+        order: 0,
+      }),
+      createMockContainer({
+        id: 'c2',
+        title: 'Container 2',
+        parentContainerId: 'parent',
+        order: 1,
+      }),
     ];
 
     const mockChildren: ContainerChildren = {
@@ -220,12 +240,15 @@ describe('useContainersStore - Optimistic Reordering', () => {
   it('handles mixed container and story reordering', async () => {
     // Setup: Create mock containers and stories
     const mockContainers: Container[] = [
-      createMockContainer({ id: 'c1', title: 'Container 1', parentContainerId: 'parent', order: 0 }),
+      createMockContainer({
+        id: 'c1',
+        title: 'Container 1',
+        parentContainerId: 'parent',
+        order: 0,
+      }),
     ];
 
-    const mockStories: StorySummary[] = [
-      createMockStory({ id: 's1', title: 'Story 1', order: 0 }),
-    ];
+    const mockStories: StorySummary[] = [createMockStory({ id: 's1', title: 'Story 1', order: 0 })];
 
     const mockChildren: ContainerChildren = {
       containers: mockContainers,
@@ -280,7 +303,9 @@ describe('useContainersStore - Optimistic Reordering', () => {
 
   it('handles container creation failure and sets error state', async () => {
     // Mock backend error
-    const backendError = new Error('Cannot add child container to a container that already has stories');
+    const backendError = new Error(
+      'Cannot add child container to a container that already has stories',
+    );
     vi.mocked(invoke).mockRejectedValue(backendError);
 
     // Get the store function

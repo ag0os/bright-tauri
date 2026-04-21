@@ -2,10 +2,10 @@
  * Tests for useElementsStore - Filter Functionality
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
-import { useElementsStore } from './useElementsStore';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Element, ElementType } from '@/types';
+import { useElementsStore } from './useElementsStore';
 
 describe('useElementsStore - Filter Functionality', () => {
   // Helper function to create mock elements
@@ -80,7 +80,7 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.elementType === 'location')).toBe(true);
+      expect(filtered.every((e) => e.elementType === 'location')).toBe(true);
     });
 
     it('filters elements by vehicle type', () => {
@@ -113,7 +113,7 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.elementType === 'item')).toBe(true);
+      expect(filtered.every((e) => e.elementType === 'item')).toBe(true);
     });
 
     it('filters elements by organization type', () => {
@@ -146,12 +146,12 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.elementType === 'creature')).toBe(true);
+      expect(filtered.every((e) => e.elementType === 'creature')).toBe(true);
     });
 
     it('filters elements by event type', () => {
       const elements: Element[] = [
-        createMockElement({ id: 'e1', elementType: 'event', name: 'Battle of Helm\'s Deep' }),
+        createMockElement({ id: 'e1', elementType: 'event', name: "Battle of Helm's Deep" }),
         createMockElement({ id: 'e2', elementType: 'location', name: 'Battlefield' }),
       ];
 
@@ -195,7 +195,7 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.elementType === 'custom')).toBe(true);
+      expect(filtered.every((e) => e.elementType === 'custom')).toBe(true);
     });
 
     it('returns empty array when no elements match type filter', () => {
@@ -245,7 +245,7 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.some(e => e.name.includes('Gandalf'))).toBe(true);
+      expect(filtered.some((e) => e.name.includes('Gandalf'))).toBe(true);
     });
 
     it('searches elements by description (case-insensitive)', () => {
@@ -262,14 +262,29 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.description.toLowerCase().includes('warrior'))).toBe(true);
+      expect(filtered.every((e) => e.description.toLowerCase().includes('warrior'))).toBe(true);
     });
 
     it('searches elements by details (case-insensitive)', () => {
       const elements: Element[] = [
-        createMockElement({ id: 'e1', name: 'Element 1', description: 'Desc 1', details: 'Has magical powers' }),
-        createMockElement({ id: 'e2', name: 'Element 2', description: 'Desc 2', details: 'Ordinary person' }),
-        createMockElement({ id: 'e3', name: 'Element 3', description: 'Desc 3', details: 'Uses magic daily' }),
+        createMockElement({
+          id: 'e1',
+          name: 'Element 1',
+          description: 'Desc 1',
+          details: 'Has magical powers',
+        }),
+        createMockElement({
+          id: 'e2',
+          name: 'Element 2',
+          description: 'Desc 2',
+          details: 'Ordinary person',
+        }),
+        createMockElement({
+          id: 'e3',
+          name: 'Element 3',
+          description: 'Desc 3',
+          details: 'Uses magic daily',
+        }),
       ];
 
       act(() => {
@@ -279,7 +294,7 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.details?.toLowerCase().includes('magic'))).toBe(true);
+      expect(filtered.every((e) => e.details?.toLowerCase().includes('magic'))).toBe(true);
     });
 
     it('searches elements by customTypeName (case-insensitive)', () => {
@@ -296,15 +311,31 @@ describe('useElementsStore - Filter Functionality', () => {
 
       const filtered = useElementsStore.getState().getFilteredElements();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(e => e.customTypeName?.toLowerCase().includes('spell'))).toBe(true);
+      expect(filtered.every((e) => e.customTypeName?.toLowerCase().includes('spell'))).toBe(true);
     });
 
     it('searches across name, description, details, and customTypeName', () => {
       const elements: Element[] = [
-        createMockElement({ id: 'e1', name: 'Dragon Slayer', description: 'A hero', details: null }),
+        createMockElement({
+          id: 'e1',
+          name: 'Dragon Slayer',
+          description: 'A hero',
+          details: null,
+        }),
         createMockElement({ id: 'e2', name: 'Hero', description: 'Fights dragons', details: null }),
-        createMockElement({ id: 'e3', name: 'Bob', description: 'Regular person', details: 'Once saw a dragon' }),
-        createMockElement({ id: 'e4', elementType: 'custom', customTypeName: 'Dragon Scale', name: 'Item', description: 'Rare material' }),
+        createMockElement({
+          id: 'e3',
+          name: 'Bob',
+          description: 'Regular person',
+          details: 'Once saw a dragon',
+        }),
+        createMockElement({
+          id: 'e4',
+          elementType: 'custom',
+          customTypeName: 'Dragon Scale',
+          name: 'Item',
+          description: 'Rare material',
+        }),
       ];
 
       act(() => {
@@ -382,7 +413,12 @@ describe('useElementsStore - Filter Functionality', () => {
     it('ignores elements with null customTypeName when searching', () => {
       const elements: Element[] = [
         createMockElement({ id: 'e1', name: 'Element 1', customTypeName: null }),
-        createMockElement({ id: 'e2', name: 'Element 2', elementType: 'custom', customTypeName: 'Custom Type' }),
+        createMockElement({
+          id: 'e2',
+          name: 'Element 2',
+          elementType: 'custom',
+          customTypeName: 'Custom Type',
+        }),
       ];
 
       act(() => {
@@ -557,11 +593,18 @@ describe('useElementsStore - Filter Functionality', () => {
 
       // Test each valid ElementType
       const validTypes: ElementType[] = [
-        'character', 'location', 'vehicle', 'item', 'organization',
-        'creature', 'event', 'concept', 'custom'
+        'character',
+        'location',
+        'vehicle',
+        'item',
+        'organization',
+        'creature',
+        'event',
+        'concept',
+        'custom',
       ];
 
-      validTypes.forEach(type => {
+      validTypes.forEach((type) => {
         act(() => {
           useElementsStore.getState().setFilter('type', type);
         });

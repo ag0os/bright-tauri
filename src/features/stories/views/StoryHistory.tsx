@@ -11,15 +11,15 @@
  * - No manual delete (retention policy handles cleanup)
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { ArrowLeft, Clock, ArrowCounterClockwise, SpinnerGap } from '@phosphor-icons/react';
-import { listStorySnapshots, switchStorySnapshot } from '@/features/stories/api/snapshots';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { ArrowCounterClockwise, ArrowLeft, Clock, SpinnerGap } from '@phosphor-icons/react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
+import { listStorySnapshots, switchStorySnapshot } from '@/features/stories/api/snapshots';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
-import type { StoryDetail, StorySnapshot } from '@/types';
 import { countLexicalWords } from '@/shared/utils/lexicalWordCount';
+import type { StoryDetail, StorySnapshot } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -58,8 +58,7 @@ export function StoryHistory() {
   const [restoringId, setRestoringId] = useState<string | null>(null);
 
   // Extract story ID from route
-  const storyId =
-    currentRoute.screen === 'story-history' ? currentRoute.storyId : null;
+  const storyId = currentRoute.screen === 'story-history' ? currentRoute.storyId : null;
 
   // Load story and snapshots
   useEffect(() => {
@@ -131,7 +130,7 @@ export function StoryHistory() {
         setRestoringId(null);
       }
     },
-    [storyId, restoringId, snapshots, maxSnapshotsPerVersion, showSuccess, showError]
+    [storyId, restoringId, snapshots, maxSnapshotsPerVersion, showSuccess, showError],
   );
 
   // Loading state
@@ -160,12 +159,7 @@ export function StoryHistory() {
   return (
     <div className="story-history">
       <div className="story-history-header">
-        <button
-          className="back-button"
-          onClick={goBack}
-          aria-label="Go back"
-          title="Go back"
-        >
+        <button className="back-button" onClick={goBack} aria-label="Go back" title="Go back">
           <ArrowLeft size={20} />
         </button>
         <div className="header-content">
@@ -195,9 +189,7 @@ export function StoryHistory() {
               return (
                 <div key={snapshot.id} className="timeline-item">
                   <div className="timeline-marker">
-                    <div
-                      className={`timeline-dot ${isCurrentSnapshot ? 'active' : ''}`}
-                    />
+                    <div className={`timeline-dot ${isCurrentSnapshot ? 'active' : ''}`} />
                     {!isLastItem && <div className="timeline-line" />}
                   </div>
                   <div className={`snapshot-card ${isCurrentSnapshot ? 'current' : ''}`}>

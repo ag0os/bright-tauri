@@ -5,9 +5,12 @@
  * Focused single-purpose view for managing app configuration.
  */
 
-import { ArrowLeft, ArrowCounterClockwise } from '@phosphor-icons/react';
+import { ArrowCounterClockwise, ArrowLeft } from '@phosphor-icons/react';
+import {
+  type SnapshotTrigger,
+  useSettingsStore,
+} from '@/features/settings/stores/useSettingsStore';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
-import { useSettingsStore, type SnapshotTrigger } from '@/features/settings/stores/useSettingsStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -63,7 +66,7 @@ export function Settings() {
     showSuccess(
       trigger === 'on_leave'
         ? 'Snapshots: when leaving editor'
-        : 'Snapshots: based on character count'
+        : 'Snapshots: based on character count',
     );
   };
 
@@ -88,12 +91,7 @@ export function Settings() {
     <div className="settings">
       {/* Header */}
       <div className="settings-header">
-        <button
-          className="back-button"
-          onClick={handleBack}
-          aria-label="Go back"
-          title="Back"
-        >
+        <button className="back-button" onClick={handleBack} aria-label="Go back" title="Back">
           <ArrowLeft size={20} />
         </button>
 
@@ -114,12 +112,8 @@ export function Settings() {
           {/* Snapshot Trigger Mode */}
           <div className="setting-item">
             <div className="setting-info">
-              <label className="setting-label">
-                Snapshot trigger
-              </label>
-              <p className="setting-description">
-                Choose when to create automatic snapshots
-              </p>
+              <label className="setting-label">Snapshot trigger</label>
+              <p className="setting-description">Choose when to create automatic snapshots</p>
             </div>
             <div className="setting-control">
               <div className="radio-group">

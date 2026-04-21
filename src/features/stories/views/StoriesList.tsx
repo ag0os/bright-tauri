@@ -4,20 +4,20 @@
  * Displays all stories in the current universe with filtering, sorting, and search.
  */
 
+import { Books, CircleNotch, FolderPlus, MagnifyingGlass, Plus } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
-import { Plus, MagnifyingGlass, CircleNotch, Books, FolderPlus } from '@phosphor-icons/react';
-import { PageLayout } from '@/shared/components/PageLayout';
-import { StoryCard } from '@/features/stories/components/StoryCard';
+import { ContainerCard } from '@/features/containers/components/ContainerCard';
+import { CreateContainerModal } from '@/features/containers/components/CreateContainerModal';
+import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { CreateStoryModal } from '@/features/stories/components/CreateStoryModal';
 import { DeleteStoryModal } from '@/features/stories/components/DeleteStoryModal';
-import { CreateContainerModal } from '@/features/containers/components/CreateContainerModal';
-import { ContainerCard } from '@/features/containers/components/ContainerCard';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { StoryCard } from '@/features/stories/components/StoryCard';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
-import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
-import { STORY_TYPE_OPTIONS, CONTAINER_TYPE_OPTIONS } from '@/shared/config/filter-options';
-import type { StorySummary, StoryType, Container } from '@/types';
+import { PageLayout } from '@/shared/components/PageLayout';
+import { CONTAINER_TYPE_OPTIONS, STORY_TYPE_OPTIONS } from '@/shared/config/filter-options';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import type { Container, StorySummary, StoryType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -157,9 +157,7 @@ export function StoriesList() {
 
   // Get filtered and sorted stories (grouped view - top level only)
   // Filter to show only stories not in containers (root stories)
-  const filteredStories = getFilteredAndSortedStories().filter(
-    (story) => !story.containerId
-  );
+  const filteredStories = getFilteredAndSortedStories().filter((story) => !story.containerId);
 
   // Get root-level containers (no parentContainerId) with filtering applied
   const rootContainers = getFilteredContainers().filter((c) => !c.parentContainerId);
@@ -251,9 +249,7 @@ export function StoriesList() {
             <select
               className="input-field input-base"
               value={containerFilters.containerType || ''}
-              onChange={(e) =>
-                setContainerFilter('containerType', e.target.value || null)
-              }
+              onChange={(e) => setContainerFilter('containerType', e.target.value || null)}
             >
               <option value="">All Containers</option>
               {CONTAINER_TYPE_OPTIONS.map(({ value, label }) => (
@@ -288,10 +284,7 @@ export function StoriesList() {
               className="input-field input-base"
               value={sortBy}
               onChange={(e) =>
-                setSorting(
-                  e.target.value as 'lastEdited' | 'title' | 'wordCount',
-                  sortOrder
-                )
+                setSorting(e.target.value as 'lastEdited' | 'title' | 'wordCount', sortOrder)
               }
             >
               <option value="lastEdited">Last Edited</option>
@@ -359,90 +352,92 @@ export function StoriesList() {
         )}
 
         {/* Content Grid - Containers and Stories together */}
-        {!isLoading && !containersLoading && (rootContainers.length > 0 || filteredStories.length > 0) && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-              gap: 'var(--spacing-6)',
-              alignItems: 'start',
-            }}
-          >
-            {rootContainers.map((container) => (
-              <ContainerCard
-                key={container.id}
-                container={container}
-                onClick={handleContainerClick}
-                onDelete={handleDeleteContainer}
-              />
-            ))}
-            {filteredStories.map((story) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                onClick={handleStoryClick}
-                onDelete={handleDeleteStory}
-                onToggleFavorite={handleToggleFavorite}
-              />
-            ))}
-          </div>
-        )}
+        {!isLoading &&
+          !containersLoading &&
+          (rootContainers.length > 0 || filteredStories.length > 0) && (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: 'var(--spacing-6)',
+                alignItems: 'start',
+              }}
+            >
+              {rootContainers.map((container) => (
+                <ContainerCard
+                  key={container.id}
+                  container={container}
+                  onClick={handleContainerClick}
+                  onDelete={handleDeleteContainer}
+                />
+              ))}
+              {filteredStories.map((story) => (
+                <StoryCard
+                  key={story.id}
+                  story={story}
+                  onClick={handleStoryClick}
+                  onDelete={handleDeleteStory}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              ))}
+            </div>
+          )}
 
         {/* Empty State */}
-        {!isLoading && !containersLoading && filteredStories.length === 0 && rootContainers.length === 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: 1,
-              gap: 'var(--spacing-4)',
-              textAlign: 'center',
-            }}
-          >
-            <Books
-              size={64}
-              weight="duotone"
+        {!isLoading &&
+          !containersLoading &&
+          filteredStories.length === 0 &&
+          rootContainers.length === 0 && (
+            <div
               style={{
-                color: 'var(--color-text-secondary)',
-                opacity: 0.4,
-              }}
-            />
-            <h2
-              style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h3-size)',
-                fontWeight: 'var(--typography-h3-weight)',
-                color: 'var(--color-text-primary)',
-                margin: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flex: 1,
+                gap: 'var(--spacing-4)',
+                textAlign: 'center',
               }}
             >
-              No stories yet
-            </h2>
-            <p
-              style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-secondary)',
-                maxWidth: '400px',
-              }}
-            >
-              {filters.searchQuery || filters.type || filters.status
-                ? 'No stories match your filters. Try adjusting your search or filters.'
-                : 'Get started by creating your first story!'}
-            </p>
-            {!filters.searchQuery && !filters.type && !filters.status && (
-              <button
-                className="btn btn-primary btn-lg"
-                onClick={() => setShowCreateModal(true)}
+              <Books
+                size={64}
+                weight="duotone"
+                style={{
+                  color: 'var(--color-text-secondary)',
+                  opacity: 0.4,
+                }}
+              />
+              <h2
+                style={{
+                  fontFamily: 'var(--typography-heading-font)',
+                  fontSize: 'var(--typography-h3-size)',
+                  fontWeight: 'var(--typography-h3-weight)',
+                  color: 'var(--color-text-primary)',
+                  margin: 0,
+                }}
               >
-                <Plus className="icon icon-base" />
-                Create Your First Story
-              </button>
-            )}
-          </div>
-        )}
+                No stories yet
+              </h2>
+              <p
+                style={{
+                  fontFamily: 'var(--typography-body-font)',
+                  fontSize: 'var(--font-size-base)',
+                  color: 'var(--color-text-secondary)',
+                  maxWidth: '400px',
+                }}
+              >
+                {filters.searchQuery || filters.type || filters.status
+                  ? 'No stories match your filters. Try adjusting your search or filters.'
+                  : 'Get started by creating your first story!'}
+              </p>
+              {!filters.searchQuery && !filters.type && !filters.status && (
+                <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
+                  <Plus className="icon icon-base" />
+                  Create Your First Story
+                </button>
+              )}
+            </div>
+          )}
       </div>
 
       {/* Create Container Modal */}

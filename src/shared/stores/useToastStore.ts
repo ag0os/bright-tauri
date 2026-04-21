@@ -6,7 +6,7 @@
  */
 
 import { create } from 'zustand';
-import type { ToastType, ToastMessage } from '@/shared/components/Toast';
+import type { ToastMessage, ToastType } from '@/shared/components/Toast';
 
 interface ToastState {
   toasts: ToastMessage[];

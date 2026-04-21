@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import type { Universe, CreateUniverseInput } from '@/types';
+import type { CreateUniverseInput, Universe } from '@/types';
 
 export function listUniverses(): Promise<Universe[]> {
   return invoke<Universe[]>('list_universes');

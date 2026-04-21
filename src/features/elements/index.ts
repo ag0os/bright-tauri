@@ -1,5 +1,7 @@
 // Views
-export { ElementDetailPage } from './views/ElementDetailPage';
+
+// API
+export * from './api/elements';
 
 // Components
 export { CreateElementModal } from './components/CreateElementModal';
@@ -8,6 +10,4 @@ export { ElementCard } from './components/ElementCard';
 
 // Store
 export { useElementsStore } from './stores/useElementsStore';
-
-// API
-export * from './api/elements';
+export { ElementDetailPage } from './views/ElementDetailPage';

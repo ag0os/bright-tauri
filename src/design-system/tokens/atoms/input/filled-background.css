@@ -25,7 +25,9 @@
   --input-helper-margin-top: 6px;
   --input-icon-size: 18px;
   --input-icon-gap: 10px;
-  --input-transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+  --input-transition:
+    background-color 150ms var(--ease-out), border-color 150ms var(--ease-out),
+    box-shadow 150ms var(--ease-out);
 }
 
 /* Input Group Container */

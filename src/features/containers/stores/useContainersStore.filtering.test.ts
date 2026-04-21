@@ -2,9 +2,9 @@
  * Tests for Container Store Filtering Functionality
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useContainersStore } from './useContainersStore';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { Container } from '@/types';
+import { useContainersStore } from './useContainersStore';
 
 // Helper to create mock Container (DBV: no git fields)
 const createMockContainer = (overrides: Partial<Container> = {}): Container => ({

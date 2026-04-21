@@ -5,13 +5,13 @@
  * Loads suggested attributes from element-templates.json based on selected template.
  */
 
-import { useState, FormEvent } from 'react';
 import { X } from '@phosphor-icons/react';
+import { type FormEvent, useState } from 'react';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
+import elementTemplatesData from '@/shared/config/element-templates.json';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import type { ElementType } from '@/types';
-import elementTemplatesData from '@/shared/config/element-templates.json';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -35,7 +35,15 @@ interface TemplateData {
   }>;
 }
 
-type TemplateKey = 'character' | 'location' | 'vehicle' | 'item' | 'organization' | 'creature' | 'event' | 'concept';
+type TemplateKey =
+  | 'character'
+  | 'location'
+  | 'vehicle'
+  | 'item'
+  | 'organization'
+  | 'creature'
+  | 'event'
+  | 'concept';
 
 const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates as any;
 
@@ -102,7 +110,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
     try {
       // Filter out empty attributes
       const filteredAttributes = Object.fromEntries(
-        Object.entries(attributes).filter(([_, value]) => value.trim() !== '')
+        Object.entries(attributes).filter(([_, value]) => value.trim() !== ''),
       );
 
       const element = await createElement({
@@ -115,7 +123,10 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
         attributes: Object.keys(filteredAttributes).length > 0 ? filteredAttributes : null,
         imageUrl: null,
         tags: formData.tags
-          ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+          ? formData.tags
+              .split(',')
+              .map((t) => t.trim())
+              .filter(Boolean)
           : null,
         relationships: null,
         color: formData.color.trim() || null,
@@ -382,7 +393,8 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                         marginBottom: 'var(--spacing-4)',
                       }}
                     >
-                      These attributes are suggestions based on the {templateData.name} template. You can fill in any that are relevant or skip them all.
+                      These attributes are suggestions based on the {templateData.name} template.
+                      You can fill in any that are relevant or skip them all.
                     </p>
                   </div>
 
@@ -408,9 +420,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                             onChange={(e) => handleAttributeChange(attr.key, e.target.value)}
                           />
                         </div>
-                        {attr.description && (
-                          <div className="input-helper">{attr.description}</div>
-                        )}
+                        {attr.description && <div className="input-helper">{attr.description}</div>}
                       </div>
                     ))}
                   </div>
@@ -493,11 +503,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-base"
-                  disabled={isSubmitting}
-                >
+                <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Element'}
                 </button>
               </div>

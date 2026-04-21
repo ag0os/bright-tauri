@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { renderWithProviders } from './test/utils';
+import { describe, expect, it } from 'vitest';
 import App from './App';
+import { renderWithProviders } from './test/utils';
 
 describe('App', () => {
   it('renders without crashing', () => {

@@ -32,8 +32,7 @@ pub fn create_story_snapshot(
     let snapshot = StorySnapshotRepository::create(db, &active_version_id, content)
         .map_err(|e| e.to_string())?;
 
-    StoryRepository::set_active_snapshot(db, story_id, &snapshot.id)
-        .map_err(|e| e.to_string())?;
+    StoryRepository::set_active_snapshot(db, story_id, &snapshot.id).map_err(|e| e.to_string())?;
 
     StoryRepository::update_word_count_and_edited(db, story_id, word_count)
         .map_err(|e| e.to_string())?;

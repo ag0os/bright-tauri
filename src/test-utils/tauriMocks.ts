@@ -13,10 +13,7 @@ const mockHandlers = new Map<string, InvokeHandler>();
 /**
  * Mock implementation of Tauri's invoke function
  */
-export const mockInvoke = async (
-  command: string,
-  args?: InvokeArgs
-): Promise<unknown> => {
+export const mockInvoke = async (command: string, args?: InvokeArgs): Promise<unknown> => {
   const handler = mockHandlers.get(command);
 
   if (!handler) {
@@ -30,10 +27,7 @@ export const mockInvoke = async (
 /**
  * Register a mock handler for a Tauri command
  */
-export const registerMockCommand = (
-  command: string,
-  handler: InvokeHandler
-): void => {
+export const registerMockCommand = (command: string, handler: InvokeHandler): void => {
   mockHandlers.set(command, handler);
 };
 

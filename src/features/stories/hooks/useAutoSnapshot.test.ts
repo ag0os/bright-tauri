@@ -6,18 +6,23 @@
  * - on_leave: snapshot on component unmount
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
-import { useAutoSnapshot } from './useAutoSnapshot';
 import { invoke } from '@tauri-apps/api/core';
+import { renderHook } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockTauriInvoke, resetTauriMocks } from '@/test/utils';
+import { useAutoSnapshot } from './useAutoSnapshot';
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;
 
 describe('useAutoSnapshot', () => {
   beforeEach(() => {
     resetTauriMocks();
-    mockTauriInvoke('create_story_snapshot', { id: 'snapshot-1', versionId: 'version-1', content: '', createdAt: '' });
+    mockTauriInvoke('create_story_snapshot', {
+      id: 'snapshot-1',
+      versionId: 'version-1',
+      content: '',
+      createdAt: '',
+    });
   });
 
   describe('Character Count Trigger', () => {
@@ -29,7 +34,7 @@ describe('useAutoSnapshot', () => {
           enabled: true,
           trigger: 'character_count',
           characterThreshold: 500,
-        })
+        }),
       );
 
       expect(mockInvoke).not.toHaveBeenCalled();
@@ -45,7 +50,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // Add content that exceeds threshold (10 chars)
@@ -69,7 +74,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 100,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // Add only 5 characters (below threshold of 100)
@@ -88,7 +93,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: 'This is some initial content' } }
+        { initialProps: { content: 'This is some initial content' } },
       );
 
       // Delete content (should NOT trigger snapshot)
@@ -107,7 +112,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: 'Start' } } // 5 chars
+        { initialProps: { content: 'Start' } }, // 5 chars
       );
 
       // First increase: 5 -> 19 chars (delta = 14, exceeds threshold of 10)
@@ -119,7 +124,7 @@ describe('useAutoSnapshot', () => {
       });
 
       // Allow microtasks to complete (the .then() that updates lastSnapshotCharCount)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
 
       // Small increase from 19 -> 21 (delta = 2, below threshold)
       // This should NOT trigger because we're measuring from last snapshot
@@ -127,7 +132,7 @@ describe('useAutoSnapshot', () => {
       rerender({ content: 'Start and more text!!' }); // 21 chars, delta from 19 = 2
 
       // Give the effect a chance to run
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
       expect(mockInvoke).not.toHaveBeenCalled();
 
       // Large increase from 21 -> 34 (delta = 13, exceeds threshold)
@@ -148,7 +153,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: 'Initial', enabled: false } }
+        { initialProps: { content: 'Initial', enabled: false } },
       );
 
       // Add content that would exceed threshold
@@ -167,7 +172,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             // characterThreshold not specified, should default to 500
           }),
-        { initialProps: { content: 'Start' } }
+        { initialProps: { content: 'Start' } },
       );
 
       // Add 100 characters (below default threshold of 500)
@@ -191,7 +196,7 @@ describe('useAutoSnapshot', () => {
           enabled: true,
           trigger: 'on_leave',
           characterThreshold: 500,
-        })
+        }),
       );
 
       expect(mockInvoke).not.toHaveBeenCalled();
@@ -215,7 +220,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 1000, // High threshold so it won't trigger during typing
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       // Change content but not enough to trigger threshold
@@ -239,7 +244,7 @@ describe('useAutoSnapshot', () => {
           enabled: false,
           trigger: 'on_leave',
           characterThreshold: 500,
-        })
+        }),
       );
 
       unmount();
@@ -255,7 +260,7 @@ describe('useAutoSnapshot', () => {
           enabled: true,
           trigger: 'character_count', // Not on_leave
           characterThreshold: 500,
-        })
+        }),
       );
 
       // Content hasn't changed from initial, and trigger is not on_leave
@@ -277,7 +282,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { storyId: 'story-1', content: 'Initial content for story 1' } }
+        { initialProps: { storyId: 'story-1', content: 'Initial content for story 1' } },
       );
 
       // Change to a different story
@@ -310,7 +315,7 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: '', enabled: false } }
+        { initialProps: { content: '', enabled: false } },
       );
 
       rerender({ content: 'Existing story body', enabled: true });
@@ -344,17 +349,17 @@ describe('useAutoSnapshot', () => {
             trigger: 'character_count',
             characterThreshold: 10,
           }),
-        { initialProps: { content: 'Initial' } }
+        { initialProps: { content: 'Initial' } },
       );
 
       rerender({ content: 'Initial with lots more content added' });
 
-      await vi.waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Auto-snapshot error:',
-          expect.any(Error)
-        );
-      }, { timeout: 1000 });
+      await vi.waitFor(
+        () => {
+          expect(consoleSpy).toHaveBeenCalledWith('Auto-snapshot error:', expect.any(Error));
+        },
+        { timeout: 1000 },
+      );
 
       consoleSpy.mockRestore();
     });
@@ -370,16 +375,13 @@ describe('useAutoSnapshot', () => {
           enabled: true,
           trigger: 'on_leave',
           characterThreshold: 500,
-        })
+        }),
       );
 
       unmount();
 
       await vi.waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Auto-snapshot cleanup error:',
-          expect.any(Error)
-        );
+        expect(consoleSpy).toHaveBeenCalledWith('Auto-snapshot cleanup error:', expect.any(Error));
       });
 
       consoleSpy.mockRestore();
@@ -398,7 +400,7 @@ describe('useAutoSnapshot', () => {
             trigger,
             characterThreshold: 10,
           }),
-        { initialProps: { trigger: 'on_leave', content: 'Initial' } }
+        { initialProps: { trigger: 'on_leave', content: 'Initial' } },
       );
 
       // With on_leave trigger, content changes should not trigger snapshots
@@ -410,7 +412,10 @@ describe('useAutoSnapshot', () => {
 
       // Now content changes should trigger (but this render is treated as "initial" for the new trigger)
       // Add more content to trigger
-      rerender({ trigger: 'character_count', content: 'Initial with a lot more content now and even more' });
+      rerender({
+        trigger: 'character_count',
+        content: 'Initial with a lot more content now and even more',
+      });
       expect(mockInvoke).toHaveBeenCalled();
     });
   });

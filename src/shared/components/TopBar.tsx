@@ -5,11 +5,11 @@
  * Provides navigation between Stories and Universe sections.
  */
 
+import { BookOpen, CaretDown, Gear, Globe, Moon, Sun } from '@phosphor-icons/react';
 import { useEffect } from 'react';
-import { CaretDown, BookOpen, Globe, Sun, Moon, Gear } from '@phosphor-icons/react';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
 import { useTheme } from '@/shared/hooks/useTheme';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import './TopBar.css';
 
 export type NavigationTab = 'stories' | 'universe';
@@ -29,7 +29,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
   }, [loadUniverses]);
 
   const handleUniverseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedUniverse = universes.find(u => u.id === event.target.value);
+    const selectedUniverse = universes.find((u) => u.id === event.target.value);
     if (selectedUniverse) {
       setCurrentUniverse(selectedUniverse);
     }

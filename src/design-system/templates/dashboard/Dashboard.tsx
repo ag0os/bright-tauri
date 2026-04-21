@@ -1,5 +1,5 @@
-import React from 'react';
-import { FileText, Users, Star, TrendUp, Plus, Lightning } from '@phosphor-icons/react';
+import { FileText, Lightning, Plus, Star, TrendUp, Users } from '@phosphor-icons/react';
+import type React from 'react';
 import { MinimalTopBar } from '../../organisms/navigation/Navigation';
 import './stats-grid.css';
 
@@ -61,14 +61,36 @@ export const StatsGridDashboard: React.FC = () => {
               <div className="dashboard-1__section">
                 <div className="dashboard-1__section-header">
                   <h2 className="dashboard-1__section-title">Recent Documents</h2>
-                  <a href="#" className="dashboard-1__section-action">View all</a>
+                  <a href="#" className="dashboard-1__section-action">
+                    View all
+                  </a>
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
-                    { title: 'Chapter 3: The Awakening', meta: 'My Novel · Edited 2h ago', status: 'Draft', icon: <FileText size={20} weight="duotone" /> },
-                    { title: 'Character Profile: Sarah Chen', meta: 'My Novel · Edited 5h ago', status: 'Complete', icon: <Users size={20} weight="duotone" /> },
-                    { title: 'Outline: Part Two', meta: 'My Novel · Edited yesterday', status: 'Draft', icon: <FileText size={20} weight="duotone" /> },
-                    { title: 'Chapter 2: First Contact', meta: 'My Novel · Edited 2 days ago', status: 'Final', icon: <FileText size={20} weight="duotone" /> },
+                    {
+                      title: 'Chapter 3: The Awakening',
+                      meta: 'My Novel · Edited 2h ago',
+                      status: 'Draft',
+                      icon: <FileText size={20} weight="duotone" />,
+                    },
+                    {
+                      title: 'Character Profile: Sarah Chen',
+                      meta: 'My Novel · Edited 5h ago',
+                      status: 'Complete',
+                      icon: <Users size={20} weight="duotone" />,
+                    },
+                    {
+                      title: 'Outline: Part Two',
+                      meta: 'My Novel · Edited yesterday',
+                      status: 'Draft',
+                      icon: <FileText size={20} weight="duotone" />,
+                    },
+                    {
+                      title: 'Chapter 2: First Contact',
+                      meta: 'My Novel · Edited 2 days ago',
+                      status: 'Final',
+                      icon: <FileText size={20} weight="duotone" />,
+                    },
                   ].map((doc, i) => (
                     <div key={i} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
@@ -85,12 +107,22 @@ export const StatsGridDashboard: React.FC = () => {
               <div className="dashboard-1__section">
                 <div className="dashboard-1__section-header">
                   <h2 className="dashboard-1__section-title">Universe Elements</h2>
-                  <a href="#" className="dashboard-1__section-action">Manage</a>
+                  <a href="#" className="dashboard-1__section-action">
+                    Manage
+                  </a>
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
-                    { title: 'Downtown District', meta: '8 locations', icon: <Star size={20} weight="duotone" /> },
-                    { title: 'Tech Corporation HQ', meta: '3 locations', icon: <Star size={20} weight="duotone" /> },
+                    {
+                      title: 'Downtown District',
+                      meta: '8 locations',
+                      icon: <Star size={20} weight="duotone" />,
+                    },
+                    {
+                      title: 'Tech Corporation HQ',
+                      meta: '3 locations',
+                      icon: <Star size={20} weight="duotone" />,
+                    },
                   ].map((doc, i) => (
                     <div key={i} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
@@ -125,12 +157,36 @@ export const StatsGridDashboard: React.FC = () => {
 
               <div className="dashboard-1__section">
                 <h3 className="dashboard-1__section-title">Writing Goal</h3>
-                <div className="dashboard-1__stat-value" style={{ marginBottom: '8px' }}>2,450</div>
-                <div className="dashboard-1__document-meta" style={{ marginBottom: '16px' }}>words this week</div>
-                <div style={{ height: '8px', background: 'var(--color-border)', borderRadius: '4px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: '82%', background: 'var(--color-primary)', borderRadius: '4px' }}></div>
+                <div className="dashboard-1__stat-value" style={{ marginBottom: '8px' }}>
+                  2,450
                 </div>
-                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
+                <div className="dashboard-1__document-meta" style={{ marginBottom: '16px' }}>
+                  words this week
+                </div>
+                <div
+                  style={{
+                    height: '8px',
+                    background: 'var(--color-border)',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: '82%',
+                      background: 'var(--color-primary)',
+                      borderRadius: '4px',
+                    }}
+                  ></div>
+                </div>
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: 'var(--color-text-secondary)',
+                    marginTop: '8px',
+                  }}
+                >
                   82% of 3,000 word goal
                 </div>
               </div>

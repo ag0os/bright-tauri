@@ -7,7 +7,7 @@
 
 import { create } from 'zustand';
 import * as api from '@/features/elements/api/elements';
-import type { Element, CreateElementInput, UpdateElementInput, ElementType } from '@/types';
+import type { CreateElementInput, Element, ElementType, UpdateElementInput } from '@/types';
 
 interface ElementFilters {
   type: ElementType | null;
@@ -168,7 +168,7 @@ export const useElementsStore = create<ElementsState>((set, get) => ({
           e.name.toLowerCase().includes(query) ||
           e.description.toLowerCase().includes(query) ||
           (e.details && e.details.toLowerCase().includes(query)) ||
-          (e.customTypeName && e.customTypeName.toLowerCase().includes(query))
+          (e.customTypeName && e.customTypeName.toLowerCase().includes(query)),
       );
     }
 

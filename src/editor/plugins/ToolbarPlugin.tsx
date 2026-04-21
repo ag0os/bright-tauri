@@ -5,25 +5,33 @@
  * Supports bold, italic, underline, headings, and lists.
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { useCallback, useEffect, useState } from 'react';
 import {
+  $isListNode,
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
+  REMOVE_LIST_COMMAND,
+} from '@lexical/list';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $createHeadingNode, type HeadingTagType } from '@lexical/rich-text';
+import { $setBlocksType } from '@lexical/selection';
+import { mergeRegister } from '@lexical/utils';
+import {
+  ListBullets,
+  ListNumbers,
+  TextB,
+  TextHOne,
+  TextHTwo,
+  TextItalic,
+  TextUnderline,
+} from '@phosphor-icons/react';
+import {
+  $createParagraphNode,
   $getSelection,
   $isRangeSelection,
   FORMAT_TEXT_COMMAND,
   SELECTION_CHANGE_COMMAND,
 } from 'lexical';
-import { $setBlocksType } from '@lexical/selection';
-import { $createHeadingNode, HeadingTagType } from '@lexical/rich-text';
-import { $createParagraphNode } from 'lexical';
-import {
-  INSERT_ORDERED_LIST_COMMAND,
-  INSERT_UNORDERED_LIST_COMMAND,
-  REMOVE_LIST_COMMAND,
-  $isListNode,
-} from '@lexical/list';
-import { mergeRegister } from '@lexical/utils';
-import { TextB, TextItalic, TextUnderline, TextHOne, TextHTwo, ListBullets, ListNumbers } from '@phosphor-icons/react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
@@ -43,9 +51,7 @@ export function ToolbarPlugin() {
       // Update block type
       const anchorNode = selection.anchor.getNode();
       const element =
-        anchorNode.getKey() === 'root'
-          ? anchorNode
-          : anchorNode.getTopLevelElementOrThrow();
+        anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow();
 
       const elementType = element.getType();
       if (elementType === 'heading') {
@@ -73,8 +79,8 @@ export function ToolbarPlugin() {
           updateToolbar();
           return false;
         },
-        1
-      )
+        1,
+      ),
     );
   }, [editor, updateToolbar]);
 

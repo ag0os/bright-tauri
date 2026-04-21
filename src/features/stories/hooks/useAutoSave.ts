@@ -5,8 +5,8 @@
  * Prevents excessive save calls by debouncing user input changes.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
 import debounce from 'lodash.debounce';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SaveState = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -105,7 +105,7 @@ export function useAutoSave<T>({
   const debouncedSave = useRef(
     debounce((callback: () => void) => {
       callback();
-    }, delay)
+    }, delay),
   );
 
   // Update debounce delay if it changes

@@ -7,15 +7,21 @@
 
 import { create } from 'zustand';
 import * as api from '@/features/containers/api/containers';
-import type { Container, StorySummary, CreateContainerInput, UpdateContainerInput, ContainerChildren } from '@/types';
 import { LRUCache } from '@/shared/utils/LRUCache';
+import type {
+  Container,
+  ContainerChildren,
+  CreateContainerInput,
+  StorySummary,
+  UpdateContainerInput,
+} from '@/types';
 
 // Cache configuration
 const CHILDREN_CACHE_SIZE = 100; // Maximum number of container children to cache
 const CHILDREN_CACHE_TTL = 5 * 60 * 1000; // 5 minutes TTL for cached children
 
 interface ContainerFilters {
-  containerType: string | null;  // 'novel' | 'series' | 'collection' | null
+  containerType: string | null; // 'novel' | 'series' | 'collection' | null
   searchQuery: string;
 }
 
@@ -43,8 +49,16 @@ interface ContainersState {
 
   // Child container actions
   loadContainerChildren: (containerId: string) => Promise<ContainerChildren>;
-  reorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => Promise<void>;
-  optimisticReorderChildren: (containerId: string, containerIds: string[], storyIds: string[]) => void;
+  reorderChildren: (
+    containerId: string,
+    containerIds: string[],
+    storyIds: string[],
+  ) => Promise<void>;
+  optimisticReorderChildren: (
+    containerId: string,
+    containerIds: string[],
+    storyIds: string[],
+  ) => void;
   getContainerChildren: (containerId: string) => ContainerChildren | null;
   invalidateChildren: (containerId: string) => void;
 
@@ -164,9 +178,10 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
         }
 
         // Clear selected container if it was deleted
-        const newSelectedContainer = state.selectedContainer && deletedIds.includes(state.selectedContainer.id)
-          ? null
-          : state.selectedContainer;
+        const newSelectedContainer =
+          state.selectedContainer && deletedIds.includes(state.selectedContainer.id)
+            ? null
+            : state.selectedContainer;
 
         return {
           containers: remainingContainers,
@@ -197,7 +212,8 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
       });
       return children;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load container children';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to load container children';
       set((state) => ({
         error: errorMessage,
         childrenLoading: { ...state.childrenLoading, [containerId]: false },
@@ -240,17 +256,17 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
     if (!currentChildren) return;
 
     // Create maps for quick lookup
-    const containerMap = new Map(currentChildren.containers.map(c => [c.id, c]));
-    const storyMap = new Map(currentChildren.stories.map(s => [s.id, s]));
+    const containerMap = new Map(currentChildren.containers.map((c) => [c.id, c]));
+    const storyMap = new Map(currentChildren.stories.map((s) => [s.id, s]));
 
     // Reorder containers based on new order
     const reorderedContainers = containerIds
-      .map(id => containerMap.get(id))
+      .map((id) => containerMap.get(id))
       .filter((c): c is Container => c !== undefined);
 
     // Reorder stories based on new order
     const reorderedStories = storyIds
-      .map(id => storyMap.get(id))
+      .map((id) => storyMap.get(id))
       .filter((s): s is StorySummary => s !== undefined);
 
     // Update state immediately
@@ -306,7 +322,7 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
       result = result.filter(
         (c) =>
           c.title.toLowerCase().includes(query) ||
-          (c.description && c.description.toLowerCase().includes(query))
+          (c.description && c.description.toLowerCase().includes(query)),
       );
     }
 

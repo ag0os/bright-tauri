@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getStory } from '@/features/stories/api/stories';
 import {
-  listStoryVersions,
   createStoryVersion,
-  switchStoryVersion,
-  renameStoryVersion,
   deleteStoryVersion,
+  listStoryVersions,
+  renameStoryVersion,
+  switchStoryVersion,
 } from '@/features/stories/api/versions';
 import type { StoryDetail, StoryVersion } from '@/types';
 
@@ -106,27 +106,30 @@ export function useStoryVersions(storyId: string): UseStoryVersionsReturn {
     loadData();
   }, [loadData]);
 
-  const handleCreateVersion = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateVersion = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!storyId || !newVersionName.trim()) return;
+      if (!storyId || !newVersionName.trim()) return;
 
-    setCreating(true);
-    setCreateError(null);
+      setCreating(true);
+      setCreateError(null);
 
-    try {
-      const currentContent = story?.activeSnapshot?.content ?? '';
-      await createStoryVersion(storyId, newVersionName.trim(), currentContent);
+      try {
+        const currentContent = story?.activeSnapshot?.content ?? '';
+        await createStoryVersion(storyId, newVersionName.trim(), currentContent);
 
-      setNewVersionName('');
-      setShowCreateForm(false);
-      await loadData();
-    } catch (err) {
-      setCreateError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setCreating(false);
-    }
-  }, [storyId, newVersionName, story, loadData]);
+        setNewVersionName('');
+        setShowCreateForm(false);
+        await loadData();
+      } catch (err) {
+        setCreateError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setCreating(false);
+      }
+    },
+    [storyId, newVersionName, story, loadData],
+  );
 
   const resetCreateForm = useCallback(() => {
     setShowCreateForm(false);
@@ -134,20 +137,23 @@ export function useStoryVersions(storyId: string): UseStoryVersionsReturn {
     setCreateError(null);
   }, []);
 
-  const handleSwitchVersion = useCallback(async (versionId: string) => {
-    if (!storyId || switching) return;
+  const handleSwitchVersion = useCallback(
+    async (versionId: string) => {
+      if (!storyId || switching) return;
 
-    setSwitching(versionId);
+      setSwitching(versionId);
 
-    try {
-      await switchStoryVersion(storyId, versionId);
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setSwitching(null);
-    }
-  }, [storyId, switching, loadData]);
+      try {
+        await switchStoryVersion(storyId, versionId);
+        await loadData();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setSwitching(null);
+      }
+    },
+    [storyId, switching, loadData],
+  );
 
   const handleStartRename = useCallback((version: StoryVersion) => {
     setEditingVersionId(version.id);
@@ -176,15 +182,18 @@ export function useStoryVersions(storyId: string): UseStoryVersionsReturn {
     setEditingName('');
   }, []);
 
-  const handleRequestDelete = useCallback((version: StoryVersion) => {
-    const isActive = story?.activeVersionId === version.id;
-    setDeleteConfirm({
-      versionId: version.id,
-      versionName: version.name,
-      isActive,
-    });
-    setDeleteError(null);
-  }, [story]);
+  const handleRequestDelete = useCallback(
+    (version: StoryVersion) => {
+      const isActive = story?.activeVersionId === version.id;
+      setDeleteConfirm({
+        versionId: version.id,
+        versionName: version.name,
+        isActive,
+      });
+      setDeleteError(null);
+    },
+    [story],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     if (!deleteConfirm || deleting) return;

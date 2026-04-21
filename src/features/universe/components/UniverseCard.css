@@ -1,7 +1,7 @@
 /* Import design system tokens */
-@import '../../../design-system/tokens/colors/modern-indigo.css';
-@import '../../../design-system/tokens/typography/classic-serif.css';
-@import '../../../design-system/tokens/spacing.css';
+@import "../../../design-system/tokens/colors/modern-indigo.css";
+@import "../../../design-system/tokens/typography/classic-serif.css";
+@import "../../../design-system/tokens/spacing.css";
 
 .universe-card {
   /* Size */
@@ -57,7 +57,9 @@
 /* Focus state - visible border for keyboard navigation */
 .universe-card--focused {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg), 0 0 0 3px var(--color-primary-subtle);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 3px var(--color-primary-subtle);
 }
 
 /* Active/pressed state */

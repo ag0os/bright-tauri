@@ -54,6 +54,6 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'bright-tauri-settings', // localStorage key
-    }
-  )
+    },
+  ),
 );

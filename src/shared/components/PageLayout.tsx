@@ -5,8 +5,8 @@
  * Includes TopBar and provides a content area with proper padding.
  */
 
-import { ReactNode } from 'react';
-import { TopBar, NavigationTab } from './TopBar';
+import type { ReactNode } from 'react';
+import { type NavigationTab, TopBar } from './TopBar';
 import './PageLayout.css';
 
 interface PageLayoutProps {

@@ -5,21 +5,22 @@
  * Uses Elevated Shadow card design from design system.
  */
 
-import React, { useState } from 'react';
 import {
-  User,
-  MapPin,
-  Car,
-  Package,
-  Buildings,
   Bird,
+  Buildings,
   Calendar,
+  Car,
   Lightbulb,
-  Star,
-  PencilSimple,
-  Trash,
   Link,
+  MapPin,
+  Package,
+  PencilSimple,
+  Star,
+  Trash,
+  User,
 } from '@phosphor-icons/react';
+import type React from 'react';
+import { useState } from 'react';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -168,7 +169,11 @@ export function ElementCard({
                 <>
                   <span>•</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Link className="icon icon-sm" weight="duotone" style={{ width: '14px', height: '14px' }} />
+                    <Link
+                      className="icon icon-sm"
+                      weight="duotone"
+                      style={{ width: '14px', height: '14px' }}
+                    />
                     {actualRelationshipCount} {actualRelationshipCount === 1 ? 'link' : 'links'}
                   </span>
                 </>

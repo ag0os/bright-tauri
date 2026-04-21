@@ -62,8 +62,7 @@ pub fn list_container_children(
     // Get stories in this container and convert to summaries
     let stories =
         StoryRepository::list_by_container(&db, &container_id).map_err(|e| e.to_string())?;
-    let story_summaries: Vec<StorySummary> =
-        stories.into_iter().map(StorySummary::from).collect();
+    let story_summaries: Vec<StorySummary> = stories.into_iter().map(StorySummary::from).collect();
 
     Ok(ContainerChildren {
         containers,

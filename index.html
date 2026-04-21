@@ -7,7 +7,7 @@
     <title>Bright</title>
     <script>
       // Apply saved theme immediately to prevent flash
-      (function() {
+      (() => {
         var theme = localStorage.getItem('bright-theme');
         if (theme === 'light') {
           document.documentElement.setAttribute('data-theme', 'light');

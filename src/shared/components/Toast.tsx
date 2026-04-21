@@ -4,8 +4,8 @@
  * Simple toast notification for showing success, error, and info messages.
  */
 
-import { useEffect, useState, useCallback } from 'react';
-import { X, CheckCircle, WarningCircle, Info } from '@phosphor-icons/react';
+import { CheckCircle, Info, WarningCircle, X } from '@phosphor-icons/react';
+import { useCallback, useEffect, useState } from 'react';
 import '@/design-system/tokens/colors/modern-indigo.css';
 
 export type ToastType = 'success' | 'error' | 'info';
@@ -71,9 +71,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         transition: 'opacity 0.2s, transform 0.2s',
       }}
     >
-      <span style={{ color: colors[toast.type], flexShrink: 0 }}>
-        {icons[toast.type]}
-      </span>
+      <span style={{ color: colors[toast.type], flexShrink: 0 }}>{icons[toast.type]}</span>
       <span
         style={{
           flex: 1,
@@ -133,14 +131,11 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
 export function useToast() {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const addToast = useCallback(
-    (type: ToastType, message: string, duration?: number) => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setToasts((prev) => [...prev, { id, type, message, duration }]);
-      return id;
-    },
-    []
-  );
+  const addToast = useCallback((type: ToastType, message: string, duration?: number) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setToasts((prev) => [...prev, { id, type, message, duration }]);
+    return id;
+  }, []);
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -148,17 +143,17 @@ export function useToast() {
 
   const success = useCallback(
     (message: string, duration?: number) => addToast('success', message, duration),
-    [addToast]
+    [addToast],
   );
 
   const error = useCallback(
     (message: string, duration?: number) => addToast('error', message, duration),
-    [addToast]
+    [addToast],
   );
 
   const info = useCallback(
     (message: string, duration?: number) => addToast('info', message, duration),
-    [addToast]
+    [addToast],
   );
 
   return {

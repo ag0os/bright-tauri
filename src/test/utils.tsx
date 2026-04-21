@@ -1,17 +1,14 @@
-import { render, RenderOptions } from '@testing-library/react';
-import { ReactElement } from 'react';
-import { vi } from 'vitest';
 import * as tauriCore from '@tauri-apps/api/core';
-import type { Story, StorySummary, StoryDetail, Container } from '@/types';
+import { type RenderOptions, render } from '@testing-library/react';
+import type { ReactElement } from 'react';
+import type { vi } from 'vitest';
+import type { Container, Story, StoryDetail, StorySummary } from '@/types';
 
 /**
  * Custom render function that wraps components with common providers
  * Add any global providers here (e.g., ThemeProvider, Router, etc.)
  */
-export function renderWithProviders(
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) {
+export function renderWithProviders(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
   // For now, just use the default render
   // In the future, you can add providers here:
   // const Wrapper = ({ children }: { children: React.ReactNode }) => (

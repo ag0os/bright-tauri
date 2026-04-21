@@ -35,9 +35,7 @@ export function DeleteStoryModal({
           <p>
             Are you sure you want to delete <strong>"{story.title}"</strong>?
           </p>
-          <p>
-            This will permanently remove the story and all its version history.
-          </p>
+          <p>This will permanently remove the story and all its version history.</p>
         </>
       );
     }

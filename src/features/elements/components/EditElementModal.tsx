@@ -5,11 +5,11 @@
  * Pre-populates form with current element data and supports partial updates.
  */
 
-import { useState, FormEvent } from 'react';
 import { X } from '@phosphor-icons/react';
+import { type FormEvent, useState } from 'react';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
-import type { Element, UpdateElementInput } from '@/types';
 import elementTemplatesData from '@/shared/config/element-templates.json';
+import type { Element, UpdateElementInput } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -35,7 +35,15 @@ interface TemplateData {
   }>;
 }
 
-type TemplateKey = 'character' | 'location' | 'vehicle' | 'item' | 'organization' | 'creature' | 'event' | 'concept';
+type TemplateKey =
+  | 'character'
+  | 'location'
+  | 'vehicle'
+  | 'item'
+  | 'organization'
+  | 'creature'
+  | 'event'
+  | 'concept';
 
 const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates as any;
 
@@ -66,9 +74,8 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get template data for the element's type
-  const templateData = element.elementType in templates
-    ? templates[element.elementType as TemplateKey]
-    : null;
+  const templateData =
+    element.elementType in templates ? templates[element.elementType as TemplateKey] : null;
 
   const handleAttributeChange = (key: string, value: string) => {
     setAttributes({ ...attributes, [key]: value });
@@ -98,33 +105,47 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
     try {
       // Filter out empty attributes
       const filteredAttributes = Object.fromEntries(
-        Object.entries(attributes).filter(([_, value]) => value.trim() !== '')
+        Object.entries(attributes).filter(([_, value]) => value.trim() !== ''),
       );
 
       // Build update input - only include changed fields
       const input: UpdateElementInput = {
         name: formData.name.trim() !== element.name ? formData.name.trim() : null,
-        description: formData.description.trim() !== element.description ? formData.description.trim() : null,
+        description:
+          formData.description.trim() !== element.description ? formData.description.trim() : null,
         elementType: null, // Can't change element type in edit
         customTypeName: null,
-        details: formData.details.trim() !== (element.details || '') ? (formData.details.trim() || null) : null,
-        attributes: JSON.stringify(filteredAttributes) !== JSON.stringify(element.attributes || {})
-          ? (Object.keys(filteredAttributes).length > 0 ? filteredAttributes : {})
-          : null,
+        details:
+          formData.details.trim() !== (element.details || '')
+            ? formData.details.trim() || null
+            : null,
+        attributes:
+          JSON.stringify(filteredAttributes) !== JSON.stringify(element.attributes || {})
+            ? Object.keys(filteredAttributes).length > 0
+              ? filteredAttributes
+              : {}
+            : null,
         imageUrl: null,
-        tags: formData.tags !== (element.tags?.join(', ') || '')
-          ? (formData.tags ? formData.tags.split(',').map((t) => t.trim()).filter(Boolean) : [])
-          : null,
+        tags:
+          formData.tags !== (element.tags?.join(', ') || '')
+            ? formData.tags
+              ? formData.tags
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter(Boolean)
+              : []
+            : null,
         relationships: null, // Keep existing relationships
         relatedStoryIds: null,
-        color: formData.color.trim() !== (element.color || '') ? (formData.color.trim() || null) : null,
+        color:
+          formData.color.trim() !== (element.color || '') ? formData.color.trim() || null : null,
         icon: null, // Icons are now determined by element type (Phosphor icons)
         favorite: null, // Keep existing favorite status
         order: null,
       };
 
       // Check if anything actually changed
-      const hasChanges = Object.values(input).some(v => v !== null);
+      const hasChanges = Object.values(input).some((v) => v !== null);
       if (!hasChanges) {
         // Nothing changed, just close
         onClose();
@@ -352,9 +373,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
                           onChange={(e) => handleAttributeChange(attr.key, e.target.value)}
                         />
                       </div>
-                      {attr.description && (
-                        <div className="input-helper">{attr.description}</div>
-                      )}
+                      {attr.description && <div className="input-helper">{attr.description}</div>}
                     </div>
                   ))}
                 </div>
@@ -428,11 +447,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-base"
-              disabled={isSubmitting}
-            >
+            <button type="submit" className="btn btn-primary btn-base" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>

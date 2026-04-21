@@ -28,9 +28,9 @@
  * 5. TypeScript will error if you add an invalid value
  */
 
-import type { StoryType } from '@/types/StoryType';
-import type { StoryStatus } from '@/types/StoryStatus';
 import type { ElementType } from '@/types/ElementType';
+import type { StoryStatus } from '@/types/StoryStatus';
+import type { StoryType } from '@/types/StoryType';
 
 // Story type filter options - derived from StoryType
 export const STORY_TYPE_OPTIONS: { value: StoryType; label: string }[] = [

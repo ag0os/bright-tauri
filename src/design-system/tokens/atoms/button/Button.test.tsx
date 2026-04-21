@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '../../../../test/utils';
 import './minimal-squared.css';
 
@@ -63,7 +63,9 @@ describe('Button Component', () => {
 
     it('applies multiple classes correctly', () => {
       renderWithProviders(
-        <Button variant="outline" size="sm">Small Outline</Button>
+        <Button variant="outline" size="sm">
+          Small Outline
+        </Button>,
       );
       const button = screen.getByRole('button');
       expect(button).toHaveClass('btn', 'btn-outline', 'btn-sm');
@@ -88,7 +90,7 @@ describe('Button Component', () => {
       renderWithProviders(
         <Button onClick={handleClick} disabled>
           Disabled Button
-        </Button>
+        </Button>,
       );
 
       await user.click(screen.getByRole('button'));
@@ -125,9 +127,7 @@ describe('Button Component', () => {
     });
 
     it('supports aria-label for better accessibility', () => {
-      renderWithProviders(
-        <Button aria-label="Close dialog">×</Button>
-      );
+      renderWithProviders(<Button aria-label="Close dialog">×</Button>);
       expect(screen.getByRole('button', { name: /close dialog/i })).toBeInTheDocument();
     });
   });

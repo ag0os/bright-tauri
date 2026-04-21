@@ -4,13 +4,13 @@
  * Tests for the StoryVersions view which manages database-based versioning.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '@/test/utils';
-import { StoryVersions } from './StoryVersions';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { renderWithProviders } from '@/test/utils';
 import type { StoryDetail, StoryVersion } from '@/types';
+import { StoryVersions } from './StoryVersions';
 
 // Mock Tauri invoke
 vi.mock('@tauri-apps/api/core', () => ({
@@ -92,13 +92,18 @@ describe('StoryVersions', () => {
 
     // Setup navigation store mock
     (useNavigationStore as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-      (selector: (state: { currentRoute: { screen: string; storyId: string }; goBack: typeof mockGoBack }) => unknown) => {
+      (
+        selector: (state: {
+          currentRoute: { screen: string; storyId: string };
+          goBack: typeof mockGoBack;
+        }) => unknown,
+      ) => {
         const state = {
           currentRoute: { screen: 'story-versions', storyId: 'story-1' },
           goBack: mockGoBack,
         };
         return selector(state);
-      }
+      },
     );
 
     // Setup default mock responses

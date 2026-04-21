@@ -75,11 +75,7 @@ export function ConfirmDeleteModal({
               flexShrink: 0,
             }}
           >
-            <Warning
-              size={24}
-              weight="duotone"
-              style={{ color: 'var(--color-error)' }}
-            />
+            <Warning size={24} weight="duotone" style={{ color: 'var(--color-error)' }} />
           </div>
           <h2
             style={{
@@ -136,11 +132,7 @@ export function ConfirmDeleteModal({
             gap: 'var(--spacing-3)',
           }}
         >
-          <button
-            className="btn btn-secondary btn-base"
-            onClick={onCancel}
-            disabled={isDeleting}
-          >
+          <button className="btn btn-secondary btn-base" onClick={onCancel} disabled={isDeleting}>
             Cancel
           </button>
           <button

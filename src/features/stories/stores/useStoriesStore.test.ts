@@ -2,10 +2,10 @@
  * Tests for useStoriesStore - Filter and Sort Functionality
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import { act } from '@testing-library/react';
-import { useStoriesStore } from './useStoriesStore';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { StorySummary } from '@/types';
+import { useStoriesStore } from './useStoriesStore';
 
 describe('useStoriesStore - Filter and Sort Functionality', () => {
   // Helper function to create mock StorySummary (lightweight list type)
@@ -119,7 +119,7 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(s => s.storyType === 'episode')).toBe(true);
+      expect(filtered.every((s) => s.storyType === 'episode')).toBe(true);
     });
 
     it('filters stories by poem type', () => {
@@ -233,7 +233,7 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(s => s.status === 'draft')).toBe(true);
+      expect(filtered.every((s) => s.status === 'draft')).toBe(true);
     });
 
     it('filters stories by inprogress status', () => {
@@ -267,7 +267,7 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(s => s.status === 'completed')).toBe(true);
+      expect(filtered.every((s) => s.status === 'completed')).toBe(true);
     });
 
     it('filters stories by published status', () => {
@@ -349,7 +349,7 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();
       expect(filtered).toHaveLength(2);
-      expect(filtered.some(s => s.title.includes('Adventure'))).toBe(true);
+      expect(filtered.some((s) => s.title.includes('Adventure'))).toBe(true);
     });
 
     it('searches stories by description (case-insensitive)', () => {
@@ -366,7 +366,7 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
       const filtered = useStoriesStore.getState().getFilteredAndSortedStories();
       expect(filtered).toHaveLength(2);
-      expect(filtered.every(s => s.description.toLowerCase().includes('mystery'))).toBe(true);
+      expect(filtered.every((s) => s.description.toLowerCase().includes('mystery'))).toBe(true);
     });
 
     it('searches across title and description', () => {
@@ -506,10 +506,25 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
 
     it('applies all three filters together', () => {
       const stories: StorySummary[] = [
-        createMockStory({ id: 's1', storyType: 'chapter', status: 'draft', title: 'Dragon Adventure' }),
+        createMockStory({
+          id: 's1',
+          storyType: 'chapter',
+          status: 'draft',
+          title: 'Dragon Adventure',
+        }),
         createMockStory({ id: 's2', storyType: 'chapter', status: 'draft', title: 'Simple Tale' }),
-        createMockStory({ id: 's3', storyType: 'chapter', status: 'completed', title: 'Dragon Quest' }),
-        createMockStory({ id: 's4', storyType: 'short-story', status: 'draft', title: 'Dragon Story' }),
+        createMockStory({
+          id: 's3',
+          storyType: 'chapter',
+          status: 'completed',
+          title: 'Dragon Quest',
+        }),
+        createMockStory({
+          id: 's4',
+          storyType: 'short-story',
+          status: 'draft',
+          title: 'Dragon Story',
+        }),
       ];
 
       act(() => {
@@ -527,7 +542,12 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
     it('returns empty array when combined filters match nothing', () => {
       const stories: StorySummary[] = [
         createMockStory({ id: 's1', storyType: 'chapter', status: 'draft', title: 'Story 1' }),
-        createMockStory({ id: 's2', storyType: 'short-story', status: 'completed', title: 'Story 2' }),
+        createMockStory({
+          id: 's2',
+          storyType: 'short-story',
+          status: 'completed',
+          title: 'Story 2',
+        }),
       ];
 
       act(() => {
@@ -784,11 +804,27 @@ describe('useStoriesStore - Filter and Sort Functionality', () => {
       });
 
       // Test each valid StoryType
-      const validTypes: Array<'chapter' | 'short-story' | 'scene' | 'episode' | 'poem' | 'outline' | 'treatment' | 'screenplay'> = [
-        'chapter', 'short-story', 'scene', 'episode', 'poem', 'outline', 'treatment', 'screenplay'
+      const validTypes: Array<
+        | 'chapter'
+        | 'short-story'
+        | 'scene'
+        | 'episode'
+        | 'poem'
+        | 'outline'
+        | 'treatment'
+        | 'screenplay'
+      > = [
+        'chapter',
+        'short-story',
+        'scene',
+        'episode',
+        'poem',
+        'outline',
+        'treatment',
+        'screenplay',
       ];
 
-      validTypes.forEach(type => {
+      validTypes.forEach((type) => {
         act(() => {
           useStoriesStore.getState().setFilter('type', type);
         });

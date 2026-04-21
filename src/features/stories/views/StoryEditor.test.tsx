@@ -8,16 +8,16 @@
  * - Integration with useAutoSnapshot for history snapshots
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { screen, waitFor, act } from '@testing-library/react';
-import { renderWithProviders, mockTauriInvoke, resetTauriMocks } from '@/test/utils';
-import { StoryEditor } from './StoryEditor';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
-import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
-import { useToastStore } from '@/shared/stores/useToastStore';
-import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
-import type { StoryDetail } from '@/types';
 import { invoke } from '@tauri-apps/api/core';
+import { act, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
+import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { useToastStore } from '@/shared/stores/useToastStore';
+import { mockTauriInvoke, renderWithProviders, resetTauriMocks } from '@/test/utils';
+import type { StoryDetail } from '@/types';
+import { StoryEditor } from './StoryEditor';
 
 // Mock stores
 vi.mock('@/shared/stores/useNavigationStore');
@@ -41,7 +41,9 @@ vi.mock('@/editor/RichTextEditor', () => ({
       <div data-testid="editor-placeholder">{placeholder}</div>
       <button
         data-testid="editor-change"
-        onClick={() => onChange?.('{"root":{"children":[{"children":[{"text":"Updated content"}]}]}}')}
+        onClick={() =>
+          onChange?.('{"root":{"children":[{"children":[{"text":"Updated content"}]}]}}')
+        }
       >
         Simulate Change
       </button>
@@ -118,7 +120,7 @@ describe('StoryEditor', () => {
           navigate: mockNavigate,
         };
         return selector(state);
-      }
+      },
     );
 
     // Mock stories store - use mockResolvedValue for async getStory
@@ -130,7 +132,7 @@ describe('StoryEditor', () => {
           updateStory: mockUpdateStory,
         };
         return selector(state);
-      }
+      },
     );
 
     // Mock toast store
@@ -140,7 +142,7 @@ describe('StoryEditor', () => {
           error: mockShowError,
         };
         return selector(state);
-      }
+      },
     );
 
     // Mock settings store with default values
@@ -152,7 +154,7 @@ describe('StoryEditor', () => {
           maxSnapshotsPerVersion: 50,
         };
         return selector(state);
-      }
+      },
     );
   };
 
@@ -180,7 +182,9 @@ describe('StoryEditor', () => {
       await waitFor(() => {
         // The RichTextEditor should receive the initial content from activeSnapshot
         const editorContent = screen.getByTestId('editor-content');
-        expect(editorContent).toHaveTextContent('{"root":{"children":[{"children":[{"text":"Initial content from snapshot"}]}]}}');
+        expect(editorContent).toHaveTextContent(
+          '{"root":{"children":[{"children":[{"text":"Initial content from snapshot"}]}]}}',
+        );
       });
     });
 
@@ -300,7 +304,7 @@ describe('StoryEditor', () => {
 
       // Verify the call uses storyId, which backend resolves to active snapshot
       const calls = mockInvoke.mock.calls;
-      const updateCall = calls.find(call => call[0] === 'update_snapshot_content');
+      const updateCall = calls.find((call) => call[0] === 'update_snapshot_content');
       expect(updateCall).toBeTruthy();
       expect(updateCall![1]).toHaveProperty('storyId', 'story-1');
     });

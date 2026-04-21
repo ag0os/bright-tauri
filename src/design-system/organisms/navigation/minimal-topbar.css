@@ -30,7 +30,9 @@
   align-items: center;
   padding: 0 20px;
   z-index: 100;
-  transition: transform var(--nav-transition), opacity var(--nav-transition);
+  transition:
+    transform var(--nav-transition),
+    opacity var(--nav-transition);
 }
 
 .nav-3__topbar--hidden {
@@ -226,7 +228,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

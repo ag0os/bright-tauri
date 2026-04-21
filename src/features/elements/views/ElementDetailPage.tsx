@@ -4,28 +4,28 @@
  * Full-screen view of a single universe element with all details and relationships.
  */
 
-import { useEffect, useState } from 'react';
 import {
-  User,
-  MapPin,
-  Car,
-  Package,
-  Buildings,
-  Bird,
-  Calendar,
-  Lightbulb,
   ArrowLeft,
-  Star,
-  PencilSimple,
-  Trash,
+  Bird,
+  Buildings,
+  Calendar,
+  Car,
   CircleNotch,
+  Lightbulb,
   Link as LinkIcon,
+  MapPin,
+  Package,
+  PencilSimple,
+  Star,
+  Trash,
+  User,
 } from '@phosphor-icons/react';
-import { useNavigationStore } from '@/shared/stores/useNavigationStore';
+import { useEffect, useState } from 'react';
+import { EditElementModal } from '@/features/elements/components/EditElementModal';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
-import { EditElementModal } from '@/features/elements/components/EditElementModal';
 import { ConfirmDeleteModal } from '@/shared/components/ConfirmDeleteModal';
+import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import type { Element, ElementType, StoryDetail } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -84,8 +84,7 @@ export function ElementDetailPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Get element ID from route
-  const elementId =
-    currentRoute.screen === 'element-detail' ? currentRoute.elementId : null;
+  const elementId = currentRoute.screen === 'element-detail' ? currentRoute.elementId : null;
 
   // Load element data
   useEffect(() => {
@@ -107,15 +106,14 @@ export function ElementDetailPage() {
         // Load related stories if any
         if (loadedElement.relatedStoryIds && loadedElement.relatedStoryIds.length > 0) {
           const stories = await Promise.all(
-            loadedElement.relatedStoryIds.map((storyId) => getStory(storyId))
+            loadedElement.relatedStoryIds.map((storyId) => getStory(storyId)),
           );
           setRelatedStories(stories);
         }
 
         setIsLoading(false);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to load element';
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load element';
         setError(errorMessage);
         setIsLoading(false);
       }

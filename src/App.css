@@ -5,10 +5,10 @@
  * A subtle 3% paper-grain sits on the app background in dark mode.
  */
 
-@import './design-system/tokens/colors/modern-indigo.css';
-@import './design-system/tokens/typography/classic-serif.css';
-@import './design-system/tokens/spacing.css';
-@import './design-system/tokens/reset/modern-reset.css';
+@import "./design-system/tokens/colors/modern-indigo.css";
+@import "./design-system/tokens/typography/classic-serif.css";
+@import "./design-system/tokens/spacing.css";
+@import "./design-system/tokens/reset/modern-reset.css";
 
 :root {
   font-family: var(--font-body);

@@ -152,7 +152,9 @@ export class LRUCache<K, V> {
    * Get all values in the cache (in LRU order, oldest first).
    */
   values(): IterableIterator<V> {
-    return Array.from(this.cache.values()).map((entry) => entry.value).values();
+    return Array.from(this.cache.values())
+      .map((entry) => entry.value)
+      .values();
   }
 
   /**

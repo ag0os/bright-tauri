@@ -6,9 +6,9 @@
  * to detect real content changes.
  */
 
-import { useEffect, useRef } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { EditorState } from 'lexical';
+import type { EditorState } from 'lexical';
+import { useEffect, useRef } from 'react';
 
 export interface ContentChangePluginProps {
   onChange: (editorState: EditorState) => void;

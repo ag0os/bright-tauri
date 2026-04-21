@@ -19,7 +19,8 @@ pub fn list_stories_by_universe(
     db: State<Database>,
     universe_id: String,
 ) -> Result<Vec<StorySummary>, String> {
-    let stories = StoryRepository::list_by_universe(&db, &universe_id).map_err(|e| e.to_string())?;
+    let stories =
+        StoryRepository::list_by_universe(&db, &universe_id).map_err(|e| e.to_string())?;
     Ok(stories.into_iter().map(StorySummary::from).collect())
 }
 
@@ -104,7 +105,10 @@ mod tests {
         }
     }
 
-    fn create_story_internal(db: &Database, input: CreateStoryInput) -> Result<StoryDetail, String> {
+    fn create_story_internal(
+        db: &Database,
+        input: CreateStoryInput,
+    ) -> Result<StoryDetail, String> {
         story_service::create_story(db, input)
     }
 
@@ -120,10 +124,16 @@ mod tests {
         let story = create_story_internal(&db, input).unwrap();
 
         // StoryDetail guarantees active_version_id is set (non-optional)
-        assert!(!story.active_version_id.is_empty(), "active_version_id should be set");
+        assert!(
+            !story.active_version_id.is_empty(),
+            "active_version_id should be set"
+        );
 
         // StoryDetail guarantees active_snapshot_id is set (non-optional)
-        assert!(!story.active_snapshot_id.is_empty(), "active_snapshot_id should be set");
+        assert!(
+            !story.active_snapshot_id.is_empty(),
+            "active_snapshot_id should be set"
+        );
 
         // active_version is guaranteed populated in StoryDetail
         assert_eq!(story.active_version.name, "Original");
@@ -139,7 +149,8 @@ mod tests {
         assert_eq!(versions[0].name, "Original");
 
         // Verify snapshot exists in database
-        let snapshots = StorySnapshotRepository::list_by_version(&db, &story.active_version.id).unwrap();
+        let snapshots =
+            StorySnapshotRepository::list_by_version(&db, &story.active_version.id).unwrap();
         assert_eq!(snapshots.len(), 1);
         assert_eq!(snapshots[0].content, "");
     }

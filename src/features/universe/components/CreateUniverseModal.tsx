@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import type React from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './CreateUniverseModal.css';
 
 interface CreateUniverseModalProps {
@@ -68,11 +69,7 @@ export const CreateUniverseModal: React.FC<CreateUniverseModalProps> = ({
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2 className="modal-title">Create New Universe</h2>
-          <button
-            className="modal-close"
-            onClick={handleClose}
-            aria-label="Close modal"
-          >
+          <button className="modal-close" onClick={handleClose} aria-label="Close modal">
             ×
           </button>
         </div>
@@ -104,11 +101,7 @@ export const CreateUniverseModal: React.FC<CreateUniverseModalProps> = ({
           </div>
 
           <div className="modal-actions">
-            <button
-              type="button"
-              className="btn btn-secondary btn-base"
-              onClick={handleClose}
-            >
+            <button type="button" className="btn btn-secondary btn-base" onClick={handleClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary btn-base">

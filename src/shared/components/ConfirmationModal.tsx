@@ -5,8 +5,9 @@
  * Provides accessible keyboard navigation and focus management.
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Warning, Info, WarningCircle } from '@phosphor-icons/react';
+import { Info, Warning, WarningCircle } from '@phosphor-icons/react';
+import type React from 'react';
+import { useEffect, useRef } from 'react';
 import './ConfirmationModal.css';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -73,7 +74,7 @@ export function ConfirmationModal({
 
     const modal = modalRef.current;
     const focusableElements = modal.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const firstElement = focusableElements[0];
     const lastElement = focusableElements[focusableElements.length - 1];
@@ -152,19 +153,13 @@ export function ConfirmationModal({
               aria-hidden="true"
             />
           </div>
-          <h2
-            id="modal-title"
-            className="confirmation-modal-title"
-          >
+          <h2 id="modal-title" className="confirmation-modal-title">
             {title}
           </h2>
         </div>
 
         {/* Message */}
-        <div
-          id="modal-message"
-          className="confirmation-modal-message"
-        >
+        <div id="modal-message" className="confirmation-modal-message">
           {message}
         </div>
 
