@@ -42,38 +42,4 @@ impl Database {
         let conn = self.conn.lock().unwrap();
         conn.execute(sql, params)
     }
-
-    /// Execute a query and process results
-    #[allow(dead_code)]
-    pub fn query<T, F>(&self, sql: &str, params: &[&dyn rusqlite::ToSql], f: F) -> Result<Vec<T>>
-    where
-        F: FnMut(&rusqlite::Row) -> Result<T>,
-    {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(sql)?;
-        let rows = stmt.query_map(params, f)?;
-        rows.collect()
-    }
-
-    /// Execute a query and return a single optional result
-    #[allow(dead_code)]
-    pub fn query_one<T, F>(
-        &self,
-        sql: &str,
-        params: &[&dyn rusqlite::ToSql],
-        f: F,
-    ) -> Result<Option<T>>
-    where
-        F: FnOnce(&rusqlite::Row) -> Result<T>,
-    {
-        let conn = self.conn.lock().unwrap();
-        let mut stmt = conn.prepare(sql)?;
-        let mut rows = stmt.query(params)?;
-
-        if let Some(row) = rows.next()? {
-            Ok(Some(f(row)?))
-        } else {
-            Ok(None)
-        }
-    }
 }

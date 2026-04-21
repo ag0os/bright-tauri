@@ -1,10 +1,6 @@
 use rusqlite::{params, Connection, Result};
 use uuid::Uuid;
 
-/// Current database schema version
-#[allow(dead_code)]
-const SCHEMA_VERSION: i32 = 2;
-
 /// Run all database migrations
 pub fn run_migrations(conn: &Connection) -> Result<()> {
     // Create schema_version table if it doesn't exist

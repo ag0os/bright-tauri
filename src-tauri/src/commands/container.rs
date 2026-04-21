@@ -20,10 +20,10 @@ pub fn create_container(
     }
 
     const VALID_TYPES: &[&str] = &["novel", "series", "collection"];
-    if !VALID_TYPES.contains(&input.container_type.as_str()) {
+    let container_type = input.container_type.as_str();
+    if !VALID_TYPES.contains(&container_type) {
         return Err(format!(
-            "Invalid container type: {}. Must be one of: novel, series, collection",
-            input.container_type
+            "Invalid container type: {container_type}. Must be one of: novel, series, collection"
         ));
     }
 

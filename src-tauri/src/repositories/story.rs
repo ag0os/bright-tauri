@@ -187,77 +187,6 @@ impl StoryRepository {
         Ok(stories)
     }
 
-    /// Get all standalone stories (stories without a container)
-    pub fn list_standalone_stories(db: &Database, universe_id: &str) -> Result<Vec<Story>> {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-
-        let mut stmt = conn.prepare(
-            "SELECT id, universe_id, title, description, story_type, status, word_count,
-                    variation_group_id, variation_type, parent_variation_id,
-                    created_at, updated_at,
-                    notes, outline, target_word_count, \"order\", tags, color, favorite,
-                    related_element_ids, series_name, container_id, last_edited_at, version,
-                    active_version_id, active_snapshot_id
-             FROM stories
-             WHERE universe_id = ?1 AND container_id IS NULL
-             ORDER BY updated_at DESC",
-        )?;
-
-        let stories = stmt
-            .query_map(params![universe_id], Self::map_row_to_story)?
-            .collect::<Result<Vec<_>>>()?;
-
-        Ok(stories)
-    }
-
-    /// Reorder stories within a container by updating their order fields
-    pub fn reorder_by_container(
-        db: &Database,
-        container_id: &str,
-        story_ids: Vec<String>,
-    ) -> Result<()> {
-        let conn = db.connection();
-        let conn = conn.lock().unwrap();
-
-        // Start transaction
-        conn.execute("BEGIN TRANSACTION", [])?;
-
-        // Validate that all story_ids belong to the container
-        for story_id in &story_ids {
-            let container_check: Result<Option<String>, _> = conn.query_row(
-                "SELECT container_id FROM stories WHERE id = ?1",
-                params![story_id],
-                |row| row.get(0),
-            );
-
-            match container_check {
-                Ok(Some(cid)) if cid == container_id => {}
-                Ok(Some(_)) | Ok(None) => {
-                    conn.execute("ROLLBACK", [])?;
-                    return Err(rusqlite::Error::QueryReturnedNoRows);
-                }
-                Err(e) => {
-                    conn.execute("ROLLBACK", [])?;
-                    return Err(e);
-                }
-            }
-        }
-
-        // Update order for each story
-        for (index, story_id) in story_ids.iter().enumerate() {
-            conn.execute(
-                "UPDATE stories SET \"order\" = ?1 WHERE id = ?2",
-                params![index as u32, story_id],
-            )?;
-        }
-
-        // Commit transaction
-        conn.execute("COMMIT", [])?;
-
-        Ok(())
-    }
-
     /// Update a Story
     ///
     /// Note: Content updates are handled through the versioning system
@@ -545,7 +474,7 @@ mod tests {
         // Create multiple stories in the same container
         for i in 1..=3 {
             let input = create_test_story_input(
-                &format!("Story {}", i),
+                &format!("Story {i}"),
                 StoryType::Chapter,
                 Some(container_id.clone()),
             );
@@ -559,53 +488,6 @@ mod tests {
         // All stories should have the same container_id
         for story in stories {
             assert_eq!(story.container_id, Some(container_id.clone()));
-        }
-    }
-
-    #[test]
-    fn test_list_standalone_stories() {
-        let (db, _temp_dir) = setup_test_db();
-
-        // Create standalone stories (no container)
-        for i in 1..=2 {
-            let input = create_test_story_input(
-                &format!("Standalone Story {}", i),
-                StoryType::ShortStory,
-                None,
-            );
-            StoryRepository::create(&db, input).unwrap();
-        }
-
-        // Create a test container first
-        let container = ContainerRepository::create(
-            &db,
-            "universe-1".to_string(),
-            None,
-            "novel".to_string(),
-            "Test Container".to_string(),
-            None,
-            0,
-        )
-        .unwrap();
-
-        // Create stories with container
-        for i in 1..=3 {
-            let input = create_test_story_input(
-                &format!("Container Story {}", i),
-                StoryType::Chapter,
-                Some(container.id.clone()),
-            );
-            StoryRepository::create(&db, input).unwrap();
-        }
-
-        // List standalone stories only
-        let standalone_stories =
-            StoryRepository::list_standalone_stories(&db, "universe-1").unwrap();
-        assert_eq!(standalone_stories.len(), 2);
-
-        // All stories should have container_id = None
-        for story in standalone_stories {
-            assert!(story.container_id.is_none());
         }
     }
 
@@ -644,7 +526,7 @@ mod tests {
         // Create 3 stories under the same container
         for i in 1..=3 {
             let input = create_test_story_input(
-                &format!("Story {}", i),
+                &format!("Story {i}"),
                 StoryType::Chapter,
                 Some(container_id.clone()),
             );
