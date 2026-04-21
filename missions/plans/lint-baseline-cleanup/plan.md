@@ -1,6 +1,6 @@
 ---
 title: Reach a clean Biome + clippy lint baseline
-status: active
+status: completed
 createdAt: '2026-04-21T20:00:08.075Z'
 updatedAt: '2026-04-21T20:00:08.075Z'
 ---
