@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use ts_rs::TS;
 
 /// Maximum allowed nesting depth for containers to prevent performance issues
@@ -15,8 +16,9 @@ pub const MAX_NESTING_DEPTH: u32 = 10;
 ///
 /// With Database-Only Versioning (DBV), containers no longer have Git repositories.
 /// Versioning is handled at the story level through versions and snapshots.
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct Container {
     // Core Identity
@@ -24,13 +26,11 @@ pub struct Container {
     pub universe_id: String,
 
     // Hierarchy
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_container_id: Option<String>,
 
     // Container Properties
     pub container_type: String,
     pub title: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub order: i32,
 
@@ -41,38 +41,31 @@ pub struct Container {
 
 /// Input for creating a new Container
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct CreateContainerInput {
     pub universe_id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_container_id: Option<String>,
     pub container_type: String,
     pub title: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<i32>,
 }
 
 /// Input for updating an existing Container
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateContainerInput {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub container_type: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<i32>,
 }
 
 /// Response type containing child containers and stories
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct ContainerChildren {
     pub containers: Vec<Container>,

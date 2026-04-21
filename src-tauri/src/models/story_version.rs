@@ -7,7 +7,7 @@ use ts_rs::TS;
 /// Each version contains one or more snapshots, which are point-in-time saves of the content.
 /// This is part of the Database-Only Versioning (DBV) system that replaces Git-based versioning.
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct StoryVersion {
     pub id: String,
@@ -19,18 +19,17 @@ pub struct StoryVersion {
 
 /// Input for creating a new StoryVersion
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct CreateStoryVersionInput {
     pub story_id: String,
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<String>, // Initial content for the first snapshot
 }
 
 /// Input for renaming an existing StoryVersion
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct RenameStoryVersionInput {
     pub version_id: String,

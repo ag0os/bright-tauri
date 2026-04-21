@@ -1,12 +1,14 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use ts_rs::TS;
 
 /// Universe domain model
 ///
 /// A Universe is a project container for creative work, holding all the context,
 /// elements, and stories that belong to a particular creative world.
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct Universe {
     // Core Identity
@@ -17,27 +19,20 @@ pub struct Universe {
     pub updated_at: String, // ISO 8601 timestamp
 
     // Creative Context
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub genre: Option<Genre>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tone: Option<Tone>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub worldbuilding_notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub themes: Option<Vec<String>>,
 
     // Organization & Customization
     pub status: UniverseStatus,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum UniverseStatus {
     Active,
@@ -46,7 +41,7 @@ pub enum UniverseStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
 pub enum Genre {
     Fantasy,
@@ -61,7 +56,7 @@ pub enum Genre {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum Tone {
     Dark,
@@ -75,52 +70,34 @@ pub enum Tone {
 
 /// Input for creating a new Universe
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct CreateUniverseInput {
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub genre: Option<Genre>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tone: Option<Tone>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub worldbuilding_notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub themes: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
 }
 
 /// Input for updating an existing Universe
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateUniverseInput {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub genre: Option<Genre>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tone: Option<Tone>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub worldbuilding_notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub themes: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<UniverseStatus>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub icon: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
 }
 

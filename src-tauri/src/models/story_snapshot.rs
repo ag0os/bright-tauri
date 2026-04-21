@@ -12,7 +12,7 @@ use ts_rs::TS;
 /// - Snapshots are automatic saves within a version
 /// - Users can restore to any previous snapshot
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct StorySnapshot {
     /// Unique identifier for the snapshot

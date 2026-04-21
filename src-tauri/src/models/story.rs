@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use ts_rs::TS;
 
 use super::{StorySnapshot, StoryVersion};
@@ -14,8 +15,9 @@ use super::{StorySnapshot, StoryVersion};
 /// - active_version and active_snapshot are inline JOINed data for convenience
 ///
 /// For API responses, use `StorySummary` (list endpoints) or `StoryDetail` (get endpoint).
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct Story {
     // Core Identity
@@ -30,31 +32,21 @@ pub struct Story {
     pub story_type: StoryType,
     pub status: StoryStatus,
     pub word_count: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
 
     // Notes & Outline (not versioned)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub outline: Option<String>,
 
     // Organization
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub favorite: Option<bool>,
 
     // Context & Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub related_element_ids: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub container_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub series_name: Option<String>,
 
     // Metadata
@@ -64,19 +56,14 @@ pub struct Story {
     // Variations
     pub variation_group_id: String,
     pub variation_type: VariationType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_variation_id: Option<String>,
 
     // Database Versioning (DBV)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_version_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_snapshot_id: Option<String>,
 
     // Inline JOINed data for convenience (populated by queries)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_version: Option<StoryVersion>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_snapshot: Option<StorySnapshot>,
 }
 
@@ -84,8 +71,9 @@ pub struct Story {
 ///
 /// Excludes hydrated version/snapshot data to keep list responses lean.
 /// Used by `list_stories_by_universe`, `list_stories_by_container`, etc.
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct StorySummary {
     // Core Identity
@@ -100,23 +88,16 @@ pub struct StorySummary {
     pub story_type: StoryType,
     pub status: StoryStatus,
     pub word_count: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
 
     // Organization
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub favorite: Option<bool>,
 
     // Context & Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub container_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub series_name: Option<String>,
 
     // Metadata
@@ -126,7 +107,6 @@ pub struct StorySummary {
     // Variations
     pub variation_group_id: String,
     pub variation_type: VariationType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_variation_id: Option<String>,
 }
 
@@ -162,8 +142,9 @@ impl From<Story> for StorySummary {
 ///
 /// Includes the active version and snapshot data inline, guaranteeing
 /// they are present (non-optional) for a properly initialized story.
+#[skip_serializing_none]
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct StoryDetail {
     // Core Identity
@@ -178,31 +159,21 @@ pub struct StoryDetail {
     pub story_type: StoryType,
     pub status: StoryStatus,
     pub word_count: u32,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
 
     // Notes & Outline (not versioned)
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub outline: Option<String>,
 
     // Organization
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub favorite: Option<bool>,
 
     // Context & Relationships
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub related_element_ids: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub container_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub series_name: Option<String>,
 
     // Metadata
@@ -212,7 +183,6 @@ pub struct StoryDetail {
     // Variations
     pub variation_group_id: String,
     pub variation_type: VariationType,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_variation_id: Option<String>,
 
     // Database Versioning (DBV) - guaranteed present for initialized stories
@@ -273,7 +243,7 @@ impl StoryDetail {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
 pub enum StoryType {
     // Content types (actual written content)
@@ -288,7 +258,7 @@ pub enum StoryType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "lowercase")]
 #[serde(rename_all = "lowercase")]
 pub enum StoryStatus {
     Draft,
@@ -299,7 +269,7 @@ pub enum StoryStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "kebab-case")]
 #[serde(rename_all = "kebab-case")]
 pub enum VariationType {
     Original,
@@ -315,32 +285,21 @@ pub enum VariationType {
 /// an "Original" version with an initial empty snapshot. Content is managed
 /// through the versioning system.
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct CreateStoryInput {
     pub universe_id: String,
     pub title: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub story_type: Option<StoryType>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub outline: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub series_name: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub container_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub variation_type: Option<VariationType>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_variation_id: Option<String>,
 }
 
@@ -349,34 +308,21 @@ pub struct CreateStoryInput {
 /// Note: `content` is not included because content is managed through
 /// the versioning system (update_snapshot_content command).
 #[derive(Debug, Clone, Deserialize, TS)]
-#[ts(export, export_to = "../../src/types/")]
+#[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
 pub struct UpdateStoryInput {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub story_type: Option<StoryType>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<StoryStatus>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub notes: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub outline: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub target_word_count: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub tags: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub color: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub favorite: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub related_element_ids: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub series_name: Option<String>,
 }
 
