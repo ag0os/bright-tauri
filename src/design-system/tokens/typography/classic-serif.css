@@ -1,89 +1,170 @@
 /**
- * Option 1: Classic Serif
- * Traditional literary feel with modern serif headings and clean sans-serif body text
- * Ideal for: Creative writing, storytelling, publishing platforms
+ * Bright Design System — Type Foundations
+ *
+ * Newsreader (editorial serif) for display, Geist for UI/body,
+ * JetBrains Mono for word counts & timestamps.
+ *
+ * Promoted to :root so tokens are available app-wide (the old file
+ * scoped everything to `.typo-1` which never got applied globally).
+ * Legacy --typography-* and --font-size-* aliases are preserved so
+ * existing feature CSS keeps working.
  */
 
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..800&family=Geist:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root,
 .typo-1 {
-  /* Font Families */
-  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Source Code Pro", Menlo, "Courier New", monospace;
+  /* ========================================================
+     FONT FAMILIES
+     ======================================================== */
+  --font-display: "Newsreader", "Iowan Old Style", "Hoefler Text", Georgia, serif;
+  --font-body:    "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
 
-  /* Font Weights */
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
+  /* ========================================================
+     WEIGHTS
+     ======================================================== */
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Legacy aliases */
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
   --font-weight-semibold: 600;
-  --font-weight-bold: 700;
+  --font-weight-bold:     700;
 
-  /* Font Sizes - Type Scale (1.250 - Major Third) */
-  --font-size-xs: 0.8rem;      /* 12.8px */
-  --font-size-sm: 0.875rem;    /* 14px */
-  --font-size-base: 1rem;      /* 16px */
-  --font-size-lg: 1.125rem;    /* 18px */
-  --font-size-xl: 1.25rem;     /* 20px */
-  --font-size-2xl: 1.563rem;   /* 25px */
-  --font-size-3xl: 1.953rem;   /* 31.25px */
-  --font-size-4xl: 2.441rem;   /* 39px */
-  --font-size-5xl: 3.052rem;   /* 48.8px */
+  /* ========================================================
+     SIZE SCALE — fixed px, tuned for a desktop writing app
+     Base is 15px in UI chrome; reading surfaces bump to 17–19px.
+     ======================================================== */
+  --fs-2xs:  12px;
+  --fs-xs:   13px;
+  --fs-sm:   14px;
+  --fs-base: 15px;
+  --fs-md:   17px;
+  --fs-lg:   19px;
+  --fs-xl:   22px;
+  --fs-2xl:  28px;
+  --fs-3xl:  36px;
+  --fs-4xl:  48px;
+  --fs-5xl:  64px;
 
-  /* Line Heights */
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --line-height-loose: 2;
+  /* Legacy --font-size-* aliases (kept intentionally close to the old
+     Major Third scale but re-aligned to the new base of 15px). */
+  --font-size-xs:   var(--fs-xs);
+  --font-size-sm:   var(--fs-sm);
+  --font-size-base: var(--fs-base);
+  --font-size-lg:   var(--fs-md);
+  --font-size-xl:   var(--fs-lg);
+  --font-size-2xl:  var(--fs-xl);
+  --font-size-3xl:  var(--fs-2xl);
+  --font-size-4xl:  var(--fs-3xl);
+  --font-size-5xl:  var(--fs-4xl);
 
-  /* Letter Spacing */
-  --letter-spacing-tight: -0.025em;
-  --letter-spacing-normal: 0;
-  --letter-spacing-wide: 0.025em;
+  /* ========================================================
+     LINE HEIGHTS
+     ======================================================== */
+  --lh-tight:   1.15;
+  --lh-snug:    1.3;
+  --lh-normal:  1.5;
+  --lh-reading: 1.7;
 
-  /* Semantic Typography Tokens */
+  --line-height-tight:   var(--lh-tight);
+  --line-height-snug:    var(--lh-snug);
+  --line-height-normal:  var(--lh-normal);
+  --line-height-relaxed: 1.6;
+  --line-height-loose:   var(--lh-reading);
+
+  /* ========================================================
+     LETTER SPACING
+     ======================================================== */
+  --tracking-tight:  -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+
+  --letter-spacing-tight:  var(--tracking-tight);
+  --letter-spacing-normal: var(--tracking-normal);
+  --letter-spacing-wide:   var(--tracking-wide);
+
+  /* ========================================================
+     SEMANTIC TYPE TOKENS
+     ======================================================== */
   --typography-heading-font: var(--font-display);
-  --typography-body-font: var(--font-body);
-  --typography-code-font: var(--font-mono);
+  --typography-body-font:    var(--font-body);
+  --typography-code-font:    var(--font-mono);
 
-  /* Heading Styles */
-  --typography-h1-size: var(--font-size-5xl);
-  --typography-h1-weight: var(--font-weight-bold);
-  --typography-h1-line-height: var(--line-height-tight);
-  --typography-h1-letter-spacing: var(--letter-spacing-tight);
+  /* H1 */
+  --type-h1-size:             var(--fs-4xl);
+  --type-h1-weight:           var(--fw-semibold);
+  --type-h1-lh:               var(--lh-tight);
+  --type-h1-tracking:         var(--tracking-tight);
+  --typography-h1-size:           var(--type-h1-size);
+  --typography-h1-weight:         var(--type-h1-weight);
+  --typography-h1-line-height:    var(--type-h1-lh);
+  --typography-h1-letter-spacing: var(--type-h1-tracking);
 
-  --typography-h2-size: var(--font-size-4xl);
-  --typography-h2-weight: var(--font-weight-bold);
-  --typography-h2-line-height: var(--line-height-tight);
-  --typography-h2-letter-spacing: var(--letter-spacing-tight);
+  /* H2 */
+  --type-h2-size:             var(--fs-3xl);
+  --type-h2-weight:           var(--fw-semibold);
+  --type-h2-lh:               var(--lh-tight);
+  --type-h2-tracking:         var(--tracking-tight);
+  --typography-h2-size:           var(--type-h2-size);
+  --typography-h2-weight:         var(--type-h2-weight);
+  --typography-h2-line-height:    var(--type-h2-lh);
+  --typography-h2-letter-spacing: var(--type-h2-tracking);
 
-  --typography-h3-size: var(--font-size-3xl);
-  --typography-h3-weight: var(--font-weight-semibold);
-  --typography-h3-line-height: var(--line-height-snug);
-  --typography-h3-letter-spacing: var(--letter-spacing-normal);
+  /* H3 */
+  --type-h3-size:             var(--fs-2xl);
+  --type-h3-weight:           var(--fw-semibold);
+  --type-h3-lh:               var(--lh-snug);
+  --typography-h3-size:           var(--type-h3-size);
+  --typography-h3-weight:         var(--type-h3-weight);
+  --typography-h3-line-height:    var(--type-h3-lh);
+  --typography-h3-letter-spacing: var(--tracking-normal);
 
-  --typography-h4-size: var(--font-size-2xl);
-  --typography-h4-weight: var(--font-weight-semibold);
-  --typography-h4-line-height: var(--line-height-snug);
-  --typography-h4-letter-spacing: var(--letter-spacing-normal);
+  /* H4 */
+  --type-h4-size:             var(--fs-xl);
+  --type-h4-weight:           var(--fw-medium);
+  --type-h4-lh:               var(--lh-snug);
+  --typography-h4-size:           var(--type-h4-size);
+  --typography-h4-weight:         var(--type-h4-weight);
+  --typography-h4-line-height:    var(--type-h4-lh);
+  --typography-h4-letter-spacing: var(--tracking-normal);
 
-  /* Body Text */
-  --typography-body-size: var(--font-size-base);
-  --typography-body-weight: var(--font-weight-normal);
-  --typography-body-line-height: var(--line-height-relaxed);
-  --typography-body-letter-spacing: var(--letter-spacing-normal);
+  /* Body */
+  --type-body-size:           var(--fs-base);
+  --type-body-lh:             var(--lh-normal);
+  --typography-body-size:           var(--type-body-size);
+  --typography-body-weight:         var(--fw-regular);
+  --typography-body-line-height:    var(--type-body-lh);
+  --typography-body-letter-spacing: var(--tracking-normal);
 
-  --typography-body-large-size: var(--font-size-lg);
-  --typography-body-large-line-height: var(--line-height-relaxed);
+  --typography-body-large-size:        var(--fs-md);
+  --typography-body-large-line-height: var(--lh-reading);
 
-  --typography-body-small-size: var(--font-size-sm);
-  --typography-body-small-line-height: var(--line-height-normal);
+  --typography-body-small-size:        var(--fs-sm);
+  --typography-body-small-line-height: var(--lh-normal);
 
-  /* UI Text */
-  --typography-caption-size: var(--font-size-xs);
-  --typography-caption-weight: var(--font-weight-normal);
-  --typography-caption-line-height: var(--line-height-normal);
+  /* Reading surface (editor column) */
+  --type-reading-size:        var(--fs-md);
+  --type-reading-lh:          var(--lh-reading);
 
-  --typography-button-size: var(--font-size-base);
-  --typography-button-weight: var(--font-weight-medium);
-  --typography-button-line-height: var(--line-height-normal);
-  --typography-button-letter-spacing: var(--letter-spacing-wide);
+  /* Meta / caption / button */
+  --type-meta-size:           var(--fs-xs);
+  --type-meta-lh:             var(--lh-normal);
+
+  --type-caption-size:        var(--fs-2xs);
+  --type-caption-lh:          var(--lh-normal);
+  --typography-caption-size:        var(--type-caption-size);
+  --typography-caption-weight:      var(--fw-regular);
+  --typography-caption-line-height: var(--type-caption-lh);
+
+  --type-button-size:         var(--fs-sm);
+  --type-button-weight:       var(--fw-medium);
+  --typography-button-size:           var(--type-button-size);
+  --typography-button-weight:         var(--type-button-weight);
+  --typography-button-line-height:    var(--lh-normal);
+  --typography-button-letter-spacing: var(--tracking-normal);
 }

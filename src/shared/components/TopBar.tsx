@@ -66,7 +66,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
               </>
             )}
           </select>
-          <CaretDown className="topbar__select-icon" size={16} weight="duotone" />
+          <CaretDown className="topbar__select-icon" size={16} />
         </div>
       </div>
 
@@ -75,7 +75,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           className={`topbar__nav-button ${activeTab === 'stories' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('stories')}
         >
-          <BookOpen size={16} weight="duotone" />
+          <BookOpen size={16} />
           <span>Stories</span>
         </button>
 
@@ -83,7 +83,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           className={`topbar__nav-button ${activeTab === 'universe' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('universe')}
         >
-          <Globe size={16} weight="duotone" />
+          <Globe size={16} />
           <span>Universe</span>
         </button>
 
@@ -95,7 +95,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          {isDark ? <Sun size={16} weight="duotone" /> : <Moon size={16} weight="duotone" />}
+          {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
         <button
@@ -104,7 +104,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
           title="Settings"
           aria-label="Settings"
         >
-          <Gear size={16} weight="duotone" />
+          <Gear size={16} />
         </button>
       </nav>
     </div>

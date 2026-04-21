@@ -1,8 +1,8 @@
 /**
- * App-level Styles
+ * App-level Styles — Ink & Paper
  *
- * Minimal app styles that use design system tokens.
- * Most styling should be done through design system components.
+ * Token imports: colors → typography → spacing → reset.
+ * A subtle 3% paper-grain sits on the app background in dark mode.
  */
 
 @import './design-system/tokens/colors/modern-indigo.css';
@@ -11,24 +11,56 @@
 @import './design-system/tokens/reset/modern-reset.css';
 
 :root {
-  font-family: var(--typography-body-font);
-  font-size: 16px;
-  line-height: 1.5;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  font-weight: var(--fw-regular);
 
-  color: var(--color-text-primary);
-  background-color: var(--color-background);
+  color: var(--fg1);
+  background-color: var(--bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  font-feature-settings: "ss01", "cv11";
 }
 
-/* Full height app container */
+body {
+  background-color: var(--bg);
+  color: var(--fg1);
+}
+
+/* Paper-grain noise on the main app background (dark only, 3% opacity).
+   In light mode the grain is too noisy against warm paper, so it's off. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("./assets/bright/paper-grain.svg");
+  background-repeat: repeat;
+  opacity: 0.03;
+  z-index: 0;
+  mix-blend-mode: overlay;
+}
+
+:root[data-theme="light"] body::before {
+  opacity: 0;
+}
+
+/* Selection uses the accent-tinted token */
+::selection {
+  background: var(--selection);
+  color: var(--fg1);
+}
+
+/* Full-height app container, sits above the grain layer */
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }

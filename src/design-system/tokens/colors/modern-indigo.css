@@ -1,184 +1,324 @@
 /**
- * Option 1: Modern Indigo
- * Professional blue/indigo palette with warm accents
- * WCAG AA compliant for text and interactive elements
+ * Bright Design System — Ink & Paper
  *
- * Default: Dark theme (matches Universe Selection aesthetic)
- * Light theme available via [data-theme="light"]
+ * Warm neutrals (ink → paper), a single saturated marigold accent,
+ * restrained semantic palette. Replaces the previous Modern Indigo system.
+ *
+ * This file exposes BOTH:
+ *   - The new native tokens (--fg1, --accent, --bg, --surface, ...)
+ *     for new code to use directly.
+ *   - The legacy `--color-*` semantic aliases (--color-primary, etc.)
+ *     so existing feature CSS keeps working without a sweep rename.
+ *
+ * Dark theme is default. Light theme opts in via [data-theme="light"].
  */
 
 :root,
 .option-1 {
-  /* Base Color Primitives */
-  --color-indigo-50: #eef2ff;
-  --color-indigo-100: #e0e7ff;
-  --color-indigo-200: #c7d2fe;
-  --color-indigo-300: #a5b4fc;
-  --color-indigo-400: #818cf8;
-  --color-indigo-500: #6366f1;
-  --color-indigo-600: #4f46e5;
-  --color-indigo-700: #4338ca;
-  --color-indigo-800: #3730a3;
-  --color-indigo-900: #312e81;
-  --color-indigo-950: #1e1b4b;
+  /* ========================================================
+     COLOR PRIMITIVES — warm neutrals + marigold + semantic
+     ======================================================== */
 
-  --color-amber-50: #fffbeb;
-  --color-amber-100: #fef3c7;
-  --color-amber-200: #fde68a;
-  --color-amber-300: #fcd34d;
-  --color-amber-400: #fbbf24;
-  --color-amber-500: #f59e0b;
-  --color-amber-600: #d97706;
-  --color-amber-700: #b45309;
-  --color-amber-800: #92400e;
-  --color-amber-900: #78350f;
+  /* Ink / paper neutrals */
+  --ink-50:  #FAF7F1;  /* paper */
+  --ink-100: #F5EFE4;  /* paper-warm */
+  --ink-200: #E8E1D0;
+  --ink-300: #D4CBB5;
+  --ink-400: #A89E84;
+  --ink-500: #7A7158;
+  --ink-600: #544C3A;
+  --ink-700: #3A3328;  /* raised */
+  --ink-800: #2A251D;  /* surface-2 */
+  --ink-850: #1F1B15;  /* surface */
+  --ink-900: #15120E;  /* bg */
+  --ink-950: #0C0A07;  /* bg-deep */
 
-  --color-red-50: #fef2f2;
-  --color-red-500: #ef4444;
-  --color-red-600: #dc2626;
-  --color-red-700: #b91c1c;
-  --color-red-900: #7f1d1d;
-  --color-red-950: #450a0a;
+  /* Marigold — single saturated accent */
+  --marigold-50:  #FDF6E3;
+  --marigold-100: #FBEAB5;
+  --marigold-200: #F6D483;
+  --marigold-300: #EEBB51;
+  --marigold-400: #E29A22;
+  --marigold-500: #D97706;  /* primary accent */
+  --marigold-600: #B45309;
+  --marigold-700: #8B3F0A;
+  --marigold-800: #6B2F0C;
+  --marigold-900: #43200A;
 
-  --color-green-50: #f0fdf4;
-  --color-green-500: #22c55e;
-  --color-green-600: #16a34a;
-  --color-green-700: #15803d;
-  --color-green-900: #14532d;
-  --color-green-950: #052e16;
+  /* Semantic primitives — harmonized with the warm palette */
+  --moss-400:       #4A9C73;
+  --moss-500:       #2F7A53;
+  --moss-600:       #24603F;
 
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-  --color-gray-950: #030712;
+  --terracotta-400: #D15A3C;
+  --terracotta-500: #B0391F;
+  --terracotta-600: #8A2A14;
 
-  /* Semantic Tokens - Dark Mode (Default) */
-  --color-background: var(--color-indigo-950);
-  --color-background-primary: var(--color-indigo-950);
-  --color-background-secondary: var(--color-indigo-900);
-  --color-background-hover: var(--color-indigo-800);
-  --color-surface: var(--color-indigo-900);
-  --color-surface-secondary: var(--color-indigo-800);
-  --color-surface-hover: var(--color-indigo-800);
-  --color-hover: var(--color-indigo-800);
+  --inkblue-400:    #6E8CC0;
+  --inkblue-500:    #4C6EA8;
+  --inkblue-600:    #3A558A;
 
-  --color-text-primary: var(--color-gray-50);
-  --color-text-secondary: var(--color-indigo-200);
-  --color-text-tertiary: var(--color-indigo-300);
-  --color-text-muted: var(--color-indigo-300);
-  --color-text-disabled: var(--color-indigo-400);
+  --amber-400:      #D99944;
+  --amber-500:      #B45309;
 
-  --color-primary: var(--color-indigo-400);
-  --color-primary-hover: var(--color-indigo-300);
-  --color-primary-active: var(--color-indigo-200);
-  --color-primary-subtle: var(--color-indigo-900);
-  --color-primary-bg: var(--color-indigo-900);
-  --color-primary-light: rgba(99, 102, 241, 0.15);
-  --color-primary-ultralight: rgba(99, 102, 241, 0.1);
-  --color-primary-soft: rgba(99, 102, 241, 0.25);
-  --color-primary-dark: var(--color-indigo-500);
+  /* ========================================================
+     NEW NATIVE TOKENS — dark default
+     (use these directly in new code)
+     ======================================================== */
 
-  /* Selection - needs higher contrast than primary-subtle for visibility */
-  --color-selection: var(--color-indigo-700);
+  /* Backgrounds / surfaces */
+  --bg:              var(--ink-900);
+  --bg-deep:         var(--ink-950);
+  --surface:         var(--ink-850);
+  --surface-2:       var(--ink-800);
+  --surface-raised:  var(--ink-700);
+  --surface-hover:   color-mix(in oklch, var(--ink-800), white 4%);
+  --surface-active:  color-mix(in oklch, var(--ink-800), white 6%);
+  --scrim:           rgba(12, 10, 7, 0.6);
 
-  --color-accent: var(--color-amber-400);
-  --color-accent-hover: var(--color-amber-300);
+  /* Foreground text */
+  --fg1:             var(--ink-100);  /* primary */
+  --fg2:             var(--ink-300);  /* secondary */
+  --fg3:             var(--ink-400);  /* tertiary / meta */
+  --fg-muted:        var(--ink-500);
+  --fg-disabled:     var(--ink-600);
+  --fg-on-accent:    var(--ink-950);  /* text on marigold button */
 
-  --color-success: var(--color-green-500);
-  --color-success-subtle: var(--color-green-950);
-  --color-success-bg: var(--color-green-950);
-  --color-success-light: rgba(34, 197, 94, 0.15);
-  --color-semantic-success: var(--color-green-500);
+  /* Accent */
+  --accent:          var(--marigold-500);
+  --accent-hover:    var(--marigold-400);
+  --accent-active:   var(--marigold-600);
+  --accent-soft:     color-mix(in oklch, var(--marigold-500) 18%, transparent);
+  --accent-subtle:   color-mix(in oklch, var(--marigold-500) 12%, transparent);
 
-  --color-error: var(--color-red-500);
-  --color-error-subtle: var(--color-red-950);
-  --color-error-light: rgba(239, 68, 68, 0.15);
-  --color-semantic-error: var(--color-red-500);
+  /* Semantic */
+  --success:         var(--moss-400);
+  --success-soft:    color-mix(in oklch, var(--moss-500) 18%, transparent);
+  --error:           var(--terracotta-400);
+  --error-soft:      color-mix(in oklch, var(--terracotta-500) 18%, transparent);
+  --warning:         var(--amber-400);
+  --warning-soft:    color-mix(in oklch, var(--amber-500) 18%, transparent);
+  --info:            var(--inkblue-400);
+  --info-soft:       color-mix(in oklch, var(--inkblue-500) 18%, transparent);
 
-  --color-warning: var(--color-amber-500);
-  --color-warning-bg: rgba(245, 158, 11, 0.15);
-  --color-warning-border: var(--color-amber-600);
-  --color-warning-soft: rgba(245, 158, 11, 0.1);
-  --color-warning-light: rgba(245, 158, 11, 0.15);
+  /* Borders — hairlines via color-mix on foreground */
+  --border:          color-mix(in oklch, var(--fg1) 8%, transparent);
+  --border-strong:   color-mix(in oklch, var(--fg1) 16%, transparent);
+  --border-accent:   var(--accent);
+  --ring:            var(--accent);
 
-  --color-info: var(--color-indigo-400);
-  --color-info-light: rgba(99, 102, 241, 0.15);
+  /* Editor selection */
+  --selection:       color-mix(in oklch, var(--marigold-500) 30%, transparent);
 
-  --color-border: var(--color-indigo-700);
-  --color-border-strong: var(--color-indigo-600);
-  --color-border-emphasis: var(--color-indigo-500);
+  /* ========================================================
+     LEGACY ALIASES — map old --color-* names to new palette
+     so every existing feature file keeps working.
+     ======================================================== */
 
-  --color-focus: var(--color-indigo-400);
+  /* Gray bridge — map the old gray scale roughly onto ink */
+  --color-gray-50:  var(--ink-50);
+  --color-gray-100: var(--ink-100);
+  --color-gray-200: var(--ink-200);
+  --color-gray-300: var(--ink-300);
+  --color-gray-400: var(--ink-400);
+  --color-gray-500: var(--ink-500);
+  --color-gray-600: var(--ink-600);
+  --color-gray-700: var(--ink-700);
+  --color-gray-800: var(--ink-800);
+  --color-gray-900: var(--ink-900);
+  --color-gray-950: var(--ink-950);
 
-  --color-input-background: var(--color-indigo-800);
+  /* Indigo aliases (kept for anything referencing them explicitly — now point
+     to warm ink so nothing purple leaks through). */
+  --color-indigo-50:  var(--ink-50);
+  --color-indigo-100: var(--ink-100);
+  --color-indigo-200: var(--ink-200);
+  --color-indigo-300: var(--ink-300);
+  --color-indigo-400: var(--marigold-400);
+  --color-indigo-500: var(--marigold-500);
+  --color-indigo-600: var(--marigold-600);
+  --color-indigo-700: var(--ink-700);
+  --color-indigo-800: var(--ink-800);
+  --color-indigo-900: var(--ink-850);
+  --color-indigo-950: var(--ink-900);
+
+  --color-amber-50:  var(--marigold-50);
+  --color-amber-100: var(--marigold-100);
+  --color-amber-200: var(--marigold-200);
+  --color-amber-300: var(--marigold-300);
+  --color-amber-400: var(--marigold-400);
+  --color-amber-500: var(--marigold-500);
+  --color-amber-600: var(--marigold-600);
+  --color-amber-700: var(--marigold-700);
+  --color-amber-800: var(--marigold-800);
+  --color-amber-900: var(--marigold-900);
+
+  --color-red-50:  color-mix(in oklch, var(--terracotta-500) 10%, transparent);
+  --color-red-500: var(--terracotta-400);
+  --color-red-600: var(--terracotta-500);
+  --color-red-700: var(--terracotta-600);
+  --color-red-900: color-mix(in oklch, var(--terracotta-600), black 25%);
+  --color-red-950: color-mix(in oklch, var(--terracotta-600), black 40%);
+
+  --color-green-50:  color-mix(in oklch, var(--moss-500) 10%, transparent);
+  --color-green-500: var(--moss-400);
+  --color-green-600: var(--moss-500);
+  --color-green-700: var(--moss-600);
+  --color-green-900: color-mix(in oklch, var(--moss-600), black 25%);
+  --color-green-950: color-mix(in oklch, var(--moss-600), black 40%);
+
+  /* Semantic aliases (dark) */
+  --color-background:           var(--bg);
+  --color-background-primary:   var(--bg);
+  --color-background-secondary: var(--surface);
+  --color-background-hover:     var(--surface-hover);
+  --color-surface:              var(--surface);
+  --color-surface-secondary:    var(--surface-2);
+  --color-surface-hover:        var(--surface-hover);
+  --color-hover:                var(--surface-hover);
+
+  --color-text-primary:   var(--fg1);
+  --color-text-secondary: var(--fg2);
+  --color-text-tertiary:  var(--fg3);
+  --color-text-muted:     var(--fg-muted);
+  --color-text-disabled:  var(--fg-disabled);
+
+  --color-primary:          var(--accent);
+  --color-primary-hover:    var(--accent-hover);
+  --color-primary-active:   var(--accent-active);
+  --color-primary-subtle:   var(--accent-subtle);
+  --color-primary-bg:       var(--accent-subtle);
+  --color-primary-light:    var(--accent-soft);
+  --color-primary-ultralight: var(--accent-subtle);
+  --color-primary-soft:     var(--accent-soft);
+  --color-primary-dark:     var(--accent-active);
+
+  --color-selection: var(--selection);
+
+  --color-accent:       var(--accent);
+  --color-accent-hover: var(--accent-hover);
+
+  --color-success:          var(--success);
+  --color-success-subtle:   var(--success-soft);
+  --color-success-bg:       var(--success-soft);
+  --color-success-light:    var(--success-soft);
+  --color-semantic-success: var(--success);
+
+  --color-error:           var(--error);
+  --color-error-subtle:    var(--error-soft);
+  --color-error-light:     var(--error-soft);
+  --color-semantic-error:  var(--error);
+
+  --color-warning:        var(--warning);
+  --color-warning-bg:     var(--warning-soft);
+  --color-warning-border: var(--amber-500);
+  --color-warning-soft:   var(--warning-soft);
+  --color-warning-light:  var(--warning-soft);
+
+  --color-info:       var(--info);
+  --color-info-light: var(--info-soft);
+
+  --color-border:          var(--border);
+  --color-border-strong:   var(--border-strong);
+  --color-border-emphasis: var(--border-strong);
+
+  --color-focus: var(--accent);
+
+  --color-input-background: var(--surface-2);
 }
 
-/* Light Mode (opt-in) */
+/* ========================================================
+   LIGHT THEME — warm paper
+   ======================================================== */
+
 :root[data-theme="light"],
 .option-1[data-theme="light"] {
-  --color-background: var(--color-gray-50);
-  --color-background-primary: var(--color-gray-50);
-  --color-background-secondary: #ffffff;
-  --color-background-hover: var(--color-gray-100);
-  --color-surface: #ffffff;
-  --color-surface-secondary: var(--color-gray-100);
-  --color-surface-hover: var(--color-gray-100);
-  --color-hover: var(--color-gray-100);
+  /* New native tokens (light) */
+  --bg:              var(--ink-50);
+  --bg-deep:         var(--ink-100);
+  --surface:         #FFFFFF;
+  --surface-2:       var(--ink-100);
+  --surface-raised:  #FFFFFF;
+  --surface-hover:   color-mix(in oklch, var(--ink-100), black 3%);
+  --surface-active:  color-mix(in oklch, var(--ink-100), black 5%);
+  --scrim:           rgba(21, 18, 14, 0.4);
 
-  --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-tertiary: var(--color-gray-500);
-  --color-text-muted: var(--color-gray-500);
-  --color-text-disabled: var(--color-gray-400);
+  --fg1:             #1A1712;
+  --fg2:             var(--ink-600);
+  --fg3:             var(--ink-500);
+  --fg-muted:        var(--ink-400);
+  --fg-disabled:     var(--ink-300);
+  --fg-on-accent:    #FFFFFF;
 
-  --color-primary: var(--color-indigo-600);
-  --color-primary-hover: var(--color-indigo-700);
-  --color-primary-active: var(--color-indigo-800);
-  --color-primary-subtle: var(--color-indigo-50);
-  --color-primary-bg: var(--color-indigo-50);
-  --color-primary-light: var(--color-indigo-50);
-  --color-primary-ultralight: rgba(79, 70, 229, 0.05);
-  --color-primary-soft: rgba(79, 70, 229, 0.15);
-  --color-primary-dark: var(--color-indigo-700);
+  --accent:          var(--marigold-600);
+  --accent-hover:    var(--marigold-500);
+  --accent-active:   var(--marigold-700);
+  --accent-soft:     color-mix(in oklch, var(--marigold-500) 14%, transparent);
+  --accent-subtle:   color-mix(in oklch, var(--marigold-500) 8%, transparent);
 
-  /* Selection - light blue for visibility in light mode */
-  --color-selection: var(--color-indigo-200);
+  --success:         var(--moss-500);
+  --error:           var(--terracotta-500);
+  --warning:         var(--amber-500);
+  --info:            var(--inkblue-500);
 
-  --color-accent: var(--color-amber-500);
-  --color-accent-hover: var(--color-amber-600);
+  --border:          color-mix(in oklch, var(--fg1) 10%, transparent);
+  --border-strong:   color-mix(in oklch, var(--fg1) 20%, transparent);
 
-  --color-success: var(--color-green-600);
-  --color-success-subtle: var(--color-green-50);
-  --color-success-bg: var(--color-green-50);
-  --color-success-light: var(--color-green-50);
-  --color-semantic-success: var(--color-green-600);
+  --selection:       color-mix(in oklch, var(--marigold-500) 25%, transparent);
 
-  --color-error: var(--color-red-600);
-  --color-error-subtle: var(--color-red-50);
-  --color-error-light: var(--color-red-50);
-  --color-semantic-error: var(--color-red-600);
+  /* Legacy aliases — light */
+  --color-background:           var(--bg);
+  --color-background-primary:   var(--bg);
+  --color-background-secondary: var(--surface);
+  --color-background-hover:     var(--surface-hover);
+  --color-surface:              var(--surface);
+  --color-surface-secondary:    var(--surface-2);
+  --color-surface-hover:        var(--surface-hover);
+  --color-hover:                var(--surface-hover);
 
-  --color-warning: var(--color-amber-600);
-  --color-warning-bg: var(--color-amber-50);
-  --color-warning-border: var(--color-amber-400);
-  --color-warning-soft: rgba(245, 158, 11, 0.1);
-  --color-warning-light: var(--color-amber-50);
+  --color-text-primary:   var(--fg1);
+  --color-text-secondary: var(--fg2);
+  --color-text-tertiary:  var(--fg3);
+  --color-text-muted:     var(--fg-muted);
+  --color-text-disabled:  var(--fg-disabled);
 
-  --color-info: var(--color-indigo-600);
-  --color-info-light: var(--color-indigo-50);
+  --color-primary:        var(--accent);
+  --color-primary-hover:  var(--accent-hover);
+  --color-primary-active: var(--accent-active);
+  --color-primary-subtle: var(--accent-subtle);
+  --color-primary-bg:     var(--accent-subtle);
+  --color-primary-light:  var(--accent-soft);
+  --color-primary-soft:   var(--accent-soft);
+  --color-primary-dark:   var(--accent-active);
 
-  --color-border: var(--color-gray-200);
-  --color-border-strong: var(--color-gray-300);
-  --color-border-emphasis: var(--color-gray-400);
+  --color-selection: var(--selection);
 
-  --color-focus: var(--color-indigo-500);
+  --color-accent:       var(--accent);
+  --color-accent-hover: var(--accent-hover);
 
-  --color-input-background: var(--color-gray-100);
+  --color-success:        var(--success);
+  --color-success-subtle: color-mix(in oklch, var(--moss-500) 10%, transparent);
+  --color-success-bg:     color-mix(in oklch, var(--moss-500) 10%, transparent);
+
+  --color-error:           var(--error);
+  --color-error-subtle:    color-mix(in oklch, var(--terracotta-500) 10%, transparent);
+  --color-error-light:     color-mix(in oklch, var(--terracotta-500) 10%, transparent);
+  --color-semantic-error:  var(--error);
+
+  --color-warning:        var(--warning);
+  --color-warning-bg:     color-mix(in oklch, var(--amber-500) 10%, transparent);
+  --color-warning-border: var(--amber-400);
+  --color-warning-soft:   color-mix(in oklch, var(--amber-500) 8%, transparent);
+  --color-warning-light:  color-mix(in oklch, var(--amber-500) 10%, transparent);
+
+  --color-info:       var(--info);
+  --color-info-light: color-mix(in oklch, var(--inkblue-500) 10%, transparent);
+
+  --color-border:          var(--border);
+  --color-border-strong:   var(--border-strong);
+  --color-border-emphasis: var(--border-strong);
+
+  --color-focus: var(--accent);
+
+  --color-input-background: var(--surface-2);
 }

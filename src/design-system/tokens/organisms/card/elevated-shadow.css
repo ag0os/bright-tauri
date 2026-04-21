@@ -1,32 +1,31 @@
 /**
- * Option 1: Elevated Shadow Cards
- * Clean cards with subtle shadows for depth
- * Style: Soft shadow, no border, floating appearance
- * Best for: Modern apps, content cards, dashboard widgets
+ * Bright Design System — Card
  *
- * IMPORTANT: This file uses global color tokens directly (var(--color-*))
- * instead of intermediate scoped tokens to ensure theme switching works.
+ * Flat surface with a 1px hairline border. No shadow at rest.
+ * Interactive cards: hover fades in --shadow-sm and darkens the border
+ * slightly — no transform (the 2px lift in the old system read as
+ * floaty and distracted during long writing sessions).
  */
 
+:root,
 .card-1 {
-  /* Non-color tokens (these are fine as scoped) */
-  --card-border-radius: 8px;
+  --card-border-radius: 12px;
   --card-padding-sm: 16px;
-  --card-padding-base: 24px;
-  --card-padding-lg: 32px;
-  --card-header-padding: 20px 24px;
-  --card-footer-padding: 16px 24px;
-  --card-content-padding: 24px;
-  --card-content-gap: 16px;
-  --card-transition: all 0.2s ease;
+  --card-padding-base: 20px;
+  --card-padding-lg: 24px;
+  --card-header-padding: 16px 20px;
+  --card-footer-padding: 12px 20px;
+  --card-content-padding: 20px;
+  --card-content-gap: 12px;
+  --card-transition: background-color 150ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
 }
 
-/* Card Base - uses global tokens directly */
+/* Card Base */
 .card-1 .card {
-  background-color: var(--color-surface);
+  background-color: var(--surface);
   border-radius: var(--card-border-radius);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-base);
+  border: 1px solid var(--border);
+  box-shadow: none;
   transition: var(--card-transition);
   overflow: hidden;
 }
@@ -34,7 +33,6 @@
 /* Card Size Variants */
 .card-1 .card-sm {
   padding: var(--card-padding-sm);
-  box-shadow: var(--shadow-sm);
 }
 
 .card-1 .card-base {
@@ -43,39 +41,46 @@
 
 .card-1 .card-lg {
   padding: var(--card-padding-lg);
-  box-shadow: var(--shadow-lg);
 }
 
-/* Interactive Card - Hover State */
+/* Interactive Card — hover is a subtle surface shift + hairline fill,
+   not a transform. */
 .card-1 .card-interactive {
   cursor: pointer;
 }
 
 .card-1 .card-interactive:hover {
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-2px);
+  background-color: var(--surface-hover);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Card Header - uses global tokens directly */
+.card-1 .card-interactive:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Card Header */
 .card-1 .card-header {
   padding: var(--card-header-padding);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--border);
 }
 
 .card-1 .card-title {
-  font-family: var(--typography-heading-font);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--fg1);
   margin: 0;
+  letter-spacing: -0.005em;
 }
 
 .card-1 .card-description {
-  font-family: var(--typography-body-font);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  margin-top: 4px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  color: var(--fg3);
+  margin-top: 2px;
+  line-height: var(--lh-normal);
 }
 
 /* Card Content */
@@ -86,12 +91,15 @@
   gap: var(--card-content-gap);
 }
 
-/* Card Footer - uses global tokens directly */
+/* Card Footer — hairline separator only, no fill */
 .card-1 .card-footer {
   padding: var(--card-footer-padding);
-  border-top: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  border-top: 1px solid var(--border);
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-2xs);
+  color: var(--fg3);
 }
