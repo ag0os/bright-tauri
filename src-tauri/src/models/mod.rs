@@ -16,5 +16,5 @@ pub use story::{
     VariationType,
 };
 pub use story_snapshot::StorySnapshot;
-pub use story_version::{CreateStoryVersionInput, RenameStoryVersionInput, StoryVersion};
+pub use story_version::StoryVersion;
 pub use universe::{CreateUniverseInput, Universe, UniverseStatus, UpdateUniverseInput};

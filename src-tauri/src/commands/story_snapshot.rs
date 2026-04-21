@@ -360,7 +360,7 @@ mod tests {
 
         // Update multiple times
         for i in 1..=5 {
-            let content = format!("Update number {}", i);
+            let content = format!("Update number {i}");
             let word_count = count_words(&content);
 
             StorySnapshotRepository::update_content(&db, &active_snapshot_id, &content).unwrap();

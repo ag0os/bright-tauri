@@ -230,7 +230,7 @@ mod tests {
         let new_active = all_versions
             .iter()
             .filter(|v| v.id != v1.id)
-            .last()
+            .next_back()
             .unwrap();
 
         StoryRepository::set_active_version(&db, "story-1", &new_active.id).unwrap();

@@ -18,6 +18,7 @@ pub struct StoryVersion {
 }
 
 /// Input for creating a new StoryVersion
+#[allow(dead_code)] // Reserved TS-exported payload shape for the upcoming Tauri command surface.
 #[derive(Debug, Clone, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]
@@ -28,6 +29,7 @@ pub struct CreateStoryVersionInput {
 }
 
 /// Input for renaming an existing StoryVersion
+#[allow(dead_code)] // Reserved TS-exported payload shape for the upcoming Tauri command surface.
 #[derive(Debug, Clone, Deserialize, TS)]
 #[ts(export, export_to = "../../src/types/", rename_all = "camelCase")]
 #[serde(rename_all = "camelCase")]

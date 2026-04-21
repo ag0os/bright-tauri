@@ -102,6 +102,7 @@ impl StorySnapshotRepository {
     }
 
     /// Delete a single snapshot by ID
+    #[cfg(test)]
     pub fn delete(db: &Database, id: &str) -> Result<()> {
         let rows_affected = db.execute("DELETE FROM story_snapshots WHERE id = ?1", params![id])?;
 
@@ -411,7 +412,7 @@ mod tests {
 
         // Create 5 snapshots with delays to ensure different timestamps
         for i in 1..=5 {
-            StorySnapshotRepository::create(&db, "version-1", &format!("Content {}", i)).unwrap();
+            StorySnapshotRepository::create(&db, "version-1", &format!("Content {i}")).unwrap();
             std::thread::sleep(std::time::Duration::from_millis(10));
         }
 
@@ -450,7 +451,7 @@ mod tests {
 
         // Create 3 snapshots
         for i in 1..=3 {
-            StorySnapshotRepository::create(&db, "version-1", &format!("Content {}", i)).unwrap();
+            StorySnapshotRepository::create(&db, "version-1", &format!("Content {i}")).unwrap();
         }
 
         // Delete all by keeping 0
@@ -490,10 +491,8 @@ mod tests {
 
         // Create snapshots for both versions
         for i in 1..=3 {
-            StorySnapshotRepository::create(&db, "version-1", &format!("V1 Content {}", i))
-                .unwrap();
-            StorySnapshotRepository::create(&db, "version-2", &format!("V2 Content {}", i))
-                .unwrap();
+            StorySnapshotRepository::create(&db, "version-1", &format!("V1 Content {i}")).unwrap();
+            StorySnapshotRepository::create(&db, "version-2", &format!("V2 Content {i}")).unwrap();
         }
 
         // Delete oldest from version-1 only

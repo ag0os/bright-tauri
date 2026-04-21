@@ -1,0 +1,225 @@
+{
+  "planSlug": "lint-baseline-cleanup",
+  "createdAt": "2026-04-21T20:43:13.463Z",
+  "updatedAt": "2026-04-21T20:53:00.910Z",
+  "sessions": [
+    {
+      "sessionId": "019db1c5-fedf-750e-a189-c5ff69009dc3",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-002",
+      "startedAt": "2026-04-21T20:40:36.320Z",
+      "completedAt": "2026-04-21T20:43:13.462Z",
+      "outcome": "success",
+      "sessionFile": "worker-ffb2d595-d434-4abe-b308-96479b487e31.jsonl",
+      "transcriptFile": "worker-ffb2d595-d434-4abe-b308-96479b487e31.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 72607,
+          "output": 6944,
+          "total": 525119
+        },
+        "cost": 0.3970694999999999,
+        "durationMs": 157141,
+        "turns": 1,
+        "toolCalls": 34
+      }
+    },
+    {
+      "sessionId": "019db1c5-fedc-72cc-ba7d-26ea78f5ea70",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-004",
+      "startedAt": "2026-04-21T20:40:36.317Z",
+      "completedAt": "2026-04-21T20:43:22.500Z",
+      "outcome": "success",
+      "sessionFile": "worker-345684c2-b1eb-4216-9f88-28d899b4111c.jsonl",
+      "transcriptFile": "worker-345684c2-b1eb-4216-9f88-28d899b4111c.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 68366,
+          "output": 4795,
+          "total": 883913
+        },
+        "cost": 0.445528,
+        "durationMs": 166182,
+        "turns": 1,
+        "toolCalls": 28
+      }
+    },
+    {
+      "sessionId": "019db1c5-fee1-74c2-ad72-c283ee19affa",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-006",
+      "startedAt": "2026-04-21T20:40:36.321Z",
+      "completedAt": "2026-04-21T20:43:39.097Z",
+      "outcome": "success",
+      "sessionFile": "worker-0ce7aa29-ff17-4c96-a12b-e0d37f76e1dd.jsonl",
+      "transcriptFile": "worker-0ce7aa29-ff17-4c96-a12b-e0d37f76e1dd.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 65217,
+          "output": 6913,
+          "total": 547906
+        },
+        "cost": 0.3856815,
+        "durationMs": 182775,
+        "turns": 1,
+        "toolCalls": 27
+      }
+    },
+    {
+      "sessionId": "019db1c5-fedf-750e-a189-c3712899e958",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-003",
+      "startedAt": "2026-04-21T20:40:36.319Z",
+      "completedAt": "2026-04-21T20:45:51.012Z",
+      "outcome": "success",
+      "sessionFile": "worker-e30e80cf-f951-4e4d-b26b-7dd64f749259.jsonl",
+      "transcriptFile": "worker-e30e80cf-f951-4e4d-b26b-7dd64f749259.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 69805,
+          "output": 12669,
+          "total": 1218346
+        },
+        "cost": 0.6485154999999998,
+        "durationMs": 314693,
+        "turns": 1,
+        "toolCalls": 49
+      }
+    },
+    {
+      "sessionId": "019db1c8-6fc2-763e-ba08-8c1a0b1eac49",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-007",
+      "startedAt": "2026-04-21T20:43:16.292Z",
+      "completedAt": "2026-04-21T20:49:45.509Z",
+      "outcome": "success",
+      "sessionFile": "worker-c6a8d931-8890-412b-9d13-7599d32b540b.jsonl",
+      "transcriptFile": "worker-c6a8d931-8890-412b-9d13-7599d32b540b.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 64580,
+          "output": 17823,
+          "total": 1662947
+        },
+        "cost": 0.823931,
+        "durationMs": 389217,
+        "turns": 1,
+        "toolCalls": 51
+      }
+    },
+    {
+      "sessionId": "019db1cc-6de4-7269-8763-8857e5cce528",
+      "role": "worker",
+      "startedAt": "2026-04-21T20:47:37.958Z",
+      "completedAt": "2026-04-21T20:50:29.898Z",
+      "outcome": "success",
+      "sessionFile": "worker-2969fc09-4161-4586-b2d4-cd3891f472f7.jsonl",
+      "transcriptFile": "worker-2969fc09-4161-4586-b2d4-cd3891f472f7.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 46825,
+          "output": 6412,
+          "total": 494965
+        },
+        "cost": 0.3236745,
+        "durationMs": 171939,
+        "turns": 1,
+        "toolCalls": 33
+      }
+    },
+    {
+      "sessionId": "019db1c5-fee0-762a-a465-e407dba0e04a",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-005",
+      "startedAt": "2026-04-21T20:40:36.320Z",
+      "completedAt": "2026-04-21T20:50:44.471Z",
+      "outcome": "success",
+      "sessionFile": "worker-a1c8a561-3531-4fbe-a981-85b687352e91.jsonl",
+      "transcriptFile": "worker-a1c8a561-3531-4fbe-a981-85b687352e91.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 126775,
+          "output": 23662,
+          "total": 4173477
+        },
+        "cost": 1.6776275,
+        "durationMs": 608149,
+        "turns": 1,
+        "toolCalls": 71
+      }
+    },
+    {
+      "sessionId": "019db1c8-e80a-739a-b162-a3842d03ccfa",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-008",
+      "startedAt": "2026-04-21T20:43:47.083Z",
+      "completedAt": "2026-04-21T20:52:38.342Z",
+      "outcome": "success",
+      "sessionFile": "worker-a364b3f1-63bf-4621-a882-1c73979505ca.jsonl",
+      "transcriptFile": "worker-a364b3f1-63bf-4621-a882-1c73979505ca.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 74982,
+          "output": 22263,
+          "total": 2650333
+        },
+        "cost": 1.1596720000000003,
+        "durationMs": 531259,
+        "turns": 1,
+        "toolCalls": 65
+      }
+    },
+    {
+      "sessionId": "019db1ca-d5f9-7118-959c-8f8ffc143181",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-010",
+      "startedAt": "2026-04-21T20:45:53.530Z",
+      "completedAt": "2026-04-21T20:52:52.962Z",
+      "outcome": "success",
+      "sessionFile": "worker-4bcebca9-9b17-41f2-a57a-b3a421a9d12e.jsonl",
+      "transcriptFile": "worker-4bcebca9-9b17-41f2-a57a-b3a421a9d12e.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 167082,
+          "output": 15722,
+          "total": 3207828
+        },
+        "cost": 1.4097910000000002,
+        "durationMs": 419426,
+        "turns": 1,
+        "toolCalls": 73
+      }
+    },
+    {
+      "sessionId": "019db1c9-b0d9-73db-a1e5-520de67d23dc",
+      "role": "worker",
+      "parentSessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "taskId": "TASK-009",
+      "startedAt": "2026-04-21T20:44:38.490Z",
+      "completedAt": "2026-04-21T20:53:00.910Z",
+      "outcome": "success",
+      "sessionFile": "worker-c0b57769-444a-4b38-a4a0-03005d0d3f79.jsonl",
+      "transcriptFile": "worker-c0b57769-444a-4b38-a4a0-03005d0d3f79.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 125832,
+          "output": 18908,
+          "total": 4773092
+        },
+        "cost": 1.7552880000000004,
+        "durationMs": 502419,
+        "turns": 1,
+        "toolCalls": 69
+      }
+    }
+  ]
+}

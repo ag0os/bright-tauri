@@ -197,6 +197,7 @@ export function StoriesList() {
           </h1>
           <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
             <button
+              type="button"
               className="btn btn-outline btn-base"
               onClick={() => setShowCreateContainerModal(true)}
               title="Create a container (Novel, Series, Collection)"
@@ -205,6 +206,7 @@ export function StoriesList() {
               New Container
             </button>
             <button
+              type="button"
               className="btn btn-primary btn-base"
               onClick={() => setShowCreateModal(true)}
               title="Create a standalone story"
@@ -295,6 +297,7 @@ export function StoriesList() {
 
           {/* Sort Order */}
           <button
+            type="button"
             className="btn btn-outline btn-base"
             onClick={() => setSorting(sortBy, sortOrder === 'asc' ? 'desc' : 'asc')}
             title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
@@ -431,7 +434,11 @@ export function StoriesList() {
                   : 'Get started by creating your first story!'}
               </p>
               {!filters.searchQuery && !filters.type && !filters.status && (
-                <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-lg"
+                  onClick={() => setShowCreateModal(true)}
+                >
                   <Plus className="icon icon-base" />
                   Create Your First Story
                 </button>
@@ -473,17 +480,25 @@ export function StoriesList() {
             justifyContent: 'center',
             zIndex: 1000,
           }}
-          onClick={handleCancelDeleteContainer}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCancelDeleteContainer();
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-container-modal-title"
+          aria-describedby="delete-container-modal-message"
         >
           <div
             className="card card-base option-1 typo-1 button-2"
-            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth: '500px',
               padding: 'var(--spacing-6)',
             }}
           >
             <h2
+              id="delete-container-modal-title"
               style={{
                 fontFamily: 'var(--typography-heading-font)',
                 fontSize: 'var(--typography-h3-size)',
@@ -496,6 +511,7 @@ export function StoriesList() {
               Delete Container?
             </h2>
             <p
+              id="delete-container-modal-message"
               style={{
                 fontFamily: 'var(--typography-body-font)',
                 fontSize: 'var(--font-size-base)',
@@ -509,6 +525,7 @@ export function StoriesList() {
             </p>
             <div style={{ display: 'flex', gap: 'var(--spacing-3)', justifyContent: 'flex-end' }}>
               <button
+                type="button"
                 className="btn btn-outline btn-base"
                 onClick={handleCancelDeleteContainer}
                 disabled={isDeletingContainer}
@@ -516,6 +533,7 @@ export function StoriesList() {
                 Cancel
               </button>
               <button
+                type="button"
                 className="btn btn-primary btn-base"
                 onClick={handleConfirmDeleteContainer}
                 disabled={isDeletingContainer}

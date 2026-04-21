@@ -39,8 +39,7 @@ impl ContainerRepository {
         let depth = Self::calculate_depth(db, parent_container_id.as_deref())?;
         if depth >= MAX_NESTING_DEPTH {
             return Err(rusqlite::Error::InvalidParameterName(format!(
-                "Maximum container nesting depth of {} levels exceeded. Current depth: {}",
-                MAX_NESTING_DEPTH, depth
+                "Maximum container nesting depth of {MAX_NESTING_DEPTH} levels exceeded. Current depth: {depth}"
             )));
         }
 
@@ -139,6 +138,7 @@ impl ContainerRepository {
     /// This method uses a recursive Common Table Expression (CTE) to load the entire subtree
     /// in a single database query, which is significantly faster than making multiple queries
     /// for each level of the hierarchy.
+    #[cfg(test)]
     pub fn get_subtree(
         db: &Database,
         container_id: &str,
@@ -165,13 +165,12 @@ impl ContainerRepository {
                            c.description, c.\"order\", c.created_at, c.updated_at, s.depth + 1
                     FROM containers c
                     INNER JOIN subtree s ON c.parent_container_id = s.id
-                    WHERE s.depth < {}
+                    WHERE s.depth < {depth_limit}
                 )
                 SELECT id, universe_id, parent_container_id, container_type, title,
                        description, \"order\", created_at, updated_at
                 FROM subtree
-                ORDER BY depth ASC, \"order\" ASC",
-                depth_limit
+                ORDER BY depth ASC, \"order\" ASC"
             )
         } else {
             // Query without depth limit
@@ -353,6 +352,7 @@ impl ContainerRepository {
     }
 
     /// Get the count of child containers for a container
+    #[cfg(test)]
     pub fn get_child_container_count(db: &Database, container_id: &str) -> Result<i32> {
         let conn = db.connection();
         let conn = conn.lock().unwrap();
@@ -880,7 +880,7 @@ mod tests {
                 "universe-1".to_string(),
                 current_parent.clone(),
                 "container".to_string(),
-                format!("Level {}", i),
+                format!("Level {i}"),
                 None,
                 1,
             )
@@ -899,7 +899,7 @@ mod tests {
             "universe-1".to_string(),
             current_parent,
             "container".to_string(),
-            format!("Level {}", MAX_NESTING_DEPTH),
+            format!("Level {MAX_NESTING_DEPTH}"),
             None,
             1,
         );

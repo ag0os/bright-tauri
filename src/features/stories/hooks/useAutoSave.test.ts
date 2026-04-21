@@ -141,7 +141,7 @@ describe('useAutoSave', () => {
 
   describe('Save State Transitions', () => {
     it('transitions to saving state when saving', async () => {
-      let resolvePromise: () => void;
+      let resolvePromise: (() => void) | undefined;
       const onSave = vi.fn().mockImplementation(
         () =>
           new Promise<void>((resolve) => {
@@ -167,9 +167,10 @@ describe('useAutoSave', () => {
 
       expect(result.current.saveState).toBe('saving');
 
-      // Resolve the save
+      expect(resolvePromise).toBeDefined();
+
       await act(async () => {
-        resolvePromise!();
+        resolvePromise?.();
       });
     });
 

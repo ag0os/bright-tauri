@@ -187,8 +187,8 @@
 }
 
 /* Select option styling (limited browser support) */
-.input-5 select.input-field option,
-.input-5 .select-field option {
+.input-5 .select-field option,
+.input-5 select.input-field option {
   padding: 8px 12px;
   background-color: var(--color-surface);
   color: var(--color-text-primary);
