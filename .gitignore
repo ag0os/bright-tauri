@@ -25,3 +25,6 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Cosmonauts — session transcripts are local-only artifacts
+missions/sessions
