@@ -30,6 +30,12 @@ npm run test:run           # vitest once (CI)
 npm run test:coverage      # coverage report
 npx tsc                    # typecheck only
 
+npm run lint               # Biome lint + format check (frontend)
+npm run lint:fix           # Biome auto-fix + format
+npm run lint:rust          # cargo fmt --check + cargo clippy -D warnings
+npm run lint:rust:fix      # cargo fmt + cargo clippy --fix
+npm run lint:all           # frontend + Rust lint in one shot
+
 cd src-tauri && cargo test --lib   # runs Rust tests AND regenerates src/types/*.ts via ts-rs
 ```
 
