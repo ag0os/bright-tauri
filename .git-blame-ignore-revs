@@ -1,0 +1,5 @@
+# Revisions to skip when running `git blame`.
+# Enable locally with: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# style: baseline Biome + rustfmt formatting pass
+d8c5937b6799eeb76959a04c46044bbc38816554
