@@ -177,12 +177,12 @@ describe('useAutoSnapshot', () => {
 
       // Add 100 characters (below default threshold of 500)
       const shortAddition = 'a'.repeat(100);
-      rerender({ content: 'Start' + shortAddition });
+      rerender({ content: `Start${shortAddition}` });
       expect(mockInvoke).not.toHaveBeenCalled();
 
       // Add 500+ characters (exceeds default threshold)
       const longAddition = 'b'.repeat(500);
-      rerender({ content: 'Start' + shortAddition + longAddition });
+      rerender({ content: `Start${shortAddition}${longAddition}` });
       expect(mockInvoke).toHaveBeenCalled();
     });
   });

@@ -321,8 +321,7 @@ export const useContainersStore = create<ContainersState>((set, get) => ({
       const query = state.filters.searchQuery.toLowerCase();
       result = result.filter(
         (c) =>
-          c.title.toLowerCase().includes(query) ||
-          (c.description && c.description.toLowerCase().includes(query)),
+          c.title.toLowerCase().includes(query) || c.description?.toLowerCase().includes(query),
       );
     }
 

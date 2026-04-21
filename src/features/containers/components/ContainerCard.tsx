@@ -198,12 +198,10 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
             {childCount && (
               <>
                 {childCount.containers > 0 && (
-                  <>
-                    <span>
-                      {childCount.containers}{' '}
-                      {childCount.containers === 1 ? 'container' : 'containers'}
-                    </span>
-                  </>
+                  <span>
+                    {childCount.containers}{' '}
+                    {childCount.containers === 1 ? 'container' : 'containers'}
+                  </span>
                 )}
                 {childCount.stories > 0 && (
                   <>

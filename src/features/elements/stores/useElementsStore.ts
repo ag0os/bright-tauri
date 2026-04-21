@@ -167,8 +167,8 @@ export const useElementsStore = create<ElementsState>((set, get) => ({
         (e) =>
           e.name.toLowerCase().includes(query) ||
           e.description.toLowerCase().includes(query) ||
-          (e.details && e.details.toLowerCase().includes(query)) ||
-          (e.customTypeName && e.customTypeName.toLowerCase().includes(query)),
+          e.details?.toLowerCase().includes(query) ||
+          e.customTypeName?.toLowerCase().includes(query),
       );
     }
 
