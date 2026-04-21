@@ -91,7 +91,13 @@ export function Settings() {
     <div className="settings">
       {/* Header */}
       <div className="settings-header">
-        <button className="back-button" onClick={handleBack} aria-label="Go back" title="Back">
+        <button
+          type="button"
+          className="back-button"
+          onClick={handleBack}
+          aria-label="Go back"
+          title="Back"
+        >
           <ArrowLeft size={20} />
         </button>
 
@@ -112,11 +118,17 @@ export function Settings() {
           {/* Snapshot Trigger Mode */}
           <div className="setting-item">
             <div className="setting-info">
-              <label className="setting-label">Snapshot trigger</label>
+              <p id="snapshot-trigger-label" className="setting-label">
+                Snapshot trigger
+              </p>
               <p className="setting-description">Choose when to create automatic snapshots</p>
             </div>
             <div className="setting-control">
-              <div className="radio-group">
+              <div
+                className="radio-group"
+                role="radiogroup"
+                aria-labelledby="snapshot-trigger-label"
+              >
                 <label className="radio-option">
                   <input
                     type="radio"
@@ -199,6 +211,7 @@ export function Settings() {
         {/* Actions */}
         <div className="settings-actions">
           <button
+            type="button"
             className="btn btn-outline btn-base"
             onClick={handleResetToDefaults}
             title="Reset all settings to default values"

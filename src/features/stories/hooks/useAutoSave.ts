@@ -73,33 +73,36 @@ export function useAutoSave<T>({
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Save function - uses refs to avoid dependency on onSave
-  const performSave = useCallback(async () => {
-    if (!enabled) return;
+  const performSave = useCallback(
+    async (contentToSave: T) => {
+      if (!enabled) return;
 
-    setSaveState('saving');
-    setError(null);
+      setSaveState('saving');
+      setError(null);
 
-    try {
-      await onSaveRef.current(contentRef.current);
-      setSaveState('saved');
+      try {
+        await onSaveRef.current(contentToSave);
+        setSaveState('saved');
 
-      // Clear any existing timeout
-      if (savedTimeoutRef.current) {
-        clearTimeout(savedTimeoutRef.current);
+        // Clear any existing timeout
+        if (savedTimeoutRef.current) {
+          clearTimeout(savedTimeoutRef.current);
+        }
+
+        // Reset to idle after showing "saved" for a moment
+        savedTimeoutRef.current = setTimeout(() => {
+          setSaveState('idle');
+          savedTimeoutRef.current = null;
+        }, 2000);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Save failed';
+        setError(errorMessage);
+        setSaveState('error');
+        console.error('Auto-save error:', err);
       }
-
-      // Reset to idle after showing "saved" for a moment
-      savedTimeoutRef.current = setTimeout(() => {
-        setSaveState('idle');
-        savedTimeoutRef.current = null;
-      }, 2000);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Save failed';
-      setError(errorMessage);
-      setSaveState('error');
-      console.error('Auto-save error:', err);
-    }
-  }, [enabled]);
+    },
+    [enabled],
+  );
 
   // Create debounced save function
   const debouncedSave = useRef(
@@ -138,7 +141,7 @@ export function useAutoSave<T>({
     // Cancel any pending save and schedule a new one
     debouncedSave.current.cancel();
     debouncedSave.current(() => {
-      performSave();
+      void performSave(content);
     });
 
     // Cleanup: cancel pending saves on unmount
@@ -150,7 +153,7 @@ export function useAutoSave<T>({
   // Manual save trigger
   const triggerSave = useCallback(() => {
     debouncedSave.current.cancel();
-    performSave();
+    void performSave(contentRef.current);
   }, [performSave]);
 
   // Reset function

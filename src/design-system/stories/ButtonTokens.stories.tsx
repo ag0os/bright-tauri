@@ -35,9 +35,15 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
           Size Variants
         </h4>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-sm">Small</button>
-          <button className="btn btn-primary btn-base">Base</button>
-          <button className="btn btn-primary btn-lg">Large</button>
+          <button type="button" className="btn btn-primary btn-sm">
+            Small
+          </button>
+          <button type="button" className="btn btn-primary btn-base">
+            Base
+          </button>
+          <button type="button" className="btn btn-primary btn-lg">
+            Large
+          </button>
         </div>
       </div>
 
@@ -55,10 +61,18 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
           Style Variants
         </h4>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-base">Primary</button>
-          <button className="btn btn-secondary btn-base">Secondary</button>
-          <button className="btn btn-outline btn-base">Outline</button>
-          <button className="btn btn-ghost btn-base">Ghost</button>
+          <button type="button" className="btn btn-primary btn-base">
+            Primary
+          </button>
+          <button type="button" className="btn btn-secondary btn-base">
+            Secondary
+          </button>
+          <button type="button" className="btn btn-outline btn-base">
+            Outline
+          </button>
+          <button type="button" className="btn btn-ghost btn-base">
+            Ghost
+          </button>
         </div>
       </div>
 
@@ -76,15 +90,15 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
           With Icons
         </h4>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-base">
+          <button type="button" className="btn btn-primary btn-base">
             <IconDemo />
             Icon Left
           </button>
-          <button className="btn btn-secondary btn-base">
+          <button type="button" className="btn btn-secondary btn-base">
             Icon Right
             <IconDemo />
           </button>
-          <button className="btn btn-outline btn-base">
+          <button type="button" className="btn btn-outline btn-base">
             <IconDemo />
             Both Sides
             <IconDemo />
@@ -106,14 +120,17 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
           States
         </h4>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn btn-primary btn-base">Default</button>
+          <button type="button" className="btn btn-primary btn-base">
+            Default
+          </button>
           <button
+            type="button"
             className="btn btn-primary btn-base"
             style={{ pointerEvents: 'none', filter: 'brightness(0.9)' }}
           >
             Hover (sim)
           </button>
-          <button className="btn btn-primary btn-base" disabled>
+          <button type="button" className="btn btn-primary btn-base" disabled>
             Disabled
           </button>
         </div>
@@ -154,8 +171,12 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
             Form Actions
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-            <button className="btn btn-ghost btn-base">Cancel</button>
-            <button className="btn btn-primary btn-base">Save Changes</button>
+            <button type="button" className="btn btn-ghost btn-base">
+              Cancel
+            </button>
+            <button type="button" className="btn btn-primary btn-base">
+              Save Changes
+            </button>
           </div>
         </div>
 
@@ -191,8 +212,12 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
             Everything you need to build great products at scale.
           </p>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-primary btn-base">Get Started</button>
-            <button className="btn btn-outline btn-base">Learn More</button>
+            <button type="button" className="btn btn-primary btn-base">
+              Get Started
+            </button>
+            <button type="button" className="btn btn-outline btn-base">
+              Learn More
+            </button>
           </div>
         </div>
       </div>

@@ -251,7 +251,7 @@ export function ElementDetailPage() {
         >
           {error || 'Element not found'}
         </div>
-        <button className="btn btn-secondary btn-base" onClick={handleGoBack}>
+        <button type="button" className="btn btn-secondary btn-base" onClick={handleGoBack}>
           <ArrowLeft className="icon icon-base" />
           Go Back
         </button>
@@ -286,6 +286,7 @@ export function ElementDetailPage() {
           }}
         >
           <button
+            type="button"
             className="btn btn-ghost btn-base"
             onClick={handleGoBack}
             style={{ padding: 'var(--spacing-2)' }}
@@ -296,6 +297,7 @@ export function ElementDetailPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
             <button
+              type="button"
               className="btn btn-ghost btn-base"
               onClick={handleToggleFavorite}
               title={element.favorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -309,11 +311,11 @@ export function ElementDetailPage() {
               />
               {element.favorite ? 'Favorited' : 'Favorite'}
             </button>
-            <button className="btn btn-secondary btn-base" onClick={handleEdit}>
+            <button type="button" className="btn btn-secondary btn-base" onClick={handleEdit}>
               <PencilSimple className="icon icon-base" weight="duotone" />
               Edit
             </button>
-            <button className="btn btn-secondary btn-base" onClick={handleDelete}>
+            <button type="button" className="btn btn-secondary btn-base" onClick={handleDelete}>
               <Trash className="icon icon-base" weight="duotone" />
               Delete
             </button>
@@ -489,9 +491,9 @@ export function ElementDetailPage() {
                 Relationships
               </h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
-                {element.relationships.map((rel, index) => (
+                {element.relationships.map((rel) => (
                   <div
-                    key={index}
+                    key={`${rel.targetElementId}-${rel.label}-${rel.inverseLabel ?? ''}-${rel.description ?? ''}`}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -553,9 +555,9 @@ export function ElementDetailPage() {
                   gap: 'var(--spacing-2)',
                 }}
               >
-                {element.tags.map((tag, index) => (
+                {element.tags.map((tag) => (
                   <span
-                    key={index}
+                    key={`${element.id}-tag-${tag}`}
                     style={{
                       padding: 'var(--spacing-1) var(--spacing-3)',
                       borderRadius: '4px',

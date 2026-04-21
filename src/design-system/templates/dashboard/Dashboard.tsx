@@ -61,9 +61,9 @@ export const StatsGridDashboard: React.FC = () => {
               <div className="dashboard-1__section">
                 <div className="dashboard-1__section-header">
                   <h2 className="dashboard-1__section-title">Recent Documents</h2>
-                  <a href="#" className="dashboard-1__section-action">
+                  <button type="button" className="dashboard-1__section-action">
                     View all
-                  </a>
+                  </button>
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
@@ -91,8 +91,8 @@ export const StatsGridDashboard: React.FC = () => {
                       status: 'Final',
                       icon: <FileText size={20} weight="duotone" />,
                     },
-                  ].map((doc, i) => (
-                    <div key={i} className="dashboard-1__document-item">
+                  ].map((doc) => (
+                    <div key={doc.title} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
                       <div className="dashboard-1__document-info">
                         <div className="dashboard-1__document-title">{doc.title}</div>
@@ -107,9 +107,9 @@ export const StatsGridDashboard: React.FC = () => {
               <div className="dashboard-1__section">
                 <div className="dashboard-1__section-header">
                   <h2 className="dashboard-1__section-title">Universe Elements</h2>
-                  <a href="#" className="dashboard-1__section-action">
+                  <button type="button" className="dashboard-1__section-action">
                     Manage
-                  </a>
+                  </button>
                 </div>
                 <div className="dashboard-1__document-list">
                   {[
@@ -123,8 +123,8 @@ export const StatsGridDashboard: React.FC = () => {
                       meta: '3 locations',
                       icon: <Star size={20} weight="duotone" />,
                     },
-                  ].map((doc, i) => (
-                    <div key={i} className="dashboard-1__document-item">
+                  ].map((doc) => (
+                    <div key={doc.title} className="dashboard-1__document-item">
                       <div className="dashboard-1__document-icon">{doc.icon}</div>
                       <div className="dashboard-1__document-info">
                         <div className="dashboard-1__document-title">{doc.title}</div>
@@ -140,15 +140,21 @@ export const StatsGridDashboard: React.FC = () => {
               <div className="dashboard-1__section">
                 <h3 className="dashboard-1__section-title">Quick Actions</h3>
                 <div className="dashboard-1__quick-actions">
-                  <button className="dashboard-1__action-button">
+                  <button type="button" className="dashboard-1__action-button">
                     <Plus className="dashboard-1__action-icon" weight="duotone" />
                     New Document
                   </button>
-                  <button className="dashboard-1__action-button dashboard-1__action-button--secondary">
+                  <button
+                    type="button"
+                    className="dashboard-1__action-button dashboard-1__action-button--secondary"
+                  >
                     <Users className="dashboard-1__action-icon" weight="duotone" />
                     New Character
                   </button>
-                  <button className="dashboard-1__action-button dashboard-1__action-button--secondary">
+                  <button
+                    type="button"
+                    className="dashboard-1__action-button dashboard-1__action-button--secondary"
+                  >
                     <Star className="dashboard-1__action-icon" weight="duotone" />
                     New Location
                   </button>

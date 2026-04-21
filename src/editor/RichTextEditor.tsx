@@ -13,7 +13,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { HeadingNode, QuoteNode } from '@lexical/rich-text';
 import type { EditorState } from 'lexical';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ContentChangePlugin } from './plugins/ContentChangePlugin';
 import { ToolbarPlugin } from './plugins/ToolbarPlugin';
 import './RichTextEditor.css';
@@ -41,13 +41,7 @@ export function RichTextEditor({
   // Store the initial content only once when the component first mounts
   // This prevents the editor from remounting on every keystroke
   const [initialEditorState] = useState(() => initialContent || null);
-  const [editorKey, setEditorKey] = useState(0);
-
-  // Only reset editor when readOnly changes (not on content changes)
-  // Content changes are handled internally by Lexical
-  useEffect(() => {
-    setEditorKey((prev) => prev + 1);
-  }, [readOnly]);
+  const editorKey = readOnly ? 'read-only' : 'editable';
 
   const initialConfig = {
     namespace: 'RichTextEditor',

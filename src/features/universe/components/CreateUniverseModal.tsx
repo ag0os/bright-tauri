@@ -64,12 +64,31 @@ export const CreateUniverseModal: React.FC<CreateUniverseModalProps> = ({
 
   if (!isOpen) return null;
 
+  const titleId = 'create-universe-modal-title';
+
   return (
-    <div className="modal-overlay" onClick={handleClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal-overlay"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+    >
+      <div className="modal-content">
         <div className="modal-header">
-          <h2 className="modal-title">Create New Universe</h2>
-          <button className="modal-close" onClick={handleClose} aria-label="Close modal">
+          <h2 id={titleId} className="modal-title">
+            Create New Universe
+          </h2>
+          <button
+            className="modal-close"
+            onClick={handleClose}
+            aria-label="Close modal"
+            type="button"
+          >
             ×
           </button>
         </div>

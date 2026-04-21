@@ -14,7 +14,7 @@ import {
   StackSimple,
   WarningCircle,
 } from '@phosphor-icons/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RichTextEditor } from '@/editor/RichTextEditor';
 import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
 import { updateSnapshotContent } from '@/features/stories/api/snapshots';
@@ -51,6 +51,7 @@ export function StoryEditor() {
   const [title, setTitle] = useState<string>('');
   const [isLoadingStory, setIsLoadingStory] = useState(true);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement | null>(null);
 
   // Extract story ID from route
   const storyId = currentRoute.screen === 'story-editor' ? currentRoute.storyId : null;
@@ -77,7 +78,13 @@ export function StoryEditor() {
     };
 
     loadStoryData();
-  }, [storyId, getStory]);
+  }, [storyId, getStory, showError]);
+
+  useEffect(() => {
+    if (isEditingTitle) {
+      titleInputRef.current?.focus();
+    }
+  }, [isEditingTitle]);
 
   // Memoized save callback - saves to snapshot via DBV system
   // Backend resolves the active snapshot internally from storyId
@@ -188,7 +195,7 @@ export function StoryEditor() {
     return (
       <div className="story-editor-error">
         <p>Story not found</p>
-        <button className="btn btn-outline btn-base" onClick={goBack}>
+        <button type="button" className="btn btn-outline btn-base" onClick={goBack}>
           <ArrowLeft size={18} />
           Go Back
         </button>
@@ -201,6 +208,7 @@ export function StoryEditor() {
       {/* Top Chrome - Minimal */}
       <div className="story-editor-header">
         <button
+          type="button"
           className="back-button"
           onClick={goBack}
           aria-label="Go back"
@@ -211,21 +219,24 @@ export function StoryEditor() {
 
         {isEditingTitle ? (
           <input
+            ref={titleInputRef}
             type="text"
             className="title-input"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
-            autoFocus
           />
         ) : (
-          <h1
-            className="story-title"
-            onClick={() => setIsEditingTitle(true)}
-            title="Click to edit title"
-          >
-            {title}
+          <h1 className="story-title">
+            <button
+              type="button"
+              className="story-title-button"
+              onClick={() => setIsEditingTitle(true)}
+              title="Click to edit title"
+            >
+              {title}
+            </button>
           </h1>
         )}
 
@@ -233,6 +244,7 @@ export function StoryEditor() {
           {renderSaveIndicator()}
 
           <button
+            type="button"
             className="icon-button"
             onClick={() => storyId && navigate({ screen: 'story-versions', storyId })}
             aria-label="Manage versions"
@@ -242,6 +254,7 @@ export function StoryEditor() {
           </button>
 
           <button
+            type="button"
             className="icon-button"
             onClick={() => storyId && navigate({ screen: 'story-settings', storyId })}
             aria-label="Story settings"
@@ -251,6 +264,7 @@ export function StoryEditor() {
           </button>
 
           <button
+            type="button"
             className="icon-button"
             onClick={() => storyId && navigate({ screen: 'story-history', storyId })}
             aria-label="View history"

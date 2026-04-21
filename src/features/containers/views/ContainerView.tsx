@@ -15,7 +15,7 @@ import {
   Gear,
   Plus,
 } from '@phosphor-icons/react';
-import { useEffect, useState } from 'react';
+import { type KeyboardEvent, useEffect, useState } from 'react';
 import { CreateContainerModal } from '@/features/containers/components/CreateContainerModal';
 import { useContainersStore } from '@/features/containers/stores/useContainersStore';
 import { PageLayout } from '@/shared/components/PageLayout';
@@ -30,6 +30,19 @@ import '@/design-system/tokens/spacing.css';
 interface ContainerViewProps {
   containerId: string;
 }
+
+const handleRowKeyDown = (event: KeyboardEvent<HTMLDivElement>, onActivate: () => void) => {
+  if (event.target !== event.currentTarget) {
+    return;
+  }
+
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  event.preventDefault();
+  onActivate();
+};
 
 export function ContainerView({ containerId }: ContainerViewProps) {
   const navigate = useNavigationStore((state) => state.navigate);
@@ -214,7 +227,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
           >
             Container not found
           </p>
-          <button className="btn btn-primary btn-base" onClick={goBack}>
+          <button type="button" className="btn btn-primary btn-base" onClick={goBack}>
             Go Back
           </button>
         </div>
@@ -244,6 +257,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
         >
           {/* Back Button */}
           <button
+            type="button"
             className="btn btn-ghost btn-sm"
             onClick={goBack}
             title="Back"
@@ -295,6 +309,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
             <button
+              type="button"
               className="btn btn-ghost btn-base"
               onClick={() => navigate({ screen: 'container-settings', containerId })}
               aria-label="Container settings"
@@ -302,7 +317,11 @@ export function ContainerView({ containerId }: ContainerViewProps) {
             >
               <Gear size={18} weight="duotone" />
             </button>
-            <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(true)}>
+            <button
+              type="button"
+              className="btn btn-primary btn-base"
+              onClick={() => setShowCreateModal(true)}
+            >
               <Plus className="icon icon-base" />
               Add Child
             </button>
@@ -382,8 +401,11 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                   }}
                 >
                   {children.containers.map((childContainer, index) => (
+                    /* biome-ignore lint/a11y/useSemanticElements: the row contains native move buttons, so a wrapper button would create invalid nested buttons */
                     <div
                       key={childContainer.id}
+                      role="button"
+                      tabIndex={0}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -395,6 +417,9 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                         transition: 'background-color 0.2s',
                       }}
                       onClick={() => handleContainerClick(childContainer)}
+                      onKeyDown={(event) => {
+                        handleRowKeyDown(event, () => handleContainerClick(childContainer));
+                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
                       }}
@@ -432,21 +457,26 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                           </p>
                         )}
                       </div>
-                      <div
-                        style={{ display: 'flex', gap: 'var(--spacing-1)' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div style={{ display: 'flex', gap: 'var(--spacing-1)' }}>
                         <button
+                          type="button"
                           className="btn btn-ghost btn-sm"
-                          onClick={() => handleMoveContainerUp(index)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveContainerUp(index);
+                          }}
                           disabled={index === 0}
                           title="Move up"
                         >
                           <CaretUp size={16} />
                         </button>
                         <button
+                          type="button"
                           className="btn btn-ghost btn-sm"
-                          onClick={() => handleMoveContainerDown(index)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveContainerDown(index);
+                          }}
                           disabled={index === children.containers.length - 1}
                           title="Move down"
                         >
@@ -481,8 +511,11 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                   }}
                 >
                   {children.stories.map((story, index) => (
+                    /* biome-ignore lint/a11y/useSemanticElements: the row contains native move buttons, so a wrapper button would create invalid nested buttons */
                     <div
                       key={story.id}
+                      role="button"
+                      tabIndex={0}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -494,6 +527,9 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                         transition: 'background-color 0.2s',
                       }}
                       onClick={() => handleStoryClick(story)}
+                      onKeyDown={(event) => {
+                        handleRowKeyDown(event, () => handleStoryClick(story));
+                      }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
                       }}
@@ -529,21 +565,26 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                           {story.wordCount.toLocaleString()} words · {story.status}
                         </p>
                       </div>
-                      <div
-                        style={{ display: 'flex', gap: 'var(--spacing-1)' }}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div style={{ display: 'flex', gap: 'var(--spacing-1)' }}>
                         <button
+                          type="button"
                           className="btn btn-ghost btn-sm"
-                          onClick={() => handleMoveStoryUp(index)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveStoryUp(index);
+                          }}
                           disabled={index === 0}
                           title="Move up"
                         >
                           <CaretUp size={16} />
                         </button>
                         <button
+                          type="button"
                           className="btn btn-ghost btn-sm"
-                          onClick={() => handleMoveStoryDown(index)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveStoryDown(index);
+                          }}
                           disabled={index === children.stories.length - 1}
                           title="Move down"
                         >
@@ -598,7 +639,11 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                 >
                   Add child containers or stories to organize your content.
                 </p>
-                <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-lg"
+                  onClick={() => setShowCreateModal(true)}
+                >
                   <Plus className="icon icon-base" />
                   Add First Child
                 </button>

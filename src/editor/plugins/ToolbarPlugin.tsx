@@ -12,7 +12,7 @@ import {
   REMOVE_LIST_COMMAND,
 } from '@lexical/list';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $createHeadingNode, type HeadingTagType } from '@lexical/rich-text';
+import { $createHeadingNode, $isHeadingNode, type HeadingTagType } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
 import {
@@ -33,12 +33,14 @@ import {
 } from 'lexical';
 import { useCallback, useEffect, useState } from 'react';
 
+type ToolbarBlockType = 'paragraph' | HeadingTagType | 'ul' | 'ol';
+
 export function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
-  const [blockType, setBlockType] = useState('paragraph');
+  const [blockType, setBlockType] = useState<ToolbarBlockType>('paragraph');
 
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
@@ -53,15 +55,12 @@ export function ToolbarPlugin() {
       const element =
         anchorNode.getKey() === 'root' ? anchorNode : anchorNode.getTopLevelElementOrThrow();
 
-      const elementType = element.getType();
-      if (elementType === 'heading') {
-        const tag = (element as any).getTag();
-        setBlockType(tag);
+      if ($isHeadingNode(element)) {
+        setBlockType(element.getTag());
       } else if ($isListNode(element)) {
-        const parentList = (element as any).getListType();
-        setBlockType(parentList === 'bullet' ? 'ul' : 'ol');
+        setBlockType(element.getTag());
       } else {
-        setBlockType(elementType);
+        setBlockType('paragraph');
       }
     }
   }, []);

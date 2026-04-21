@@ -150,6 +150,7 @@ export function ContainerSettings() {
       {/* Header */}
       <div className="settings-page__header">
         <button
+          type="button"
           className="settings-page__back-button"
           onClick={handleBack}
           aria-label="Go back"

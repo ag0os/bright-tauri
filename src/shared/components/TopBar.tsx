@@ -72,6 +72,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
 
       <nav className="topbar__nav">
         <button
+          type="button"
           className={`topbar__nav-button ${activeTab === 'stories' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('stories')}
         >
@@ -80,6 +81,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
         </button>
 
         <button
+          type="button"
           className={`topbar__nav-button ${activeTab === 'universe' ? 'topbar__nav-button--active' : ''}`}
           onClick={() => handleTabClick('universe')}
         >
@@ -90,6 +92,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
         <div className="topbar__divider" />
 
         <button
+          type="button"
           className="topbar__theme-toggle"
           onClick={toggleTheme}
           title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -99,6 +102,7 @@ export function TopBar({ activeTab = 'stories', onTabChange }: TopBarProps) {
         </button>
 
         <button
+          type="button"
           className="topbar__settings-button"
           onClick={() => navigate({ screen: 'settings' })}
           title="Settings"

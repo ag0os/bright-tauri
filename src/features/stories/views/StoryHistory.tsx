@@ -130,7 +130,7 @@ export function StoryHistory() {
         setRestoringId(null);
       }
     },
-    [storyId, restoringId, snapshots, maxSnapshotsPerVersion, showSuccess, showError],
+    [storyId, restoringId, snapshots, maxSnapshotsPerVersion, showSuccess, showError, getStory],
   );
 
   // Loading state
@@ -148,7 +148,7 @@ export function StoryHistory() {
     return (
       <div className="story-history-error">
         <p>{error}</p>
-        <button className="btn btn-outline btn-base" onClick={goBack}>
+        <button type="button" className="btn btn-outline btn-base" onClick={goBack}>
           <ArrowLeft size={18} />
           Go Back
         </button>
@@ -159,7 +159,13 @@ export function StoryHistory() {
   return (
     <div className="story-history">
       <div className="story-history-header">
-        <button className="back-button" onClick={goBack} aria-label="Go back" title="Go back">
+        <button
+          type="button"
+          className="back-button"
+          onClick={goBack}
+          aria-label="Go back"
+          title="Go back"
+        >
           <ArrowLeft size={20} />
         </button>
         <div className="header-content">
@@ -201,6 +207,7 @@ export function StoryHistory() {
                         <span className="current-badge">Current</span>
                       ) : (
                         <button
+                          type="button"
                           className="btn btn-outline btn-sm restore-button"
                           onClick={() => handleRestore(snapshot.id)}
                           disabled={isRestoring || restoringId !== null}

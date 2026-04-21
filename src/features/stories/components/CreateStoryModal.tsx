@@ -131,6 +131,8 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
     }
   };
 
+  const titleId = 'create-story-modal-title';
+
   return (
     <div
       className="option-1 typo-1 icons-1 button-2 input-5"
@@ -147,7 +149,14 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
         zIndex: 1000,
         padding: 'var(--spacing-4)',
       }}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div
         style={{
@@ -159,7 +168,6 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
           overflow: 'auto',
           boxShadow: 'var(--shadow-xl)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -173,6 +181,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
         >
           <div>
             <h2
+              id={titleId}
               style={{
                 fontFamily: 'var(--typography-heading-font)',
                 fontSize: 'var(--typography-h3-size)',
@@ -189,6 +198,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
             onClick={onClose}
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
+            type="button"
           >
             <X className="icon icon-base" weight="duotone" />
           </button>

@@ -63,6 +63,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
       </p>
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
         <button
+          type="button"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -82,6 +83,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
           Primary Action
         </button>
         <button
+          type="button"
           style={{
             display: 'flex',
             alignItems: 'center',

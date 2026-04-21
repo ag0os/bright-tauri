@@ -26,7 +26,6 @@ interface CreateElementModalProps {
 interface TemplateData {
   name: string;
   description: string;
-  icon: string;
   suggestedAttributes: Array<{
     key: string;
     label: string;
@@ -35,17 +34,20 @@ interface TemplateData {
   }>;
 }
 
-type TemplateKey =
-  | 'character'
-  | 'location'
-  | 'vehicle'
-  | 'item'
-  | 'organization'
-  | 'creature'
-  | 'event'
-  | 'concept';
+type TemplateKey = Exclude<ElementType, 'custom'>;
 
-const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates as any;
+const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates;
+
+const templateIcons: Record<TemplateKey, string> = {
+  character: '👤',
+  location: '📍',
+  vehicle: '🚗',
+  item: '📦',
+  organization: '🏛️',
+  creature: '🐉',
+  event: '✨',
+  concept: '💡',
+};
 
 export function CreateElementModal({ onClose }: CreateElementModalProps) {
   const navigate = useNavigationStore((state) => state.navigate);
@@ -117,7 +119,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
         universeId: currentUniverse.id,
         name: formData.name.trim(),
         description: formData.description.trim(),
-        elementType: selectedTemplate as ElementType,
+        elementType: selectedTemplate,
         customTypeName: null,
         details: formData.details.trim() || null,
         attributes: Object.keys(filteredAttributes).length > 0 ? filteredAttributes : null,
@@ -153,6 +155,8 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
 
   const templateData = selectedTemplate ? templates[selectedTemplate] : null;
 
+  const titleId = 'create-element-modal-title';
+
   return (
     <div
       className="option-1 typo-1 icons-1 button-2 input-5"
@@ -169,7 +173,14 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
         zIndex: 1000,
         padding: 'var(--spacing-4)',
       }}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div
         style={{
@@ -181,7 +192,6 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
           overflow: 'auto',
           boxShadow: 'var(--shadow-xl)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -194,6 +204,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
           }}
         >
           <h2
+            id={titleId}
             style={{
               fontFamily: 'var(--typography-heading-font)',
               fontSize: 'var(--typography-h3-size)',
@@ -209,6 +220,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
             onClick={onClose}
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
+            type="button"
           >
             <X className="icon icon-base" weight="duotone" />
           </button>
@@ -242,8 +254,9 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                     textAlign: 'center',
                     whiteSpace: 'normal',
                   }}
+                  type="button"
                 >
-                  <span style={{ fontSize: '32px', flexShrink: 0 }}>{template.icon}</span>
+                  <span style={{ fontSize: '32px', flexShrink: 0 }}>{templateIcons[key]}</span>
                   <span
                     style={{
                       fontFamily: 'var(--typography-heading-font)',

@@ -313,6 +313,7 @@ export const ClassicSerif: StoryObj = {
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
             <button
+              type="button"
               style={{
                 fontFamily: 'var(--typography-body-font)',
                 fontSize: 'var(--typography-button-size)',
@@ -331,6 +332,7 @@ export const ClassicSerif: StoryObj = {
             </button>
 
             <button
+              type="button"
               style={{
                 fontFamily: 'var(--typography-body-font)',
                 fontSize: 'var(--typography-button-size)',

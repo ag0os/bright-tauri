@@ -110,6 +110,7 @@ export const ModernIndigo: StoryObj = {
             </p>
           </div>
           <button
+            type="button"
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             style={{
               padding: '10px 20px',
@@ -185,6 +186,7 @@ export const ModernIndigo: StoryObj = {
           </h3>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <button
+              type="button"
               style={{
                 backgroundColor: 'var(--color-primary)',
                 color: '#ffffff',
@@ -199,6 +201,7 @@ export const ModernIndigo: StoryObj = {
               Primary Button
             </button>
             <button
+              type="button"
               style={{
                 backgroundColor: 'transparent',
                 color: 'var(--color-primary)',

@@ -80,13 +80,31 @@ export function ElementCard({
   onToggleFavorite,
 }: ElementCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click if clicking action buttons
-    if ((e.target as HTMLElement).closest('.element-card-actions')) {
+  const handleCardClick = () => {
+    onClick(element);
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
       return;
     }
+
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
     onClick(element);
+  };
+
+  const handleCardBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget)) {
+      return;
+    }
+
+    setIsFocused(false);
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -109,16 +127,21 @@ export function ElementCard({
     relationshipCount !== undefined
       ? relationshipCount
       : (element.relationships?.length ?? 0) + (element.relatedStoryIds?.length ?? 0);
+  const showActions = isHovered || isFocused;
 
   return (
-    <div
-      className="option-1 typo-1 icons-1 button-2 card-1"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="option-1 typo-1 icons-1 button-2 card-1">
+      {/* biome-ignore lint/a11y/useSemanticElements: the card surface contains native action buttons, so a wrapper button would create invalid nested buttons */}
       <div
         className="card card-base card-interactive"
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleCardBlur}
         style={{
           position: 'relative',
           cursor: 'pointer',
@@ -242,9 +265,9 @@ export function ElementCard({
                   flexWrap: 'wrap',
                 }}
               >
-                {element.tags.slice(0, 3).map((tag, index) => (
+                {element.tags.slice(0, 3).map((tag) => (
                   <span
-                    key={index}
+                    key={`${element.id}-tag-${tag}`}
                     style={{
                       padding: '2px 8px',
                       borderRadius: '4px',
@@ -276,7 +299,7 @@ export function ElementCard({
           </div>
 
           {/* Right: Hover Actions */}
-          {isHovered && (
+          {showActions && (
             <div
               className="element-card-actions"
               style={{
@@ -285,6 +308,7 @@ export function ElementCard({
               }}
             >
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleToggleFavorite}
                 title={element.favorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -299,6 +323,7 @@ export function ElementCard({
                 />
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleEdit}
                 title="Edit element"
@@ -307,6 +332,7 @@ export function ElementCard({
                 <PencilSimple className="icon icon-base" weight="duotone" />
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleDelete}
                 title="Delete element"

@@ -10,6 +10,7 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { act, screen, waitFor } from '@testing-library/react';
+import { useEffect } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useSettingsStore } from '@/features/settings/stores/useSettingsStore';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
@@ -25,6 +26,9 @@ vi.mock('@/features/stories/stores/useStoriesStore');
 vi.mock('@/shared/stores/useToastStore');
 vi.mock('@/features/settings/stores/useSettingsStore');
 
+let richTextEditorMountCount = 0;
+let richTextEditorUnmountCount = 0;
+
 // Mock RichTextEditor to simplify testing
 vi.mock('@/editor/RichTextEditor', () => ({
   RichTextEditor: ({
@@ -35,20 +39,31 @@ vi.mock('@/editor/RichTextEditor', () => ({
     initialContent?: string;
     onChange?: (content: string) => void;
     placeholder?: string;
-  }) => (
-    <div data-testid="rich-text-editor">
-      <div data-testid="editor-content">{initialContent || ''}</div>
-      <div data-testid="editor-placeholder">{placeholder}</div>
-      <button
-        data-testid="editor-change"
-        onClick={() =>
-          onChange?.('{"root":{"children":[{"children":[{"text":"Updated content"}]}]}}')
-        }
-      >
-        Simulate Change
-      </button>
-    </div>
-  ),
+  }) => {
+    useEffect(() => {
+      richTextEditorMountCount += 1;
+
+      return () => {
+        richTextEditorUnmountCount += 1;
+      };
+    }, []);
+
+    return (
+      <div data-testid="rich-text-editor">
+        <div data-testid="editor-content">{initialContent || ''}</div>
+        <div data-testid="editor-placeholder">{placeholder}</div>
+        <button
+          type="button"
+          data-testid="editor-change"
+          onClick={() =>
+            onChange?.('{"root":{"children":[{"children":[{"text":"Updated content"}]}]}}')
+          }
+        >
+          Simulate Change
+        </button>
+      </div>
+    );
+  },
 }));
 
 const mockInvoke = invoke as ReturnType<typeof vi.fn>;
@@ -106,6 +121,8 @@ describe('StoryEditor', () => {
   const setupMocks = (storyToReturn: StoryDetail | null = mockStory) => {
     vi.clearAllMocks();
     resetTauriMocks();
+    richTextEditorMountCount = 0;
+    richTextEditorUnmountCount = 0;
 
     // Setup default Tauri invoke responses
     mockTauriInvoke('update_snapshot_content', undefined);
@@ -194,6 +211,30 @@ describe('StoryEditor', () => {
       await waitFor(() => {
         expect(screen.getByText('Test Story')).toBeInTheDocument();
       });
+    });
+
+    it('loads the story once and does not remount the editor when content changes', async () => {
+      renderWithProviders(<StoryEditor />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Story')).toBeInTheDocument();
+      });
+
+      expect(mockGetStory).toHaveBeenCalledTimes(1);
+      expect(richTextEditorMountCount).toBe(1);
+      expect(richTextEditorUnmountCount).toBe(0);
+
+      await act(async () => {
+        screen.getByTestId('editor-change').click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('2 words')).toBeInTheDocument();
+      });
+
+      expect(mockGetStory).toHaveBeenCalledTimes(1);
+      expect(richTextEditorMountCount).toBe(1);
+      expect(richTextEditorUnmountCount).toBe(0);
     });
 
     it('handles empty activeSnapshot content gracefully', async () => {
@@ -305,8 +346,11 @@ describe('StoryEditor', () => {
       // Verify the call uses storyId, which backend resolves to active snapshot
       const calls = mockInvoke.mock.calls;
       const updateCall = calls.find((call) => call[0] === 'update_snapshot_content');
-      expect(updateCall).toBeTruthy();
-      expect(updateCall![1]).toHaveProperty('storyId', 'story-1');
+      expect(updateCall).toBeDefined();
+      if (!updateCall) {
+        throw new Error('Expected update_snapshot_content to be called');
+      }
+      expect(updateCall[1]).toHaveProperty('storyId', 'story-1');
     });
   });
 
@@ -387,10 +431,15 @@ describe('StoryEditor', () => {
     });
 
     it('shows singular "word" for count of 1', async () => {
+      const activeSnapshot = mockStory.activeSnapshot;
+      if (!activeSnapshot) {
+        throw new Error('Expected mock story to have an active snapshot');
+      }
+
       const singleWordStory = {
         ...mockStory,
         activeSnapshot: {
-          ...mockStory.activeSnapshot!,
+          ...activeSnapshot,
           content: '{"root":{"children":[{"children":[{"text":"Hello"}]}]}}',
         },
       };

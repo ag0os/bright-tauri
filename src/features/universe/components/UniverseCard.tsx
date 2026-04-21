@@ -18,14 +18,13 @@ export const UniverseCard: React.FC<UniverseCardProps> = ({
   onKeyDown,
 }) => {
   return (
-    <div
+    <button
+      type="button"
       className={`universe-card ${isCreateNew ? 'universe-card--create' : ''} ${
         isFocused ? 'universe-card--focused' : ''
       }`}
       onClick={onClick}
       onKeyDown={onKeyDown}
-      role="button"
-      tabIndex={0}
       aria-label={isCreateNew ? 'Create new universe' : `Select ${name} universe`}
     >
       <div className="universe-card__content">
@@ -38,6 +37,6 @@ export const UniverseCard: React.FC<UniverseCardProps> = ({
           <h3 className="universe-card__title">{name}</h3>
         )}
       </div>
-    </div>
+    </button>
   );
 };

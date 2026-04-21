@@ -91,6 +91,9 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
     }
   };
 
+  const titleId = 'create-container-modal-title';
+  const descriptionId = parentContainer ? 'create-container-modal-description' : undefined;
+
   return (
     <div
       className="option-1 typo-1 icons-1 button-2 input-5"
@@ -107,7 +110,15 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
         zIndex: 1000,
         padding: 'var(--spacing-4)',
       }}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
       <div
         style={{
@@ -119,7 +130,6 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
           overflow: 'auto',
           boxShadow: 'var(--shadow-xl)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -133,6 +143,7 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
         >
           <div>
             <h2
+              id={titleId}
               style={{
                 fontFamily: 'var(--typography-heading-font)',
                 fontSize: 'var(--typography-h3-size)',
@@ -145,6 +156,7 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
             </h2>
             {parentContainer && (
               <p
+                id={descriptionId}
                 style={{
                   fontFamily: 'var(--typography-body-font)',
                   fontSize: 'var(--font-size-sm)',
@@ -161,6 +173,7 @@ export function CreateContainerModal({ onClose, parentContainer }: CreateContain
             onClick={onClose}
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
+            type="button"
           >
             <X className="icon icon-base" weight="duotone" />
           </button>

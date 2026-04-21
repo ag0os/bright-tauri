@@ -29,6 +29,10 @@ export function ConfirmDeleteModal({
   onCancel,
   isDeleting = false,
 }: ConfirmDeleteModalProps) {
+  const titleId = 'confirm-delete-modal-title';
+  const messageId = 'confirm-delete-modal-message';
+  const itemNameId = 'confirm-delete-modal-item';
+
   return (
     <div
       className="option-1 typo-1 icons-1 button-2"
@@ -41,7 +45,19 @@ export function ConfirmDeleteModal({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         zIndex: 1000,
       }}
-      onClick={onCancel}
+      onMouseDown={
+        isDeleting
+          ? undefined
+          : (e) => {
+              if (e.target === e.currentTarget) {
+                onCancel();
+              }
+            }
+      }
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={`${messageId} ${itemNameId}`}
     >
       <div
         style={{
@@ -52,7 +68,6 @@ export function ConfirmDeleteModal({
           width: '90%',
           boxShadow: 'var(--shadow-lg)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header with warning icon */}
         <div
@@ -78,6 +93,7 @@ export function ConfirmDeleteModal({
             <Warning size={24} weight="duotone" style={{ color: 'var(--color-error)' }} />
           </div>
           <h2
+            id={titleId}
             style={{
               fontFamily: 'var(--typography-heading-font)',
               fontSize: 'var(--typography-h3-size)',
@@ -92,6 +108,7 @@ export function ConfirmDeleteModal({
 
         {/* Message */}
         <p
+          id={messageId}
           style={{
             fontFamily: 'var(--typography-body-font)',
             fontSize: 'var(--font-size-base)',
@@ -105,6 +122,7 @@ export function ConfirmDeleteModal({
 
         {/* Item name highlight */}
         <div
+          id={itemNameId}
           style={{
             padding: 'var(--spacing-3)',
             backgroundColor: 'var(--color-background)',
@@ -132,7 +150,12 @@ export function ConfirmDeleteModal({
             gap: 'var(--spacing-3)',
           }}
         >
-          <button className="btn btn-secondary btn-base" onClick={onCancel} disabled={isDeleting}>
+          <button
+            className="btn btn-secondary btn-base"
+            onClick={onCancel}
+            disabled={isDeleting}
+            type="button"
+          >
             Cancel
           </button>
           <button
@@ -144,6 +167,7 @@ export function ConfirmDeleteModal({
               color: 'white',
               border: 'none',
             }}
+            type="button"
           >
             <Trash className="icon icon-base" weight="duotone" />
             {isDeleting ? 'Deleting...' : 'Delete'}

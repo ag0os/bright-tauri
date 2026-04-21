@@ -178,10 +178,6 @@
   background: var(--color-background);
 }
 
-.rich-text-editor.read-only .editor-content {
-  cursor: default;
-}
-
 /* Focus State */
 .editor-content:focus {
   outline: none;

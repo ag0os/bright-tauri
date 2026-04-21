@@ -98,20 +98,27 @@
 .story-title {
   flex: 1;
   margin: 0;
+}
+
+.story-title-button {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
   font-family: var(--font-family-heading);
   font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--color-text-primary);
-  cursor: pointer;
-  padding: var(--spacing-2) var(--spacing-3);
+  background: transparent;
+  border: 0;
   border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
   transition: background 0.15s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.story-title:hover {
+.story-title-button:hover {
   background: var(--color-surface-secondary);
 }
 

@@ -1,7 +1,7 @@
 {
   "planSlug": "lint-baseline-cleanup",
   "createdAt": "2026-04-21T20:43:13.463Z",
-  "updatedAt": "2026-04-21T20:53:00.910Z",
+  "updatedAt": "2026-04-21T21:13:10.036Z",
   "sessions": [
     {
       "sessionId": "019db1c5-fedf-750e-a189-c5ff69009dc3",
@@ -219,6 +219,149 @@
         "durationMs": 502419,
         "turns": 1,
         "toolCalls": 69
+      }
+    },
+    {
+      "sessionId": "019db1d0-34e8-74bd-ab34-ceb5eb174add",
+      "role": "fixer",
+      "startedAt": "2026-04-21T20:51:45.514Z",
+      "completedAt": "2026-04-21T20:59:47.477Z",
+      "outcome": "success",
+      "sessionFile": "fixer-16447a08-7005-4e43-b895-3e172e0b7012.jsonl",
+      "transcriptFile": "fixer-16447a08-7005-4e43-b895-3e172e0b7012.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 71343,
+          "output": 16689,
+          "total": 2416864
+        },
+        "cost": 1.0109004999999998,
+        "durationMs": 481961,
+        "turns": 1,
+        "toolCalls": 81
+      }
+    },
+    {
+      "sessionId": "019db1d7-8fae-727b-a237-cb66ab542b5d",
+      "role": "worker",
+      "startedAt": "2026-04-21T20:59:47.504Z",
+      "completedAt": "2026-04-21T21:02:16.141Z",
+      "outcome": "success",
+      "sessionFile": "worker-f4d99f67-0c4c-446c-805a-4fb740948aa7.jsonl",
+      "transcriptFile": "worker-f4d99f67-0c4c-446c-805a-4fb740948aa7.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 69322,
+          "output": 5797,
+          "total": 568047
+        },
+        "cost": 0.383492,
+        "durationMs": 148636,
+        "turns": 1,
+        "toolCalls": 43
+      }
+    },
+    {
+      "sessionId": "019db1c4-6e09-72ca-b483-87ca3c66e732",
+      "role": "coordinator",
+      "startedAt": "2026-04-21T20:38:53.706Z",
+      "completedAt": "2026-04-21T21:02:47.569Z",
+      "outcome": "success",
+      "sessionFile": "coordinator-6cc5ada6-63a4-4aad-8b86-9d74e9089f82.jsonl",
+      "transcriptFile": "coordinator-6cc5ada6-63a4-4aad-8b86-9d74e9089f82.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 40,
+          "output": 37348,
+          "total": 1442928
+        },
+        "cost": 1.37833455,
+        "durationMs": 1433862,
+        "turns": 1,
+        "toolCalls": 66
+      }
+    },
+    {
+      "sessionId": "019db1da-4f30-77a9-8cb0-c18d62728873",
+      "role": "integration-verifier",
+      "startedAt": "2026-04-21T21:02:47.601Z",
+      "completedAt": "2026-04-21T21:02:56.351Z",
+      "outcome": "success",
+      "sessionFile": "integration-verifier-6ad6bfff-538d-4b93-9340-50ca47dc5367.jsonl",
+      "transcriptFile": "integration-verifier-6ad6bfff-538d-4b93-9340-50ca47dc5367.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "total": 0
+        },
+        "cost": 0,
+        "durationMs": 8749,
+        "turns": 1,
+        "toolCalls": 0
+      }
+    },
+    {
+      "sessionId": "019db1db-b0b3-71e8-b4b6-0767d68c71b4",
+      "role": "verifier",
+      "parentSessionId": "019db1da-716e-701a-b5e1-30445beee0ae",
+      "startedAt": "2026-04-21T21:04:18.100Z",
+      "completedAt": "2026-04-21T21:04:27.240Z",
+      "outcome": "success",
+      "sessionFile": "verifier-512d767a-7ec1-4764-967c-56a3a656dd88.jsonl",
+      "transcriptFile": "verifier-512d767a-7ec1-4764-967c-56a3a656dd88.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "total": 0
+        },
+        "cost": 0,
+        "durationMs": 9128,
+        "turns": 1,
+        "toolCalls": 0
+      }
+    },
+    {
+      "sessionId": "019db1de-2645-76ad-a08a-5421fc820b1b",
+      "role": "reviewer",
+      "parentSessionId": "019db1da-716e-701a-b5e1-30445beee0ae",
+      "startedAt": "2026-04-21T21:06:59.271Z",
+      "completedAt": "2026-04-21T21:07:08.096Z",
+      "outcome": "success",
+      "sessionFile": "reviewer-6ee3e20d-804e-492b-a16d-4025f16ed2aa.jsonl",
+      "transcriptFile": "reviewer-6ee3e20d-804e-492b-a16d-4025f16ed2aa.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "total": 0
+        },
+        "cost": 0,
+        "durationMs": 8812,
+        "turns": 1,
+        "toolCalls": 0
+      }
+    },
+    {
+      "sessionId": "019db1e3-a88f-722c-83e9-6c488e609e75",
+      "role": "integration-verifier",
+      "parentSessionId": "019db1da-716e-701a-b5e1-30445beee0ae",
+      "startedAt": "2026-04-21T21:13:00.306Z",
+      "completedAt": "2026-04-21T21:13:10.035Z",
+      "outcome": "success",
+      "sessionFile": "integration-verifier-1ec38d04-640e-4ec8-bf5b-c27f6ac5baa3.jsonl",
+      "transcriptFile": "integration-verifier-1ec38d04-640e-4ec8-bf5b-c27f6ac5baa3.transcript.md",
+      "stats": {
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "total": 0
+        },
+        "cost": 0,
+        "durationMs": 9717,
+        "turns": 1,
+        "toolCalls": 0
       }
     }
   ]

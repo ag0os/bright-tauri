@@ -174,8 +174,12 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
             </p>
           </div>
           <div className="card-footer" style={{ justifyContent: 'flex-end' }}>
-            <button className="btn btn-ghost btn-base">Cancel</button>
-            <button className="btn btn-primary btn-base">Confirm</button>
+            <button type="button" className="btn btn-ghost btn-base">
+              Cancel
+            </button>
+            <button type="button" className="btn btn-primary btn-base">
+              Confirm
+            </button>
           </div>
         </div>
       </div>
@@ -361,7 +365,7 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
                 / month
               </span>
             </div>
-            <button className="btn btn-primary btn-base" style={{ width: '100%' }}>
+            <button type="button" className="btn btn-primary btn-base" style={{ width: '100%' }}>
               Get Started
             </button>
           </div>

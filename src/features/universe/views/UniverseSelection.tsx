@@ -1,6 +1,6 @@
 import { Moon, Sun } from '@phosphor-icons/react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
 import { useTheme } from '@/shared/hooks/useTheme';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
@@ -21,6 +21,7 @@ export const UniverseSelection: React.FC = () => {
   // Theme toggle component (reused in all states)
   const ThemeToggle = () => (
     <button
+      type="button"
       className="universe-selection__theme-toggle"
       onClick={toggleTheme}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -35,12 +36,15 @@ export const UniverseSelection: React.FC = () => {
     loadUniverses();
   }, [loadUniverses]);
 
-  const handleSelectUniverse = (universe: Universe) => {
-    console.log('Selected universe:', universe);
-    setCurrentUniverse(universe);
-    // Navigate to stories list
-    navigate({ screen: 'stories-list' });
-  };
+  const handleSelectUniverse = useCallback(
+    (universe: Universe) => {
+      console.log('Selected universe:', universe);
+      setCurrentUniverse(universe);
+      // Navigate to stories list
+      navigate({ screen: 'stories-list' });
+    },
+    [navigate, setCurrentUniverse],
+  );
 
   const handleCreateUniverse = async (name: string) => {
     try {
@@ -66,9 +70,9 @@ export const UniverseSelection: React.FC = () => {
     }
   };
 
-  const handleOpenCreateModal = () => {
+  const handleOpenCreateModal = useCallback(() => {
     setIsModalOpen(true);
-  };
+  }, []);
 
   // Calculate total items (universes + "create new" card)
   const totalItems = universes.length + 1;
@@ -119,7 +123,14 @@ export const UniverseSelection: React.FC = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [focusedIndex, totalItems, universes, isModalOpen]);
+  }, [
+    focusedIndex,
+    totalItems,
+    universes,
+    isModalOpen,
+    handleOpenCreateModal,
+    handleSelectUniverse,
+  ]);
 
   if (isLoading) {
     return (
@@ -142,7 +153,7 @@ export const UniverseSelection: React.FC = () => {
           <p className="universe-selection__subtitle">
             Start your creative journey by creating your first universe
           </p>
-          <button className="btn btn-primary btn-lg" onClick={handleOpenCreateModal} autoFocus>
+          <button type="button" className="btn btn-primary btn-lg" onClick={handleOpenCreateModal}>
             Create Universe
           </button>
         </div>

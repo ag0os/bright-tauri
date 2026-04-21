@@ -129,17 +129,21 @@ export function ConfirmationModal({
   return (
     <div
       className="confirmation-modal-overlay option-1 typo-1 icons-1 button-2"
-      onClick={isProcessing ? undefined : onCancel}
+      onMouseDown={
+        isProcessing
+          ? undefined
+          : (e) => {
+              if (e.target === e.currentTarget) {
+                onCancel();
+              }
+            }
+      }
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
       aria-describedby="modal-message"
     >
-      <div
-        ref={modalRef}
-        className="confirmation-modal-content"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div ref={modalRef} className="confirmation-modal-content">
         {/* Header with icon */}
         <div className="confirmation-modal-header">
           <div

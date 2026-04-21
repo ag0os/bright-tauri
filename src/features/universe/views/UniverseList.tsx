@@ -160,7 +160,11 @@ export function UniverseList() {
           >
             Universe Elements
           </h1>
-          <button className="btn btn-primary btn-base" onClick={() => setShowCreateModal(true)}>
+          <button
+            type="button"
+            className="btn btn-primary btn-base"
+            onClick={() => setShowCreateModal(true)}
+          >
             <Plus className="icon icon-base" />
             New Element
           </button>
@@ -334,7 +338,11 @@ export function UniverseList() {
                 : 'Build your universe by creating your first element!'}
             </p>
             {!filters.searchQuery && !filters.type && (
-              <button className="btn btn-primary btn-lg" onClick={() => setShowCreateModal(true)}>
+              <button
+                type="button"
+                className="btn btn-primary btn-lg"
+                onClick={() => setShowCreateModal(true)}
+              >
                 <Plus className="icon icon-base" />
                 Create Your First Element
               </button>

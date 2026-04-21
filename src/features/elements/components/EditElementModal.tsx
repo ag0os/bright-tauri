@@ -9,7 +9,7 @@ import { X } from '@phosphor-icons/react';
 import { type FormEvent, useState } from 'react';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import elementTemplatesData from '@/shared/config/element-templates.json';
-import type { Element, UpdateElementInput } from '@/types';
+import type { Element, ElementType, UpdateElementInput } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
 import '@/design-system/tokens/icons/phosphor.css';
@@ -26,7 +26,6 @@ interface EditElementModalProps {
 interface TemplateData {
   name: string;
   description: string;
-  icon: string;
   suggestedAttributes: Array<{
     key: string;
     label: string;
@@ -35,17 +34,13 @@ interface TemplateData {
   }>;
 }
 
-type TemplateKey =
-  | 'character'
-  | 'location'
-  | 'vehicle'
-  | 'item'
-  | 'organization'
-  | 'creature'
-  | 'event'
-  | 'concept';
+type TemplateKey = Exclude<ElementType, 'custom'>;
 
-const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates as any;
+const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates;
+
+function isTemplateKey(elementType: ElementType): elementType is TemplateKey {
+  return elementType in templates;
+}
 
 export function EditElementModal({ element, onClose, onSuccess }: EditElementModalProps) {
   const { updateElement } = useElementsStore();
@@ -74,8 +69,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get template data for the element's type
-  const templateData =
-    element.elementType in templates ? templates[element.elementType as TemplateKey] : null;
+  const templateData = isTemplateKey(element.elementType) ? templates[element.elementType] : null;
 
   const handleAttributeChange = (key: string, value: string) => {
     setAttributes({ ...attributes, [key]: value });
@@ -164,6 +158,8 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
     }
   };
 
+  const titleId = 'edit-element-modal-title';
+
   return (
     <div
       className="option-1 typo-1 icons-1 button-2 input-5"
@@ -180,7 +176,14 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
         zIndex: 1000,
         padding: 'var(--spacing-4)',
       }}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
     >
       <div
         style={{
@@ -192,7 +195,6 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
           overflow: 'auto',
           boxShadow: 'var(--shadow-xl)',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -205,6 +207,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
           }}
         >
           <h2
+            id={titleId}
             style={{
               fontFamily: 'var(--typography-heading-font)',
               fontSize: 'var(--typography-h3-size)',
@@ -220,6 +223,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
             onClick={onClose}
             aria-label="Close modal"
             style={{ padding: 'var(--spacing-1)' }}
+            type="button"
           >
             <X className="icon icon-base" weight="duotone" />
           </button>

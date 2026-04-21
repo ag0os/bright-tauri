@@ -86,14 +86,32 @@ const formatTimestamp = (timestamp: string): string => {
 
 export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click if clicking action buttons
-    if ((e.target as HTMLElement).closest('.story-card-actions')) {
+  const handleCardClick = () => {
+    onClick(story);
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
       return;
     }
+
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
     onClick(story);
+  };
+
+  const handleCardBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget)) {
+      return;
+    }
+
+    setIsFocused(false);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -111,15 +129,21 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
     navigate({ screen: 'story-settings', storyId: story.id });
   };
 
+  const showActions = isHovered || isFocused;
+
   return (
-    <div
-      className="option-1 typo-1 icons-1 button-2 card-1"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="option-1 typo-1 icons-1 button-2 card-1">
+      {/* biome-ignore lint/a11y/useSemanticElements: the card surface contains native action buttons, so a wrapper button would create invalid nested buttons */}
       <div
         className="card card-base card-interactive"
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleCardBlur}
         style={{
           position: 'relative',
           cursor: 'pointer',
@@ -246,7 +270,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
           </div>
 
           {/* Right: Hover Actions */}
-          {isHovered && (
+          {showActions && (
             <div
               className="story-card-actions"
               style={{
@@ -255,6 +279,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
               }}
             >
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleToggleFavorite}
                 title={story.favorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -269,6 +294,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 />
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleSettings}
                 title="Story settings"
@@ -277,6 +303,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 <Gear className="icon icon-base" weight="duotone" />
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleDelete}
                 title="Delete story"

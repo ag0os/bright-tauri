@@ -92,6 +92,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </code>
           )}
           <button
+            type="button"
             className="btn btn-primary btn-base"
             onClick={this.handleRetry}
             style={{ marginTop: '8px' }}

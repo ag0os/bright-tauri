@@ -40,6 +40,26 @@ describe('useAutoSnapshot', () => {
       expect(mockInvoke).not.toHaveBeenCalled();
     });
 
+    it('does not create snapshots on rerenders without content growth', () => {
+      const { rerender } = renderHook(
+        ({ content, wordCount }) =>
+          useAutoSnapshot({
+            storyId: 'story-1',
+            content,
+            wordCount,
+            enabled: true,
+            trigger: 'character_count',
+            characterThreshold: 10,
+          }),
+        { initialProps: { content: 'Initial content', wordCount: 2 } },
+      );
+
+      rerender({ content: 'Initial content', wordCount: 3 });
+      rerender({ content: 'Initial content', wordCount: 4 });
+
+      expect(mockInvoke).not.toHaveBeenCalled();
+    });
+
     it('creates snapshot when content increases by threshold', async () => {
       const { rerender } = renderHook(
         ({ content }) =>

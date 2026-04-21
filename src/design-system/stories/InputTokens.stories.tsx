@@ -357,8 +357,12 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-              <button className="btn btn-ghost btn-base">Cancel</button>
-              <button className="btn btn-primary btn-base">Create Account</button>
+              <button type="button" className="btn btn-ghost btn-base">
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary btn-base">
+                Create Account
+              </button>
             </div>
           </div>
         </div>

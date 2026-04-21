@@ -1,5 +1,6 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '../../../../test/utils';
 import './minimal-squared.css';
@@ -14,24 +15,25 @@ import './minimal-squared.css';
  * - Different button variants
  */
 
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  size?: 'sm' | 'base' | 'lg';
+};
+
 // Simple Button component for testing
 function Button({
   children,
   onClick,
+  type = 'button',
   variant = 'primary',
   size = 'base',
   disabled = false,
   ...props
-}: {
-  children: React.ReactNode;
-  onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'base' | 'lg';
-  disabled?: boolean;
-  [key: string]: any;
-}) {
+}: ButtonProps) {
   return (
     <button
+      type={type}
       className={`btn btn-${variant} btn-${size}`}
       onClick={onClick}
       disabled={disabled}

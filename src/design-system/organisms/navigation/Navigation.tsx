@@ -16,15 +16,15 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
     <>
       <div className={`nav-3__topbar ${isHidden ? 'nav-3__topbar--hidden' : ''}`}>
         <div className="nav-3__left">
-          <button className="nav-3__nav-button">
+          <button type="button" className="nav-3__nav-button">
             <List className="nav-3__nav-icon" weight="duotone" />
             <span>Projects</span>
           </button>
           <div className="nav-3__divider"></div>
-          <button className="nav-3__icon-button">
+          <button type="button" className="nav-3__icon-button">
             <CaretLeft className="nav-3__nav-icon" weight="duotone" />
           </button>
-          <button className="nav-3__icon-button">
+          <button type="button" className="nav-3__icon-button">
             <CaretRight className="nav-3__nav-icon" weight="duotone" />
           </button>
         </div>
@@ -47,13 +47,13 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
             <span>{isSaving ? 'Saving...' : 'Saved'}</span>
           </div>
           <div className="nav-3__divider"></div>
-          <button className="nav-3__icon-button">
+          <button type="button" className="nav-3__icon-button">
             <Command className="nav-3__nav-icon" weight="duotone" />
           </button>
-          <button className="nav-3__icon-button">
+          <button type="button" className="nav-3__icon-button">
             <MagnifyingGlass className="nav-3__nav-icon" weight="duotone" />
           </button>
-          <button className="nav-3__action-button nav-3__action-button--primary">
+          <button type="button" className="nav-3__action-button nav-3__action-button--primary">
             <Plus className="nav-3__action-icon" weight="duotone" />
             <span>New</span>
           </button>
@@ -68,12 +68,14 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
             The navigation bar is slim and unobtrusive, perfect for focused writing.
           </p>
           <button
+            type="button"
             onClick={() => setIsSaving(!isSaving)}
             style={{ marginTop: '16px', padding: '8px 16px' }}
           >
             Toggle Saving Status
           </button>
           <button
+            type="button"
             onClick={() => setIsHidden(!isHidden)}
             style={{ marginTop: '8px', marginLeft: '8px', padding: '8px 16px' }}
           >

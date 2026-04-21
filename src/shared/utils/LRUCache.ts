@@ -175,6 +175,8 @@ export class LRUCache<K, V> {
       }
     }
 
-    keysToDelete.forEach((key) => this.cache.delete(key));
+    keysToDelete.forEach((key) => {
+      this.cache.delete(key);
+    });
   }
 }

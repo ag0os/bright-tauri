@@ -11,6 +11,7 @@
  */
 
 import { ArrowLeft, Check, Pencil, Plus, StackSimple, Trash, Warning } from '@phosphor-icons/react';
+import { useEffect, useRef } from 'react';
 import { useStoryVersions } from '@/features/stories/hooks/useStoryVersions';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import '@/design-system/tokens/colors/modern-indigo.css';
@@ -58,6 +59,23 @@ export function StoryVersions() {
     handleCancelDelete,
   } = useStoryVersions(storyId);
 
+  const deleteModalTitleId = 'story-versions-delete-modal-title';
+  const deleteModalMessageId = 'story-versions-delete-modal-message';
+  const createInputRef = useRef<HTMLInputElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showCreateForm) {
+      createInputRef.current?.focus();
+    }
+  }, [showCreateForm]);
+
+  useEffect(() => {
+    if (editingVersionId) {
+      renameInputRef.current?.focus();
+    }
+  }, [editingVersionId]);
+
   // Loading state
   if (loading) {
     return (
@@ -74,7 +92,7 @@ export function StoryVersions() {
         <StackSimple size={48} />
         <h2>Error Loading Story</h2>
         <p>{error}</p>
-        <button className="btn btn-primary btn-base" onClick={goBack}>
+        <button className="btn btn-primary btn-base" onClick={goBack} type="button">
           Go Back
         </button>
       </div>
@@ -85,7 +103,13 @@ export function StoryVersions() {
     <div className="story-versions">
       {/* Header */}
       <div className="story-versions-header">
-        <button className="back-button" onClick={goBack} aria-label="Go back" title="Go back">
+        <button
+          className="back-button"
+          onClick={goBack}
+          aria-label="Go back"
+          title="Go back"
+          type="button"
+        >
           <ArrowLeft size={20} />
         </button>
         <h1 className="page-title">Versions</h1>
@@ -111,6 +135,7 @@ export function StoryVersions() {
               <div className="form-group">
                 <label htmlFor="version-name">Version Name</label>
                 <input
+                  ref={createInputRef}
                   id="version-name"
                   type="text"
                   className="input input-filled"
@@ -118,7 +143,6 @@ export function StoryVersions() {
                   onChange={(e) => setNewVersionName(e.target.value)}
                   placeholder="e.g., Alternate Ending"
                   disabled={creating}
-                  autoFocus
                 />
                 <p className="form-hint">
                   This will create a new version with a copy of your current content.
@@ -148,6 +172,7 @@ export function StoryVersions() {
           <button
             className="btn btn-primary btn-base create-version-button"
             onClick={() => setShowCreateForm(true)}
+            type="button"
           >
             <Plus size={16} />
             New Version
@@ -171,6 +196,7 @@ export function StoryVersions() {
                     <div className="version-info">
                       {isEditing ? (
                         <input
+                          ref={renameInputRef}
                           type="text"
                           className="input input-filled version-rename-input"
                           value={editingName}
@@ -180,7 +206,6 @@ export function StoryVersions() {
                             if (e.key === 'Escape') handleCancelRename();
                           }}
                           disabled={renaming}
-                          autoFocus
                         />
                       ) : (
                         <span className="version-name">{version.name}</span>
@@ -200,6 +225,7 @@ export function StoryVersions() {
                             onClick={handleSaveRename}
                             disabled={renaming || !editingName.trim()}
                             title="Save"
+                            type="button"
                           >
                             {renaming ? 'Saving...' : 'Save'}
                           </button>
@@ -208,6 +234,7 @@ export function StoryVersions() {
                             onClick={handleCancelRename}
                             disabled={renaming}
                             title="Cancel"
+                            type="button"
                           >
                             Cancel
                           </button>
@@ -220,6 +247,7 @@ export function StoryVersions() {
                               onClick={() => handleSwitchVersion(version.id)}
                               disabled={!!switching}
                               title="Switch to this version"
+                              type="button"
                             >
                               {isSwitching ? 'Switching...' : 'Switch'}
                             </button>
@@ -229,6 +257,7 @@ export function StoryVersions() {
                             onClick={() => handleStartRename(version)}
                             title="Rename version"
                             aria-label="Rename version"
+                            type="button"
                           >
                             <Pencil size={16} />
                           </button>
@@ -237,6 +266,7 @@ export function StoryVersions() {
                             onClick={() => handleRequestDelete(version)}
                             title="Delete version"
                             aria-label="Delete version"
+                            type="button"
                           >
                             <Trash size={16} />
                           </button>
@@ -253,20 +283,35 @@ export function StoryVersions() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="modal-overlay" onClick={handleCancelDelete}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onMouseDown={
+            deleting
+              ? undefined
+              : (e) => {
+                  if (e.target === e.currentTarget) {
+                    handleCancelDelete();
+                  }
+                }
+          }
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={deleteModalTitleId}
+          aria-describedby={deleteModalMessageId}
+        >
+          <div className="modal-content">
             <div className="modal-header">
               {deleteConfirm.isActive && <Warning size={24} className="warning-icon" />}
-              <h3>Delete Version</h3>
+              <h3 id={deleteModalTitleId}>Delete Version</h3>
             </div>
             <div className="modal-body">
               {deleteConfirm.isActive ? (
-                <p>
+                <p id={deleteModalMessageId}>
                   <strong>"{deleteConfirm.versionName}"</strong> is your active version. Deleting it
                   will automatically switch to another version. Are you sure you want to continue?
                 </p>
               ) : (
-                <p>
+                <p id={deleteModalMessageId}>
                   Are you sure you want to delete version{' '}
                   <strong>"{deleteConfirm.versionName}"</strong>? This action cannot be undone.
                 </p>
@@ -278,6 +323,7 @@ export function StoryVersions() {
                 className="btn btn-ghost btn-base"
                 onClick={handleCancelDelete}
                 disabled={deleting}
+                type="button"
               >
                 Cancel
               </button>
@@ -285,6 +331,7 @@ export function StoryVersions() {
                 className="btn btn-danger btn-base"
                 onClick={handleConfirmDelete}
                 disabled={deleting}
+                type="button"
               >
                 {deleting ? 'Deleting...' : 'Delete'}
               </button>

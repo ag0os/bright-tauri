@@ -82,6 +82,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         {toast.message}
       </span>
       <button
+        type="button"
         onClick={handleDismiss}
         style={{
           background: 'none',

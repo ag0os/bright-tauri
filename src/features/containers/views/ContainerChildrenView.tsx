@@ -6,6 +6,7 @@
  */
 
 import { CaretDown, CaretUp, CircleNotch, FileText, FolderOpen } from '@phosphor-icons/react';
+import type { KeyboardEvent } from 'react';
 import type { Container, ContainerChildren, StorySummary } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -24,6 +25,19 @@ interface ContainerChildrenViewProps {
   onMoveStoryDown: (index: number) => void;
   emptyMessage?: string;
 }
+
+const handleRowKeyDown = (event: KeyboardEvent<HTMLDivElement>, onActivate: () => void) => {
+  if (event.target !== event.currentTarget) {
+    return;
+  }
+
+  if (event.key !== 'Enter' && event.key !== ' ') {
+    return;
+  }
+
+  event.preventDefault();
+  onActivate();
+};
 
 export function ContainerChildrenView({
   children,
@@ -136,8 +150,11 @@ export function ContainerChildrenView({
             }}
           >
             {children.containers.map((container, index) => (
+              /* biome-ignore lint/a11y/useSemanticElements: the row contains native move buttons, so a wrapper button would create invalid nested buttons */
               <div
                 key={container.id}
+                role="button"
+                tabIndex={0}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -149,6 +166,9 @@ export function ContainerChildrenView({
                   transition: 'background-color 0.2s',
                 }}
                 onClick={() => onContainerClick(container)}
+                onKeyDown={(event) => {
+                  handleRowKeyDown(event, () => onContainerClick(container));
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
                 }}
@@ -192,21 +212,26 @@ export function ContainerChildrenView({
                     Type: {container.containerType}
                   </p>
                 </div>
-                <div
-                  style={{ display: 'flex', gap: 'var(--spacing-1)' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div style={{ display: 'flex', gap: 'var(--spacing-1)' }}>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => onMoveContainerUp(index)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onMoveContainerUp(index);
+                    }}
                     disabled={index === 0}
                     title="Move up"
                   >
                     <CaretUp size={16} />
                   </button>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => onMoveContainerDown(index)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onMoveContainerDown(index);
+                    }}
                     disabled={index === children.containers.length - 1}
                     title="Move down"
                   >
@@ -241,8 +266,11 @@ export function ContainerChildrenView({
             }}
           >
             {children.stories.map((story, index) => (
+              /* biome-ignore lint/a11y/useSemanticElements: the row contains native move buttons, so a wrapper button would create invalid nested buttons */
               <div
                 key={story.id}
+                role="button"
+                tabIndex={0}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -254,6 +282,9 @@ export function ContainerChildrenView({
                   transition: 'background-color 0.2s',
                 }}
                 onClick={() => onStoryClick(story)}
+                onKeyDown={(event) => {
+                  handleRowKeyDown(event, () => onStoryClick(story));
+                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
                 }}
@@ -285,21 +316,26 @@ export function ContainerChildrenView({
                     {story.wordCount.toLocaleString()} words · {story.status}
                   </p>
                 </div>
-                <div
-                  style={{ display: 'flex', gap: 'var(--spacing-1)' }}
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div style={{ display: 'flex', gap: 'var(--spacing-1)' }}>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => onMoveStoryUp(index)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onMoveStoryUp(index);
+                    }}
                     disabled={index === 0}
                     title="Move up"
                   >
                     <CaretUp size={16} />
                   </button>
                   <button
+                    type="button"
                     className="btn btn-ghost btn-sm"
-                    onClick={() => onMoveStoryDown(index)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onMoveStoryDown(index);
+                    }}
                     disabled={index === children.stories.length - 1}
                     title="Move down"
                   >

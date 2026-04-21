@@ -64,14 +64,32 @@ const formatTimestamp = (timestamp: string): string => {
 
 export function ContainerCard({ container, childCount, onClick, onDelete }: ContainerCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigationStore((state) => state.navigate);
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    // Don't trigger card click if clicking action buttons
-    if ((e.target as HTMLElement).closest('.container-card-actions')) {
+  const handleCardClick = () => {
+    onClick(container);
+  };
+
+  const handleCardKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) {
       return;
     }
+
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
     onClick(container);
+  };
+
+  const handleCardBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget)) {
+      return;
+    }
+
+    setIsFocused(false);
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -85,16 +103,21 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
   };
 
   const totalChildren = childCount ? childCount.containers + childCount.stories : 0;
+  const showActions = isHovered || isFocused;
 
   return (
-    <div
-      className="option-1 typo-1 icons-1 button-2 card-1"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="option-1 typo-1 icons-1 button-2 card-1">
+      {/* biome-ignore lint/a11y/useSemanticElements: the card surface contains native action buttons, so a wrapper button would create invalid nested buttons */}
       <div
         className="card card-base card-interactive"
+        role="button"
+        tabIndex={0}
         onClick={handleCardClick}
+        onKeyDown={handleCardKeyDown}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={handleCardBlur}
         style={{
           position: 'relative',
           cursor: 'pointer',
@@ -218,7 +241,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
           </div>
 
           {/* Right: Hover Actions */}
-          {isHovered && (
+          {showActions && (
             <div
               className="container-card-actions"
               style={{
@@ -227,6 +250,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
               }}
             >
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleSettings}
                 title="Container settings"
@@ -235,6 +259,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
                 <Gear className="icon icon-base" weight="duotone" />
               </button>
               <button
+                type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={handleDelete}
                 title="Delete container"
