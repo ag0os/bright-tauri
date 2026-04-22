@@ -157,7 +157,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
           <div
             style={{
               flexShrink: 0,
-              color: 'var(--color-primary)',
+              color: 'var(--accent)',
               display: 'flex',
               alignItems: 'center',
             }}
@@ -167,10 +167,10 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-md)',
+                fontWeight: 'var(--fw-semibold)',
+                color: 'var(--fg1)',
                 margin: 0,
                 marginBottom: 'var(--spacing-1)',
                 overflow: 'hidden',
@@ -185,8 +185,8 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 display: 'flex',
                 alignItems: 'center',
                 gap: 'var(--spacing-2)',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--fs-sm)',
+                color: 'var(--fg2)',
               }}
             >
               <span>{formatStatus(story.storyType)}</span>
@@ -197,7 +197,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
               className="icon icon-base"
               weight="fill"
               style={{
-                color: 'var(--color-accent)',
+                color: 'var(--accent)',
                 flexShrink: 0,
               }}
             />
@@ -208,11 +208,11 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
         {story.description && (
           <p
             style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              color: 'var(--fg2)',
               margin: 0,
-              lineHeight: 'var(--typography-body-line-height)',
+              lineHeight: 'var(--type-body-lh)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
@@ -231,7 +231,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingTop: 'var(--spacing-2)',
-            borderTop: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--border)',
           }}
         >
           {/* Left: Stats */}
@@ -240,8 +240,8 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--spacing-3)',
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--fs-xs)',
+              color: 'var(--fg2)',
             }}
           >
             <span
@@ -250,17 +250,17 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 borderRadius: '4px',
                 backgroundColor:
                   story.status === 'completed'
-                    ? 'var(--color-success-bg)'
+                    ? 'var(--success-soft)'
                     : story.status === 'inprogress'
-                      ? 'var(--color-primary-bg)'
-                      : 'var(--color-surface)',
+                      ? 'var(--accent-subtle)'
+                      : 'var(--surface)',
                 color:
                   story.status === 'completed'
-                    ? 'var(--color-success)'
+                    ? 'var(--success)'
                     : story.status === 'inprogress'
-                      ? 'var(--color-primary)'
-                      : 'var(--color-text-secondary)',
-                fontWeight: 'var(--font-weight-medium)',
+                      ? 'var(--accent)'
+                      : 'var(--fg2)',
+                fontWeight: 'var(--fw-medium)',
               }}
             >
               {formatStatus(story.status)}
@@ -289,7 +289,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                   className="icon icon-base"
                   weight={story.favorite ? 'fill' : undefined}
                   style={{
-                    color: story.favorite ? 'var(--color-accent)' : 'currentColor',
+                    color: story.favorite ? 'var(--accent)' : 'currentColor',
                   }}
                 />
               </button>

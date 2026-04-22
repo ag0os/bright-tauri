@@ -52,7 +52,7 @@ export function DeleteStoryModal({
           </strong>{' '}
           and ALL version history.
         </p>
-        <p style={{ color: 'var(--color-error)', fontWeight: 'var(--font-weight-semibold)' }}>
+        <p style={{ color: 'var(--error)', fontWeight: 'var(--fw-semibold)' }}>
           This action cannot be undone.
         </p>
       </>

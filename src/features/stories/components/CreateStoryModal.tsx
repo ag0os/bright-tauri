@@ -160,7 +160,7 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
     >
       <div
         style={{
-          backgroundColor: 'var(--color-surface)',
+          backgroundColor: 'var(--surface)',
           borderRadius: '8px',
           maxWidth: '600px',
           width: '100%',
@@ -176,17 +176,17 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: 'var(--spacing-6)',
-            borderBottom: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--border)',
           }}
         >
           <div>
             <h2
               id={titleId}
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h3-size)',
-                fontWeight: 'var(--typography-h3-weight)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--type-h3-size)',
+                fontWeight: 'var(--type-h3-weight)',
+                color: 'var(--fg1)',
                 margin: 0,
               }}
             >
@@ -219,11 +219,11 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
               <div
                 style={{
                   padding: 'var(--spacing-3)',
-                  backgroundColor: 'var(--color-error-subtle)',
-                  color: 'var(--color-error)',
+                  backgroundColor: 'var(--error-soft)',
+                  color: 'var(--error)',
                   borderRadius: '4px',
-                  fontFamily: 'var(--typography-body-font)',
-                  fontSize: 'var(--font-size-sm)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'var(--fs-sm)',
                 }}
               >
                 {errors.general}
@@ -243,13 +243,13 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                   onChange={(e) => setFormData({ ...formData, containerId: e.target.value })}
                   disabled={!!containerId} // Disable if container was pre-selected
                   style={{
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border)',
                     borderRadius: '4px',
                     padding: 'var(--spacing-2) var(--spacing-3)',
-                    fontFamily: 'var(--typography-body-font)',
-                    fontSize: 'var(--font-size-base)',
-                    color: 'var(--color-text-primary)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'var(--fs-base)',
+                    color: 'var(--fg1)',
                   }}
                 >
                   <option value="">Standalone (no container)</option>
@@ -278,13 +278,13 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
                     setFormData({ ...formData, storyType: e.target.value as StoryType })
                   }
                   style={{
-                    backgroundColor: 'var(--color-surface)',
-                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border)',
                     borderRadius: '4px',
                     padding: 'var(--spacing-2) var(--spacing-3)',
-                    fontFamily: 'var(--typography-body-font)',
-                    fontSize: 'var(--font-size-base)',
-                    color: 'var(--color-text-primary)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'var(--fs-base)',
+                    color: 'var(--fg1)',
                   }}
                 >
                   {storyTypeOptions.map((option) => (
@@ -385,8 +385,8 @@ export function CreateStoryModal({ onClose, containerId }: CreateStoryModalProps
               justifyContent: 'flex-end',
               gap: 'var(--spacing-3)',
               padding: 'var(--spacing-6)',
-              borderTop: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-background)',
+              borderTop: '1px solid var(--border)',
+              backgroundColor: 'var(--bg)',
             }}
           >
             <button
