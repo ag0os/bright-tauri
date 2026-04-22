@@ -84,16 +84,18 @@ export function RichTextEditor({
       <LexicalComposer key={editorKey} initialConfig={initialConfig}>
         {!readOnly && <ToolbarPlugin />}
         <div className="editor-container">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                className="editor-content"
-                aria-placeholder={placeholder}
-                placeholder={<div className="editor-placeholder">{placeholder}</div>}
-              />
-            }
-            ErrorBoundary={() => <div>Error loading editor</div>}
-          />
+          <div className="editor-reading-column">
+            <RichTextPlugin
+              contentEditable={
+                <ContentEditable
+                  className="editor-content"
+                  aria-placeholder={placeholder}
+                  placeholder={<div className="editor-placeholder">{placeholder}</div>}
+                />
+              }
+              ErrorBoundary={() => <div>Error loading editor</div>}
+            />
+          </div>
           <HistoryPlugin />
           <ContentChangePlugin onChange={handleChange} />
         </div>
