@@ -1,7 +1,7 @@
 ---
 id: TASK-023
 title: Stage 5 module migration — src/features/stories
-status: In Progress
+status: Done
 priority: medium
 assignee: worker
 labels:
@@ -10,7 +10,7 @@ labels:
 dependencies:
   - TASK-018
 createdAt: '2026-04-22T20:30:39.510Z'
-updatedAt: '2026-04-22T21:30:14.634Z'
+updatedAt: '2026-04-22T21:36:50.091Z'
 ---
 
 ## Description
@@ -35,4 +35,4 @@ Commit message must reference `plan:ink-and-paper-migration-cleanup` stage 5.
 
 ## Implementation Notes
 
-AC1-4 complete: migrated aliased token usages in src/features/stories to native Ink & Paper tokens, verified the alias grep returns zero, ran dark/light visual QA via a temporary local Playwright screenshot harness covering the affected story surfaces, and passed `npm run lint`, `npm run test:run`, and `npm run build`.
+Landed in a613b49. Final quality-gate verified `rg 'var\(--(color|typography|font-family|font-size|line-height|font-weight)-' src/features/stories` returns zero.

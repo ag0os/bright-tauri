@@ -1,15 +1,16 @@
 ---
 id: TASK-022
 title: Stage 5 module migration — src/features/containers
-status: To Do
+status: Done
 priority: medium
+assignee: worker
 labels:
   - frontend
   - 'plan:ink-and-paper-migration-cleanup'
 dependencies:
   - TASK-018
 createdAt: '2026-04-22T20:30:35.390Z'
-updatedAt: '2026-04-22T20:30:35.390Z'
+updatedAt: '2026-04-22T21:36:50.090Z'
 ---
 
 ## Description
@@ -31,3 +32,7 @@ Commit message must reference `plan:ink-and-paper-migration-cleanup` stage 5.
 - [ ] #3 Visual QA passes in dark and light themes
 - [ ] #4 npm run lint, npm run test:run, and npm run build all pass
 <!-- AC:END -->
+
+## Implementation Notes
+
+Landed in 9cdde4d. Final quality-gate verified `rg 'var\(--(color|typography|font-family|font-size|line-height|font-weight)-' src/features/containers` returns zero.

@@ -3,15 +3,16 @@ id: TASK-018
 title: >-
   Stage 5 prep — Freeze alias comments + build alias→native map at
   docs/design-reference/alias-map.md
-status: To Do
+status: Done
 priority: high
+assignee: worker
 labels:
   - frontend
   - 'plan:ink-and-paper-migration-cleanup'
 dependencies:
   - TASK-016
 createdAt: '2026-04-22T20:30:12.422Z'
-updatedAt: '2026-04-22T20:30:12.422Z'
+updatedAt: '2026-04-22T21:19:11.781Z'
 ---
 
 ## Description
@@ -38,3 +39,7 @@ This task must complete before any module migration begins. Workers for module t
 - [ ] #4 No source behavior or visual change introduced in this task
 - [ ] #5 npm run lint, npm run test:run, and npm run build all pass
 <!-- AC:END -->
+
+## Implementation Notes
+
+Implemented docs-only Stage 5 prep and committed as `481becd` (`TASK-018: Stage 5 prep — freeze alias comments + alias-map.md (plan:ink-and-paper-migration-cleanup)`). Added freeze comments at `src/design-system/tokens/colors/ink-and-paper.css:113` and `src/design-system/tokens/typography/newsreader-geist.css:34`. Created `docs/design-reference/alias-map.md` with the full color/typography alias map plus the spacing migration decision (`docs/design-reference/alias-map.md:1`). Validation: `npm run lint` (passes with 5 pre-existing Biome warnings in `biome.json`), `npm run test:run`, and `npm run build` all passed. No CSS values or runtime behavior changed in this task.

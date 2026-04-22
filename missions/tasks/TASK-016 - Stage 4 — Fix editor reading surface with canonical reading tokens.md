@@ -1,15 +1,16 @@
 ---
 id: TASK-016
 title: Stage 4 — Fix editor reading surface with canonical reading tokens
-status: To Do
+status: Done
 priority: medium
+assignee: worker
 labels:
   - frontend
   - 'plan:ink-and-paper-migration-cleanup'
 dependencies:
   - TASK-015
 createdAt: '2026-04-22T20:29:46.726Z'
-updatedAt: '2026-04-22T20:29:46.726Z'
+updatedAt: '2026-04-22T21:18:45.814Z'
 ---
 
 ## Description
@@ -42,3 +43,7 @@ Commit message should cite `docs/design-reference/project/colors_and_type.css:13
 - [ ] #6 Editor renders correctly in both dark and light themes
 - [ ] #7 npm run lint, npm run test:run, and npm run build all pass
 <!-- AC:END -->
+
+## Implementation Notes
+
+Implemented Stage 4 in `src/editor/RichTextEditor.tsx`, `src/editor/RichTextEditor.css`, and `src/features/stories/views/StoryEditor.css`. Added `.editor-reading-column` so the Lexical host and placeholder share a centered 720px reading column; moved the reading surface to `var(--font-display)` / `var(--fs-md)` / `var(--lh-reading)`; moved editor headings to `var(--font-display)` + `var(--lh-tight)`; kept chrome on `var(--font-body)`; and changed editor selection to `var(--selection)` directly. Verified dark/light visually with a temporary static harness screenshot at `/tmp/task-016-visual-check.png` plus computed-style checks for both themes. Validation run: `npm run lint` (passes with pre-existing Biome ignore-folder warnings in `biome.json`), `npm run test:run`, and `npm run build`. Commit: `7f82496`.

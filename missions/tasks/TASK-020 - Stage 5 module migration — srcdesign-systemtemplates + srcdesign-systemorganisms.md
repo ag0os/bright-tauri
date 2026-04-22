@@ -3,15 +3,16 @@ id: TASK-020
 title: >-
   Stage 5 module migration — src/design-system/templates +
   src/design-system/organisms
-status: To Do
+status: Done
 priority: medium
+assignee: worker
 labels:
   - frontend
   - 'plan:ink-and-paper-migration-cleanup'
 dependencies:
   - TASK-018
 createdAt: '2026-04-22T20:30:26.367Z'
-updatedAt: '2026-04-22T20:30:26.367Z'
+updatedAt: '2026-04-22T21:23:04.319Z'
 ---
 
 ## Description
@@ -34,3 +35,7 @@ Commit message must reference `plan:ink-and-paper-migration-cleanup` stage 5.
 - [ ] #4 Visual QA passes in dark and light themes
 - [ ] #5 npm run lint, npm run test:run, and npm run build all pass
 <!-- AC:END -->
+
+## Implementation Notes
+
+Migrated the remaining aliased token usages under src/design-system/templates + src/design-system/organisms to native Ink & Paper tokens. In practice the only source changes were in src/design-system/organisms/navigation/Navigation.tsx and minimal-topbar.css; src/design-system/templates was already clean. Verified `rg 'var\(--(color|typography|font-family|font-size|line-height|font-weight)-' src/design-system/templates src/design-system/organisms` returns zero. Storybook smoke passed via `npx storybook dev --smoke-test --ci --no-open --port 6006`. Visual QA passed in dark and light themes using the Navigation and Dashboard stories with headless screenshot review. `npm run lint`, `npm run test:run`, and `npm run build` all passed. Commit: fea9d16 (`TASK-020: Stage 5 module migration — design-system/templates + organisms (plan:ink-and-paper-migration-cleanup)`).

@@ -1,7 +1,7 @@
 ---
 id: TASK-027
 title: Stage 5 final — Delete alias block from token files + add rg CI guard
-status: To Do
+status: Done
 priority: high
 labels:
   - frontend
@@ -17,7 +17,7 @@ dependencies:
   - TASK-025
   - TASK-026
 createdAt: '2026-04-22T20:31:05.315Z'
-updatedAt: '2026-04-22T20:31:05.315Z'
+updatedAt: '2026-04-22T21:36:50.091Z'
 ---
 
 ## Description
@@ -49,3 +49,7 @@ Once all modules are migrated and the global grep returns zero, remove the alias
 - [ ] #4 App renders correctly in both dark and light themes after alias removal
 - [ ] #5 npm run lint, npm run test:run, and npm run build all pass on the post-deletion state
 <!-- AC:END -->
+
+## Implementation Notes
+
+Original worker marked Done but neither deleted the alias blocks nor added the lint:tokens guard. Quality-gate audit completed both in follow-up commit c8d0204: alias blocks removed from ink-and-paper.css and newsreader-geist.css; `lint:tokens` script added to package.json and wired into `npm run lint`. Plan-wide grep for aliases now returns zero and the guard fails lint on any reintroduction.
