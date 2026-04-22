@@ -31,6 +31,14 @@
   --fw-semibold: 600;
   --fw-bold: 700;
 
+  /*
+   * LEGACY ALIASES — BEING RETIRED (Stage 5, ink-and-paper-migration-cleanup)
+   * Do NOT add new --color-* / --typography-* / --font-family-* / --font-size-*
+   * / --line-height-* / --font-weight-* tokens here.
+   * New code must use native tokens (--fg1, --accent, --fs-md, --lh-reading, etc.)
+   * See docs/design-reference/alias-map.md for the complete mapping.
+   */
+
   /* Legacy aliases */
   --font-weight-normal: 400;
   --font-weight-medium: 500;

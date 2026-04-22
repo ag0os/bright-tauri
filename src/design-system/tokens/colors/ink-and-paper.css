@@ -110,6 +110,14 @@
   /* Editor selection */
   --selection: color-mix(in oklch, var(--marigold-500) 30%, transparent);
 
+  /*
+   * LEGACY ALIASES — BEING RETIRED (Stage 5, ink-and-paper-migration-cleanup)
+   * Do NOT add new --color-* / --typography-* / --font-family-* / --font-size-*
+   * / --line-height-* / --font-weight-* tokens here.
+   * New code must use native tokens (--fg1, --accent, --fs-md, --lh-reading, etc.)
+   * See docs/design-reference/alias-map.md for the complete mapping.
+   */
+
   /* ========================================================
      LEGACY ALIASES — map old --color-* names to new palette
      so every existing feature file keeps working.
