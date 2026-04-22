@@ -1,0 +1,14 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Inputs</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--fg2)}
+.field input,.field select{font-family:var(--font-body);font-size:14px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;color:var(--fg1);outline:none;transition:all 150ms}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-subtle)}
+.field input::placeholder{color:var(--fg-muted)}
+</style></head>
+<body><div class="card-root" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div class="field"><label>Story title</label><input placeholder="Untitled" value="The Last Light"/></div>
+<div class="field"><label>Type</label><select><option>Chapter</option><option>Scene</option></select></div>
+<div class="field" style="grid-column:1/-1"><label>Description</label><input placeholder="A short note about this piece"/></div>
+</div></body></html>

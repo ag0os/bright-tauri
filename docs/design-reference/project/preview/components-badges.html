@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Badges</title>
+<link rel="stylesheet" href="_base.css">
+<style>
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-family:var(--font-body);font-size:12px;font-weight:500}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+</style></head>
+<body><div class="card-root">
+<div class="label" style="margin-bottom:10px">Status pills — one-step down saturation, warm palette</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+  <span class="pill" style="background:var(--accent-subtle);color:var(--accent)"><span class="dot" style="background:var(--accent)"></span>In progress</span>
+  <span class="pill" style="background:color-mix(in oklch,var(--success) 15%,transparent);color:var(--success)"><span class="dot" style="background:var(--success)"></span>Completed</span>
+  <span class="pill" style="background:var(--surface-2);color:var(--fg2)"><span class="dot" style="background:var(--fg-muted)"></span>Draft</span>
+  <span class="pill" style="background:color-mix(in oklch,var(--info) 15%,transparent);color:var(--info)"><span class="dot" style="background:var(--info)"></span>Reviewing</span>
+  <span class="pill" style="background:color-mix(in oklch,var(--error) 15%,transparent);color:var(--error)"><span class="dot" style="background:var(--error)"></span>Stuck</span>
+</div>
+<div style="margin-top:14px;display:flex;gap:8px">
+  <span class="pill" style="background:var(--surface-2);color:var(--fg2);border-radius:4px">character</span>
+  <span class="pill" style="background:var(--surface-2);color:var(--fg2);border-radius:4px">location</span>
+  <span class="pill" style="background:var(--surface-2);color:var(--fg2);border-radius:4px">organization</span>
+</div>
+</div></body></html>

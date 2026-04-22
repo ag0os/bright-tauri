@@ -124,6 +124,7 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 ## Key docs
 
 - `docs/design-system.md` — design system reference
+- `docs/design-reference/` — Ink & Paper source of truth (tokens, preview HTML, voice). Read-only; do not edit.
 - `docs/decisions/002-database-only-versioning.md` — DBV rationale
 - `docs/ideas/roadmap.md` — feature roadmap
 - `docs/ui-navigation.md`, `docs/implementation-plan.md`
