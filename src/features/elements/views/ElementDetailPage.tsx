@@ -6,22 +6,15 @@
 
 import {
   ArrowLeft,
-  Bird,
-  Buildings,
-  Calendar,
-  Car,
   CircleNotch,
-  Lightbulb,
   Link as LinkIcon,
-  MapPin,
-  Package,
   PencilSimple,
   Star,
   Trash,
-  User,
 } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { EditElementModal } from '@/features/elements/components/EditElementModal';
+import { ElementTypeIcon } from '@/features/elements/components/ElementTypeIcon';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import { useStoriesStore } from '@/features/stories/stores/useStoriesStore';
 import { ConfirmDeleteModal } from '@/shared/components/ConfirmDeleteModal';
@@ -33,30 +26,6 @@ import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/organisms/card/elevated-shadow.css';
 import '@/design-system/tokens/spacing.css';
-
-// Map element types to Phosphor icons
-const getElementIcon = (type: ElementType): React.ReactNode => {
-  switch (type) {
-    case 'character':
-      return <User size={48} weight="duotone" />;
-    case 'location':
-      return <MapPin size={48} weight="duotone" />;
-    case 'vehicle':
-      return <Car size={48} weight="duotone" />;
-    case 'item':
-      return <Package size={48} weight="duotone" />;
-    case 'organization':
-      return <Buildings size={48} weight="duotone" />;
-    case 'creature':
-      return <Bird size={48} weight="duotone" />;
-    case 'event':
-      return <Calendar size={48} weight="duotone" />;
-    case 'concept':
-      return <Lightbulb size={48} weight="duotone" />;
-    default:
-      return <Package size={48} weight="duotone" />;
-  }
-};
 
 // Format element type for display
 const formatElementType = (type: ElementType, customTypeName?: string | null): string => {
@@ -349,7 +318,7 @@ export function ElementDetailPage() {
                 alignItems: 'center',
               }}
             >
-              {getElementIcon(element.elementType)}
+              <ElementTypeIcon type={element.elementType} size={48} />
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>

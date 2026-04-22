@@ -5,22 +5,9 @@
  * Uses Elevated Shadow card design from design system.
  */
 
-import {
-  Bird,
-  Buildings,
-  Calendar,
-  Car,
-  Lightbulb,
-  Link,
-  MapPin,
-  Package,
-  PencilSimple,
-  Star,
-  Trash,
-  User,
-} from '@phosphor-icons/react';
-import type React from 'react';
+import { Link, PencilSimple, Star, Trash } from '@phosphor-icons/react';
 import { useState } from 'react';
+import { ElementTypeIcon } from '@/features/elements/components/ElementTypeIcon';
 import type { Element, ElementType } from '@/types';
 import '@/design-system/tokens/colors/modern-indigo.css';
 import '@/design-system/tokens/typography/classic-serif.css';
@@ -37,30 +24,6 @@ interface ElementCardProps {
   onDelete: (element: Element) => void;
   onToggleFavorite: (element: Element) => void;
 }
-
-// Map element types to Phosphor icons
-const getElementIcon = (type: ElementType): React.ReactNode => {
-  switch (type) {
-    case 'character':
-      return <User size={24} weight="duotone" />;
-    case 'location':
-      return <MapPin size={24} weight="duotone" />;
-    case 'vehicle':
-      return <Car size={24} weight="duotone" />;
-    case 'item':
-      return <Package size={24} weight="duotone" />;
-    case 'organization':
-      return <Buildings size={24} weight="duotone" />;
-    case 'creature':
-      return <Bird size={24} weight="duotone" />;
-    case 'event':
-      return <Calendar size={24} weight="duotone" />;
-    case 'concept':
-      return <Lightbulb size={24} weight="duotone" />;
-    default:
-      return <Package size={24} weight="duotone" />;
-  }
-};
 
 // Format element type for display
 const formatElementType = (type: ElementType, customTypeName?: string | null): string => {
@@ -160,7 +123,7 @@ export function ElementCard({
               alignItems: 'center',
             }}
           >
-            {getElementIcon(element.elementType)}
+            <ElementTypeIcon type={element.elementType} size={24} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
