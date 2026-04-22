@@ -192,8 +192,8 @@ Recommended: **Modal Dialog** for quick creation without losing context
 
 ### Design System
 - `src/design-system/organisms/card/Card.tsx`: Base card component
-- `src/design-system/tokens/colors/modern-indigo.css`: Existing color tokens
-- May need: `src/design-system/tokens/colors/purple-gradient.css`: New purple tokens
+- `src/design-system/tokens/colors/ink-and-paper.css`: Existing color tokens
+- No additional purple-only color token file should be introduced
 
 ## Success Criteria
 

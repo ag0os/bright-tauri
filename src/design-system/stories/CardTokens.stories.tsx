@@ -1,8 +1,8 @@
 import { ChartBar, Gear } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type React from 'react';
-import '../tokens/colors/modern-indigo.css';
-import '../tokens/typography/classic-serif.css';
+import '../tokens/colors/ink-and-paper.css';
+import '../tokens/typography/newsreader-geist.css';
 import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 import '../tokens/atoms/input/filled-background.css';

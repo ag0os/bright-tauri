@@ -6,7 +6,7 @@
 
 import { CheckCircle, Info, WarningCircle, X } from '@phosphor-icons/react';
 import { useCallback, useEffect, useState } from 'react';
-import '@/design-system/tokens/colors/modern-indigo.css';
+import '@/design-system/tokens/colors/ink-and-paper.css';
 
 export type ToastType = 'success' | 'error' | 'info';
 

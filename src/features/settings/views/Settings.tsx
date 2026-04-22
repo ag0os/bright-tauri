@@ -12,8 +12,8 @@ import {
 } from '@/features/settings/stores/useSettingsStore';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
 import { useToastStore } from '@/shared/stores/useToastStore';
-import '@/design-system/tokens/colors/modern-indigo.css';
-import '@/design-system/tokens/typography/classic-serif.css';
+import '@/design-system/tokens/colors/ink-and-paper.css';
+import '@/design-system/tokens/typography/newsreader-geist.css';
 import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/atoms/input/filled-background.css';

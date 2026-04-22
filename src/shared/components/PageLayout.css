@@ -6,7 +6,7 @@
  */
 
 @import "../../design-system/tokens/spacing.css";
-@import "../../design-system/tokens/colors/modern-indigo.css";
+@import "../../design-system/tokens/colors/ink-and-paper.css";
 
 .page-layout {
   display: flex;

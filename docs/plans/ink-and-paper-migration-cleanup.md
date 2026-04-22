@@ -26,9 +26,8 @@ earlier stages remove landmines, later stages finish the job.
   editor has been silently falling back to UA defaults. Confirm with
   `rg -n '\-\-font-family-body|--font-family-heading|--line-height-body|--line-height-heading' src/design-system/tokens` → no matches.
 - **Untouched:** Storybook stories, `design-system/templates/dashboard/`,
-  old token filenames (`modern-indigo.css`, `classic-serif.css`,
-  `purple-gradient.css`), Phosphor `weight="duotone"` across 30 files
-  (~94 occurrences), editor reading surface.
+  legacy token filenames pending cleanup, Phosphor `weight="duotone"`
+  across 30 files (~94 occurrences), editor reading surface.
 - **Stale / contradictory docs:**
   - `AGENTS.md:89-94` still tells contributors to use `var(--color-primary)`.
   - `docs/design-system.md` still describes "Modern Indigo" / "Classic Serif".
@@ -162,22 +161,17 @@ zero matches.
 
 ## Stage 2 — Rename the token files
 
-**Problem.** The filenames lie: `modern-indigo.css` now contains Ink & Paper,
-`classic-serif.css` contains Newsreader + Geist. `purple-gradient.css` is
-dead (unreferenced). Future `grep indigo` returns the warm-ink palette.
+**Problem.** The filenames lie: the color token file now contains Ink & Paper,
+the typography token file now contains Newsreader + Geist, and the unused
+purple-only color file should be removed.
 
 **Work.**
-1. Rename:
-   - `tokens/colors/modern-indigo.css` → `tokens/colors/ink-and-paper.css`
-   - `tokens/typography/classic-serif.css` → `tokens/typography/newsreader-geist.css`
-2. Delete `tokens/colors/purple-gradient.css` after
-   `rg 'purple-gradient' src docs` returns zero.
+1. Rename the legacy token files to:
+   - `tokens/colors/ink-and-paper.css`
+   - `tokens/typography/newsreader-geist.css`
+2. Delete the unused purple-only color token file once references are gone.
 3. Update **all** references to these filenames — both `@import` in CSS
-   and `import "..."` in TS/TSX. Find them with:
-   `rg -l 'modern-indigo|classic-serif' src docs`.
-   Known entry points: `src/App.css`, `src/shared/components/TopBar.css`,
-   `src/features/stories/views/StoryEditor.tsx`,
-   `src/features/universe/views/UniverseList.tsx`.
+   and `import "..."` in TS/TSX.
 4. Update path references in `docs/design-system.md`.
 
 **Risk.** Low. Mechanical rename + import update. `tsc` won't catch broken
@@ -185,9 +179,8 @@ CSS `@import`s — rely on `npm run build` + visual smoke.
 
 **Ship as:** one PR.
 
-**Done when:** `rg 'modern-indigo|classic-serif|purple-gradient' src docs`
-returns zero; standard validation checklist passes; app renders in both
-themes.
+**Done when:** no source or docs files refer to the retired filenames; the
+standard validation checklist passes; app renders in both themes.
 
 ---
 
@@ -290,8 +283,8 @@ them as the one permanent alias family. Default: migrate for consistency.
 2. **Build a migration map** (one commit, no behavior change) — document
    each alias → native mapping in `docs/design-reference/alias-map.md`.
    Source: the alias blocks themselves
-   (`src/design-system/tokens/colors/modern-indigo.css:170-230`,
-   `src/design-system/tokens/typography/classic-serif.css:55-95`).
+   (`src/design-system/tokens/colors/ink-and-paper.css:170-230`,
+   `src/design-system/tokens/typography/newsreader-geist.css:55-95`).
 3. **Migrate by module, one PR per module:**
    - `src/shared/` + `src/App.css` + `src/editor/` (already touched in Stage 4)
    - `src/design-system/templates/` + `src/design-system/organisms/`

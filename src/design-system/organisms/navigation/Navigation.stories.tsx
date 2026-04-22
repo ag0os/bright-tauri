@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MinimalTopBar } from './Navigation';
-import '../../tokens/colors/modern-indigo.css';
-import '../../tokens/typography/classic-serif.css';
+import '../../tokens/colors/ink-and-paper.css';
+import '../../tokens/typography/newsreader-geist.css';
 
 const meta = {
   title: 'Design System/3. Organisms/Navigation',

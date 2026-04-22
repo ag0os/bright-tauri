@@ -34,4 +34,4 @@ Pixel-faithful recreation of Bright's five core screens, re-skinned into the **I
 | `UniverseElements.jsx` | `src/features/elements/components/ElementCard.tsx` + `views/ElementsList.tsx` |
 | `VersionsDrawer.jsx` | `src/features/stories/views/StoryVersions.tsx` + `StoryHistory.tsx` |
 
-Replaces the old `modern-indigo` + `classic-serif` + `elevated-shadow` tokens with the Ink & Paper foundations (`../../colors_and_type.css`).
+Replaces the legacy color, typography, and elevated-shadow tokens with the Ink & Paper foundations (`../../colors_and_type.css`).

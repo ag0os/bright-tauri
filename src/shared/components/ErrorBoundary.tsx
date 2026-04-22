@@ -7,7 +7,7 @@
 
 import { ArrowClockwise, WarningCircle } from '@phosphor-icons/react';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import '@/design-system/tokens/colors/modern-indigo.css';
+import '@/design-system/tokens/colors/ink-and-paper.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 
 interface Props {

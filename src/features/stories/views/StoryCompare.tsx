@@ -9,8 +9,8 @@
 
 import { ArrowLeft, Clock } from '@phosphor-icons/react';
 import { useNavigationStore } from '@/shared/stores/useNavigationStore';
-import '@/design-system/tokens/colors/modern-indigo.css';
-import '@/design-system/tokens/typography/classic-serif.css';
+import '@/design-system/tokens/colors/ink-and-paper.css';
+import '@/design-system/tokens/typography/newsreader-geist.css';
 import '@/design-system/tokens/icons/phosphor.css';
 import '@/design-system/tokens/atoms/button/minimal-squared.css';
 import '@/design-system/tokens/spacing.css';

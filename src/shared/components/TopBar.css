@@ -7,7 +7,7 @@
  * saturated fill.
  */
 
-@import "../../design-system/tokens/colors/modern-indigo.css";
+@import "../../design-system/tokens/colors/ink-and-paper.css";
 @import "../../design-system/tokens/atoms/button/minimal-squared.css";
 
 .topbar {

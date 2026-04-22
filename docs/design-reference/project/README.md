@@ -16,8 +16,8 @@ All design context was read from the attached codebase (read-only, mounted local
 - **Key files read:**
   - `bright-tauri/README.md`, `bright-tauri/CLAUDE.md` — product & architecture
   - `bright-tauri/design-system-state.json` — the prior system's selections
-  - `bright-tauri/src/design-system/tokens/colors/modern-indigo.css`
-  - `bright-tauri/src/design-system/tokens/typography/classic-serif.css`
+  - `bright-tauri/src/design-system/tokens/colors/ink-and-paper.css`
+  - `bright-tauri/src/design-system/tokens/typography/newsreader-geist.css`
   - `bright-tauri/src/design-system/tokens/spacing.css`
   - `bright-tauri/src/design-system/tokens/atoms/button/minimal-squared.css`
   - `bright-tauri/src/design-system/tokens/atoms/input/filled-background.css`
