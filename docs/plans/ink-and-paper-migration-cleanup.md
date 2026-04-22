@@ -49,16 +49,23 @@ earlier stages remove landmines, later stages finish the job.
 2. **Design package lives in the repo** at `docs/design-reference/`
    (moved out of `~/Downloads/` — this repo is now the authoritative
    location). Every stage cites paths under `docs/design-reference/`.
-3. **Editor reading surface uses the package's canonical values:**
+3. **Three-doc split + one skill for design-system guidance** (see Stage 6):
+   - `docs/design-reference/` — exported reference, read-only.
+   - `docs/design-system.md` — canonical prose reference for humans.
+   - `.claude/skills/ink-and-paper/SKILL.md` — on-demand agent guidance
+     (tokens, voice, iconography, editor values, alias-retirement status).
+   `AGENTS.md` keeps only a short blurb + a pointer to the skill, so
+   non-UI sessions don't pay the token cost.
+4. **Editor reading surface uses the package's canonical values:**
    `font-family: var(--font-display)` (Newsreader),
    `font-size: var(--fs-md)` (17px),
    `line-height: var(--lh-reading)` (1.7),
    `max-width: var(--layout-reading-w)` (720px).
    Source: `docs/design-reference/project/colors_and_type.css:132,144,173-174,251,375-378`.
-4. **`docs/ideas/roadmap.md` is deleted** (stale, no replacement in scope).
+5. **`docs/ideas/roadmap.md` is deleted** (stale, no replacement in scope).
    **`docs/ui-navigation.md` is kept** — its UX ideas are still the design
    intent — but design-system-specific references are synced to Ink & Paper.
-5. **No new lint tooling.** Biome does not enforce CSS custom-property
+6. **No new lint tooling.** Biome does not enforce CSS custom-property
    names and the project has no Stylelint. Enforcement comes from Stage 5
    eliminating the aliases and a simple `rg` guard described there.
 
@@ -326,52 +333,116 @@ PR after step 4's grep is clean.
 ## Stage 6 — Sync the docs and contributor guide
 
 **Problem.** Contributor-facing docs still describe the old system and
-tell people to use aliases:
+tell people to use aliases, and the most useful agent guidance — tokens,
+voice, iconography, editor values — is either missing or scattered:
 
 - `AGENTS.md:89-94` — prescribes `var(--color-primary)` and
   `className="btn btn-primary btn-base"`.
-- `AGENTS.md:124-129` — "Key docs" list is out of date.
+- `AGENTS.md:124-129` — "Key docs" list is out of date (Stage 0 partially
+  fixed this by adding `docs/design-reference/`; still needs the
+  `docs/ideas/roadmap.md` removal).
 - `docs/design-system.md` — still describes "Modern Indigo / Classic Serif".
 - `docs/ui-navigation.md:555-565` — still references the old palette
   under "Design System Integration".
 - `docs/ideas/roadmap.md` — stale (user: can be removed).
+- No on-demand agent guidance exists for UI work; the detail lives only
+  in `docs/design-reference/`, which agents don't read by default.
 - `CLAUDE.md` — just `@AGENTS.md`, so no separate edit needed.
 
+**Design: three-doc split + one skill.**
+
+| Artifact | Role | Audience |
+| --- | --- | --- |
+| `docs/design-reference/` | Exported source of truth (HTML/CSS). Read-only. | Humans + agents who need the raw package. |
+| `docs/design-system.md` | Canonical prose reference: tokens, themes, patterns. | Humans reading the repo. |
+| `.claude/skills/ink-and-paper/SKILL.md` | On-demand agent guidance with triggers. | Agents editing UI/CSS/components. |
+| `AGENTS.md` | Short blurb + pointer to the skill. Universal, always loaded. | Every agent session. |
+
+This keeps AGENTS.md small (no token cost on backend/Rust sessions),
+puts rich detail in a skill that only loads when relevant, and leaves
+one canonical human-readable doc.
+
 **Work.**
-1. **Update `AGENTS.md`:**
-   - Replace the `var(--color-primary)` guidance with native tokens
-     (`var(--fg1)`, `var(--accent)`, `var(--bg)`, etc.); cite
-     `docs/design-system.md` as the full reference.
-   - Describe Ink & Paper in a short blurb: warm ink dark + marigold,
-     Newsreader + Geist + JetBrains Mono, 8/12/16 radii, flat cards with
-     hairline borders, paper-grain background.
-   - Add `docs/design-reference/` to "Key docs".
-   - Remove `docs/ideas/roadmap.md` from "Key docs".
-2. **Rewrite `docs/design-system.md`** as the authoritative token reference:
-   full native-token table, theme modes, typography scale (with canonical
-   values for UI vs reading), radii/shadows, the temporary alias-retirement
-   note (link Stage 5), link to `docs/design-reference/`.
-3. **Update `docs/ui-navigation.md`** — keep every UX/navigation idea
+
+1. **Write `.claude/skills/ink-and-paper/SKILL.md`** following the shape
+   of `.claude/skills/backlog-manager/SKILL.md` (YAML frontmatter with
+   `name`, `description`, `allowed-tools`; body in Markdown). Contents:
+   - **Description/triggers:** "Use when editing CSS, building components,
+     touching tokens, styling the editor, or any UI work. Triggers on
+     mentions of tokens, colors, typography, Ink & Paper, Newsreader,
+     marigold, Phosphor icons, or paths under `src/design-system/` /
+     `src/features/**/*.css` / `src/editor/`."
+   - Native token table (`--fg1`, `--fg2`, `--bg`, `--surface`,
+     `--accent`, `--selection`, `--fs-*`, `--lh-*`, `--radius-*`, etc.)
+     — sourced from `docs/design-reference/project/colors_and_type.css`.
+   - Theme modes + how to test both.
+   - Typography: UI chrome uses `var(--font-body)` (Geist); reading
+     surface uses `var(--font-display)` (Newsreader) at `--fs-md` / 1.7 /
+     `--layout-reading-w`.
+   - Iconography: Phosphor regular weight; `weight="fill"` only for
+     active/selected states; no `weight="duotone"`.
+   - Component patterns: flat cards, hairline borders, no hover transform,
+     8/12/16 radii, paper-grain background.
+   - Voice/tone rules (cite `docs/design-reference/README.md` section).
+   - **Alias-retirement status** (living section): updated as Stage 5
+     progresses — "aliases frozen / N of M modules migrated / aliases
+     deleted." Instruct agents never to introduce `var(--color-*)` etc.
+   - Pointers to `docs/design-system.md` and `docs/design-reference/`.
+2. **Trim `AGENTS.md` `### Design system` section** to a short blurb +
+   a pointer:
+   ```
+   ### Design system
+
+   - Token-first, CSS custom properties, WCAG AA. Do not introduce
+     external component libraries.
+   - The system is **Ink & Paper** (warm ink + marigold, Newsreader + Geist,
+     Phosphor regular weight, flat cards with hairline borders).
+   - **For any UI/CSS/component work, load `/skill:ink-and-paper` first** —
+     it has the token table, iconography policy, editor reading values,
+     and the current alias-retirement status.
+   - Full human-readable reference: `docs/design-system.md`.
+     Exported source of truth: `docs/design-reference/`.
+   ```
+   Do **not** keep the `var(--color-primary)` example — the skill carries
+   the correct native-token examples.
+3. **Rewrite `docs/design-system.md`** as the canonical prose reference:
+   full native-token table, theme modes, typography scale (UI vs reading),
+   radii/shadows, link to the skill for agent-specific guidance, link to
+   `docs/design-reference/` for the exported package, short alias-retirement
+   note pointing at Stage 5.
+4. **Update `docs/ui-navigation.md`** — keep every UX/navigation idea
    untouched, but in the "Design System Integration" section
    (lines 555-565 and any similar block) replace "Modern Indigo /
    Classic Serif / Lucide" with "Ink & Paper / Newsreader + Geist /
-   Phosphor regular weight". A `rg -n 'Modern Indigo|Classic Serif|Lucide|Playfair'
-   docs/ui-navigation.md` sweep will find the spots.
-4. **Delete `docs/ideas/roadmap.md`** and remove any cross-links
-   (`rg -n 'ideas/roadmap' .` before deleting).
-5. **Final sweep:**
+   Phosphor regular weight". Use
+   `rg -n 'Modern Indigo|Classic Serif|Lucide|Playfair' docs/ui-navigation.md`
+   to find the spots.
+5. **Delete `docs/ideas/roadmap.md`** and remove any cross-links
+   (`rg -n 'ideas/roadmap' .` before deleting). Also remove the
+   `docs/ideas/roadmap.md` line from `AGENTS.md` "Key docs".
+6. **Final sweep:**
    `rg -i 'modern indigo|classic serif|playfair|purple gradient' .`
-   returns nothing except historical references in
-   `docs/decisions/` and archived plans.
+   returns nothing except historical references in `docs/decisions/`
+   and archived plans.
 
-**Risk.** None — documentation-only.
+**Risk.** None — documentation + skill authoring only. Main thing to get
+right is the skill's `description` field: it must fire on UI-flavored
+tasks without over-triggering on backend work.
 
-**Ship as:** one PR, landed alongside or just after Stage 1 (Storybook
-and docs should match).
+**Ship as:** can be split in two if convenient:
+  - PR A: write the skill + trim AGENTS.md + rewrite `docs/design-system.md`.
+  - PR B: `docs/ui-navigation.md` sync + delete `docs/ideas/roadmap.md` + final sweep.
 
-**Done when:** the final sweep is clean; `AGENTS.md` points contributors
-at native tokens; `docs/ideas/roadmap.md` is gone;
-`docs/ui-navigation.md` still holds its UX content but cites Ink & Paper.
+**Done when:**
+- `.claude/skills/ink-and-paper/SKILL.md` exists with a description that
+  reliably fires on UI tasks.
+- `AGENTS.md` design section is a short blurb + skill pointer; no
+  `var(--color-primary)` example remains.
+- `docs/design-system.md` is rewritten around Ink & Paper.
+- `docs/ui-navigation.md` cites Ink & Paper in its design-system section;
+  UX content untouched.
+- `docs/ideas/roadmap.md` is gone and no file links to it.
+- The final `rg` sweep is clean.
 
 ---
 
