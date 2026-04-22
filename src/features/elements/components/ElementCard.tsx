@@ -118,7 +118,7 @@ export function ElementCard({
           <div
             style={{
               flexShrink: 0,
-              color: element.color || 'var(--color-primary)',
+              color: element.color || 'var(--accent)',
               display: 'flex',
               alignItems: 'center',
             }}
@@ -128,10 +128,10 @@ export function ElementCard({
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-md)',
+                fontWeight: 'var(--fw-semibold)',
+                color: 'var(--fg1)',
                 margin: 0,
                 marginBottom: 'var(--spacing-1)',
                 overflow: 'hidden',
@@ -146,8 +146,8 @@ export function ElementCard({
                 display: 'flex',
                 alignItems: 'center',
                 gap: 'var(--spacing-2)',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--fs-sm)',
+                color: 'var(--fg2)',
               }}
             >
               <span>{formatElementType(element.elementType, element.customTypeName)}</span>
@@ -167,7 +167,7 @@ export function ElementCard({
               className="icon icon-base"
               weight="fill"
               style={{
-                color: 'var(--color-accent)',
+                color: 'var(--accent)',
                 flexShrink: 0,
               }}
             />
@@ -178,11 +178,11 @@ export function ElementCard({
         {element.description && (
           <p
             style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              color: 'var(--fg2)',
               margin: 0,
-              lineHeight: 'var(--typography-body-line-height)',
+              lineHeight: 'var(--type-body-lh)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
@@ -201,7 +201,7 @@ export function ElementCard({
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingTop: 'var(--spacing-2)',
-            borderTop: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--border)',
           }}
         >
           {/* Left: Tags */}
@@ -210,8 +210,8 @@ export function ElementCard({
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--spacing-2)',
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--fs-xs)',
+              color: 'var(--fg2)',
               flex: 1,
               overflow: 'hidden',
             }}
@@ -230,9 +230,9 @@ export function ElementCard({
                     style={{
                       padding: '2px 8px',
                       borderRadius: '4px',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text-secondary)',
-                      fontWeight: 'var(--font-weight-medium)',
+                      backgroundColor: 'var(--surface)',
+                      color: 'var(--fg2)',
+                      fontWeight: 'var(--fw-medium)',
                       whiteSpace: 'nowrap',
                     }}
                   >
@@ -243,7 +243,7 @@ export function ElementCard({
                   <span
                     style={{
                       padding: '2px 8px',
-                      color: 'var(--color-text-secondary)',
+                      color: 'var(--fg2)',
                     }}
                   >
                     +{element.tags.length - 3}
@@ -251,9 +251,7 @@ export function ElementCard({
                 )}
               </div>
             ) : (
-              <span style={{ color: 'var(--color-text-tertiary)', fontStyle: 'italic' }}>
-                No tags
-              </span>
+              <span style={{ color: 'var(--fg3)', fontStyle: 'italic' }}>No tags</span>
             )}
           </div>
 
@@ -277,7 +275,7 @@ export function ElementCard({
                   className="icon icon-base"
                   weight={element.favorite ? 'fill' : undefined}
                   style={{
-                    color: element.favorite ? 'var(--color-accent)' : 'currentColor',
+                    color: element.favorite ? 'var(--accent)' : 'currentColor',
                   }}
                 />
               </button>

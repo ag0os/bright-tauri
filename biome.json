@@ -12,11 +12,11 @@
       "!**/dist",
       "!**/coverage",
       "!**/storybook-static",
-      "!docs/design-reference/**",
-      "!missions/**",
-      "!src/types/**",
-      "!src-tauri/target/**",
-      "!src-tauri/gen/**"
+      "!docs/design-reference",
+      "!missions",
+      "!src/types",
+      "!src-tauri/target",
+      "!src-tauri/gen"
     ]
   },
   "formatter": {

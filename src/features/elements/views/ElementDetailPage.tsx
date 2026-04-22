@@ -168,15 +168,15 @@ export function ElementDetailPage() {
         <CircleNotch
           className="icon icon-2xl"
           style={{
-            color: 'var(--color-primary)',
+            color: 'var(--accent)',
             animation: 'spin 1s linear infinite',
           }}
         />
         <p
           style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-base)',
-            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-base)',
+            color: 'var(--fg2)',
           }}
         >
           Loading element...
@@ -211,8 +211,8 @@ export function ElementDetailPage() {
         <div
           style={{
             padding: 'var(--spacing-4)',
-            backgroundColor: 'var(--color-error-subtle)',
-            color: 'var(--color-error)',
+            backgroundColor: 'var(--error-soft)',
+            color: 'var(--error)',
             borderRadius: '4px',
             maxWidth: '500px',
             textAlign: 'center',
@@ -235,15 +235,15 @@ export function ElementDetailPage() {
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
-        backgroundColor: 'var(--color-background)',
+        backgroundColor: 'var(--bg)',
       }}
     >
       {/* Header */}
       <div
         style={{
           padding: 'var(--spacing-6)',
-          borderBottom: '1px solid var(--color-border)',
-          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--border)',
+          backgroundColor: 'var(--surface)',
         }}
       >
         <div
@@ -274,8 +274,8 @@ export function ElementDetailPage() {
               <Star
                 className="icon icon-base"
                 style={{
-                  fill: element.favorite ? 'var(--color-accent)' : 'none',
-                  color: element.favorite ? 'var(--color-accent)' : 'currentColor',
+                  fill: element.favorite ? 'var(--accent)' : 'none',
+                  color: element.favorite ? 'var(--accent)' : 'currentColor',
                 }}
               />
               {element.favorite ? 'Favorited' : 'Favorite'}
@@ -313,7 +313,7 @@ export function ElementDetailPage() {
             <div
               style={{
                 flexShrink: 0,
-                color: element.color || 'var(--color-primary)',
+                color: element.color || 'var(--accent)',
                 display: 'flex',
                 alignItems: 'center',
               }}
@@ -324,10 +324,10 @@ export function ElementDetailPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-3)' }}>
                 <h1
                   style={{
-                    fontFamily: 'var(--typography-heading-font)',
-                    fontSize: 'var(--typography-h1-size)',
-                    fontWeight: 'var(--typography-h1-weight)',
-                    color: 'var(--color-text-primary)',
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 'var(--type-h1-size)',
+                    fontWeight: 'var(--type-h1-weight)',
+                    color: 'var(--fg1)',
                     margin: 0,
                   }}
                 >
@@ -337,10 +337,10 @@ export function ElementDetailPage() {
                   style={{
                     padding: 'var(--spacing-1) var(--spacing-3)',
                     borderRadius: '4px',
-                    backgroundColor: 'var(--color-primary-subtle)',
-                    color: 'var(--color-primary)',
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: 'var(--font-weight-medium)',
+                    backgroundColor: 'var(--accent-subtle)',
+                    color: 'var(--accent)',
+                    fontSize: 'var(--fs-sm)',
+                    fontWeight: 'var(--fw-medium)',
                   }}
                 >
                   {formatElementType(element.elementType, element.customTypeName)}
@@ -349,9 +349,9 @@ export function ElementDetailPage() {
               {element.description && (
                 <p
                   style={{
-                    fontFamily: 'var(--typography-body-font)',
-                    fontSize: 'var(--font-size-lg)',
-                    color: 'var(--color-text-secondary)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'var(--fs-md)',
+                    color: 'var(--fg2)',
                     marginTop: 'var(--spacing-3)',
                     marginBottom: 0,
                   }}
@@ -367,10 +367,10 @@ export function ElementDetailPage() {
             <div className="card card-base" style={{ marginBottom: 'var(--spacing-6)' }}>
               <h2
                 style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--type-h3-size)',
+                  fontWeight: 'var(--type-h3-weight)',
+                  color: 'var(--fg1)',
                   marginBottom: 'var(--spacing-3)',
                 }}
               >
@@ -378,10 +378,10 @@ export function ElementDetailPage() {
               </h2>
               <p
                 style={{
-                  fontFamily: 'var(--typography-body-font)',
-                  fontSize: 'var(--font-size-base)',
-                  color: 'var(--color-text-primary)',
-                  lineHeight: 'var(--typography-body-line-height)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'var(--fs-base)',
+                  color: 'var(--fg1)',
+                  lineHeight: 'var(--type-body-lh)',
                   whiteSpace: 'pre-wrap',
                   margin: 0,
                 }}
@@ -396,10 +396,10 @@ export function ElementDetailPage() {
             <div className="card card-base" style={{ marginBottom: 'var(--spacing-6)' }}>
               <h2
                 style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--type-h3-size)',
+                  fontWeight: 'var(--type-h3-weight)',
+                  color: 'var(--fg1)',
                   marginBottom: 'var(--spacing-4)',
                 }}
               >
@@ -414,16 +414,16 @@ export function ElementDetailPage() {
                       gridTemplateColumns: '200px 1fr',
                       gap: 'var(--spacing-3)',
                       padding: 'var(--spacing-3)',
-                      backgroundColor: 'var(--color-surface)',
+                      backgroundColor: 'var(--surface)',
                       borderRadius: '4px',
                     }}
                   >
                     <dt
                       style={{
-                        fontFamily: 'var(--typography-body-font)',
-                        fontSize: 'var(--font-size-sm)',
-                        fontWeight: 'var(--font-weight-semibold)',
-                        color: 'var(--color-text-secondary)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'var(--fs-sm)',
+                        fontWeight: 'var(--fw-semibold)',
+                        color: 'var(--fg2)',
                         textTransform: 'capitalize',
                       }}
                     >
@@ -431,9 +431,9 @@ export function ElementDetailPage() {
                     </dt>
                     <dd
                       style={{
-                        fontFamily: 'var(--typography-body-font)',
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-primary)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'var(--fs-sm)',
+                        color: 'var(--fg1)',
                         margin: 0,
                       }}
                     >
@@ -450,10 +450,10 @@ export function ElementDetailPage() {
             <div className="card card-base" style={{ marginBottom: 'var(--spacing-6)' }}>
               <h2
                 style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--type-h3-size)',
+                  fontWeight: 'var(--type-h3-weight)',
+                  color: 'var(--fg1)',
                   marginBottom: 'var(--spacing-4)',
                 }}
               >
@@ -468,7 +468,7 @@ export function ElementDetailPage() {
                       alignItems: 'center',
                       gap: 'var(--spacing-3)',
                       padding: 'var(--spacing-3)',
-                      backgroundColor: 'var(--color-surface)',
+                      backgroundColor: 'var(--surface)',
                       borderRadius: '4px',
                     }}
                   >
@@ -476,10 +476,10 @@ export function ElementDetailPage() {
                     <div>
                       <div
                         style={{
-                          fontFamily: 'var(--typography-body-font)',
-                          fontSize: 'var(--font-size-base)',
-                          color: 'var(--color-text-primary)',
-                          fontWeight: 'var(--font-weight-medium)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'var(--fs-base)',
+                          color: 'var(--fg1)',
+                          fontWeight: 'var(--fw-medium)',
                         }}
                       >
                         {rel.label}
@@ -487,9 +487,9 @@ export function ElementDetailPage() {
                       {rel.description && (
                         <div
                           style={{
-                            fontFamily: 'var(--typography-body-font)',
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-text-secondary)',
+                            fontFamily: 'var(--font-body)',
+                            fontSize: 'var(--fs-sm)',
+                            color: 'var(--fg2)',
                             marginTop: 'var(--spacing-1)',
                           }}
                         >
@@ -508,10 +508,10 @@ export function ElementDetailPage() {
             <div className="card card-base" style={{ marginBottom: 'var(--spacing-6)' }}>
               <h2
                 style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--type-h3-size)',
+                  fontWeight: 'var(--type-h3-weight)',
+                  color: 'var(--fg1)',
                   marginBottom: 'var(--spacing-4)',
                 }}
               >
@@ -530,10 +530,10 @@ export function ElementDetailPage() {
                     style={{
                       padding: 'var(--spacing-1) var(--spacing-3)',
                       borderRadius: '4px',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-text-primary)',
-                      fontSize: 'var(--font-size-sm)',
-                      fontWeight: 'var(--font-weight-medium)',
+                      backgroundColor: 'var(--surface)',
+                      color: 'var(--fg1)',
+                      fontSize: 'var(--fs-sm)',
+                      fontWeight: 'var(--fw-medium)',
                     }}
                   >
                     {tag}
@@ -548,10 +548,10 @@ export function ElementDetailPage() {
             <div className="card card-base" style={{ marginBottom: 'var(--spacing-6)' }}>
               <h2
                 style={{
-                  fontFamily: 'var(--typography-heading-font)',
-                  fontSize: 'var(--typography-h3-size)',
-                  fontWeight: 'var(--typography-h3-weight)',
-                  color: 'var(--color-text-primary)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--type-h3-size)',
+                  fontWeight: 'var(--type-h3-weight)',
+                  color: 'var(--fg1)',
                   marginBottom: 'var(--spacing-4)',
                 }}
               >
@@ -563,16 +563,16 @@ export function ElementDetailPage() {
                     key={story.id}
                     style={{
                       padding: 'var(--spacing-3)',
-                      backgroundColor: 'var(--color-surface)',
+                      backgroundColor: 'var(--surface)',
                       borderRadius: '4px',
                     }}
                   >
                     <div
                       style={{
-                        fontFamily: 'var(--typography-body-font)',
-                        fontSize: 'var(--font-size-base)',
-                        color: 'var(--color-text-primary)',
-                        fontWeight: 'var(--font-weight-medium)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'var(--fs-base)',
+                        color: 'var(--fg1)',
+                        fontWeight: 'var(--fw-medium)',
                       }}
                     >
                       {story.title}
@@ -580,9 +580,9 @@ export function ElementDetailPage() {
                     {story.description && (
                       <div
                         style={{
-                          fontFamily: 'var(--typography-body-font)',
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'var(--fs-sm)',
+                          color: 'var(--fg2)',
                           marginTop: 'var(--spacing-1)',
                         }}
                       >

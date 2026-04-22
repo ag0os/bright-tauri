@@ -187,7 +187,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
     >
       <div
         style={{
-          backgroundColor: 'var(--color-surface)',
+          backgroundColor: 'var(--surface)',
           borderRadius: '8px',
           maxWidth: '800px',
           width: '100%',
@@ -203,16 +203,16 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: 'var(--spacing-6)',
-            borderBottom: '1px solid var(--color-border)',
+            borderBottom: '1px solid var(--border)',
           }}
         >
           <h2
             id={titleId}
             style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h3-size)',
+              fontWeight: 'var(--type-h3-weight)',
+              color: 'var(--fg1)',
               margin: 0,
             }}
           >
@@ -244,11 +244,11 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
               <div
                 style={{
                   padding: 'var(--spacing-3)',
-                  backgroundColor: 'var(--color-error-subtle)',
-                  color: 'var(--color-error)',
+                  backgroundColor: 'var(--error-soft)',
+                  color: 'var(--error)',
                   borderRadius: '4px',
-                  fontFamily: 'var(--typography-body-font)',
-                  fontSize: 'var(--font-size-sm)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'var(--fs-sm)',
                 }}
               >
                 {errors.general}
@@ -326,16 +326,16 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
               <>
                 <div
                   style={{
-                    borderTop: '1px solid var(--color-border)',
+                    borderTop: '1px solid var(--border)',
                     paddingTop: 'var(--spacing-4)',
                   }}
                 >
                   <h3
                     style={{
-                      fontFamily: 'var(--typography-heading-font)',
-                      fontSize: 'var(--font-size-lg)',
-                      fontWeight: 'var(--font-weight-semibold)',
-                      color: 'var(--color-text-primary)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--fs-md)',
+                      fontWeight: 'var(--fw-semibold)',
+                      color: 'var(--fg1)',
                       margin: 0,
                       marginBottom: 'var(--spacing-3)',
                     }}
@@ -344,9 +344,9 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
                   </h3>
                   <p
                     style={{
-                      fontFamily: 'var(--typography-body-font)',
-                      fontSize: 'var(--font-size-sm)',
-                      color: 'var(--color-text-secondary)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'var(--fs-sm)',
+                      color: 'var(--fg2)',
                       margin: 0,
                       marginBottom: 'var(--spacing-4)',
                     }}
@@ -387,7 +387,7 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
             {/* Additional Options */}
             <div
               style={{
-                borderTop: '1px solid var(--color-border)',
+                borderTop: '1px solid var(--border)',
                 paddingTop: 'var(--spacing-4)',
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -439,8 +439,8 @@ export function EditElementModal({ element, onClose, onSuccess }: EditElementMod
               justifyContent: 'flex-end',
               gap: 'var(--spacing-3)',
               padding: 'var(--spacing-6)',
-              borderTop: '1px solid var(--color-border)',
-              backgroundColor: 'var(--color-background)',
+              borderTop: '1px solid var(--border)',
+              backgroundColor: 'var(--bg)',
             }}
           >
             <button
