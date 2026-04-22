@@ -151,10 +151,10 @@ export function UniverseList() {
         >
           <h1
             style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h2-size)',
-              fontWeight: 'var(--typography-h2-weight)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h2-size)',
+              fontWeight: 'var(--type-h2-weight)',
+              color: 'var(--fg1)',
               margin: 0,
             }}
           >
@@ -204,13 +204,13 @@ export function UniverseList() {
                 setFilter('type', e.target.value ? (e.target.value as ElementType) : null)
               }
               style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
                 borderRadius: '4px',
                 padding: 'var(--spacing-2) var(--spacing-3)',
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-base)',
+                color: 'var(--fg1)',
               }}
             >
               <option value="">All Types</option>
@@ -229,13 +229,13 @@ export function UniverseList() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
               style={{
-                backgroundColor: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
                 borderRadius: '4px',
                 padding: 'var(--spacing-2) var(--spacing-3)',
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-base)',
+                color: 'var(--fg1)',
               }}
             >
               <option value="name">Name</option>
@@ -250,12 +250,12 @@ export function UniverseList() {
           <div
             style={{
               padding: 'var(--spacing-4)',
-              backgroundColor: 'var(--color-error-subtle)',
-              color: 'var(--color-error)',
+              backgroundColor: 'var(--error-soft)',
+              color: 'var(--error)',
               borderRadius: '4px',
               marginBottom: 'var(--spacing-6)',
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-sm)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
             }}
           >
             {error}
@@ -277,15 +277,15 @@ export function UniverseList() {
             <CircleNotch
               className="icon icon-2xl"
               style={{
-                color: 'var(--color-primary)',
+                color: 'var(--accent)',
                 animation: 'spin 1s linear infinite',
               }}
             />
             <p
               style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-base)',
+                color: 'var(--fg2)',
               }}
             >
               Loading elements...
@@ -309,16 +309,16 @@ export function UniverseList() {
             <GlobeHemisphereWest
               size={64}
               style={{
-                color: 'var(--color-text-secondary)',
+                color: 'var(--fg2)',
                 opacity: 0.4,
               }}
             />
             <h2
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h3-size)',
-                fontWeight: 'var(--typography-h3-weight)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--type-h3-size)',
+                fontWeight: 'var(--type-h3-weight)',
+                color: 'var(--fg1)',
                 margin: 0,
               }}
             >
@@ -326,9 +326,9 @@ export function UniverseList() {
             </h2>
             <p
               style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--font-size-base)',
-                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-base)',
+                color: 'var(--fg2)',
                 maxWidth: '400px',
               }}
             >
