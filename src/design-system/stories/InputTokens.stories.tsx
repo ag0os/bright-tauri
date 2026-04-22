@@ -243,7 +243,7 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
             </label>
             <div className={`input-wrapper ${isFloating && iconValue ? 'has-value' : ''}`}>
               <div className="input-icon-prefix">
-                <MagnifyingGlass size={20} weight="duotone" />
+                <MagnifyingGlass size={20} />
               </div>
               <input
                 id={`${option.className}-prefix`}
@@ -270,7 +270,7 @@ const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
                 readOnly
               />
               <div className="input-icon-suffix">
-                <CheckCircle size={20} weight="duotone" />
+                <CheckCircle size={20} />
               </div>
             </div>
           </div>

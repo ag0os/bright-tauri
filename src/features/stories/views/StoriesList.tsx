@@ -230,7 +230,7 @@ export function StoriesList() {
           <div className="input-group input-5" style={{ flex: '1', minWidth: '250px' }}>
             <div className="input-wrapper">
               <div className="input-icon-prefix">
-                <MagnifyingGlass className="icon icon-base" weight="duotone" />
+                <MagnifyingGlass className="icon icon-base" />
               </div>
               <input
                 type="text"
@@ -404,7 +404,6 @@ export function StoriesList() {
             >
               <Books
                 size={64}
-                weight="duotone"
                 style={{
                   color: 'var(--color-text-secondary)',
                   opacity: 0.4,

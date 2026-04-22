@@ -131,7 +131,7 @@ export function ToolbarPlugin() {
         aria-label="Format Bold"
         title="Bold"
       >
-        <TextB size={18} weight="duotone" />
+        <TextB size={18} />
       </button>
       <button
         type="button"
@@ -140,7 +140,7 @@ export function ToolbarPlugin() {
         aria-label="Format Italic"
         title="Italic"
       >
-        <TextItalic size={18} weight="duotone" />
+        <TextItalic size={18} />
       </button>
       <button
         type="button"
@@ -149,7 +149,7 @@ export function ToolbarPlugin() {
         aria-label="Format Underline"
         title="Underline"
       >
-        <TextUnderline size={18} weight="duotone" />
+        <TextUnderline size={18} />
       </button>
 
       <div className="toolbar-divider" />
@@ -161,7 +161,7 @@ export function ToolbarPlugin() {
         aria-label="Heading 1"
         title="Heading 1"
       >
-        <TextHOne size={18} weight="duotone" />
+        <TextHOne size={18} />
       </button>
       <button
         type="button"
@@ -170,7 +170,7 @@ export function ToolbarPlugin() {
         aria-label="Heading 2"
         title="Heading 2"
       >
-        <TextHTwo size={18} weight="duotone" />
+        <TextHTwo size={18} />
       </button>
 
       <div className="toolbar-divider" />
@@ -182,7 +182,7 @@ export function ToolbarPlugin() {
         aria-label="Bullet List"
         title="Bullet List"
       >
-        <ListBullets size={18} weight="duotone" />
+        <ListBullets size={18} />
       </button>
       <button
         type="button"
@@ -191,7 +191,7 @@ export function ToolbarPlugin() {
         aria-label="Numbered List"
         title="Numbered List"
       >
-        <ListNumbers size={18} weight="duotone" />
+        <ListNumbers size={18} />
       </button>
     </div>
   );

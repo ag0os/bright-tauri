@@ -154,7 +154,7 @@ export function StorySettings() {
           aria-label="Go back"
           title="Back"
         >
-          <ArrowLeft size={20} weight="duotone" />
+          <ArrowLeft size={20} />
         </button>
 
         <div className="settings-page__header-content">

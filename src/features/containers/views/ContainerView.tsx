@@ -269,7 +269,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
           {/* Title and Description */}
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)' }}>
-              <FolderOpen size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
+              <FolderOpen size={24} style={{ color: 'var(--color-primary)' }} />
               <h1
                 style={{
                   fontFamily: 'var(--typography-heading-font)',
@@ -315,7 +315,7 @@ export function ContainerView({ containerId }: ContainerViewProps) {
               aria-label="Container settings"
               title="Container settings"
             >
-              <Gear size={18} weight="duotone" />
+              <Gear size={18} />
             </button>
             <button
               type="button"
@@ -429,7 +429,6 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                     >
                       <FolderOpen
                         size={24}
-                        weight="duotone"
                         style={{ color: 'var(--color-primary)' }}
                       />
                       <div style={{ flex: 1 }}>
@@ -539,7 +538,6 @@ export function ContainerView({ containerId }: ContainerViewProps) {
                     >
                       <FileText
                         size={24}
-                        weight="duotone"
                         style={{ color: 'var(--color-accent)' }}
                       />
                       <div style={{ flex: 1 }}>
@@ -612,7 +610,6 @@ export function ContainerView({ containerId }: ContainerViewProps) {
               >
                 <FolderOpen
                   size={64}
-                  weight="duotone"
                   style={{
                     color: 'var(--color-text-secondary)',
                     opacity: 0.4,

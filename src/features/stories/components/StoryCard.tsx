@@ -39,23 +39,23 @@ const getStoryIcon = (type: StoryType): React.ReactNode => {
 
   switch (type) {
     case 'screenplay':
-      return <FilmStrip className={iconClass} weight="duotone" />;
+      return <FilmStrip className={iconClass} />;
     case 'short-story':
-      return <FileText className={iconClass} weight="duotone" />;
+      return <FileText className={iconClass} />;
     case 'poem':
-      return <Feather className={iconClass} weight="duotone" />;
+      return <Feather className={iconClass} />;
     case 'chapter':
-      return <BookBookmark className={iconClass} weight="duotone" />;
+      return <BookBookmark className={iconClass} />;
     case 'scene':
-      return <Scroll className={iconClass} weight="duotone" />;
+      return <Scroll className={iconClass} />;
     case 'episode':
-      return <FilmStrip className={iconClass} weight="duotone" />;
+      return <FilmStrip className={iconClass} />;
     case 'outline':
-      return <FileText className={iconClass} weight="duotone" />;
+      return <FileText className={iconClass} />;
     case 'treatment':
-      return <FileText className={iconClass} weight="duotone" />;
+      return <FileText className={iconClass} />;
     default:
-      return <FileText className={iconClass} weight="duotone" />;
+      return <FileText className={iconClass} />;
   }
 };
 
@@ -287,7 +287,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
               >
                 <Star
                   className="icon icon-base"
-                  weight={story.favorite ? 'fill' : 'duotone'}
+                  weight={story.favorite ? 'fill' : undefined}
                   style={{
                     color: story.favorite ? 'var(--color-accent)' : 'currentColor',
                   }}
@@ -300,7 +300,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 title="Story settings"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Gear className="icon icon-base" weight="duotone" />
+                <Gear className="icon icon-base" />
               </button>
               <button
                 type="button"
@@ -309,7 +309,7 @@ export function StoryCard({ story, onClick, onDelete, onToggleFavorite }: StoryC
                 title="Delete story"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Trash className="icon icon-base" weight="duotone" />
+                <Trash className="icon icon-base" />
               </button>
             </div>
           )}

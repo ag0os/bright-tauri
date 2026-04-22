@@ -17,24 +17,24 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
       <div className={`nav-3__topbar ${isHidden ? 'nav-3__topbar--hidden' : ''}`}>
         <div className="nav-3__left">
           <button type="button" className="nav-3__nav-button">
-            <List className="nav-3__nav-icon" weight="duotone" />
+            <List className="nav-3__nav-icon" />
             <span>Projects</span>
           </button>
           <div className="nav-3__divider"></div>
           <button type="button" className="nav-3__icon-button">
-            <CaretLeft className="nav-3__nav-icon" weight="duotone" />
+            <CaretLeft className="nav-3__nav-icon" />
           </button>
           <button type="button" className="nav-3__icon-button">
-            <CaretRight className="nav-3__nav-icon" weight="duotone" />
+            <CaretRight className="nav-3__nav-icon" />
           </button>
         </div>
 
         <div className="nav-3__center">
           <div className="nav-3__breadcrumb">
             <span className="nav-3__breadcrumb-item">My Novel</span>
-            <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
+            <CaretRight className="nav-3__breadcrumb-separator" />
             <span className="nav-3__breadcrumb-item">Part One</span>
-            <CaretRight className="nav-3__breadcrumb-separator" weight="duotone" />
+            <CaretRight className="nav-3__breadcrumb-separator" />
             <span className="nav-3__breadcrumb-item nav-3__breadcrumb-item--current">
               Chapter 3
             </span>
@@ -48,13 +48,13 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
           </div>
           <div className="nav-3__divider"></div>
           <button type="button" className="nav-3__icon-button">
-            <Command className="nav-3__nav-icon" weight="duotone" />
+            <Command className="nav-3__nav-icon" />
           </button>
           <button type="button" className="nav-3__icon-button">
-            <MagnifyingGlass className="nav-3__nav-icon" weight="duotone" />
+            <MagnifyingGlass className="nav-3__nav-icon" />
           </button>
           <button type="button" className="nav-3__action-button nav-3__action-button--primary">
-            <Plus className="nav-3__action-icon" weight="duotone" />
+            <Plus className="nav-3__action-icon" />
             <span>New</span>
           </button>
         </div>

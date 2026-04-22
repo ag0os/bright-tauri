@@ -16,7 +16,7 @@ const meta: Meta = {
 export default meta;
 
 // Icon component using Phosphor
-const IconDemo: React.FC = () => <Clock size={20} weight="duotone" />;
+const IconDemo: React.FC = () => <Clock size={20} />;
 
 const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
   return (

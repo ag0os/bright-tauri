@@ -157,7 +157,6 @@ export function ElementCard({
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Link
                       className="icon icon-sm"
-                      weight="duotone"
                       style={{ width: '14px', height: '14px' }}
                     />
                     {actualRelationshipCount} {actualRelationshipCount === 1 ? 'link' : 'links'}
@@ -279,7 +278,7 @@ export function ElementCard({
               >
                 <Star
                   className="icon icon-base"
-                  weight={element.favorite ? 'fill' : 'duotone'}
+                  weight={element.favorite ? 'fill' : undefined}
                   style={{
                     color: element.favorite ? 'var(--color-accent)' : 'currentColor',
                   }}
@@ -292,7 +291,7 @@ export function ElementCard({
                 title="Edit element"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <PencilSimple className="icon icon-base" weight="duotone" />
+                <PencilSimple className="icon icon-base" />
               </button>
               <button
                 type="button"
@@ -301,7 +300,7 @@ export function ElementCard({
                 title="Delete element"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Trash className="icon icon-base" weight="duotone" />
+                <Trash className="icon icon-base" />
               </button>
             </div>
           )}

@@ -225,7 +225,7 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
                   color: '#ffffff',
                 }}
               >
-                <ChartBar size={24} weight="duotone" />
+                <ChartBar size={24} />
               </div>
               <div>
                 <div
@@ -272,7 +272,7 @@ const CardShowcase: React.FC<{ className: string }> = ({ className }) => {
                   color: '#ffffff',
                 }}
               >
-                <Gear size={24} weight="duotone" />
+                <Gear size={24} />
               </div>
               <div>
                 <div

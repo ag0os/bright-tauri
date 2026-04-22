@@ -107,7 +107,6 @@ export function ContainerChildrenView({
       >
         <FolderOpen
           size={64}
-          weight="duotone"
           style={{
             color: 'var(--color-text-secondary)',
             opacity: 0.4,
@@ -176,7 +175,7 @@ export function ContainerChildrenView({
                   e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
                 }}
               >
-                <FolderOpen size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
+                <FolderOpen size={24} style={{ color: 'var(--color-primary)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{
@@ -292,7 +291,7 @@ export function ContainerChildrenView({
                   e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
                 }}
               >
-                <FileText size={24} weight="duotone" style={{ color: 'var(--color-accent)' }} />
+                <FileText size={24} style={{ color: 'var(--color-accent)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{

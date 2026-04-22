@@ -152,7 +152,6 @@ export function ConfirmationModal({
           >
             <IconComponent
               size={24}
-              weight="duotone"
               style={{ color: config.iconColor }}
               aria-hidden="true"
             />

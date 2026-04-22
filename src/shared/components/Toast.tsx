@@ -42,9 +42,9 @@ function Toast({ toast, onDismiss }: ToastProps) {
   };
 
   const icons = {
-    success: <CheckCircle size={18} weight="duotone" />,
-    error: <WarningCircle size={18} weight="duotone" />,
-    info: <Info size={18} weight="duotone" />,
+    success: <CheckCircle size={18} />,
+    error: <WarningCircle size={18} />,
+    info: <Info size={18} />,
   };
 
   const colors = {
@@ -94,7 +94,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         }}
         aria-label="Dismiss"
       >
-        <X size={16} weight="duotone" />
+        <X size={16} />
       </button>
     </div>
   );

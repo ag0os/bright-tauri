@@ -68,7 +68,6 @@ export class ErrorBoundary extends Component<Props, State> {
         >
           <WarningCircle
             size={48}
-            weight="duotone"
             style={{ color: 'var(--color-semantic-error)' }}
           />
           <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Something went wrong</h2>
@@ -97,7 +96,7 @@ export class ErrorBoundary extends Component<Props, State> {
             onClick={this.handleRetry}
             style={{ marginTop: '8px' }}
           >
-            <ArrowClockwise size={16} weight="duotone" />
+            <ArrowClockwise size={16} />
             Try Again
           </button>
         </div>

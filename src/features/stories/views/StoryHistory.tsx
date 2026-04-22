@@ -137,7 +137,7 @@ export function StoryHistory() {
   if (isLoading) {
     return (
       <div className="story-history-loading">
-        <SpinnerGap size={48} weight="duotone" className="spinner" />
+        <SpinnerGap size={48} className="spinner" />
         <p>Loading snapshots...</p>
       </div>
     );

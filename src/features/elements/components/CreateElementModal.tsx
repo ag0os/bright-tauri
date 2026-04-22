@@ -212,7 +212,7 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
             style={{ padding: 'var(--spacing-1)' }}
             type="button"
           >
-            <X className="icon icon-base" weight="duotone" />
+            <X className="icon icon-base" />
           </button>
         </div>
 

@@ -31,7 +31,7 @@ const SizeDemo: React.FC<{ className: string }> = ({ className }) => (
         key={size}
         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}
       >
-        <Clock size={size} weight="duotone" />
+        <Clock size={size} />
         <code
           style={{
             fontFamily: 'var(--font-mono)',
@@ -79,7 +79,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
             cursor: 'pointer',
           }}
         >
-          <Plus size={20} weight="duotone" />
+          <Plus size={20} />
           Primary Action
         </button>
         <button
@@ -100,7 +100,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
           }}
         >
           Secondary Action
-          <Check size={20} weight="duotone" />
+          <Check size={20} />
         </button>
       </div>
     </div>
@@ -129,7 +129,7 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
           gap: 'var(--icon-gap-inline)',
         }}
       >
-        <MagnifyingGlass size={16} weight="duotone" />
+        <MagnifyingGlass size={16} />
         Icon appears inline with body text, maintaining proper alignment and spacing.
       </p>
     </div>
@@ -148,9 +148,9 @@ const ContextDemo: React.FC<{ className: string }> = ({ className }) => (
         Standalone Icons
       </p>
       <div style={{ display: 'flex', gap: '16px' }}>
-        <FileText size={24} weight="duotone" style={{ color: 'var(--color-primary)' }} />
-        <Star size={24} weight="duotone" style={{ color: 'var(--color-accent)' }} />
-        <Users size={24} weight="duotone" style={{ color: 'var(--color-text-secondary)' }} />
+        <FileText size={24} style={{ color: 'var(--color-primary)' }} />
+        <Star size={24} style={{ color: 'var(--color-accent)' }} />
+        <Users size={24} style={{ color: 'var(--color-text-secondary)' }} />
       </div>
     </div>
   </div>

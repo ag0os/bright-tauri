@@ -90,7 +90,7 @@ export function ConfirmDeleteModal({
               flexShrink: 0,
             }}
           >
-            <Warning size={24} weight="duotone" style={{ color: 'var(--color-error)' }} />
+            <Warning size={24} style={{ color: 'var(--color-error)' }} />
           </div>
           <h2
             id={titleId}
@@ -169,7 +169,7 @@ export function ConfirmDeleteModal({
             }}
             type="button"
           >
-            <Trash className="icon icon-base" weight="duotone" />
+            <Trash className="icon icon-base" />
             {isDeleting ? 'Deleting...' : 'Delete'}
           </button>
         </div>

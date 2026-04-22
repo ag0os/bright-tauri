@@ -216,7 +216,7 @@ export function Settings() {
             onClick={handleResetToDefaults}
             title="Reset all settings to default values"
           >
-            <ArrowCounterClockwise size={18} weight="duotone" />
+            <ArrowCounterClockwise size={18} />
             Reset to Defaults
           </button>
         </div>

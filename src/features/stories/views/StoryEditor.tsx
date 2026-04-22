@@ -160,7 +160,7 @@ export function StoryEditor() {
       case 'saving':
         return (
           <div className="save-indicator saving">
-            <FloppyDisk size={16} weight="duotone" />
+            <FloppyDisk size={16} />
             <span>Saving...</span>
           </div>
         );
@@ -174,7 +174,7 @@ export function StoryEditor() {
       case 'error':
         return (
           <div className="save-indicator error">
-            <WarningCircle size={16} weight="duotone" />
+            <WarningCircle size={16} />
             <span>Error saving</span>
           </div>
         );
@@ -260,7 +260,7 @@ export function StoryEditor() {
             aria-label="Story settings"
             title="Story settings"
           >
-            <Gear size={18} weight="duotone" />
+            <Gear size={18} />
           </button>
 
           <button

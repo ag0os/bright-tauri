@@ -281,11 +281,11 @@ export function ElementDetailPage() {
               {element.favorite ? 'Favorited' : 'Favorite'}
             </button>
             <button type="button" className="btn btn-secondary btn-base" onClick={handleEdit}>
-              <PencilSimple className="icon icon-base" weight="duotone" />
+              <PencilSimple className="icon icon-base" />
               Edit
             </button>
             <button type="button" className="btn btn-secondary btn-base" onClick={handleDelete}>
-              <Trash className="icon icon-base" weight="duotone" />
+              <Trash className="icon icon-base" />
               Delete
             </button>
           </div>

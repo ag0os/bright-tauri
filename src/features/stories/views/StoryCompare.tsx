@@ -36,7 +36,7 @@ export function StoryCompare() {
 
       <div className="story-compare-content">
         <div className="story-info">
-          <Clock size={48} weight="duotone" />
+          <Clock size={48} />
           <h2>Coming Soon</h2>
           <p className="story-subtitle">
             Version comparison will be available in a future update. You'll be able to see

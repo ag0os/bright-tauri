@@ -22,7 +22,7 @@ export const StatsGridDashboard: React.FC = () => {
                 <div className="dashboard-1__stat-value">47,328</div>
               </div>
               <div className="dashboard-1__stat-change dashboard-1__stat-change--positive">
-                <TrendUp size={16} weight="duotone" />
+                <TrendUp size={16} />
                 <span>+2,450 this week</span>
               </div>
             </div>
@@ -41,7 +41,7 @@ export const StatsGridDashboard: React.FC = () => {
                 <div className="dashboard-1__stat-value">12 days</div>
               </div>
               <div className="dashboard-1__stat-change dashboard-1__stat-change--positive">
-                <Lightning size={16} weight="duotone" />
+                <Lightning size={16} />
                 <span>Keep it up!</span>
               </div>
             </div>
@@ -71,25 +71,25 @@ export const StatsGridDashboard: React.FC = () => {
                       title: 'Chapter 3: The Awakening',
                       meta: 'My Novel · Edited 2h ago',
                       status: 'Draft',
-                      icon: <FileText size={20} weight="duotone" />,
+                      icon: <FileText size={20} />,
                     },
                     {
                       title: 'Character Profile: Sarah Chen',
                       meta: 'My Novel · Edited 5h ago',
                       status: 'Complete',
-                      icon: <Users size={20} weight="duotone" />,
+                      icon: <Users size={20} />,
                     },
                     {
                       title: 'Outline: Part Two',
                       meta: 'My Novel · Edited yesterday',
                       status: 'Draft',
-                      icon: <FileText size={20} weight="duotone" />,
+                      icon: <FileText size={20} />,
                     },
                     {
                       title: 'Chapter 2: First Contact',
                       meta: 'My Novel · Edited 2 days ago',
                       status: 'Final',
-                      icon: <FileText size={20} weight="duotone" />,
+                      icon: <FileText size={20} />,
                     },
                   ].map((doc) => (
                     <div key={doc.title} className="dashboard-1__document-item">
@@ -116,12 +116,12 @@ export const StatsGridDashboard: React.FC = () => {
                     {
                       title: 'Downtown District',
                       meta: '8 locations',
-                      icon: <Star size={20} weight="duotone" />,
+                      icon: <Star size={20} />,
                     },
                     {
                       title: 'Tech Corporation HQ',
                       meta: '3 locations',
-                      icon: <Star size={20} weight="duotone" />,
+                      icon: <Star size={20} />,
                     },
                   ].map((doc) => (
                     <div key={doc.title} className="dashboard-1__document-item">
@@ -141,21 +141,21 @@ export const StatsGridDashboard: React.FC = () => {
                 <h3 className="dashboard-1__section-title">Quick Actions</h3>
                 <div className="dashboard-1__quick-actions">
                   <button type="button" className="dashboard-1__action-button">
-                    <Plus className="dashboard-1__action-icon" weight="duotone" />
+                    <Plus className="dashboard-1__action-icon" />
                     New Document
                   </button>
                   <button
                     type="button"
                     className="dashboard-1__action-button dashboard-1__action-button--secondary"
                   >
-                    <Users className="dashboard-1__action-icon" weight="duotone" />
+                    <Users className="dashboard-1__action-icon" />
                     New Character
                   </button>
                   <button
                     type="button"
                     className="dashboard-1__action-button dashboard-1__action-button--secondary"
                   >
-                    <Star className="dashboard-1__action-icon" weight="duotone" />
+                    <Star className="dashboard-1__action-icon" />
                     New Location
                   </button>
                 </div>

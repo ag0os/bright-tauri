@@ -28,5 +28,5 @@ const iconByType = {
 
 export function ElementTypeIcon({ type, size = 24 }: ElementTypeIconProps) {
   const Icon = type === 'custom' ? Package : iconByType[type];
-  return <Icon size={size} weight="duotone" />;
+  return <Icon size={size} />;
 }

@@ -30,13 +30,13 @@ const getContainerIcon = (type: string): React.ReactNode => {
 
   switch (type) {
     case 'novel':
-      return <Book className={iconClass} weight="duotone" />;
+      return <Book className={iconClass} />;
     case 'series':
-      return <Books className={iconClass} weight="duotone" />;
+      return <Books className={iconClass} />;
     case 'collection':
-      return <FolderOpen className={iconClass} weight="duotone" />;
+      return <FolderOpen className={iconClass} />;
     default:
-      return <FolderOpen className={iconClass} weight="duotone" />;
+      return <FolderOpen className={iconClass} />;
   }
 };
 
@@ -256,7 +256,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
                 title="Container settings"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Gear className="icon icon-base" weight="duotone" />
+                <Gear className="icon icon-base" />
               </button>
               <button
                 type="button"
@@ -265,7 +265,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
                 title="Delete container"
                 style={{ padding: 'var(--spacing-1)' }}
               >
-                <Trash className="icon icon-base" weight="duotone" />
+                <Trash className="icon icon-base" />
               </button>
             </div>
           )}
