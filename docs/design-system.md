@@ -1,533 +1,205 @@
-# Design System
+# Ink & Paper design system
+
+Bright uses **Ink & Paper**: warm ink surfaces, a single marigold accent, Newsreader for editorial reading, Geist for UI chrome, flat components, restrained motion, and hairline borders.
+
+## References
+
+- Agent skill: `.claude/skills/ink-and-paper/SKILL.md`
+- Exported source package: `docs/design-reference/`
+- Token source: `docs/design-reference/project/colors_and_type.css`
+
+`docs/design-reference/` is read-only. Re-export it if the upstream package changes. This document is the canonical prose reference for the production app.
+
+## Theme modes
+
+- **Dark** is the default mode from `:root`.
+- **Light** mode is enabled with `:root[data-theme="light"]` or `.theme-light`.
+- Every visual change must be checked in both modes: page background, surfaces, text hierarchy, borders, focus rings, selection color, and interactive states.
+- Use the shared theme tokens. Do not hard-code one-off dark or light values inside components.
+
+## Native token table
+
+### Surfaces, text, accent, and state
+
+| Token | Dark default | Light mode | Purpose |
+| --- | --- | --- | --- |
+| `--bg` | `#15120E` | `#FAF7F1` | App background |
+| `--bg-deep` | `#0C0A07` | `#F5EFE4` | Deep backdrop areas |
+| `--surface` | `#1F1B15` | `#FFFFFF` | Default panel/card surface |
+| `--surface-2` | `#2A251D` | `#F5EFE4` | Nested surface |
+| `--surface-raised` | `#3A3328` | `#FFFFFF` | Raised panels and menus |
+| `--surface-hover` | color-mix from `--surface-2` | color-mix from `--ink-100` | Hover fill |
+| `--surface-active` | color-mix from `--surface-2` | color-mix from `--ink-100` | Pressed/selected fill |
+| `--scrim` | `rgba(12, 10, 7, 0.6)` | `rgba(21, 18, 14, 0.4)` | Modal backdrop |
+| `--fg1` | `var(--ink-100)` | `#1A1712` | Primary text |
+| `--fg2` | `var(--ink-300)` | `var(--ink-600)` | Secondary text |
+| `--fg3` | `var(--ink-400)` | `var(--ink-500)` | Tertiary/meta text |
+| `--fg-muted` | `var(--ink-500)` | `var(--ink-400)` | Placeholder/subtle text |
+| `--fg-disabled` | `var(--ink-600)` | `var(--ink-300)` | Disabled text |
+| `--fg-on-accent` | `var(--ink-950)` | `#FFFFFF` | Text on primary accent |
+| `--accent` | `#D97706` | `#B45309` | Primary accent |
+| `--accent-hover` | `#E29A22` | `#D97706` | Hovered primary action |
+| `--accent-active` | `#B45309` | `#8B3F0A` | Pressed primary action |
+| `--accent-soft` | marigold at `18%` | marigold at `14%` | Selected/soft fill |
+| `--accent-subtle` | marigold at `10%` | marigold at `8%` | Very light emphasis |
+| `--success` | `#4A9C73` | `#2F7A53` | Success text/icon |
+| `--success-soft` | moss at `18%` | moss at `18%` | Success fill |
+| `--error` | `#D15A3C` | `#B0391F` | Error text/icon |
+| `--error-soft` | terracotta at `18%` | terracotta at `18%` | Error fill |
+| `--warning` | `#D99944` | `#B45309` | Warning text/icon |
+| `--warning-soft` | amber at `18%` | amber at `18%` | Warning fill |
+| `--info` | `#6E8CC0` | `#4C6EA8` | Informational text/icon |
+| `--info-soft` | ink blue at `18%` | ink blue at `18%` | Informational fill |
+| `--border` | `var(--fg1)` at `8%` | `var(--fg1)` at `10%` | Default hairline border |
+| `--border-strong` | `var(--fg1)` at `16%` | `var(--fg1)` at `20%` | Stronger separator |
+| `--border-accent` | `var(--accent)` | `var(--accent)` | Accent border |
+| `--ring` | `var(--accent)` | `var(--accent)` | Focus ring |
+| `--selection` | marigold at `30%` | marigold at `25%` | Text selection |
+
+### Fonts and weights
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--font-display` | `"Newsreader", "Iowan Old Style", "Hoefler Text", Georgia, serif` | Reading text and editorial headings |
+| `--font-body` | `"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif` | UI chrome, labels, controls |
+| `--font-mono` | `"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace` | Counts, timestamps, code-like data |
+| `--fw-regular` | `400` | Default body weight |
+| `--fw-medium` | `500` | Controls, emphasized UI text |
+| `--fw-semibold` | `600` | Section headings |
+| `--fw-bold` | `700` | Strong emphasis |
+
+### Font-size scale
+
+| Token | Value |
+| --- | --- |
+| `--fs-2xs` | `12px` |
+| `--fs-xs` | `13px` |
+| `--fs-sm` | `14px` |
+| `--fs-base` | `15px` |
+| `--fs-md` | `17px` |
+| `--fs-lg` | `19px` |
+| `--fs-xl` | `22px` |
+| `--fs-2xl` | `28px` |
+| `--fs-3xl` | `36px` |
+| `--fs-4xl` | `48px` |
+| `--fs-5xl` | `64px` |
+
+### Line-height and tracking scale
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--lh-tight` | `1.15` | H1/H2 |
+| `--lh-snug` | `1.3` | H3/H4 |
+| `--lh-normal` | `1.5` | UI body copy |
+| `--lh-reading` | `1.7` | Reading/editor text |
+| `--tracking-tight` | `-0.02em` | Display headings |
+| `--tracking-normal` | `0` | Default |
+| `--tracking-wide` | `0.04em` | Rare wide-label use |
+
+### Layout scale
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--layout-topbar-h` | `48px` | Top bar height |
+| `--layout-sidebar-w` | `280px` | Sidebar width |
+| `--layout-content-w` | `1200px` | Wide content max width |
+| `--layout-reading-w` | `720px` | Reading/editor column width |
+| `--layout-gutter` | `24px` | Standard page gutter |
 
-This document describes the design system for Bright, a desktop writing application built with Tauri, React, and TypeScript.
+### Radius scale
 
-## Overview
+| Token | Value | Use |
+| --- | --- | --- |
+| `--radius-xs` | `4px` | Tags and small pills |
+| `--radius-sm` | `6px` | Compact controls |
+| `--radius-md` | `8px` | Buttons, inputs, menus |
+| `--radius-lg` | `12px` | Cards, modals |
+| `--radius-xl` | `16px` | Major panels |
+| `--radius-full` | `999px` | Capsule chips |
 
-The design system follows a token-first, atomic design methodology, progressing from foundational design tokens through atoms, organisms, and templates. All components are optimized for desktop applications with a focus on writing and content creation workflows.
+### Shadow scale
 
-## Quick Reference
+| Token | Value | Use |
+| --- | --- | --- |
+| `--shadow-xs` | `0 1px 0 rgba(0, 0, 0, 0.04)` | Header seam |
+| `--shadow-sm` | `0 1px 2px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.06)` | Subtle hover depth |
+| `--shadow-md` | `0 6px 18px -6px rgba(0, 0, 0, 0.30), 0 2px 4px rgba(0, 0, 0, 0.12)` | Menus and popovers |
+| `--shadow-lg` | `0 18px 40px -12px rgba(0, 0, 0, 0.45), 0 6px 12px rgba(0, 0, 0, 0.18)` | Modals |
+| `--shadow-inset` | `inset 0 1px 0 rgba(0, 0, 0, 0.08)` | Filled inputs |
 
-- **Location**: `src/design-system/`
-- **Storybook**: Run `npm run storybook` to view components at `http://localhost:6006`
-- **CSS Methodology**: Design tokens implemented as CSS custom properties
-- **Component Library**: React components with TypeScript
+## Typography
 
-## Design Decisions
+### UI chrome
 
-### Phase 1: Foundations
+- Use `var(--font-body)` (Geist) for controls, navigation, metadata, and app chrome.
+- UI body copy sits on the main UI scale: `var(--fs-base)` with `var(--lh-normal)`.
+- H4 and smaller utility headings stay on Geist to keep the interface quiet and functional.
 
-#### CSS Reset - Modern Reset
-**File**: `src/design-system/tokens/reset/modern-reset.css`
+### Reading surface
 
-A modern, opinionated CSS reset based on best practices from Pawel Grzybek. Automatically imported in the application entry point.
+- Use `var(--font-display)` (Newsreader) for story text and editorial headings.
+- Canonical reading values:
+  - `font-family: var(--font-display)`
+  - `font-size: var(--fs-md)`
+  - `line-height: var(--lh-reading)`
+  - `max-width: var(--layout-reading-w)`
+- Keep the reading column visibly distinct from chrome so writing feels like paper on a desk, not text inside a dashboard.
 
-**Key Features**:
-- **Universal Box-Sizing**: `box-sizing: border-box` for consistent sizing
-- **Zero Margins/Padding**: Removes browser defaults for predictable spacing
-- **Improved Typography**:
-  - `text-wrap: balance` for headings (prevents orphans)
-  - `text-wrap: pretty` for paragraphs (better line breaks)
-- **Enhanced Font Rendering**: `-webkit-font-smoothing: antialiased` on macOS
-- **Light/Dark Mode Support**: `color-scheme: light dark` enables native browser themes
-- **Accessibility**: Respects `prefers-reduced-motion` for animations
-- **RTL Support**: Google Translate RTL fix included
-- **Modern List Styling**: Better default positioning with logical properties
+## Iconography
 
-**Browser Features**:
-- Hanging punctuation for better typography
-- Interpolate-size for smoother animations (when motion is enabled)
-- Future-proofed with commented `:heading` selector
+- Use **Phosphor** icons.
+- Default to regular weight; omit `weight` unless a stateful exception is needed.
+- Use `weight="fill"` only for active or selected states.
+- Do **not** use `weight="duotone"`.
+- Icons inherit `currentColor`; state changes come from text/color tokens, not decorative multicolor fills.
 
-**Usage**: Automatically imported - no action needed. The reset is loaded first before all other styles to provide a consistent foundation.
+## Component patterns
 
-**CSS Layer**: Uses `@layer reset` for proper cascade control, allowing easy overrides when needed.
+### Surfaces and cards
 
----
+- Cards are flat by default.
+- Use a warm surface token plus a `1px` hairline border.
+- Interactive cards may add `--shadow-sm` on hover, but **do not** translate or scale on hover.
+- Use `12px` radius for cards and `16px` for major panels.
 
-#### Colors - Modern Indigo
-**File**: `src/design-system/tokens/colors/modern-indigo.css`
+### Buttons, inputs, and controls
 
-Professional blue/indigo palette with warm amber accents, optimized for long writing sessions.
+- Use `8px` radius for most controls.
+- Focus-visible uses the accent ring; do not replace focus with a border-only treatment.
+- Hover and press should change fill, border, or opacity first. Avoid dramatic motion.
 
-**Color Palette**:
-- **Primary**: Indigo (#4F46E5, #6366F1, #818CF8)
-- **Secondary**: Amber (#F59E0B, #FBBF24, #FCD34D)
-- **Neutrals**: Gray scale from #111827 to #F9FAFB
-- **Semantic**: Success (green), warning (amber), error (red), info (blue)
+### Background treatment
 
-**Accessibility**: All text colors meet WCAG AA contrast requirements (4.5:1 for normal text, 3:1 for large text).
+- The app-level background can carry the paper-grain treatment from the Ink & Paper package.
+- Do not apply grain to every nested component.
+- No glossy gradients or cold SaaS-style chrome.
 
-**Use Cases**:
-- Professional writing tools
-- Dashboard analytics
-- Long reading sessions
-- Desktop-first applications
+## Voice and tone
 
----
+Voice and tone rules live in `docs/design-reference/README.md`, which points to the exported package guidance in `docs/design-reference/project/README.md`.
 
-#### Typography - Classic Serif
-**File**: `src/design-system/tokens/typography/classic-serif.css`
-
-Elegant serif headings paired with clean sans-serif body text, using a 1.250 (Major Third) type scale.
+Use these defaults in UI copy:
 
-**Font Families**:
-- **Headings**: Playfair Display (serif, elegant, authoritative)
-- **Body**: System font stack (-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, etc.)
-- **Monospace**: SF Mono, Consolas, Monaco, 'Courier New'
-
-**Type Scale** (1.250 ratio):
-- `--font-size-xs`: 0.64rem (10.24px)
-- `--font-size-sm`: 0.8rem (12.8px)
-- `--font-size-base`: 1rem (16px)
-- `--font-size-lg`: 1.25rem (20px)
-- `--font-size-xl`: 1.563rem (25px)
-- `--font-size-2xl`: 1.953rem (31.25px)
-- `--font-size-3xl`: 2.441rem (39.06px)
-- `--font-size-4xl`: 3.052rem (48.83px)
+- Quiet, warm, and craft-oriented.
+- Sentence case everywhere.
+- Conversational, but never chirpy.
+- Present tense and active voice.
+- No emoji in product UI.
+- Treat the user as a working writer, not a generic SaaS customer.
 
-**Heading Sizes**:
-- H1: 2.441rem (bold)
-- H2: 1.953rem (semibold)
-- H3: 1.563rem (semibold)
-- H4: 1.25rem (semibold)
-- H5: 1rem (semibold)
-- H6: 1rem (medium)
-
-**Use Cases**:
-- Literary applications
-- Long-form content
-- Professional publishing tools
-- Editorial interfaces
-
----
-
-#### Icons - Phosphor Icons (Duotone)
-**File**: `src/design-system/tokens/icons/phosphor.css`
-
-Modern, versatile icon library with duotone two-tone style for depth and visual interest.
-
-**Features**:
-- 6 weight variants: thin, light, regular, bold, fill, duotone
-- Duotone style adds depth with two-tone opacity
-- 7000+ icons available
-- Consistent 256x256 grid for pixel-perfect scaling
-- React component library: `@phosphor-icons/react`
-
-**Sizes**:
-- XS: 12px
-- Small: 16px
-- Base: 20px
-- Large: 24px
-- XL: 32px
-- 2XL: 48px
-
-**Installation**:
-```bash
-npm install @phosphor-icons/react
-```
-
-**Usage**:
-```typescript
-import { FileText, Users, Star } from '@phosphor-icons/react';
-
-<FileText size={20} weight="duotone" />
-<Star size={24} weight="fill" />  // For filled state (e.g., favorited)
-```
-
----
-
-### Phase 2: Atoms
-
-#### Buttons - Minimal Squared
-**File**: `src/design-system/tokens/atoms/button/minimal-squared.css`
-
-Clean, minimal buttons with squared corners and compact spacing.
-
-**Design Features**:
-- **Border Radius**: 4px (clean, minimal aesthetic)
-- **Padding**: 8px/16px (compact, dense interfaces)
-- **Focus Ring**: 2px subtle ring
-- **Min Height**: 40px base size
-- **Font Weight**: Medium (lighter feel)
-
-**Variants**:
-- **Primary**: Filled with primary color (`btn-primary`)
-- **Secondary**: Outlined with border (`btn-secondary`)
-- **Outline**: Bordered with transparent background (`btn-outline`)
-- **Ghost**: No background or border (`btn-ghost`)
-
-**Sizes**:
-- Small: 32px min-height (`btn-sm`)
-- Base: 40px min-height (`btn-base`)
-- Large: 48px min-height (`btn-lg`)
-
-**States**:
-- Default
-- Hover (subtle background change)
-- Active/Pressed (slightly darker)
-- Disabled (reduced opacity, no interaction)
-- Focus (2px ring for keyboard navigation)
-
-**Usage**:
-```tsx
-<button className="btn btn-primary btn-base">Save</button>
-<button className="btn btn-outline btn-sm">Cancel</button>
-<button className="btn btn-ghost btn-lg">Delete</button>
-```
-
----
-
-#### Inputs - Filled Background
-**File**: `src/design-system/tokens/atoms/input/filled-background.css`
-
-Material Design-inspired inputs with filled background and no default border.
-
-**Design Features**:
-- **Background**: Gray fill (#f3f4f6)
-- **Border**: None by default, 2px primary border on focus
-- **Border Radius**: 6px
-- **Label**: Positioned above input
-- **Min Height**: 44px (accessible touch target)
-
-**States**:
-- Default (gray fill, no border)
-- Focus (primary border appears)
-- Error (red border and text)
-- Disabled (reduced opacity)
-- Required (asterisk indicator)
-
-**Features**:
-- Helper text support
-- Prefix/suffix icon slots
-- Error message display
-- Size variants (sm, base, lg)
-
-**Usage**:
-```tsx
-<div className="input-group input-5">
-  <label className="input-label" htmlFor="email">
-    Email Address
-    <span className="required">*</span>
-  </label>
-  <div className="input-wrapper">
-    <input
-      id="email"
-      type="email"
-      className="input-field input-base"
-      placeholder="you@example.com"
-    />
-  </div>
-  <div className="input-helper">Enter your email address</div>
-</div>
-```
-
----
-
-### Phase 3: Organisms
-
-#### Cards - Elevated Shadow
-**File**: `src/design-system/tokens/organisms/card/elevated-shadow.css`
-
-Shadow-based depth hierarchy with no borders for clean, modern appearance.
-
-**Design Features**:
-- **Border Radius**: 8px
-- **Shadows**: Three levels (sm, base, lg)
-- **Hover**: Lift effect (-2px transform + larger shadow)
-- **No Borders**: Clean, minimal look
-- **Padding**: 16px/24px/32px
-
-**Shadow Levels**:
-- **Small**: `0 1px 2px rgba(0,0,0,0.05)`
-- **Base**: `0 4px 6px rgba(0,0,0,0.1)`
-- **Large**: `0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05)`
-
-**Variants**:
-- Basic card (static)
-- Interactive card (hover effects)
-- Stat card (with metrics)
-
-**Structure**:
-```tsx
-<div className="card-1">
-  <div className="card-1__header">
-    <h3 className="card-1__title">Card Title</h3>
-  </div>
-  <div className="card-1__body">
-    Card content goes here
-  </div>
-  <div className="card-1__footer">
-    <button className="btn btn-primary btn-base">Action</button>
-  </div>
-</div>
-```
-
----
-
-#### Navigation - Minimal Top Bar
-**File**: `src/design-system/organisms/navigation/minimal-topbar.css`
-
-Slim single top bar for focused, distraction-free writing interfaces.
-
-**Design Features**:
-- **Height**: 48px (maximum content space)
-- **Layout**: Three-column (left, center, right)
-- **Centered**: Breadcrumb navigation
-- **Minimal**: Essential actions only
-- **Auto-save**: Status indicator
-
-**Layout Sections**:
-- **Left**: Navigation controls (menu, back/forward)
-- **Center**: Breadcrumb context
-- **Right**: Actions (search, command palette, new item)
-
-**Features**:
-- Auto-save indicator with animation
-- Breadcrumb trail (project → section → document)
-- Icon-only buttons for common actions
-- Optional auto-hide on scroll
-
-**Use Cases**:
-- Writing applications (Notion-style)
-- Content editors
-- Distraction-free interfaces
-- Desktop-first tools
-
----
-
-### Phase 4: Templates
-
-#### Dashboard - Stats Grid
-**File**: `src/design-system/templates/dashboard/stats-grid.css`
-
-Analytics-focused dashboard with comprehensive data visibility.
-
-**Layout Structure**:
-- **Top Stats Grid**: 4 key metrics in card grid
-- **Main Content**: Two-column layout
-  - Primary: Recent documents, Universe elements
-  - Sidebar: Quick actions, Writing goal progress
-- **Navigation**: Minimal top bar (48px)
-
-**Key Features**:
-- Prominent stats cards with trend indicators
-- Document list with status badges
-- Quick action buttons
-- Visual progress indicators
-- High information density
-- Organized sections with "View all" links
-
-**Information Density**: High - shows maximum information at once without requiring clicks.
-
-**Use Case**:
-Perfect for users who:
-- Track multiple projects simultaneously
-- Want to see progress metrics at a glance
-- Need quick access to recent work
-- Prefer traditional dashboard layouts with clear organization
-
----
-
-## File Structure
-
-```
-src/design-system/
-├── tokens/
-│   ├── reset/
-│   │   └── modern-reset.css
-│   ├── colors/
-│   │   └── modern-indigo.css
-│   ├── typography/
-│   │   └── classic-serif.css
-│   ├── icons/
-│   │   └── phosphor.css
-│   └── atoms/
-│       ├── button/
-│       │   └── minimal-squared.css
-│       └── input/
-│           └── filled-background.css
-├── organisms/
-│   ├── card/
-│   │   ├── elevated-shadow.css
-│   │   ├── Card.tsx
-│   │   └── Card.stories.tsx
-│   └── navigation/
-│       ├── minimal-topbar.css
-│       ├── Navigation.tsx
-│       └── Navigation.stories.tsx
-├── templates/
-│   └── dashboard/
-│       ├── stats-grid.css
-│       ├── Dashboard.tsx
-│       └── Dashboard.stories.tsx
-└── stories/
-    ├── ColorTokens.stories.tsx
-    ├── TypographyTokens.stories.tsx
-    ├── IconTokens.stories.tsx
-    ├── ButtonTokens.stories.tsx
-    ├── InputTokens.stories.tsx
-    └── CardTokens.stories.tsx
-```
-
----
-
-## Using the Design System
-
-### 1. Import CSS Tokens
-
-Import the design tokens you need in your component or story:
-
-```typescript
-import '../tokens/colors/modern-indigo.css';
-import '../tokens/typography/classic-serif.css';
-import '../tokens/icons/phosphor.css';
-import '../tokens/atoms/button/minimal-squared.css';
-```
-
-### 2. Use CSS Custom Properties
-
-All tokens are available as CSS custom properties (CSS variables):
-
-```css
-.my-component {
-  color: var(--color-primary);
-  font-family: var(--typography-body-font);
-  font-size: var(--font-size-base);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-4);
-}
-```
-
-### 3. Use Pre-built Components
-
-Import and use the React components:
-
-```typescript
-import { MinimalTopBar } from '@/design-system/organisms/navigation/Navigation';
-import { StatsGridDashboard } from '@/design-system/templates/dashboard/Dashboard';
-
-function App() {
-  return (
-    <>
-      <MinimalTopBar />
-      <StatsGridDashboard />
-    </>
-  );
-}
-```
-
-### 4. Apply Utility Classes
-
-Use the predefined CSS classes:
-
-```tsx
-<button className="btn btn-primary btn-base">
-  Save Changes
-</button>
-
-<div className="input-group input-5">
-  <label className="input-label">Email</label>
-  <input className="input-field input-base" type="email" />
-</div>
-```
-
----
-
-## Storybook Development
-
-### Running Storybook
-
-```bash
-npm run storybook
-```
-
-Storybook will open at `http://localhost:6006`
-
-### Story Organization
-
-Stories are organized hierarchically:
-
-1. **Foundations**: Colors, Typography, Icons
-2. **Atoms**: Buttons, Inputs
-3. **Organisms**: Cards, Navigation
-4. **Templates**: Dashboard
-
-### Viewing Components
-
-Navigate through the sidebar to explore each component:
-- See all variants and states
-- View accessibility features
-- Test interactive behaviors
-- Copy code examples
-
----
-
-## Accessibility
-
-All components meet WCAG AA standards:
-
-- ✅ **Color Contrast**: 4.5:1 for normal text, 3:1 for large text
-- ✅ **Focus Indicators**: Visible focus rings on all interactive elements
-- ✅ **Keyboard Navigation**: Full keyboard support
-- ✅ **Touch Targets**: Minimum 44px height for all interactive elements
-- ✅ **Screen Reader Support**: Proper ARIA labels and semantic HTML
-
----
-
-## Design Principles
-
-1. **Token-First**: Start with design tokens, build up to components
-2. **Consistency**: Reuse tokens across all components
-3. **Accessibility**: WCAG AA compliance by default
-4. **Desktop-Optimized**: Designed for desktop writing applications
-5. **Distraction-Free**: Minimal chrome, maximum content focus
-6. **Clarity**: Clear visual hierarchy and organization
-
----
-
-## Extending the Design System
-
-### Adding New Tokens
-
-1. Create new CSS file in appropriate tokens directory
-2. Define CSS custom properties
-3. Import in components/stories that need them
-4. Document in this file
-
-### Adding New Components
-
-1. Create component in appropriate directory (atoms/organisms/templates)
-2. Create corresponding CSS file
-3. Create Storybook story file
-4. Import design tokens
-5. Test accessibility
-6. Document usage
-
-### Contributing
-
-When adding or modifying components:
-- Maintain consistency with existing design tokens
-- Test all states (default, hover, active, disabled, focus)
-- Verify WCAG AA contrast ratios
-- Add Storybook stories showing all variants
-- Update this documentation
-
----
-
-## Resources
-
-- **Storybook**: `http://localhost:6006` (when running)
-- **Phosphor Icons**: https://phosphoricons.com
-- **Color Contrast Checker**: https://webaim.org/resources/contrastchecker/
-- **WCAG Guidelines**: https://www.w3.org/WAI/WCAG21/quickref/
-
----
-
-## Version History
-
-- **v1.0** (2025-10-08): Initial design system with all phases complete
-  - Phase 1: Foundations (Colors, Typography, Icons)
-  - Phase 2: Atoms (Buttons, Inputs)
-  - Phase 3: Organisms (Cards, Navigation)
-  - Phase 4: Templates (Dashboard)
+## Alias retirement
+
+Legacy aliases from the previous token layer are being retired in **Stage 5** of the Ink & Paper migration cleanup.
+
+- Do not introduce new `var(--color-*)`, `var(--typography-*)`, `var(--font-family-*)`, `var(--font-size-*)`, `var(--line-height-*)`, or `var(--font-weight-*)` references.
+- New code should use the native tokens documented above.
+- For current status and agent-specific guidance, load `.claude/skills/ink-and-paper/SKILL.md`.
+
+## Working rules
+
+1. Start with native tokens.
+2. Test both theme modes.
+3. Keep UI chrome in Geist and reading text in Newsreader.
+4. Keep icons regular; reserve `fill` for active state.
+5. Prefer flat surfaces, hairline borders, and restrained motion.
+6. If a new pattern is needed, align it with the exported reference package before implementation.

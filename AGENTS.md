@@ -89,9 +89,9 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 ### Design system
 
 - Token-first, CSS custom properties, WCAG AA. Do not introduce external component libraries.
-- Use tokens (`var(--color-primary)`) and utility classes (`className="btn btn-primary btn-base"`) over one-off styles.
-- Add new variants as Storybook stories.
-- Full reference: `docs/design-system.md`.
+- The system is **Ink & Paper**: warm ink + marigold, Newsreader + Geist, Phosphor regular weight, flat cards with hairline borders.
+- **For any UI/CSS/component work, load `/skill:ink-and-paper` first** — it has the native token table, iconography policy, editor reading values, and alias-retirement status.
+- Full reference: `docs/design-system.md`. Exported source of truth: `docs/design-reference/`.
 
 ### Adding a Tauri command
 
