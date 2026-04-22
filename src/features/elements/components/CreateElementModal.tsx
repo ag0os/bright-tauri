@@ -5,7 +5,18 @@
  * Loads suggested attributes from element-templates.json based on selected template.
  */
 
-import { X } from '@phosphor-icons/react';
+import {
+  Bird,
+  Buildings,
+  Calendar,
+  Car,
+  Lightbulb,
+  MapPin,
+  Package,
+  User,
+  X,
+} from '@phosphor-icons/react';
+import type React from 'react';
 import { type FormEvent, useState } from 'react';
 import { useElementsStore } from '@/features/elements/stores/useElementsStore';
 import { useUniverseStore } from '@/features/universe/stores/useUniverseStore';
@@ -38,15 +49,25 @@ type TemplateKey = Exclude<ElementType, 'custom'>;
 
 const templates: Record<TemplateKey, TemplateData> = elementTemplatesData.templates;
 
-const templateIcons: Record<TemplateKey, string> = {
-  character: '👤',
-  location: '📍',
-  vehicle: '🚗',
-  item: '📦',
-  organization: '🏛️',
-  creature: '🐉',
-  event: '✨',
-  concept: '💡',
+const getTemplateIcon = (type: TemplateKey): React.ReactNode => {
+  switch (type) {
+    case 'character':
+      return <User size={32} weight="duotone" />;
+    case 'location':
+      return <MapPin size={32} weight="duotone" />;
+    case 'vehicle':
+      return <Car size={32} weight="duotone" />;
+    case 'item':
+      return <Package size={32} weight="duotone" />;
+    case 'organization':
+      return <Buildings size={32} weight="duotone" />;
+    case 'creature':
+      return <Bird size={32} weight="duotone" />;
+    case 'event':
+      return <Calendar size={32} weight="duotone" />;
+    case 'concept':
+      return <Lightbulb size={32} weight="duotone" />;
+  }
 };
 
 export function CreateElementModal({ onClose }: CreateElementModalProps) {
@@ -256,7 +277,9 @@ export function CreateElementModal({ onClose }: CreateElementModalProps) {
                   }}
                   type="button"
                 >
-                  <span style={{ fontSize: '32px', flexShrink: 0 }}>{templateIcons[key]}</span>
+                  <span style={{ flexShrink: 0, color: 'var(--color-primary)' }}>
+                    {getTemplateIcon(key)}
+                  </span>
                   <span
                     style={{
                       fontFamily: 'var(--typography-heading-font)',
