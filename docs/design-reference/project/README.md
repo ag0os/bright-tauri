@@ -4,7 +4,7 @@
 
 Bright is a desktop app (Tauri v2 + React + TypeScript, SQLite backend) that helps writers and creators develop long-form work — novels, series, screenplays, scenes, poems — alongside a "universe" of supporting context (characters, locations, vehicles, items, organizations, creatures, events, concepts). Content is organized by **Containers** (Series → Novels → Chapters) and **Stories** (the actual writing), with a database-versioning model that treats named alternate takes ("Alternate Ending") and automatic snapshots as first-class citizens.
 
-This design system modernizes Bright's original look. The old system — deep indigo dark theme, Playfair Display headings, small-radius buttons — read as generic SaaS. The new system is **Ink & Paper**: warm neutrals, a single saturated marigold accent, a distinctive editorial serif, and restrained motion. It's meant to feel like a fountain pen rather than a dashboard.
+This design system modernizes Bright's original look. The old system — a cool indigo dark theme, a high-contrast display serif, and small-radius buttons — read as generic SaaS. The new system is **Ink & Paper**: warm neutrals, a single saturated marigold accent, a distinctive editorial serif, and restrained motion. It's meant to feel like a fountain pen rather than a dashboard.
 
 ---
 
@@ -37,7 +37,7 @@ No Figma was provided.
 | Old | Why it was tired | New |
 |---|---|---|
 | `#1e1b4b` indigo-950 background + indigo-400 primary | Generic "dark SaaS" — every startup has this palette | Warm ink (`#15120E`) background, marigold (`#D97706`) as the single accent |
-| Playfair Display headings | Over-indexed on "creative writing app" cliché; high-contrast strokes feel dated | **Newsreader** (Google's variable serif) — optically refined, distinctively editorial |
+| High-contrast display-serif headings | Over-indexed on "creative writing app" cliché; sharp contrast feels dated | **Newsreader** (Google's variable serif) — optically refined, distinctively editorial |
 | System sans body | Default-feeling | **Geist** — modern, open, pairs cleanly with a serif |
 | 4px button radius | Jagged against a soft content surface | 8px standard, 12px cards, 999px pills |
 | Purple focus rings, purple status pills, purple hover | Monochromatic fatigue | Neutral hovers, accent only for primary actions and focus |
@@ -212,7 +212,7 @@ Bright's copy is **quiet, warm, and craft-oriented**. It treats the user as a wo
 
 ## Font substitutions
 
-No font files were shipped with the codebase — typography was stack-based (`"Playfair Display", Georgia, serif` and `-apple-system, ...`). The new system loads **Newsreader**, **Geist**, and **JetBrains Mono** from Google Fonts CDN. No local `.ttf` files are needed unless the user wants offline builds.
+No font files were shipped with the codebase — typography was stack-based (a generic display-serif stack plus `-apple-system, ...`). The new system loads **Newsreader**, **Geist**, and **JetBrains Mono** from Google Fonts CDN. No local `.ttf` files are needed unless the user wants offline builds.
 
 ⚠️ **If you want offline/embedded fonts**, drop the following TTF/WOFF2 files into `fonts/` and uncomment the local `@font-face` blocks in `colors_and_type.css`:
 - Newsreader (Regular 400, Italic 400, Medium 500, SemiBold 600, Bold 700)

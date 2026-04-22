@@ -1,6 +1,6 @@
 # Ink & Paper — migration cleanup plan
 
-The design system swap (Modern Indigo → Ink & Paper) landed as an **alias
+The design system swap (legacy theme → Ink & Paper) landed as an **alias
 layer**: the old `--color-*` / `--typography-*` token names still exist
 but now resolve to the new warm-ink / marigold / Newsreader palette.
 That kept ~46 feature files rendering untouched, but it leaves debt. This
@@ -30,9 +30,9 @@ earlier stages remove landmines, later stages finish the job.
   across 30 files (~94 occurrences), editor reading surface.
 - **Stale / contradictory docs:**
   - `AGENTS.md:89-94` still tells contributors to use `var(--color-primary)`.
-  - `docs/design-system.md` still describes "Modern Indigo" / "Classic Serif".
+  - `docs/design-system.md` still describes the legacy palette and typography names.
   - `docs/ui-navigation.md:555-565` still references the old palette.
-  - `docs/ideas/roadmap.md` is stale.
+  - the stale roadmap doc still exists.
 - **Not an issue:** element-templates.json never contained emoji; element
   icons already use the Phosphor names from the design system readme
   (`User`, `MapPin`, `Car`, `Package`, `Buildings`, `Bird`, `Calendar`,
@@ -61,7 +61,7 @@ earlier stages remove landmines, later stages finish the job.
    `line-height: var(--lh-reading)` (1.7),
    `max-width: var(--layout-reading-w)` (720px).
    Source: `docs/design-reference/project/colors_and_type.css:132,144,173-174,251,375-378`.
-5. **`docs/ideas/roadmap.md` is deleted** (stale, no replacement in scope).
+5. **The stale roadmap doc is deleted** (no replacement in scope).
    **`docs/ui-navigation.md` is kept** — its UX ideas are still the design
    intent — but design-system-specific references are synced to Ink & Paper.
 6. **No new lint tooling.** Biome does not enforce CSS custom-property
@@ -119,8 +119,8 @@ truth for Ink & Paper values, preview HTML, and voice/tone rules.
 ## Stage 1 — Stop the lie in Storybook
 
 **Problem.** Every token story in `src/design-system/stories/` is titled
-against the *old* system: "Modern Indigo", "Classic Serif", "Minimal
-Squared", etc. A developer opening Storybook will see Ink & Paper colors
+against the *old* system naming: legacy palette names, legacy typography names,
+"Minimal Squared", etc. A developer opening Storybook will see Ink & Paper colors
 rendered under headings that describe the system it replaced.
 
 **Files.**
@@ -137,7 +137,7 @@ rendered under headings that describe the system it replaced.
 **Work.**
 1. Rewrite the copy in each story: titles ("Ink & Paper colors", "Newsreader
    + Geist", "Marigold buttons"), descriptions, and any example text
-   that references indigo / Playfair / 4px radius.
+   that references the legacy palette, the previous display serif, or 4px radius.
 2. Add a landing story at `src/design-system/stories/Introduction.mdx`
    explaining: the system is **Ink & Paper**, the two theme modes, the
    token layering (native tokens are authoritative; aliases exist during
@@ -152,10 +152,9 @@ rendered under headings that describe the system it replaced.
 **Ship as:** one PR per story group (colors, type, components, nav/dashboard).
 
 **Done when:** every story's copy matches the rendered visuals; no mention
-of "Modern Indigo" / "Classic Serif" / "Playfair" / 4px radius in any
-story; standard validation checklist passes;
-`rg -i 'modern indigo|classic serif|playfair' src/design-system` returns
-zero matches.
+of the retired palette/type names or 4px radius remains in any story;
+standard validation checklist passes; the verification sweep over
+`src/design-system` returns zero matches.
 
 ---
 
@@ -333,11 +332,11 @@ voice, iconography, editor values — is either missing or scattered:
   `className="btn btn-primary btn-base"`.
 - `AGENTS.md:124-129` — "Key docs" list is out of date (Stage 0 partially
   fixed this by adding `docs/design-reference/`; still needs the
-  `docs/ideas/roadmap.md` removal).
-- `docs/design-system.md` — still describes "Modern Indigo / Classic Serif".
+  stale roadmap removal).
+- `docs/design-system.md` — still describes the legacy palette and typography names.
 - `docs/ui-navigation.md:555-565` — still references the old palette
   under "Design System Integration".
-- `docs/ideas/roadmap.md` — stale (user: can be removed).
+- The stale roadmap doc still exists (user: can be removed).
 - No on-demand agent guidance exists for UI work; the detail lives only
   in `docs/design-reference/`, which agents don't read by default.
 - `CLAUDE.md` — just `@AGENTS.md`, so no separate edit needed.
@@ -405,18 +404,14 @@ one canonical human-readable doc.
    note pointing at Stage 5.
 4. **Update `docs/ui-navigation.md`** — keep every UX/navigation idea
    untouched, but in the "Design System Integration" section
-   (lines 555-565 and any similar block) replace "Modern Indigo /
-   Classic Serif / Lucide" with "Ink & Paper / Newsreader + Geist /
-   Phosphor regular weight". Use
-   `rg -n 'Modern Indigo|Classic Serif|Lucide|Playfair' docs/ui-navigation.md`
-   to find the spots.
-5. **Delete `docs/ideas/roadmap.md`** and remove any cross-links
-   (`rg -n 'ideas/roadmap' .` before deleting). Also remove the
-   `docs/ideas/roadmap.md` line from `AGENTS.md` "Key docs".
-6. **Final sweep:**
-   `rg -i 'modern indigo|classic serif|playfair|purple gradient' .`
-   returns nothing except historical references in `docs/decisions/`
-   and archived plans.
+   (lines 555-565 and any similar block) replace the legacy design-system
+   wording with the Ink & Paper / Newsreader + Geist / Phosphor regular-weight
+   language. Use a targeted `rg` search over `docs/ui-navigation.md` to find
+   the spots.
+5. **Delete the stale roadmap doc** and remove any cross-links before
+   deleting it. Also remove its line from `AGENTS.md` "Key docs".
+6. **Final sweep:** run the retired-theme search and confirm only
+   historical references remain in `docs/decisions/` and archived plans.
 
 **Risk.** None — documentation + skill authoring only. Main thing to get
 right is the skill's `description` field: it must fire on UI-flavored
@@ -424,7 +419,7 @@ tasks without over-triggering on backend work.
 
 **Ship as:** can be split in two if convenient:
   - PR A: write the skill + trim AGENTS.md + rewrite `docs/design-system.md`.
-  - PR B: `docs/ui-navigation.md` sync + delete `docs/ideas/roadmap.md` + final sweep.
+  - PR B: `docs/ui-navigation.md` sync + delete the stale roadmap doc + final sweep.
 
 **Done when:**
 - `.claude/skills/ink-and-paper/SKILL.md` exists with a description that
@@ -434,7 +429,7 @@ tasks without over-triggering on backend work.
 - `docs/design-system.md` is rewritten around Ink & Paper.
 - `docs/ui-navigation.md` cites Ink & Paper in its design-system section;
   UX content untouched.
-- `docs/ideas/roadmap.md` is gone and no file links to it.
+- The stale roadmap doc is gone and no active file links to it.
 - The final `rg` sweep is clean.
 
 ---

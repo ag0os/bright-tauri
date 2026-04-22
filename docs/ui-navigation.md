@@ -560,9 +560,9 @@ All screens use components from the design system (implementation should create 
 - **Cards**: Elevated Shadow cards (shadow-based depth, 8px radius)
 - **Buttons**: Minimal Squared buttons (4px radius, compact)
 - **Inputs**: Filled Background inputs (Material Design inspired)
-- **Icons**: Lucide Icons (line-based, adjustable stroke)
-- **Colors**: Modern Indigo palette (professional blue/indigo with amber accents)
-- **Typography**: Classic Serif (Playfair Display headings + system sans body)
+- **Icons**: Phosphor icons (regular weight by default)
+- **Colors**: Ink & Paper palette (warm ink surfaces with marigold accents)
+- **Typography**: Newsreader + Geist (editorial headings with clean UI body text)
 
 ---
 

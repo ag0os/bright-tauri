@@ -8,7 +8,7 @@ Guidance for AI coding agents working in this repository.
 
 **Current phase**: Foundation Complete → Frontend Development. Backend (~95%) and design system (100%) are done. Next up: chapter/child-story management UI, version & snapshot UI, history timeline and diff viewer. AI integration and voice dictation are not yet started.
 
-See `docs/ideas/roadmap.md` for the full roadmap and `docs/decisions/` for ADRs.
+See `docs/ui-navigation.md`, `docs/implementation-plan.md`, and `docs/decisions/` for current product direction and ADRs.
 
 ## Stack
 
@@ -126,5 +126,4 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 - `docs/design-system.md` — design system reference
 - `docs/design-reference/` — Ink & Paper source of truth (tokens, preview HTML, voice). Read-only; do not edit.
 - `docs/decisions/002-database-only-versioning.md` — DBV rationale
-- `docs/ideas/roadmap.md` — feature roadmap
 - `docs/ui-navigation.md`, `docs/implementation-plan.md`

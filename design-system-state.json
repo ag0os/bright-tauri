@@ -5,7 +5,7 @@
     "phase1": {
       "colors": {
         "selected": {
-          "name": "Modern Indigo",
+          "name": "Legacy Indigo Theme",
           "file": "option1-modern-indigo.css",
           "className": "option-1",
           "primary": "#4f46e5",
@@ -15,10 +15,10 @@
       },
       "typography": {
         "selected": {
-          "name": "Classic Serif",
+          "name": "Legacy Display Serif",
           "file": "option1-classic-serif.css",
           "className": "typo-1",
-          "displayFont": "Playfair Display",
+          "displayFont": "Legacy Display Serif",
           "bodyFont": "System Sans-Serif",
           "scale": "1.250 (Major Third)",
           "description": "Traditional literary feel with modern serif headings and clean sans-serif body text"
@@ -107,7 +107,7 @@
       "phase": "1.1",
       "component": "colors",
       "action": "selected",
-      "option": "Modern Indigo",
+      "option": "Legacy Indigo Theme",
       "timestamp": "2025-10-08T14:30:00.000Z",
       "userFeedback": ""
     },
@@ -115,7 +115,7 @@
       "phase": "1.2",
       "component": "typography",
       "action": "selected",
-      "option": "Classic Serif",
+      "option": "Legacy Display Serif",
       "timestamp": "2025-10-08T14:52:00.000Z",
       "userFeedback": ""
     },
@@ -125,7 +125,7 @@
       "action": "selected",
       "option": "Phosphor Icons (Duotone)",
       "timestamp": "2025-12-12T00:00:00.000Z",
-      "userFeedback": "Switched from Lucide Icons to Phosphor Icons duotone variant for modern aesthetic"
+      "userFeedback": "Switched from the previous line-icon set to the Phosphor duotone variant for a more contemporary look"
     },
     {
       "phase": "2.1",

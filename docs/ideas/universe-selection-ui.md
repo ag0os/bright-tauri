@@ -2,12 +2,12 @@
 
 ## Overview
 
-The Universe Selection interface is the entry point to the application. It allows users to create their first universe or select from existing universes to work in. This view establishes the visual tone for the entire application with a distinctive purple gradient background and elevated card design.
+The Universe Selection interface is the entry point to the application. It allows users to create their first universe or select from existing universes to work in. This view establishes the visual tone for the entire application with a distinctive ink-toned backdrop and elevated card design.
 
 ## Visual Design
 
 ### Background
-- **Purple gradient background** - Creates a distinctive, creative atmosphere
+- **Ink-toned backdrop** - Creates a distinctive, creative atmosphere
 - Soft, smooth gradient transition
 - Should feel immersive but not overwhelming
 - Gradient direction: TBD (top-to-bottom, radial, or diagonal)
@@ -19,7 +19,7 @@ The Universe Selection interface is the entry point to the application. It allow
   - Universe name prominently displayed
   - Background element (color, pattern, or image)
   - Visual distinction between cards
-- **Elevation**: Cards appear to float above the purple background via soft shadow
+- **Elevation**: Cards appear to float above the backdrop via soft shadow
 - Hover state: Slight lift effect (consistent with design system's Elevated Shadow pattern)
 - Active/selected state: Visual feedback for keyboard navigation
 
@@ -34,7 +34,7 @@ The Universe Selection interface is the entry point to the application. It allow
 ### Flow 1: No Universes (First-time User)
 ```
 1. User opens app for first time
-2. Purple gradient background fills screen
+2. Ink-toned backdrop fills screen
 3. Central prompt appears: "Create your first universe"
 4. Single action button or card to create first universe
 5. On click/Enter → Opens universe creation form
@@ -43,7 +43,7 @@ The Universe Selection interface is the entry point to the application. It allow
 ### Flow 2: Has Universes (Returning User)
 ```
 1. User opens app
-2. Purple gradient background fills screen
+2. Ink-toned backdrop fills screen
 3. Grid of universe cards displayed
 4. "Create New Universe" card visible among existing universes
 5. User can:
@@ -64,7 +64,7 @@ The Universe Selection interface is the entry point to the application. It allow
 ### Visual Feedback
 - Focused card should have clear visual indicator (border, glow, or highlight)
 - Focus state should be distinct from hover state
-- Focus indicator should work with purple background
+- Focus indicator should work with the ink-toned backdrop
 
 ### Accessibility
 - Keyboard navigation should be intuitive and discoverable
@@ -74,16 +74,16 @@ The Universe Selection interface is the entry point to the application. It allow
 ## Relationship to Design System
 
 ### Colors
-- Background: Custom purple gradient (outside existing design system)
+- Background: Custom ink-toned backdrop treatment (outside existing design system)
 - Cards: Use design system elevation shadows (shadow-sm, shadow-base, shadow-lg)
-- Text: Ensure WCAG AA contrast against purple background
+- Text: Ensure WCAG AA contrast against the backdrop
 - Consider adding purple tokens to design system if needed
 
 ### Components
 - Cards: Leverage existing **Elevated Shadow** card pattern
 - Buttons: Use **Minimal Squared** button style for actions
 - Inputs: Use **Filled Background** inputs for universe creation form
-- Typography: **Classic Serif** for universe names (Playfair Display)
+- Typography: **Newsreader** for universe names with Geist for supporting UI text
 
 ### Spacing & Sizing
 - Card border radius: Consider existing 8px from card pattern or adjust for "rounded square" feel (12px-16px?)
@@ -154,7 +154,7 @@ Recommended: **Modal Dialog** for quick creation without losing context
 ## Implementation Phases
 
 ### Phase 1: Basic Selection (MVP)
-- Purple gradient background
+- Ink-toned backdrop
 - Simple card grid layout
 - List universes from backend
 - Click to select universe
@@ -188,7 +188,7 @@ Recommended: **Modal Dialog** for quick creation without losing context
 - `src/views/UniverseSelection.tsx`: Main component
 - `src/components/UniverseCard.tsx`: Individual universe card
 - `src/components/CreateUniverseModal.tsx`: Creation dialog
-- `src/styles/universe-selection.css`: Custom purple gradient styles
+- `src/styles/universe-selection.css`: Custom backdrop styles
 
 ### Design System
 - `src/design-system/organisms/card/Card.tsx`: Base card component
@@ -202,6 +202,6 @@ A successful Universe Selection UI should:
 - ✅ Support keyboard-only navigation completely
 - ✅ Handle empty state gracefully with clear call-to-action
 - ✅ Scale well from 1 to many universes
-- ✅ Establish the visual identity of the app (purple, elevated, creative)
+- ✅ Establish the visual identity of the app (ink-toned, elevated, creative)
 - ✅ Be fast and responsive (<100ms to render)
 - ✅ Meet WCAG AA accessibility standards
