@@ -10,7 +10,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: var(--color-background);
+  background-color: var(--bg);
 }
 
 /* Header */
@@ -19,8 +19,8 @@
   align-items: center;
   gap: var(--spacing-lg);
   padding: var(--spacing-lg) var(--spacing-xl);
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
 }
 
 .settings-page__back-button {
@@ -32,7 +32,7 @@
   border: none;
   border-radius: var(--border-radius-md);
   background-color: transparent;
-  color: var(--color-text-secondary);
+  color: var(--fg2);
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -40,8 +40,8 @@
 }
 
 .settings-page__back-button:hover {
-  background-color: var(--color-background-hover);
-  color: var(--color-text-primary);
+  background-color: var(--surface-hover);
+  color: var(--fg1);
 }
 
 .settings-page__header-content {
@@ -51,16 +51,16 @@
 
 .settings-page__title {
   margin: 0;
-  font-size: var(--font-size-2xl);
+  font-size: var(--fs-xl);
   font-weight: 600;
-  color: var(--color-text-primary);
+  color: var(--fg1);
   line-height: 1.2;
 }
 
 .settings-page__subtitle {
   margin: var(--spacing-xs) 0 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  color: var(--fg-muted);
   line-height: 1.4;
 }
 
@@ -85,11 +85,11 @@
 /* Error Banner */
 .settings-page__error-banner {
   padding: var(--spacing-3);
-  background-color: var(--color-error-subtle);
-  color: var(--color-error);
+  background-color: var(--error-soft);
+  color: var(--error);
   border-radius: 4px;
-  font-family: var(--typography-body-font);
-  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
 }
 
 /* Footer */
@@ -98,7 +98,7 @@
   justify-content: flex-end;
   gap: var(--spacing-3);
   padding-top: var(--spacing-xl);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid var(--border);
 }
 
 /* Loading and Error States */
@@ -108,10 +108,10 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  font-size: var(--font-size-lg);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-md);
+  color: var(--fg2);
 }
 
 .settings-page__error {
-  color: var(--color-error);
+  color: var(--error);
 }

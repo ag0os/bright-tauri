@@ -4,8 +4,9 @@
  * Style: Square corners (4px), tight padding, subtle focus
  * Best for: Dense interfaces, data-heavy applications
  *
- * IMPORTANT: This file uses global color tokens directly (var(--color-*))
- * instead of intermediate scoped tokens to ensure theme switching works.
+ * IMPORTANT: This file uses native Ink & Paper tokens directly (--fg1,
+ * --surface, --accent, etc.) instead of intermediate scoped color tokens,
+ * so theme switching flows through the root theme without extra layers.
  */
 
 :root,
@@ -35,8 +36,8 @@
   align-items: center;
   justify-content: center;
   gap: var(--button-icon-gap);
-  font-family: var(--typography-body-font);
-  font-weight: var(--font-weight-medium);
+  font-family: var(--font-body);
+  font-weight: var(--fw-medium);
   border-radius: var(--button-border-radius);
   border-width: var(--button-border-width);
   border-style: solid;
@@ -64,19 +65,19 @@
 /* Size Variants */
 .btn-sm {
   padding: var(--button-padding-sm);
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-sm);
   min-height: var(--button-min-height-sm);
 }
 
 .btn-base {
   padding: var(--button-padding-base);
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);
   min-height: var(--button-min-height-base);
 }
 
 .btn-lg {
   padding: var(--button-padding-lg);
-  font-size: var(--font-size-lg);
+  font-size: var(--fs-md);
   min-height: var(--button-min-height-lg);
 }
 
@@ -109,16 +110,16 @@
   border-color: var(--border-strong);
 }
 
-/* Outline Button - uses global tokens directly */
+/* Outline Button */
 .btn-outline {
   background-color: transparent;
-  color: var(--color-text-primary);
-  border-color: var(--color-border);
+  color: var(--fg1);
+  border-color: var(--border);
 }
 
 .btn-outline:hover:not(:disabled) {
-  background-color: var(--color-surface-secondary);
-  border-color: var(--color-text-secondary);
+  background-color: var(--surface-2);
+  border-color: var(--fg2);
 }
 
 /* Ghost Button */

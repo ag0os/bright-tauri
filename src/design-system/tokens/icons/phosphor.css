@@ -1,9 +1,11 @@
 /**
- * Phosphor Icons (Duotone)
- * Modern, versatile icons with multiple weight variants
+ * Phosphor Icons (Regular weight)
+ * Phosphor regular-weight icons per Ink & Paper conventions.
  * Library: @phosphor-icons/react (https://phosphoricons.com)
- * Style: Duotone (two-tone with opacity variation)
- * Best for: Modern apps, visual depth, versatile styling options
+ * Style: Regular (single-weight line icons)
+ *
+ * Icon colors reference native Ink & Paper tokens (`--fg2`, `--accent`)
+ * so theme switching flows through the root theme without extra layers.
  */
 
 .icons-1 {
@@ -36,9 +38,9 @@
 
   /* Icon Colors */
   --icon-color-default: currentColor;
-  --icon-color-muted: var(--color-text-secondary);
-  --icon-color-primary: var(--color-primary);
-  --icon-color-accent: var(--color-accent);
+  --icon-color-muted: var(--fg2);
+  --icon-color-primary: var(--accent);
+  --icon-color-accent: var(--accent);
 
   /* Icon Spacing */
   --icon-gap-inline: 0.5rem; /* 8px - gap between icon and text */

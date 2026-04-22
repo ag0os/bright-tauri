@@ -100,64 +100,6 @@ const Panel: React.FC<{ title: string; note?: string; children: React.ReactNode 
   </section>
 );
 
-const AliasScale: React.FC = () => (
-  <div style={{ display: 'grid', gap: '10px' }}>
-    {[
-      ['H1', 'var(--typography-h1-size)', 'var(--typography-h1-line-height)', 'Heading one'],
-      ['H2', 'var(--typography-h2-size)', 'var(--typography-h2-line-height)', 'Heading two'],
-      ['H3', 'var(--typography-h3-size)', 'var(--typography-h3-line-height)', 'Heading three'],
-      ['H4', 'var(--typography-h4-size)', 'var(--typography-h4-line-height)', 'Heading four'],
-      [
-        'Body',
-        'var(--typography-body-size)',
-        'var(--typography-body-line-height)',
-        'Body copy for chrome',
-      ],
-      [
-        'Caption',
-        'var(--typography-caption-size)',
-        'var(--typography-caption-line-height)',
-        'Meta and captions',
-      ],
-    ].map(([label, size, lineHeight, sample]) => (
-      <div
-        key={label}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '72px 120px minmax(0, 1fr)',
-          gap: '16px',
-          alignItems: 'baseline',
-          paddingBottom: '10px',
-          borderBottom: '1px solid var(--border)',
-        }}
-      >
-        <code
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
-        >
-          {label}
-        </code>
-        <code
-          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
-        >
-          {size}
-        </code>
-        <span
-          style={{
-            fontFamily: label.startsWith('H')
-              ? 'var(--typography-heading-font)'
-              : 'var(--typography-body-font)',
-            fontSize: size,
-            lineHeight,
-            color: 'var(--fg1)',
-          }}
-        >
-          {sample}
-        </span>
-      </div>
-    ))}
-  </div>
-);
-
 const NativeScale: React.FC = () => (
   <div style={{ display: 'grid', gap: '10px' }}>
     {[
@@ -212,13 +154,13 @@ const NativeScale: React.FC = () => (
 export const NewsreaderAndGeist: StoryObj = {
   render: () => (
     <StoryFrame
-      eyebrow="Alias layer"
+      eyebrow="Pairing"
       title="Newsreader + Geist"
-      description="Legacy typography aliases still point at the Ink & Paper type system. Newsreader handles reading surfaces and editorial headings, while Geist keeps controls, metadata, and chrome compact and readable."
+      description="Newsreader carries reading surfaces and editorial headings; Geist keeps controls, metadata, and chrome compact. Both tokens resolve directly from the native type scale."
     >
       <Panel
         title="Type pairing"
-        note="The aliases still describe the live fonts, even while their names are being retired."
+        note="Display and reading surfaces sit on Newsreader; UI chrome sits on Geist."
       >
         <div style={{ display: 'grid', gap: '20px' }}>
           <div>
@@ -227,10 +169,10 @@ export const NewsreaderAndGeist: StoryObj = {
             </p>
             <div
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--typography-h2-size)',
-                lineHeight: 'var(--typography-h2-line-height)',
-                fontWeight: 'var(--typography-h2-weight)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--type-h2-size)',
+                lineHeight: 'var(--type-h2-lh)',
+                fontWeight: 'var(--type-h2-weight)',
                 color: 'var(--fg1)',
               }}
             >
@@ -243,9 +185,9 @@ export const NewsreaderAndGeist: StoryObj = {
             </p>
             <div
               style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--typography-body-size)',
-                lineHeight: 'var(--typography-body-line-height)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--type-body-size)',
+                lineHeight: 'var(--type-body-lh)',
                 color: 'var(--fg1)',
               }}
             >
@@ -254,13 +196,6 @@ export const NewsreaderAndGeist: StoryObj = {
             </div>
           </div>
         </div>
-      </Panel>
-
-      <Panel
-        title="Alias scale"
-        note="These semantic aliases are still available while Stage 5 removes the legacy layer."
-      >
-        <AliasScale />
       </Panel>
 
       <Panel
@@ -280,9 +215,9 @@ export const NewsreaderAndGeist: StoryObj = {
           <p
             style={{
               margin: '0 0 12px',
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              lineHeight: 'var(--typography-h3-line-height)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h3-size)',
+              lineHeight: 'var(--type-h3-lh)',
               color: 'var(--fg1)',
             }}
           >
@@ -291,9 +226,9 @@ export const NewsreaderAndGeist: StoryObj = {
           <p
             style={{
               margin: 0,
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-body-large-size)',
-              lineHeight: 'var(--typography-body-large-line-height)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-md)',
+              lineHeight: 'var(--lh-reading)',
               color: 'var(--fg2)',
             }}
           >
