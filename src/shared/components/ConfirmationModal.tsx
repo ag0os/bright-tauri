@@ -105,21 +105,21 @@ export function ConfirmationModal({
   const variantConfig = {
     danger: {
       icon: Warning,
-      iconBgColor: 'var(--color-error-subtle)',
-      iconColor: 'var(--color-error)',
-      confirmBgColor: 'var(--color-error)',
+      iconBgColor: 'var(--error-soft)',
+      iconColor: 'var(--error)',
+      confirmBgColor: 'var(--error)',
     },
     warning: {
       icon: WarningCircle,
-      iconBgColor: 'var(--color-warning-bg)',
-      iconColor: 'var(--color-warning)',
-      confirmBgColor: 'var(--color-warning)',
+      iconBgColor: 'var(--warning-soft)',
+      iconColor: 'var(--warning)',
+      confirmBgColor: 'var(--warning)',
     },
     info: {
       icon: Info,
-      iconBgColor: 'var(--color-info-light)',
-      iconColor: 'var(--color-info)',
-      confirmBgColor: 'var(--color-primary)',
+      iconBgColor: 'var(--info-soft)',
+      iconColor: 'var(--info)',
+      confirmBgColor: 'var(--accent)',
     },
   };
 

@@ -29,7 +29,7 @@
 
 /* Modal content */
 .confirmation-modal-content {
-  background-color: var(--color-surface);
+  background-color: var(--surface);
   border-radius: 8px;
   padding: var(--spacing-6);
   max-width: 500px;
@@ -68,19 +68,19 @@
 }
 
 .confirmation-modal-title {
-  font-family: var(--typography-heading-font);
-  font-size: var(--typography-h3-size);
-  font-weight: var(--typography-h3-weight);
-  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-h3-size);
+  font-weight: var(--type-h3-weight);
+  color: var(--fg1);
   margin: 0;
 }
 
 /* Message content */
 .confirmation-modal-message {
-  font-family: var(--typography-body-font);
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  line-height: var(--typography-body-line-height);
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  color: var(--fg2);
+  line-height: var(--type-body-lh);
   margin-bottom: var(--spacing-6);
 }
 
@@ -101,7 +101,7 @@
 
 /* Ensure buttons inherit proper styling from design system */
 .confirmation-modal-actions .btn:focus-visible {
-  outline: var(--button-focus-ring-width) solid var(--color-primary);
+  outline: var(--button-focus-ring-width) solid var(--ring);
   outline-offset: var(--button-focus-ring-offset);
 }
 

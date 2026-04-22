@@ -48,9 +48,9 @@ function Toast({ toast, onDismiss }: ToastProps) {
   };
 
   const colors = {
-    success: 'var(--color-semantic-success)',
-    error: 'var(--color-semantic-error)',
-    info: 'var(--color-primary)',
+    success: 'var(--success)',
+    error: 'var(--error)',
+    info: 'var(--accent)',
   };
 
   return (
@@ -60,7 +60,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
         alignItems: 'center',
         gap: '12px',
         padding: '12px 16px',
-        backgroundColor: 'var(--color-background-primary)',
+        backgroundColor: 'var(--bg)',
         border: `1px solid ${colors[toast.type]}`,
         borderRadius: '8px',
         boxShadow: 'var(--shadow-lg)',
@@ -75,7 +75,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
       <span
         style={{
           flex: 1,
-          color: 'var(--color-text-primary)',
+          color: 'var(--fg1)',
           fontSize: '14px',
         }}
       >
@@ -89,7 +89,7 @@ function Toast({ toast, onDismiss }: ToastProps) {
           border: 'none',
           padding: '4px',
           cursor: 'pointer',
-          color: 'var(--color-text-tertiary)',
+          color: 'var(--fg3)',
           flexShrink: 0,
         }}
         aria-label="Dismiss"

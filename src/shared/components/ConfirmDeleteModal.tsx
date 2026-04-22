@@ -61,7 +61,7 @@ export function ConfirmDeleteModal({
     >
       <div
         style={{
-          backgroundColor: 'var(--color-surface)',
+          backgroundColor: 'var(--surface)',
           borderRadius: '8px',
           padding: 'var(--spacing-6)',
           maxWidth: '400px',
@@ -83,22 +83,22 @@ export function ConfirmDeleteModal({
               width: '40px',
               height: '40px',
               borderRadius: '50%',
-              backgroundColor: 'var(--color-error-subtle)',
+              backgroundColor: 'var(--error-soft)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <Warning size={24} style={{ color: 'var(--color-error)' }} />
+            <Warning size={24} style={{ color: 'var(--error)' }} />
           </div>
           <h2
             id={titleId}
             style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h3-size)',
+              fontWeight: 'var(--type-h3-weight)',
+              color: 'var(--fg1)',
               margin: 0,
             }}
           >
@@ -110,11 +110,11 @@ export function ConfirmDeleteModal({
         <p
           id={messageId}
           style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-base)',
-            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-base)',
+            color: 'var(--fg2)',
             marginBottom: 'var(--spacing-3)',
-            lineHeight: 'var(--typography-body-line-height)',
+            lineHeight: 'var(--type-body-lh)',
           }}
         >
           {message}
@@ -125,17 +125,17 @@ export function ConfirmDeleteModal({
           id={itemNameId}
           style={{
             padding: 'var(--spacing-3)',
-            backgroundColor: 'var(--color-background)',
+            backgroundColor: 'var(--bg)',
             borderRadius: '4px',
             marginBottom: 'var(--spacing-6)',
           }}
         >
           <span
             style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-base)',
-              fontWeight: 'var(--font-weight-semibold)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-base)',
+              fontWeight: 'var(--fw-semibold)',
+              color: 'var(--fg1)',
             }}
           >
             {itemName}
@@ -163,7 +163,7 @@ export function ConfirmDeleteModal({
             onClick={onConfirm}
             disabled={isDeleting}
             style={{
-              backgroundColor: 'var(--color-error)',
+              backgroundColor: 'var(--error)',
               color: 'white',
               border: 'none',
             }}

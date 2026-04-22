@@ -63,11 +63,11 @@ export class ErrorBoundary extends Component<Props, State> {
             padding: '48px',
             gap: '16px',
             minHeight: '200px',
-            color: 'var(--color-text-secondary)',
+            color: 'var(--fg2)',
           }}
         >
-          <WarningCircle size={48} style={{ color: 'var(--color-semantic-error)' }} />
-          <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Something went wrong</h2>
+          <WarningCircle size={48} style={{ color: 'var(--error)' }} />
+          <h2 style={{ margin: 0, color: 'var(--fg1)' }}>Something went wrong</h2>
           {name && (
             <p style={{ margin: 0 }}>
               An error occurred in <strong>{name}</strong>
@@ -77,7 +77,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <code
               style={{
                 padding: '8px 16px',
-                backgroundColor: 'var(--color-background-secondary)',
+                backgroundColor: 'var(--surface)',
                 borderRadius: '4px',
                 fontSize: '12px',
                 maxWidth: '400px',
