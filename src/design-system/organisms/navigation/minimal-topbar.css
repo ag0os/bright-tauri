@@ -54,9 +54,9 @@
   padding: 6px 10px;
   height: 32px;
   border-radius: 6px;
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--fg2);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -64,8 +64,8 @@
 }
 
 .nav-3__nav-button:hover {
-  background: var(--color-background-hover);
-  color: var(--color-text-primary);
+  background: var(--surface-hover);
+  color: var(--fg1);
 }
 
 .nav-3__nav-icon {
@@ -76,7 +76,7 @@
 .nav-3__divider {
   width: 1px;
   height: 24px;
-  background: var(--color-border);
+  background: var(--border);
   margin: 0 4px;
 }
 
@@ -93,8 +93,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--fs-sm);
+  color: var(--fg2);
   overflow: hidden;
 }
 
@@ -107,11 +107,11 @@
 }
 
 .nav-3__breadcrumb-item:hover {
-  color: var(--color-text-primary);
+  color: var(--fg1);
 }
 
 .nav-3__breadcrumb-item--current {
-  color: var(--color-text-primary);
+  color: var(--fg1);
   font-weight: 500;
 }
 
@@ -119,14 +119,14 @@
   flex-shrink: 0;
   width: 12px;
   height: 12px;
-  color: var(--color-text-tertiary);
+  color: var(--fg3);
 }
 
 /* Document Title (Alternative to Breadcrumb) */
 .nav-3__title {
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--fg1);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -149,9 +149,9 @@
   padding: 6px 10px;
   height: 32px;
   border-radius: 6px;
-  font-size: var(--font-size-sm);
+  font-size: var(--fs-sm);
   font-weight: 500;
-  color: var(--color-text-secondary);
+  color: var(--fg2);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -159,8 +159,8 @@
 }
 
 .nav-3__action-button:hover {
-  background: var(--color-background-hover);
-  color: var(--color-text-primary);
+  background: var(--surface-hover);
+  color: var(--fg1);
 }
 
 .nav-3__action-button--primary {
@@ -187,14 +187,14 @@
   border-radius: 6px;
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--fg2);
   cursor: pointer;
   transition: all 120ms ease;
 }
 
 .nav-3__icon-button:hover {
-  background: var(--color-background-hover);
-  color: var(--color-text-primary);
+  background: var(--surface-hover);
+  color: var(--fg1);
 }
 
 /* Main Content Area */
@@ -209,8 +209,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  font-size: var(--fs-xs);
+  color: var(--fg3);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -219,11 +219,11 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--color-success);
+  background: var(--success);
 }
 
 .nav-3__status--saving .nav-3__status-indicator {
-  background: var(--color-accent);
+  background: var(--accent);
   animation: pulse 1.5s ease-in-out infinite;
 }
 
@@ -248,15 +248,15 @@
   align-items: center;
   gap: 2px;
   margin-left: 8px;
-  font-size: var(--font-size-xs);
-  color: var(--color-text-tertiary);
+  font-size: var(--fs-xs);
+  color: var(--fg3);
   font-family: var(--font-mono, monospace);
 }
 
 .nav-3__shortcut-key {
   padding: 2px 4px;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
+  background: var(--bg);
+  border: 1px solid var(--border);
   border-radius: 3px;
   font-size: 10px;
 }

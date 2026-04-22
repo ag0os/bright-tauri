@@ -64,7 +64,7 @@ export const MinimalTopBar: React.FC<MinimalTopBarProps> = ({ onNavigate: _onNav
         <div style={{ padding: '64px 32px', maxWidth: '800px', margin: '0 auto' }}>
           <h2>Main Content Area</h2>
           <p>This is a minimal, distraction-free writing interface.</p>
-          <p style={{ color: 'var(--color-text-secondary)', marginTop: '16px' }}>
+          <p style={{ color: 'var(--fg2)', marginTop: '16px' }}>
             The navigation bar is slim and unobtrusive, perfect for focused writing.
           </p>
           <button
