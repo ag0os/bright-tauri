@@ -1,8 +1,9 @@
-import { Clock } from '@phosphor-icons/react';
+import { Clock, Plus, Trash } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type React from 'react';
 import '../tokens/colors/ink-and-paper.css';
 import '../tokens/typography/newsreader-geist.css';
+import '../tokens/spacing.css';
 import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 
@@ -15,25 +16,134 @@ const meta: Meta = {
 
 export default meta;
 
-// Icon component using Phosphor
-const IconDemo: React.FC = () => <Clock size={20} />;
+const StoryFrame: React.FC<{
+  title: string;
+  eyebrow: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ title, eyebrow, description, children }) => (
+  <div
+    className="option-1 typo-1 button-2 icons-1"
+    style={{
+      minHeight: '100vh',
+      padding: '32px',
+      background: 'var(--bg)',
+      color: 'var(--fg1)',
+      fontFamily: 'var(--font-body)',
+    }}
+  >
+    <div style={{ marginBottom: '32px', maxWidth: '760px' }}>
+      <p
+        style={{
+          margin: '0 0 8px',
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-medium)',
+          color: 'var(--fg3)',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {eyebrow}
+      </p>
+      <h1
+        style={{
+          margin: '0 0 12px',
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--fs-4xl)',
+          lineHeight: 'var(--lh-tight)',
+          color: 'var(--fg1)',
+        }}
+      >
+        {title}
+      </h1>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 'var(--fs-base)',
+          lineHeight: 'var(--lh-normal)',
+          color: 'var(--fg2)',
+        }}
+      >
+        {description}
+      </p>
+    </div>
+    {children}
+  </div>
+);
 
-const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
-  return (
-    <div className={className} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Size Variants */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Size Variants
-        </h4>
+const Panel: React.FC<{ title: string; note?: string; children: React.ReactNode }> = ({
+  title,
+  note,
+  children,
+}) => (
+  <section
+    style={{
+      marginBottom: '24px',
+      borderRadius: 'var(--radius-xl)',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
+      padding: '24px',
+    }}
+  >
+    <h2
+      style={{
+        margin: '0 0 6px',
+        fontSize: 'var(--fs-lg)',
+        fontWeight: 'var(--fw-semibold)',
+        color: 'var(--fg1)',
+      }}
+    >
+      {title}
+    </h2>
+    {note ? (
+      <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--fg2)' }}>{note}</p>
+    ) : null}
+    {children}
+  </section>
+);
+
+const NativeButton: React.FC<{
+  label: string;
+  background: string;
+  color: string;
+  border: string;
+  radius?: string;
+  icon?: React.ReactNode;
+}> = ({ label, background, color, border, radius = 'var(--radius-md)', icon }) => (
+  <button
+    type="button"
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '8px',
+      minHeight: '36px',
+      padding: '8px 14px',
+      borderRadius: radius,
+      border,
+      background,
+      color,
+      fontFamily: 'var(--font-body)',
+      fontSize: 'var(--fs-sm)',
+      fontWeight: 'var(--fw-medium)',
+      cursor: 'pointer',
+    }}
+  >
+    {icon}
+    {label}
+  </button>
+);
+
+export const MarigoldButtons: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Alias layer"
+      title="Marigold buttons"
+      description="The existing button classes already render the Ink & Paper button language: 8px corners, quiet neutral surfaces, and a single marigold primary action."
+    >
+      <Panel
+        title="Button sizes"
+        note="Compact controls keep chrome efficient without feeling cramped."
+      >
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
           <button type="button" className="btn btn-primary btn-sm">
             Small
@@ -45,342 +155,164 @@ const ButtonShowcase: React.FC<{ className: string }> = ({ className }) => {
             Large
           </button>
         </div>
-      </div>
+      </Panel>
 
-      {/* Style Variants */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Style Variants
-        </h4>
+      <Panel
+        title="Variants"
+        note="Primary actions carry the accent; neutral work stays on paper surfaces."
+      >
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button type="button" className="btn btn-primary btn-base">
-            Primary
+            <Plus size={18} />
+            New story
           </button>
           <button type="button" className="btn btn-secondary btn-base">
-            Secondary
+            Review notes
           </button>
           <button type="button" className="btn btn-outline btn-base">
             Outline
           </button>
           <button type="button" className="btn btn-ghost btn-base">
-            Ghost
+            Skip for now
+          </button>
+          <button type="button" className="btn btn-danger btn-base">
+            <Trash size={18} />
+            Delete
           </button>
         </div>
-      </div>
+      </Panel>
 
-      {/* With Icons */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          With Icons
-        </h4>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button type="button" className="btn btn-primary btn-base">
-            <IconDemo />
-            Icon Left
-          </button>
-          <button type="button" className="btn btn-secondary btn-base">
-            Icon Right
-            <IconDemo />
-          </button>
-          <button type="button" className="btn btn-outline btn-base">
-            <IconDemo />
-            Both Sides
-            <IconDemo />
-          </button>
-        </div>
-      </div>
-
-      {/* States */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          States
-        </h4>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button type="button" className="btn btn-primary btn-base">
-            Default
-          </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-base"
-            style={{ pointerEvents: 'none', filter: 'brightness(0.9)' }}
-          >
-            Hover (sim)
-          </button>
-          <button type="button" className="btn btn-primary btn-base" disabled>
-            Disabled
-          </button>
-        </div>
-      </div>
-
-      {/* Real-world Examples */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Real-world Context
-        </h4>
-
-        {/* Form Actions */}
+      <Panel
+        title="In context"
+        note="This card matches the preview guidance: sentence case labels, no glow, and restrained spacing."
+      >
         <div
           style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-            marginBottom: '16px',
+            display: 'grid',
+            gap: '16px',
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border)',
+            background: 'var(--surface-2)',
+            padding: '20px',
           }}
         >
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '12px',
-            }}
-          >
-            Form Actions
-          </p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <div>
+            <h3
+              style={{
+                margin: '0 0 8px',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-xl)',
+                color: 'var(--fg1)',
+              }}
+            >
+              Chapter handoff
+            </h3>
+            <p
+              style={{
+                margin: 0,
+                color: 'var(--fg2)',
+                fontSize: 'var(--fs-sm)',
+                lineHeight: 'var(--lh-normal)',
+              }}
+            >
+              Primary actions stay warm and visible. Secondary work falls back to surface buttons so
+              the page keeps its quiet tone.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-primary btn-base">
+              Publish draft
+            </button>
+            <button type="button" className="btn btn-secondary btn-base">
+              <Clock size={18} />
+              Save for later
+            </button>
             <button type="button" className="btn btn-ghost btn-base">
               Cancel
             </button>
-            <button type="button" className="btn btn-primary btn-base">
-              Save Changes
-            </button>
           </div>
         </div>
-
-        {/* Card Actions */}
-        <div
-          style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h5
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '8px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Premium Plan
-          </h5>
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '16px',
-              lineHeight: 'var(--typography-body-line-height)',
-            }}
-          >
-            Everything you need to build great products at scale.
-          </p>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button type="button" className="btn btn-primary btn-base">
-              Get Started
-            </button>
-            <button type="button" className="btn btn-outline btn-base">
-              Learn More
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+      </Panel>
+    </StoryFrame>
+  ),
 };
 
-export const MinimalSquared: StoryObj = {
-  render: () => {
-    return (
-      <div
-        className="option-1 typo-1 icons-1 button-2"
-        style={{
-          padding: '32px',
-          backgroundColor: 'var(--color-background)',
-          minHeight: '100vh',
-        }}
+export const NativeButtonTokens: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Native layer"
+      title="Native button tokens"
+      description="New buttons should read directly from the native tokens: --accent for primary actions, --surface-2 for neutral work, and the radius scale for shape."
+    >
+      <Panel
+        title="Native buttons"
+        note="These inline examples use the same values shown in the reference preview card."
       >
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h2-size)',
-              fontWeight: 'var(--typography-h2-weight)',
-              marginBottom: '8px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Minimal Squared
-          </h1>
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '12px',
-            }}
-          >
-            Small border radius with compact spacing for dense, data-heavy applications.
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              gap: '24px',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-mono)',
-              flexWrap: 'wrap',
-            }}
-          >
-            <div>
-              <strong>Shape:</strong> 4px border radius
-            </div>
-            <div>
-              <strong>Density:</strong> Compact (8px/16px base padding)
-            </div>
-            <div>
-              <strong>Focus:</strong> Subtle 2px ring
-            </div>
-          </div>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <NativeButton
+            label="New story"
+            background="var(--accent)"
+            color="var(--fg-on-accent)"
+            border="1px solid var(--accent)"
+            icon={<Plus size={18} />}
+          />
+          <NativeButton
+            label="Cancel"
+            background="var(--surface-2)"
+            color="var(--fg1)"
+            border="1px solid var(--border)"
+          />
+          <NativeButton
+            label="Skip"
+            background="transparent"
+            color="var(--fg2)"
+            border="1px solid transparent"
+          />
+          <NativeButton
+            label="Delete"
+            background="transparent"
+            color="var(--error)"
+            border="1px solid color-mix(in oklch, var(--error) 40%, transparent)"
+            icon={<Trash size={18} />}
+          />
         </div>
+      </Panel>
 
-        {/* Button Showcase */}
-        <div
-          style={{
-            marginBottom: '32px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '24px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Button Showcase
-          </h3>
-          <ButtonShowcase className="button-2" />
+      <Panel
+        title="Radius scale"
+        note="Buttons and controls should prefer the native radius tokens instead of literal values."
+      >
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <NativeButton
+            label="--radius-sm"
+            background="var(--surface-2)"
+            color="var(--fg1)"
+            border="1px solid var(--border)"
+            radius="var(--radius-sm)"
+          />
+          <NativeButton
+            label="--radius-md"
+            background="var(--accent)"
+            color="var(--fg-on-accent)"
+            border="1px solid var(--accent)"
+            radius="var(--radius-md)"
+          />
+          <NativeButton
+            label="--radius-lg"
+            background="var(--surface-2)"
+            color="var(--fg1)"
+            border="1px solid var(--border)"
+            radius="var(--radius-lg)"
+          />
+          <NativeButton
+            label="--radius-full"
+            background="var(--accent-subtle)"
+            color="var(--accent)"
+            border="1px solid transparent"
+            radius="var(--radius-full)"
+          />
         </div>
-
-        {/* Strengths & Considerations */}
-        <div
-          style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '16px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Key Strengths
-          </h3>
-          <ul
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-primary)',
-              lineHeight: 'var(--typography-body-line-height)',
-              listStyle: 'disc',
-              paddingLeft: '24px',
-              marginBottom: '24px',
-            }}
-          >
-            <li>Space efficient</li>
-            <li>Clean minimal look</li>
-            <li>Dense interfaces</li>
-            <li>Fast scanning</li>
-          </ul>
-
-          <h4
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-base)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '12px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Button Design Considerations
-          </h4>
-          <ul
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              lineHeight: 'var(--typography-body-line-height)',
-              listStyle: 'disc',
-              paddingLeft: '24px',
-            }}
-          >
-            <li>
-              Padding density determines information density and touch target size (min 44px height
-              recommended)
-            </li>
-            <li>
-              Focus ring visibility is critical for keyboard navigation accessibility (WCAG 2.4.7)
-            </li>
-            <li>
-              Button variants provide visual hierarchy (primary &gt; secondary &gt; outline &gt;
-              ghost)
-            </li>
-            <li>Icon spacing ensures proper alignment and breathing room</li>
-            <li>Hover and active states provide essential interaction feedback</li>
-            <li>
-              Maintains WCAG AA contrast requirements (4.5:1 for text, 3:1 for interactive elements)
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
-  },
+      </Panel>
+    </StoryFrame>
+  ),
 };

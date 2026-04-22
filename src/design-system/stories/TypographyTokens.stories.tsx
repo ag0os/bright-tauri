@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type React from 'react';
 import '../tokens/colors/ink-and-paper.css';
 import '../tokens/typography/newsreader-geist.css';
+import '../tokens/spacing.css';
 
 const meta: Meta = {
   title: 'Design System/1. Foundations/Typography',
@@ -12,393 +13,395 @@ const meta: Meta = {
 
 export default meta;
 
-const TypographyScale: React.FC<{ className: string }> = ({ className }) => (
-  <div className={className} style={{ marginBottom: '32px' }}>
-    <h4
-      style={{
-        fontFamily: 'var(--typography-body-font)',
-        fontSize: 'var(--font-size-lg)',
-        fontWeight: 'var(--font-weight-semibold)',
-        marginBottom: '16px',
-        color: 'var(--color-text-primary)',
-      }}
-    >
-      Type Scale
-    </h4>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {[
-        { label: '5xl', var: '--font-size-5xl' },
-        { label: '4xl', var: '--font-size-4xl' },
-        { label: '3xl', var: '--font-size-3xl' },
-        { label: '2xl', var: '--font-size-2xl' },
-        { label: 'xl', var: '--font-size-xl' },
-        { label: 'lg', var: '--font-size-lg' },
-        { label: 'base', var: '--font-size-base' },
-        { label: 'sm', var: '--font-size-sm' },
-        { label: 'xs', var: '--font-size-xs' },
-      ].map(({ label, var: varName }) => (
-        <div
-          key={label}
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            gap: '16px',
-            padding: '4px',
-            borderBottom: '1px solid var(--color-border)',
-          }}
-        >
-          <code
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '12px',
-              color: 'var(--color-text-secondary)',
-              minWidth: '50px',
-            }}
-          >
-            {label}
-          </code>
-          <span
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: `var(${varName})`,
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            The quick brown fox jumps
-          </span>
-        </div>
-      ))}
+const StoryFrame: React.FC<{
+  title: string;
+  eyebrow: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ title, eyebrow, description, children }) => (
+  <div
+    className="option-1 typo-1"
+    style={{
+      minHeight: '100vh',
+      padding: '32px',
+      background: 'var(--bg)',
+      color: 'var(--fg1)',
+      fontFamily: 'var(--font-body)',
+    }}
+  >
+    <div style={{ marginBottom: '32px', maxWidth: '760px' }}>
+      <p
+        style={{
+          margin: '0 0 8px',
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-medium)',
+          color: 'var(--fg3)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+        }}
+      >
+        {eyebrow}
+      </p>
+      <h1
+        style={{
+          margin: '0 0 12px',
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--fs-4xl)',
+          lineHeight: 'var(--lh-tight)',
+          fontWeight: 'var(--fw-semibold)',
+          color: 'var(--fg1)',
+        }}
+      >
+        {title}
+      </h1>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 'var(--fs-base)',
+          lineHeight: 'var(--lh-normal)',
+          color: 'var(--fg2)',
+        }}
+      >
+        {description}
+      </p>
     </div>
+    {children}
   </div>
 );
 
-export const ClassicSerif: StoryObj = {
-  render: () => {
-    return (
+const Panel: React.FC<{ title: string; note?: string; children: React.ReactNode }> = ({
+  title,
+  note,
+  children,
+}) => (
+  <section
+    style={{
+      marginBottom: '24px',
+      borderRadius: 'var(--radius-xl)',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
+      padding: '24px',
+    }}
+  >
+    <h2
+      style={{
+        margin: '0 0 6px',
+        fontSize: 'var(--fs-lg)',
+        fontWeight: 'var(--fw-semibold)',
+        color: 'var(--fg1)',
+      }}
+    >
+      {title}
+    </h2>
+    {note ? (
+      <p style={{ margin: '0 0 16px', color: 'var(--fg2)', fontSize: 'var(--fs-sm)' }}>{note}</p>
+    ) : null}
+    {children}
+  </section>
+);
+
+const AliasScale: React.FC = () => (
+  <div style={{ display: 'grid', gap: '10px' }}>
+    {[
+      ['H1', 'var(--typography-h1-size)', 'var(--typography-h1-line-height)', 'Heading one'],
+      ['H2', 'var(--typography-h2-size)', 'var(--typography-h2-line-height)', 'Heading two'],
+      ['H3', 'var(--typography-h3-size)', 'var(--typography-h3-line-height)', 'Heading three'],
+      ['H4', 'var(--typography-h4-size)', 'var(--typography-h4-line-height)', 'Heading four'],
+      [
+        'Body',
+        'var(--typography-body-size)',
+        'var(--typography-body-line-height)',
+        'Body copy for chrome',
+      ],
+      [
+        'Caption',
+        'var(--typography-caption-size)',
+        'var(--typography-caption-line-height)',
+        'Meta and captions',
+      ],
+    ].map(([label, size, lineHeight, sample]) => (
       <div
-        className="option-1 typo-1"
+        key={label}
         style={{
-          padding: '32px',
-          backgroundColor: 'var(--color-background)',
-          minHeight: '100vh',
+          display: 'grid',
+          gridTemplateColumns: '72px 120px minmax(0, 1fr)',
+          gap: '16px',
+          alignItems: 'baseline',
+          paddingBottom: '10px',
+          borderBottom: '1px solid var(--border)',
         }}
       >
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h2-size)',
-              fontWeight: 'var(--typography-h2-weight)',
-              marginBottom: '8px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Classic Serif
-          </h1>
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '8px',
-            }}
-          >
-            Traditional literary feel with modern serif headings and clean sans-serif body text.
-          </p>
-          <div
-            style={{
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-mono)',
-            }}
-          >
-            <div>Display: Playfair Display (serif)</div>
-            <div>Body: System Sans-Serif</div>
-            <div>Scale: 1.250 (Major Third)</div>
-          </div>
-        </div>
-
-        {/* Headings Example */}
-        <div
+        <code
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
+        >
+          {label}
+        </code>
+        <code
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
+        >
+          {size}
+        </code>
+        <span
           style={{
-            marginBottom: '48px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
+            fontFamily: label.startsWith('H')
+              ? 'var(--typography-heading-font)'
+              : 'var(--typography-body-font)',
+            fontSize: size,
+            lineHeight,
+            color: 'var(--fg1)',
           }}
         >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '24px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Heading Hierarchy
-          </h3>
+          {sample}
+        </span>
+      </div>
+    ))}
+  </div>
+);
 
-          <h1
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h1-size)',
-              fontWeight: 'var(--typography-h1-weight)',
-              lineHeight: 'var(--typography-h1-line-height)',
-              letterSpacing: 'var(--typography-h1-letter-spacing)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Heading 1: Main Title
-          </h1>
+const NativeScale: React.FC = () => (
+  <div style={{ display: 'grid', gap: '10px' }}>
+    {[
+      ['--fs-5xl', 'var(--fs-5xl)', 'var(--lh-tight)', '64 / 74', 'Display sample'],
+      ['--fs-4xl', 'var(--fs-4xl)', 'var(--lh-tight)', '48 / 56', 'Heading one'],
+      ['--fs-3xl', 'var(--fs-3xl)', 'var(--lh-tight)', '36 / 44', 'Heading two'],
+      ['--fs-2xl', 'var(--fs-2xl)', 'var(--lh-snug)', '28 / 36', 'Heading three'],
+      ['--fs-xl', 'var(--fs-xl)', 'var(--lh-snug)', '22 / 28', 'Heading four'],
+      ['--fs-base', 'var(--fs-base)', 'var(--lh-normal)', '15 / 22', 'UI body'],
+      ['--fs-md', 'var(--fs-md)', 'var(--lh-reading)', '17 / 29', 'Reading text'],
+      ['--fs-xs', 'var(--fs-xs)', 'var(--lh-normal)', '13 / 20', 'Meta'],
+    ].map(([token, size, lineHeight, metrics, sample]) => (
+      <div
+        key={token}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '96px 56px minmax(0, 1fr)',
+          gap: '16px',
+          alignItems: 'baseline',
+          paddingBottom: '10px',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
+        <code
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
+        >
+          {token}
+        </code>
+        <code
+          style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)', color: 'var(--fg3)' }}
+        >
+          {metrics}
+        </code>
+        <span
+          style={{
+            fontFamily:
+              sample.includes('Reading') || sample.includes('Display') || sample.includes('Heading')
+                ? 'var(--font-display)'
+                : 'var(--font-body)',
+            fontSize: size,
+            lineHeight,
+            color: 'var(--fg1)',
+          }}
+        >
+          {sample}
+        </span>
+      </div>
+    ))}
+  </div>
+);
 
-          <h2
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h2-size)',
-              fontWeight: 'var(--typography-h2-weight)',
-              lineHeight: 'var(--typography-h2-line-height)',
-              letterSpacing: 'var(--typography-h2-letter-spacing)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Heading 2: Section Title
-          </h2>
+export const NewsreaderAndGeist: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Alias layer"
+      title="Newsreader + Geist"
+      description="Legacy typography aliases still point at the Ink & Paper type system. Newsreader handles reading surfaces and editorial headings, while Geist keeps controls, metadata, and chrome compact and readable."
+    >
+      <Panel
+        title="Type pairing"
+        note="The aliases still describe the live fonts, even while their names are being retired."
+      >
+        <div style={{ display: 'grid', gap: '20px' }}>
+          <div>
+            <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-xs)', color: 'var(--fg3)' }}>
+              Display and reading
+            </p>
+            <div
+              style={{
+                fontFamily: 'var(--typography-heading-font)',
+                fontSize: 'var(--typography-h2-size)',
+                lineHeight: 'var(--typography-h2-line-height)',
+                fontWeight: 'var(--typography-h2-weight)',
+                color: 'var(--fg1)',
+              }}
+            >
+              Editorial headings keep the page warm and literary.
+            </div>
+          </div>
+          <div>
+            <p style={{ margin: '0 0 6px', fontSize: 'var(--fs-xs)', color: 'var(--fg3)' }}>
+              UI chrome
+            </p>
+            <div
+              style={{
+                fontFamily: 'var(--typography-body-font)',
+                fontSize: 'var(--typography-body-size)',
+                lineHeight: 'var(--typography-body-line-height)',
+                color: 'var(--fg1)',
+              }}
+            >
+              Buttons, labels, metadata, and settings stay on a quieter sans so the writing itself
+              remains the hero.
+            </div>
+          </div>
+        </div>
+      </Panel>
 
-          <h3
+      <Panel
+        title="Alias scale"
+        note="These semantic aliases are still available while Stage 5 removes the legacy layer."
+      >
+        <AliasScale />
+      </Panel>
+
+      <Panel
+        title="Reading sample"
+        note="Ink & Paper keeps long-form text generous without making chrome feel oversized."
+      >
+        <div
+          style={{
+            maxWidth: 'var(--layout-reading-w)',
+            margin: '0 auto',
+            padding: '20px',
+            borderRadius: 'var(--radius-lg)',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <p
             style={{
+              margin: '0 0 12px',
               fontFamily: 'var(--typography-heading-font)',
               fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
               lineHeight: 'var(--typography-h3-line-height)',
-              letterSpacing: 'var(--typography-h3-letter-spacing)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
+              color: 'var(--fg1)',
             }}
           >
-            Heading 3: Subsection
-          </h3>
-
-          <h4
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h4-size)',
-              fontWeight: 'var(--typography-h4-weight)',
-              lineHeight: 'var(--typography-h4-line-height)',
-              letterSpacing: 'var(--typography-h4-letter-spacing)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Heading 4: Minor Heading
-          </h4>
-        </div>
-
-        {/* Body Text Example */}
-        <div
-          style={{
-            marginBottom: '48px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '24px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Body Text
-          </h3>
-
+            The room settled back into silence.
+          </p>
           <p
             style={{
-              fontFamily: 'var(--typography-body-font)',
+              margin: 0,
+              fontFamily: 'var(--typography-heading-font)',
               fontSize: 'var(--typography-body-large-size)',
               lineHeight: 'var(--typography-body-large-line-height)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
+              color: 'var(--fg2)',
             }}
           >
-            <strong>Large body text:</strong> In the beginning, the creative process was nothing
-            more than a spark—a fleeting idea that danced at the edge of consciousness, waiting to
-            be captured and transformed into something tangible.
-          </p>
-
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              fontWeight: 'var(--typography-body-weight)',
-              lineHeight: 'var(--typography-body-line-height)',
-              letterSpacing: 'var(--typography-body-letter-spacing)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            <strong>Regular body text:</strong> Every great story begins with a question, a problem
-            to solve, or a world to explore. The writer's journey is one of discovery, where
-            characters come alive through careful observation and the patient cultivation of
-            authentic voices. Through this process, mere words transform into experiences that
-            resonate deeply with readers.
-          </p>
-
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-small-size)',
-              lineHeight: 'var(--typography-body-small-line-height)',
-              marginBottom: '8px',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <strong>Small body text:</strong> Supporting details and metadata appear in smaller
-            text, maintaining readability while establishing visual hierarchy.
-          </p>
-
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-caption-size)',
-              fontWeight: 'var(--typography-caption-weight)',
-              lineHeight: 'var(--typography-caption-line-height)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            Caption: Additional context or attribution information
+            Newsreader carries the reading voice at a calmer pace, while the rest of the interface
+            steps back into Geist so navigation, status, and controls stay crisp.
           </p>
         </div>
+      </Panel>
+    </StoryFrame>
+  ),
+};
 
-        {/* Type Scale */}
-        <div
-          style={{
-            marginBottom: '48px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
+export const NativeTypeTokens: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Native layer"
+      title="Native type tokens"
+      description="New work should use the native scale directly: --fs-* for size, --lh-* for rhythm, --font-display for reading and display, and --font-body for UI chrome."
+    >
+      <Panel
+        title="Native scale"
+        note="This mirrors the reference previews for display, UI, and reading text."
+      >
+        <NativeScale />
+      </Panel>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: '24px',
+        }}
+      >
+        <Panel
+          title="UI chrome"
+          note="Geist stays compact and efficient for toolbars, labels, and controls."
         >
-          <TypographyScale className="typo-1" />
-        </div>
-
-        {/* UI Elements */}
-        <div
-          style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '24px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            UI Elements
-          </h3>
-
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button
-              type="button"
-              style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--typography-button-size)',
-                fontWeight: 'var(--typography-button-weight)',
-                lineHeight: 'var(--typography-button-line-height)',
-                letterSpacing: 'var(--typography-button-letter-spacing)',
-                backgroundColor: 'var(--color-primary)',
-                color: '#ffffff',
-                padding: '12px 24px',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              Primary Button
-            </button>
-
-            <button
-              type="button"
-              style={{
-                fontFamily: 'var(--typography-body-font)',
-                fontSize: 'var(--typography-button-size)',
-                fontWeight: 'var(--typography-button-weight)',
-                lineHeight: 'var(--typography-button-line-height)',
-                letterSpacing: 'var(--typography-button-letter-spacing)',
-                backgroundColor: 'transparent',
-                color: 'var(--color-primary)',
-                padding: '12px 24px',
-                border: '2px solid var(--color-primary)',
-                borderRadius: '6px',
-                cursor: 'pointer',
-              }}
-            >
-              Secondary Button
-            </button>
-
-            <code
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 'var(--font-size-sm)',
-                backgroundColor: 'var(--color-surface-secondary)',
-                color: 'var(--color-text-primary)',
-                padding: '4px 8px',
-                borderRadius: '4px',
-              }}
-            >
-              code snippet
-            </code>
-          </div>
-
           <div
             style={{
-              marginTop: '32px',
-              padding: '24px',
-              backgroundColor: 'var(--color-surface-secondary)',
-              borderRadius: '8px',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-2)',
+              padding: '16px',
             }}
           >
-            <h4
+            <div
               style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                marginBottom: '16px',
-                color: 'var(--color-text-primary)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginBottom: '12px',
+                color: 'var(--fg3)',
+                fontSize: 'var(--fs-xs)',
               }}
             >
-              Typography Considerations
-            </h4>
-            <ul
+              <span>toolbar label</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>--fs-base / --lh-normal</span>
+            </div>
+            <div
               style={{
-                listStyle: 'disc',
-                paddingLeft: '24px',
-                color: 'var(--color-text-secondary)',
-                lineHeight: '1.8',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--fs-base)',
+                lineHeight: 'var(--lh-normal)',
+                color: 'var(--fg1)',
               }}
             >
-              <li>System fonts provide optimal performance and consistency across platforms</li>
-              <li>Type scales ensure harmonious size relationships throughout the interface</li>
-              <li>Line heights optimized for readability in body text (1.625-1.8)</li>
-              <li>Font weights carefully selected to work with the color palette</li>
-              <li>Letter spacing adjusted for display sizes to improve legibility</li>
-            </ul>
+              Draft history is saved automatically while you write.
+            </div>
           </div>
-        </div>
+        </Panel>
+
+        <Panel
+          title="Reading surface"
+          note="The reading column uses Newsreader at 17px with --lh-reading for a slower, book-like rhythm."
+        >
+          <div
+            style={{
+              maxWidth: 'var(--layout-reading-w)',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-2)',
+              padding: '16px',
+            }}
+          >
+            <div
+              style={{
+                marginBottom: '12px',
+                color: 'var(--fg3)',
+                fontSize: 'var(--fs-xs)',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              --font-display · --fs-md · --lh-reading
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-md)',
+                lineHeight: 'var(--lh-reading)',
+                color: 'var(--fg1)',
+              }}
+            >
+              The page asks for patience. Native reading tokens keep paragraphs open, warm, and easy
+              to scan over long sessions.
+            </p>
+          </div>
+        </Panel>
       </div>
-    );
-  },
+    </StoryFrame>
+  ),
 };

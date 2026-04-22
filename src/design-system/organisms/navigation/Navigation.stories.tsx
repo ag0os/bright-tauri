@@ -11,28 +11,28 @@ const meta = {
     docs: {
       description: {
         component: `
-# Navigation: Minimal Top Bar
+# Navigation: minimal top bar
 
-**Pattern:** Slim single top bar for focused, distraction-free interfaces
+**Pattern:** slim single top bar for focused writing work
 
-Optimized for desktop writing/creation apps:
-- 48px height - maximum content space
-- Centered breadcrumb navigation
+Built for desktop authoring flows:
+- 48px height for maximum writing space
+- Centered breadcrumb context
 - Essential actions only
-- Auto-save indicator
-- Clean, unobtrusive design
+- Quiet save state
+- Warm surfaces with a restrained accent
 
-## Design Tokens Applied
-- Colors: Modern Indigo
-- Typography: Classic Serif
-- Icons: Lucide Icons
-- Buttons: Minimal Squared
+## Ink & Paper tokens applied
+- Colors: Ink & Paper surfaces, borders, and marigold accent
+- Typography: Newsreader + Geist
+- Icons: Phosphor regular
+- States: accent-subtle active tab, surface hover, hairline separators
 
 ## Accessibility
-- ✅ AA contrast on all text
-- ✅ Focus indicators on all interactive elements
-- ✅ Keyboard navigation support
-- ✅ Clear visual hierarchy
+- AA contrast on text and controls
+- Focus indicators on interactive elements
+- Keyboard-friendly button targets
+- Clear visual hierarchy without excess chrome
         `,
       },
     },
@@ -48,28 +48,27 @@ export const Default: Story = {
     docs: {
       description: {
         story: `
-## Minimal Top Bar for Focused Writing
+## Minimal top bar for focused writing
 
-**Best for:** Content creation, writing apps, distraction-free interfaces
+**Best for:** editor views, single-story work, and any screen where content should outrank chrome
 
 ### Characteristics
-- **Layout:** Slim single top bar (48px)
-- **Pattern:** Minimal chrome, maximum content space
-- **Focused:** Centered context indicator, minimal controls
-- **Desktop Native:** Similar to Notion, Bear, Ulysses, iA Writer
+- **Layout:** slim single top bar (48px)
+- **Pattern:** minimum chrome, maximum reading space
+- **Context:** centered breadcrumb trail
+- **Desktop feel:** closer to a writing app than a SaaS dashboard
 
 ### Features
-- Breadcrumb navigation (centered)
-- Essential actions only
-- Auto-save indicator
-- Optional auto-hide on scroll
-- Clean, unobtrusive design
+- Breadcrumb navigation
+- Save-state indicator
+- Compact utility actions
+- Accent-backed primary action
+- Optional hide/show behavior for focus mode experiments
 
 ### Strengths
-- Maximum content focus
-- Minimal distraction
-- Clean, modern aesthetic
-- Perfect for writing/creation workflows
+- Keeps the writing surface dominant
+- Uses warm surfaces instead of cold utility chrome
+- Maintains quick access to essential actions without crowding the page
         `,
       },
     },

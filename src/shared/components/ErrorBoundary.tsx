@@ -66,10 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
             color: 'var(--color-text-secondary)',
           }}
         >
-          <WarningCircle
-            size={48}
-            style={{ color: 'var(--color-semantic-error)' }}
-          />
+          <WarningCircle size={48} style={{ color: 'var(--color-semantic-error)' }} />
           <h2 style={{ margin: 0, color: 'var(--color-text-primary)' }}>Something went wrong</h2>
           {name && (
             <p style={{ margin: 0 }}>

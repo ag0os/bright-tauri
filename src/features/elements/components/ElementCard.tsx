@@ -155,10 +155,7 @@ export function ElementCard({
                 <>
                   <span>•</span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Link
-                      className="icon icon-sm"
-                      style={{ width: '14px', height: '14px' }}
-                    />
+                    <Link className="icon icon-sm" style={{ width: '14px', height: '14px' }} />
                     {actualRelationshipCount} {actualRelationshipCount === 1 ? 'link' : 'links'}
                   </span>
                 </>

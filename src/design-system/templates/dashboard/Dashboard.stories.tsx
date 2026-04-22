@@ -11,29 +11,30 @@ const meta = {
     docs: {
       description: {
         component: `
-# Dashboard: Stats Grid Layout
+# Dashboard: writing overview layout
 
-**Pattern:** Analytics-focused dashboard with comprehensive data visibility
+**Pattern:** a dense but calm overview page for active writing work
 
-Complete page layout integrating all design system tokens:
-- **Phase 1:** Modern Indigo colors, Classic Serif typography, Lucide icons
-- **Phase 2:** Minimal Squared buttons, Filled Background inputs
-- **Phase 3:** Elevated Shadow cards, Minimal Top Bar navigation
+This template combines the current Ink & Paper system:
+- Warm surfaces and hairline borders
+- Newsreader display headings with Geist chrome
+- Phosphor regular icons
+- Flat cards with restrained hover depth
+- Marigold actions and progress cues
 
 ## Features
-- 4-stat grid showing key metrics with trends
-- Recent documents list with status badges
-- Universe elements section
+- Four writing metrics at the top
+- Recent document list with status pills
+- Universe summary section
 - Quick actions sidebar
-- Writing goal progress tracker
-- High information density
+- Weekly goal progress
+- High information density without glossy dashboard chrome
 
 ## Accessibility
-- ✅ AA contrast on all text
-- ✅ Focus indicators on all interactive elements
-- ✅ Keyboard navigation support
-- ✅ Clear visual hierarchy
-- ✅ Proper spacing and alignment
+- AA contrast across cards and controls
+- Focus indicators on interactive elements
+- Keyboard-accessible actions
+- Clear section hierarchy and readable metadata
         `,
       },
     },
@@ -49,36 +50,24 @@ export const Default: Story = {
     docs: {
       description: {
         story: `
-## Stats Grid Dashboard - Analytics Focus
+## Writing desk dashboard
 
-**Best for:** Users who want comprehensive overview and maximum data visibility
+**Best for:** overview screens where writers want recent work, progress, and worldbuilding context on one page
 
-### Layout Structure
-- **Top Stats Grid:** 4 key metrics in card grid (total words, projects, streak, characters)
-- **Main Content:** Two-column layout
-  - Primary: Recent documents, Universe elements
-  - Sidebar: Quick actions, Writing goal progress
-- **Navigation:** Minimal top bar (48px)
+### Layout structure
+- **Top stats row:** headline metrics for words, active stories, streak, and universe scope
+- **Main column:** recent documents and universe summary
+- **Sidebar:** quick actions and weekly goal tracking
+- **Navigation:** minimal top bar to keep chrome compact
 
-### Key Features
-- Prominent stats cards with trends (+/- indicators)
-- Organized sections with "View all" actions
-- Document list with status badges
-- Quick action buttons for common tasks
-- Visual progress indicators
-- Hover effects on interactive cards
+### Ink & Paper traits
+- Surface cards stay flat at rest with 12px corners
+- Hover depth is subtle rather than lift-heavy
+- Editorial headings use Newsreader while metadata stays in Geist
+- Accent usage is limited to actions, pills, and progress
 
-### Information Density
-- **High:** Shows maximum information at once
-- Stats, documents, universe, and goals all visible
-- Perfect for users who want an overview without clicking
-
-### Use Case
-Perfect for users who:
-- Track multiple projects simultaneously
-- Want to see progress metrics at a glance
-- Need quick access to recent work
-- Prefer traditional dashboard layouts with clear organization
+### Use case
+This template works when a writer needs orientation before diving back into a draft, but the page should still feel warm and editorial rather than like a generic analytics product.
         `,
       },
     },

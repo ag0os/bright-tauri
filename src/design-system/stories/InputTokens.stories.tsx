@@ -1,9 +1,9 @@
 import { CheckCircle, MagnifyingGlass } from '@phosphor-icons/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type React from 'react';
-import { useState } from 'react';
 import '../tokens/colors/ink-and-paper.css';
 import '../tokens/typography/newsreader-geist.css';
+import '../tokens/spacing.css';
 import '../tokens/icons/phosphor.css';
 import '../tokens/atoms/button/minimal-squared.css';
 import '../tokens/atoms/input/filled-background.css';
@@ -17,523 +17,349 @@ const meta: Meta = {
 
 export default meta;
 
-type InputOption = {
-  name: string;
+const StoryFrame: React.FC<{
+  title: string;
+  eyebrow: string;
   description: string;
-  cssFile: string;
-  className: string;
-  style: string;
-  labelPosition: string;
-  border: string;
-  strengths: string[];
-};
-
-// Basic Input Component
-const BasicInput: React.FC<{ className: string }> = ({ className }) => {
-  return (
-    <div className={`input-group ${className}`}>
-      <label className="input-label" htmlFor="basic-input">
-        Email Address
-        <span className="required">*</span>
-      </label>
-      <div className="input-wrapper">
-        <input
-          id="basic-input"
-          type="email"
-          className="input-field input-base"
-          placeholder="you@example.com"
-        />
-      </div>
-      <div className="input-helper">Enter your email address</div>
-    </div>
-  );
-};
-
-// Floating Label Input Component
-const FloatingInput: React.FC<{ className: string }> = ({ className }) => {
-  const [value, setValue] = useState('');
-  const [isFocused, setIsFocused] = useState(false);
-
-  return (
-    <div className={`input-group ${className}`}>
-      <div className={`input-wrapper ${isFocused ? 'is-focused' : ''} ${value ? 'has-value' : ''}`}>
-        <label className="input-label" htmlFor="floating-input">
-          Email Address
-          <span className="required">*</span>
-        </label>
-        <input
-          id="floating-input"
-          type="email"
-          className="input-field input-base"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-        />
-      </div>
-      <div className="input-helper">Enter your email address</div>
-    </div>
-  );
-};
-
-// Input Showcase Component
-const InputShowcase: React.FC<{ option: InputOption }> = ({ option }) => {
-  const [errorValue, setErrorValue] = useState('invalid@');
-  const [iconValue, setIconValue] = useState('');
-
-  const isFloating = option.className === 'input-2';
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {/* Size Variants */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Size Variants
-        </h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div className={`input-group ${option.className}`}>
-            <label className="input-label" htmlFor={`${option.className}-sm`}>
-              Small
-            </label>
-            <div className="input-wrapper">
-              <input
-                id={`${option.className}-sm`}
-                type="text"
-                className="input-field input-sm"
-                placeholder="Small input"
-              />
-            </div>
-          </div>
-          <div className={`input-group ${option.className}`}>
-            <label className="input-label" htmlFor={`${option.className}-base`}>
-              Base
-            </label>
-            <div className="input-wrapper">
-              <input
-                id={`${option.className}-base`}
-                type="text"
-                className="input-field input-base"
-                placeholder="Base input"
-              />
-            </div>
-          </div>
-          <div className={`input-group ${option.className}`}>
-            <label className="input-label" htmlFor={`${option.className}-lg`}>
-              Large
-            </label>
-            <div className="input-wrapper">
-              <input
-                id={`${option.className}-lg`}
-                type="text"
-                className="input-field input-lg"
-                placeholder="Large input"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* With Helper Text */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          With Helper Text
-        </h4>
-        {isFloating ? (
-          <FloatingInput className={option.className} />
-        ) : (
-          <BasicInput className={option.className} />
-        )}
-      </div>
-
-      {/* Error State */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Error State
-        </h4>
-        <div className={`input-group has-error ${option.className}`}>
-          <label className="input-label" htmlFor={`${option.className}-error`}>
-            Email Address
-            <span className="required">*</span>
-          </label>
-          <div className={`input-wrapper ${errorValue ? 'has-value' : ''}`}>
-            <input
-              id={`${option.className}-error`}
-              type="email"
-              className="input-field input-base"
-              value={errorValue}
-              onChange={(e) => setErrorValue(e.target.value)}
-            />
-          </div>
-          <div className="input-helper">Please enter a valid email address</div>
-        </div>
-      </div>
-
-      {/* Disabled State */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Disabled State
-        </h4>
-        <div className={`input-group ${option.className}`}>
-          <label className="input-label" htmlFor={`${option.className}-disabled`}>
-            Username
-          </label>
-          <div className="input-wrapper">
-            <input
-              id={`${option.className}-disabled`}
-              type="text"
-              className="input-field input-base"
-              value="johndoe"
-              disabled
-            />
-          </div>
-          <div className="input-helper">This field cannot be edited</div>
-        </div>
-      </div>
-
-      {/* With Icons */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          With Icons
-        </h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Prefix Icon */}
-          <div className={`input-group ${option.className}`}>
-            <label className="input-label" htmlFor={`${option.className}-prefix`}>
-              Search
-            </label>
-            <div className={`input-wrapper ${isFloating && iconValue ? 'has-value' : ''}`}>
-              <div className="input-icon-prefix">
-                <MagnifyingGlass size={20} />
-              </div>
-              <input
-                id={`${option.className}-prefix`}
-                type="text"
-                className="input-field input-base has-prefix"
-                placeholder="Search..."
-                value={iconValue}
-                onChange={(e) => setIconValue(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Suffix Icon */}
-          <div className={`input-group ${option.className}`}>
-            <label className="input-label" htmlFor={`${option.className}-suffix`}>
-              Verified
-            </label>
-            <div className="input-wrapper">
-              <input
-                id={`${option.className}-suffix`}
-                type="text"
-                className="input-field input-base has-suffix"
-                value="Verified User"
-                readOnly
-              />
-              <div className="input-icon-suffix">
-                <CheckCircle size={20} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Real-world Form */}
-      <div>
-        <h4
-          style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: '16px',
-            color: 'var(--color-text-primary)',
-          }}
-        >
-          Real-world Form Example
-        </h4>
-        <div
-          style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h5
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--font-size-xl)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Create Account
-          </h5>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className={`input-group ${option.className}`}>
-              <label className="input-label" htmlFor={`${option.className}-form-name`}>
-                Full Name
-                <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id={`${option.className}-form-name`}
-                  type="text"
-                  className="input-field input-base"
-                  placeholder="John Doe"
-                />
-              </div>
-            </div>
-
-            <div className={`input-group ${option.className}`}>
-              <label className="input-label" htmlFor={`${option.className}-form-email`}>
-                Email
-                <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id={`${option.className}-form-email`}
-                  type="email"
-                  className="input-field input-base"
-                  placeholder="you@example.com"
-                />
-              </div>
-            </div>
-
-            <div className={`input-group ${option.className}`}>
-              <label className="input-label" htmlFor={`${option.className}-form-password`}>
-                Password
-                <span className="required">*</span>
-              </label>
-              <div className="input-wrapper">
-                <input
-                  id={`${option.className}-form-password`}
-                  type="password"
-                  className="input-field input-base"
-                  placeholder="••••••••"
-                />
-              </div>
-              <div className="input-helper">Must be at least 8 characters</div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-              <button type="button" className="btn btn-ghost btn-base">
-                Cancel
-              </button>
-              <button type="button" className="btn btn-primary btn-base">
-                Create Account
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export const FilledBackground: StoryObj = {
-  render: () => {
-    return (
-      <div
-        className="option-1 typo-1 icons-1 button-2 input-5"
+  children: React.ReactNode;
+}> = ({ title, eyebrow, description, children }) => (
+  <div
+    className="option-1 typo-1 button-2 input-5 icons-1"
+    style={{
+      minHeight: '100vh',
+      padding: '32px',
+      background: 'var(--bg)',
+      color: 'var(--fg1)',
+      fontFamily: 'var(--font-body)',
+    }}
+  >
+    <div style={{ marginBottom: '32px', maxWidth: '760px' }}>
+      <p
         style={{
-          padding: '32px',
-          backgroundColor: 'var(--color-background)',
-          minHeight: '100vh',
+          margin: '0 0 8px',
+          fontSize: 'var(--fs-xs)',
+          fontWeight: 'var(--fw-medium)',
+          color: 'var(--fg3)',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
         }}
       >
-        <div style={{ marginBottom: '32px' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h2-size)',
-              fontWeight: 'var(--typography-h2-weight)',
-              marginBottom: '8px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Filled Background
-          </h1>
-          <p
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '12px',
-            }}
-          >
-            Material Design inspired with solid background and no border.
-          </p>
+        {eyebrow}
+      </p>
+      <h1
+        style={{
+          margin: '0 0 12px',
+          fontFamily: 'var(--font-display)',
+          fontSize: 'var(--fs-4xl)',
+          lineHeight: 'var(--lh-tight)',
+          color: 'var(--fg1)',
+        }}
+      >
+        {title}
+      </h1>
+      <p
+        style={{
+          margin: 0,
+          fontSize: 'var(--fs-base)',
+          lineHeight: 'var(--lh-normal)',
+          color: 'var(--fg2)',
+        }}
+      >
+        {description}
+      </p>
+    </div>
+    {children}
+  </div>
+);
+
+const Panel: React.FC<{ title: string; note?: string; children: React.ReactNode }> = ({
+  title,
+  note,
+  children,
+}) => (
+  <section
+    style={{
+      marginBottom: '24px',
+      borderRadius: 'var(--radius-xl)',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
+      padding: '24px',
+    }}
+  >
+    <h2
+      style={{
+        margin: '0 0 6px',
+        fontSize: 'var(--fs-lg)',
+        fontWeight: 'var(--fw-semibold)',
+        color: 'var(--fg1)',
+      }}
+    >
+      {title}
+    </h2>
+    {note ? (
+      <p style={{ margin: '0 0 16px', fontSize: 'var(--fs-sm)', color: 'var(--fg2)' }}>{note}</p>
+    ) : null}
+    {children}
+  </section>
+);
+
+const AliasField: React.FC<{
+  fieldId: string;
+  label: string;
+  helper?: string;
+  error?: string;
+  disabled?: boolean;
+  placeholder?: string;
+  defaultValue?: string;
+  icon?: React.ReactNode;
+  suffixIcon?: React.ReactNode;
+  children?: React.ReactNode;
+}> = ({
+  fieldId,
+  label,
+  helper,
+  error,
+  disabled = false,
+  placeholder,
+  defaultValue,
+  icon,
+  suffixIcon,
+  children,
+}) => (
+  <div className={`input-group ${error ? 'has-error' : ''}`}>
+    <label className="input-label" htmlFor={fieldId}>
+      {label}
+    </label>
+    <div className="input-wrapper">
+      {icon ? <div className="input-icon-prefix">{icon}</div> : null}
+      {children ?? (
+        <input
+          id={fieldId}
+          className={`input-field input-base ${icon ? 'has-prefix' : ''} ${suffixIcon ? 'has-suffix' : ''}`}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          disabled={disabled}
+        />
+      )}
+      {suffixIcon ? <div className="input-icon-suffix">{suffixIcon}</div> : null}
+    </div>
+    {error ? (
+      <div className="input-helper">{error}</div>
+    ) : helper ? (
+      <div className="input-helper">{helper}</div>
+    ) : null}
+  </div>
+);
+
+const NativeField: React.FC<{
+  label: string;
+  placeholder?: string;
+  helper?: string;
+  value?: string;
+  trailing?: React.ReactNode;
+}> = ({ label, placeholder, helper, value, trailing }) => (
+  <label style={{ display: 'grid', gap: '6px' }}>
+    <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 'var(--fw-medium)', color: 'var(--fg2)' }}>
+      {label}
+    </span>
+    <div style={{ position: 'relative' }}>
+      <input
+        readOnly={Boolean(value)}
+        defaultValue={value}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          minHeight: '38px',
+          boxSizing: 'border-box',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border)',
+          background: 'var(--surface-2)',
+          color: 'var(--fg1)',
+          padding: trailing ? '10px 42px 10px 12px' : '10px 12px',
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--fs-sm)',
+          outline: 'none',
+        }}
+      />
+      {trailing ? (
+        <span
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--fg2)',
+            display: 'inline-flex',
+          }}
+        >
+          {trailing}
+        </span>
+      ) : null}
+    </div>
+    {helper ? (
+      <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--fg3)' }}>{helper}</span>
+    ) : null}
+  </label>
+);
+
+export const InkAndPaperInputs: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Alias layer"
+      title="Ink & Paper inputs"
+      description="The current input classes already render as warm paper fields: filled surfaces, 8px corners, hairline borders, and marigold focus states."
+    >
+      <Panel
+        title="Reference-aligned field set"
+        note="These controls still use the class layer while matching the Ink & Paper input preview."
+      >
+        <div
+          style={{
+            display: 'grid',
+            gap: '16px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          }}
+        >
+          <AliasField
+            fieldId="alias-story-title"
+            label="Story title"
+            defaultValue="The Last Light"
+          />
+          <AliasField fieldId="alias-story-type" label="Type">
+            <select id="alias-story-type" className="input-field input-base">
+              <option>Chapter</option>
+              <option>Scene</option>
+              <option>Outline</option>
+            </select>
+          </AliasField>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <AliasField
+              fieldId="alias-story-description"
+              label="Description"
+              placeholder="A short note about this piece"
+            />
+          </div>
+        </div>
+      </Panel>
+
+      <Panel
+        title="States used across the app"
+        note="Helper text, validation, disabled fields, and icon affordances stay calm and legible in both themes."
+      >
+        <div
+          style={{
+            display: 'grid',
+            gap: '16px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          }}
+        >
+          <AliasField
+            fieldId="alias-search"
+            label="Search"
+            placeholder="Search stories"
+            helper="Prefix icons inherit currentColor and stay secondary until focus."
+            icon={<MagnifyingGlass size={18} />}
+          />
+          <AliasField
+            fieldId="alias-email"
+            label="Editor email"
+            defaultValue="invalid@"
+            error="Use a full email address so collaboration invites arrive correctly."
+          />
+          <AliasField
+            fieldId="alias-verified"
+            label="Verified"
+            defaultValue="Leora Finch"
+            helper="Read-only fields can still surface confirmation state."
+            suffixIcon={<CheckCircle size={18} />}
+          />
+          <AliasField
+            fieldId="alias-universe-id"
+            label="Universe ID"
+            defaultValue="ash-cycle-01"
+            helper="Disabled fields fade back without disappearing."
+            disabled
+          />
+        </div>
+      </Panel>
+    </StoryFrame>
+  ),
+};
+
+export const NativeFieldTokens: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Native layer"
+      title="Native field tokens"
+      description="New fields should use native surface, border, accent, and radius tokens directly. The defaults are --surface-2, --border, --accent, and --radius-md."
+    >
+      <Panel
+        title="Native input recipe"
+        note="This mirrors the reference preview: subtle fill, hairline border, and a stronger accent only on focus."
+      >
+        <div
+          style={{
+            display: 'grid',
+            gap: '16px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          }}
+        >
+          <NativeField
+            label="Story title"
+            value="The Last Light"
+            helper="Uses --surface-2, --border, and --radius-md."
+          />
+          <NativeField label="Type" value="Chapter" />
+          <div style={{ gridColumn: '1 / -1' }}>
+            <NativeField label="Description" placeholder="A short note about this piece" />
+          </div>
+        </div>
+      </Panel>
+
+      <Panel
+        title="Focus and feedback tokens"
+        note="Accent and semantic tokens should stay restrained and readable, never louder than the writing itself."
+      >
+        <div
+          style={{
+            display: 'grid',
+            gap: '16px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          }}
+        >
           <div
             style={{
-              display: 'flex',
-              gap: '24px',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-mono)',
-              flexWrap: 'wrap',
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--accent)',
+              boxShadow: '0 0 0 3px var(--accent-subtle)',
+              background: 'var(--surface-2)',
+              padding: '16px',
             }}
           >
-            <div>
-              <strong>Style:</strong> Filled background
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--fg3)', marginBottom: '8px' }}>
+              Focused field
             </div>
-            <div>
-              <strong>Label:</strong> Label above
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--fg1)' }}>
+              Accent ring = --accent + --accent-subtle
             </div>
-            <div>
-              <strong>Border:</strong> No border, gray fill, border appears on focus
+          </div>
+          <div
+            style={{
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid color-mix(in oklch, var(--error) 45%, transparent)',
+              background: 'var(--error-soft)',
+              padding: '16px',
+            }}
+          >
+            <div style={{ fontSize: 'var(--fs-xs)', color: 'var(--fg3)', marginBottom: '8px' }}>
+              Validation message
+            </div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: 'var(--error)' }}>
+              Error feedback uses --error and --error-soft.
             </div>
           </div>
         </div>
-
-        {/* Input Showcase */}
-        <div
-          style={{
-            marginBottom: '32px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '24px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Input Showcase
-          </h3>
-          <InputShowcase
-            option={{
-              name: 'Filled Background',
-              description: 'Material Design inspired with solid background and no border.',
-              cssFile: 'filled-background.css',
-              className: 'input-5',
-              style: 'Filled background',
-              labelPosition: 'Label above',
-              border: 'No border, gray fill, border appears on focus',
-              strengths: [
-                'Clean modern look',
-                'Reduced visual clutter',
-                'Clear input area',
-                'Less borders',
-              ],
-            }}
-          />
-        </div>
-
-        {/* Strengths & Considerations */}
-        <div
-          style={{
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '16px',
-              color: 'var(--color-primary)',
-            }}
-          >
-            Key Strengths
-          </h3>
-          <ul
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-primary)',
-              lineHeight: 'var(--typography-body-line-height)',
-              listStyle: 'disc',
-              paddingLeft: '24px',
-              marginBottom: '24px',
-            }}
-          >
-            <li>Clean modern look</li>
-            <li>Reduced visual clutter</li>
-            <li>Clear input area</li>
-            <li>Less borders</li>
-          </ul>
-
-          <h4
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-base)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: '12px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Input Design Considerations
-          </h4>
-          <ul
-            style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--typography-body-size)',
-              color: 'var(--color-text-secondary)',
-              lineHeight: 'var(--typography-body-line-height)',
-              listStyle: 'disc',
-              paddingLeft: '24px',
-            }}
-          >
-            <li>Focus states must be clearly visible for accessibility (WCAG 2.4.7)</li>
-            <li>Helper text provides context and reduces errors</li>
-            <li>Error states must be visually distinct with clear messaging</li>
-            <li>Disabled states should be obvious but not alarming</li>
-            <li>Icon support enhances usability for search, validation, and actions</li>
-            <li>All inputs maintain 44px minimum height for touch targets</li>
-            <li>Required field indicators must be consistent and visible</li>
-          </ul>
-        </div>
-      </div>
-    );
-  },
+      </Panel>
+    </StoryFrame>
+  ),
 };

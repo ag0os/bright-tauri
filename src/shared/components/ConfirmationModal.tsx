@@ -150,11 +150,7 @@ export function ConfirmationModal({
             className="confirmation-modal-icon-wrapper"
             style={{ backgroundColor: config.iconBgColor }}
           >
-            <IconComponent
-              size={24}
-              style={{ color: config.iconColor }}
-              aria-hidden="true"
-            />
+            <IconComponent size={24} style={{ color: config.iconColor }} aria-hidden="true" />
           </div>
           <h2 id="modal-title" className="confirmation-modal-title">
             {title}

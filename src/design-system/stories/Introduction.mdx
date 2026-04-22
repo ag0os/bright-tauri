@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design System/0. Introduction" />
+
+# Ink & Paper
+
+Bright uses **Ink & Paper**: warm ink surfaces, a single marigold accent, Newsreader for reading, Geist for interface chrome, flat cards, hairline borders, and restrained motion.
+
+## Theme modes
+
+- **Dark** is the default theme from `:root`.
+- **Light** is enabled with `:root[data-theme="light"]` or `.theme-light`.
+- Story and component work should be checked in both modes before shipping.
+
+## Token layering
+
+- **Native tokens are authoritative.** New code should read directly from tokens like `--bg`, `--surface`, `--fg1`, `--accent`, `--fs-*`, `--lh-reading`, and `--radius-*`.
+- **Aliases still exist during migration.** Legacy `--color-*`, `--typography-*`, `--font-size-*`, and similar aliases remain only so older code keeps rendering.
+- **Alias retirement is already planned.** Stage 5 removes the legacy layer after the remaining call sites are migrated.
+
+## What to look for in Storybook
+
+- Foundations show the Ink & Paper palette, type scale, and iconography.
+- Native-token stories sit alongside alias-backed stories so the migration state is visible.
+- Components should feel quiet, warm, and writing-first rather than glossy or dashboard-heavy.
+
+## Reference docs
+
+- [Canonical prose reference: `docs/design-system.md`](../../../docs/design-system.md)
+- [Exported source of truth: `docs/design-reference/`](../../../docs/design-reference/)

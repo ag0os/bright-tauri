@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type React from 'react';
 import { useState } from 'react';
 import '../tokens/colors/ink-and-paper.css';
+import '../tokens/typography/newsreader-geist.css';
+import '../tokens/spacing.css';
 
 const meta: Meta = {
   title: 'Design System/1. Foundations/Colors',
@@ -12,273 +14,401 @@ const meta: Meta = {
 
 export default meta;
 
-const ColorSwatch: React.FC<{ label: string; varName: string; textColor?: string }> = ({
-  label,
-  varName,
-  textColor = 'var(--color-text-primary)',
-}) => (
-  <div style={{ marginBottom: '8px' }}>
+type ThemeMode = 'light' | 'dark';
+
+const StoryFrame: React.FC<{
+  title: string;
+  description: string;
+  eyebrow: string;
+  children: React.ReactNode;
+}> = ({ title, description, eyebrow, children }) => {
+  const [theme, setTheme] = useState<ThemeMode>('dark');
+
+  return (
     <div
+      className="option-1"
+      data-theme={theme}
       style={{
-        backgroundColor: `var(${varName})`,
-        color: textColor,
-        padding: '16px',
-        borderRadius: '4px',
-        border: '1px solid var(--color-border)',
-        fontSize: '14px',
-        fontWeight: '500',
+        minHeight: '100vh',
+        padding: '32px',
+        backgroundColor: 'var(--bg)',
+        color: 'var(--fg1)',
+        fontFamily: 'var(--font-body)',
       }}
     >
-      {label}
-    </div>
-    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-      {varName}
-    </div>
-  </div>
-);
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: '24px',
+          alignItems: 'flex-start',
+          marginBottom: '32px',
+          flexWrap: 'wrap',
+        }}
+      >
+        <div style={{ maxWidth: '720px' }}>
+          <p
+            style={{
+              margin: '0 0 8px',
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-medium)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'var(--fg3)',
+            }}
+          >
+            {eyebrow}
+          </p>
+          <h1
+            style={{
+              margin: '0 0 12px',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-4xl)',
+              lineHeight: 'var(--lh-tight)',
+              fontWeight: 'var(--fw-semibold)',
+              color: 'var(--fg1)',
+            }}
+          >
+            {title}
+          </h1>
+          <p
+            style={{
+              margin: 0,
+              maxWidth: '64ch',
+              fontSize: 'var(--fs-base)',
+              lineHeight: 'var(--lh-normal)',
+              color: 'var(--fg2)',
+            }}
+          >
+            {description}
+          </p>
+        </div>
 
-const TokenSection: React.FC<{ title: string; children: React.ReactNode }> = ({
+        <button
+          type="button"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            color: 'var(--fg1)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-sm)',
+            fontWeight: 'var(--fw-medium)',
+            cursor: 'pointer',
+          }}
+        >
+          <span>Theme</span>
+          <span style={{ color: 'var(--fg3)' }}>{theme === 'dark' ? 'Dark' : 'Light'}</span>
+        </button>
+      </div>
+
+      {children}
+    </div>
+  );
+};
+
+const Section: React.FC<{ title: string; note: string; children: React.ReactNode }> = ({
   title,
+  note,
   children,
 }) => (
-  <div style={{ marginBottom: '32px' }}>
-    <h3
-      style={{
-        fontSize: '18px',
-        fontWeight: '600',
-        marginBottom: '16px',
-        color: 'var(--color-text-primary)',
-      }}
-    >
-      {title}
-    </h3>
+  <section style={{ marginBottom: '32px' }}>
+    <div style={{ marginBottom: '16px' }}>
+      <h2
+        style={{
+          margin: '0 0 4px',
+          fontSize: 'var(--fs-lg)',
+          fontWeight: 'var(--fw-semibold)',
+          color: 'var(--fg1)',
+        }}
+      >
+        {title}
+      </h2>
+      <p style={{ margin: 0, fontSize: 'var(--fs-sm)', color: 'var(--fg2)' }}>{note}</p>
+    </div>
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
         gap: '16px',
       }}
     >
       {children}
     </div>
+  </section>
+);
+
+const Swatch: React.FC<{
+  label: string;
+  token: string;
+  textColor?: string;
+  borderColor?: string;
+}> = ({ label, token, textColor = 'var(--fg1)', borderColor = 'var(--border)' }) => (
+  <div
+    style={{
+      borderRadius: 'var(--radius-lg)',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
+      padding: '12px',
+    }}
+  >
+    <div
+      style={{
+        minHeight: '120px',
+        borderRadius: '10px',
+        border: `1px solid ${borderColor}`,
+        background: `var(${token})`,
+        color: textColor,
+        padding: '14px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}
+    >
+      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 'var(--fw-semibold)' }}>{label}</span>
+      <code style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--fs-2xs)' }}>{token}</code>
+    </div>
   </div>
 );
 
-export const ModernIndigo: StoryObj = {
-  render: () => {
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+const DemoPanel: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+  <div
+    style={{
+      borderRadius: 'var(--radius-xl)',
+      border: '1px solid var(--border)',
+      background: 'var(--surface)',
+      padding: '24px',
+    }}
+  >
+    <h2
+      style={{
+        margin: '0 0 16px',
+        fontSize: 'var(--fs-lg)',
+        fontWeight: 'var(--fw-semibold)',
+        color: 'var(--fg1)',
+      }}
+    >
+      {title}
+    </h2>
+    {children}
+  </div>
+);
 
-    return (
-      <div
-        className="option-1"
-        data-theme={theme}
-        style={{
-          padding: '32px',
-          backgroundColor: 'var(--color-background)',
-          minHeight: '100vh',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-        }}
+export const InkAndPaperColors: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Alias layer"
+      title="Ink & Paper colors"
+      description="These stories keep the legacy --color-* names visible while they still power older components. The rendered palette is already Ink & Paper: warm ink surfaces, paper light mode, and a single marigold accent."
+    >
+      <Section
+        title="Alias tokens in use today"
+        note="Legacy names still resolve to the current palette while migration work is in progress."
       >
+        <Swatch label="Background" token="--color-background" />
+        <Swatch label="Surface" token="--color-surface" />
+        <Swatch label="Surface secondary" token="--color-surface-secondary" />
+        <Swatch label="Text primary" token="--color-text-primary" />
+        <Swatch label="Text secondary" token="--color-text-secondary" />
+        <Swatch label="Primary accent" token="--color-primary" textColor="var(--fg-on-accent)" />
+        <Swatch label="Primary subtle" token="--color-primary-subtle" />
+        <Swatch label="Success" token="--color-success" textColor="var(--fg-on-accent)" />
+        <Swatch label="Error" token="--color-error" textColor="var(--fg-on-accent)" />
+        <Swatch label="Border" token="--color-border" />
+      </Section>
+
+      <DemoPanel title="Alias token sample card">
         <div
           style={{
-            marginBottom: '32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) auto',
+            gap: '16px',
+            alignItems: 'start',
           }}
         >
           <div>
-            <h1
+            <h3
               style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                marginBottom: '8px',
+                margin: '0 0 8px',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-xl)',
+                fontWeight: 'var(--fw-semibold)',
                 color: 'var(--color-text-primary)',
               }}
             >
-              Modern Indigo
-            </h1>
+              Scene draft ready for review
+            </h3>
             <p
               style={{
-                fontSize: '16px',
+                margin: '0 0 16px',
+                fontSize: 'var(--fs-sm)',
+                lineHeight: 'var(--lh-normal)',
                 color: 'var(--color-text-secondary)',
-                marginBottom: '8px',
               }}
             >
-              Professional blue/indigo palette with warm amber accents. Creates a trustworthy,
-              corporate feel.
+              Alias tokens still render the same paper-backed card, muted metadata, and marigold
+              action seen across the app.
             </p>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                style={{
+                  border: '1px solid var(--color-primary)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--color-primary)',
+                  color: 'var(--fg-on-accent)',
+                  padding: '8px 14px',
+                  fontSize: 'var(--fs-sm)',
+                  fontWeight: 'var(--fw-medium)',
+                  cursor: 'pointer',
+                }}
+              >
+                Open draft
+              </button>
+              <button
+                type="button"
+                style={{
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'transparent',
+                  color: 'var(--color-text-primary)',
+                  padding: '8px 14px',
+                  fontSize: 'var(--fs-sm)',
+                  fontWeight: 'var(--fw-medium)',
+                  cursor: 'pointer',
+                }}
+              >
+                Archive
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+          <div
             style={{
-              padding: '10px 20px',
-              backgroundColor: '#374151',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--color-success-subtle)',
+              color: 'var(--color-success)',
+              padding: '6px 10px',
+              fontSize: 'var(--fs-xs)',
+              fontWeight: 'var(--fw-medium)',
             }}
           >
-            {theme === 'light' ? '🌙 Dark' : '☀️ Light'} Mode
-          </button>
+            synced
+          </div>
         </div>
+      </DemoPanel>
+    </StoryFrame>
+  ),
+};
 
-        <TokenSection title="Brand Colors">
-          <ColorSwatch label="Primary" varName="--color-primary" textColor="#ffffff" />
-          <ColorSwatch label="Primary Hover" varName="--color-primary-hover" textColor="#ffffff" />
-          <ColorSwatch
-            label="Primary Active"
-            varName="--color-primary-active"
-            textColor="#ffffff"
-          />
-          <ColorSwatch label="Primary Subtle" varName="--color-primary-subtle" />
-          <ColorSwatch label="Accent" varName="--color-accent" textColor="#ffffff" />
-          <ColorSwatch label="Accent Hover" varName="--color-accent-hover" textColor="#ffffff" />
-        </TokenSection>
+export const NativeColorTokens: StoryObj = {
+  render: () => (
+    <StoryFrame
+      eyebrow="Native layer"
+      title="Ink & Paper native color tokens"
+      description="Native tokens are the source of truth. Use --bg and --surface for paper layers, --fg1 through --fg3 for text, and --accent for the single marigold action color."
+    >
+      <Section
+        title="Core surfaces"
+        note="These swatches mirror the reference preview cards for dark and light surfaces."
+      >
+        <Swatch label="App background" token="--bg" />
+        <Swatch label="Primary surface" token="--surface" />
+        <Swatch label="Nested surface" token="--surface-2" />
+        <Swatch label="Raised surface" token="--surface-raised" />
+      </Section>
 
-        <TokenSection title="Semantic Colors">
-          <ColorSwatch label="Success" varName="--color-success" textColor="#ffffff" />
-          <ColorSwatch label="Success Subtle" varName="--color-success-subtle" />
-          <ColorSwatch label="Error" varName="--color-error" textColor="#ffffff" />
-          <ColorSwatch label="Error Subtle" varName="--color-error-subtle" />
-        </TokenSection>
+      <Section
+        title="Foreground and accent"
+        note="Primary text stays on the ink scale, while marigold carries calls to action and selection."
+      >
+        <Swatch label="Primary text" token="--fg1" />
+        <Swatch label="Secondary text" token="--fg2" />
+        <Swatch label="Muted text" token="--fg-muted" />
+        <Swatch label="Accent" token="--accent" textColor="var(--fg-on-accent)" />
+        <Swatch label="Accent subtle" token="--accent-subtle" />
+        <Swatch label="Selection" token="--selection" />
+      </Section>
 
-        <TokenSection title="Surface & Background">
-          <ColorSwatch label="Background" varName="--color-background" />
-          <ColorSwatch label="Surface" varName="--color-surface" />
-          <ColorSwatch label="Surface Secondary" varName="--color-surface-secondary" />
-        </TokenSection>
+      <Section
+        title="Semantic feedback"
+        note="Semantic colors stay warm and restrained so they sit comfortably beside the neutral paper palette."
+      >
+        <Swatch label="Success" token="--success" textColor="var(--fg-on-accent)" />
+        <Swatch label="Success soft" token="--success-soft" />
+        <Swatch label="Error" token="--error" textColor="var(--fg-on-accent)" />
+        <Swatch label="Error soft" token="--error-soft" />
+        <Swatch label="Warning" token="--warning" textColor="var(--fg-on-accent)" />
+        <Swatch label="Info" token="--info" textColor="var(--fg-on-accent)" />
+      </Section>
 
-        <TokenSection title="Text Colors">
-          <ColorSwatch label="Text Primary" varName="--color-text-primary" />
-          <ColorSwatch label="Text Secondary" varName="--color-text-secondary" />
-          <ColorSwatch label="Text Disabled" varName="--color-text-disabled" />
-        </TokenSection>
-
-        <TokenSection title="Borders & Focus">
-          <ColorSwatch label="Border" varName="--color-border" />
-          <ColorSwatch label="Border Strong" varName="--color-border-strong" />
-          <ColorSwatch label="Focus Ring" varName="--color-focus" />
-        </TokenSection>
-
+      <DemoPanel title="Native token sample card">
         <div
           style={{
-            marginTop: '48px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--border)',
+            background: 'var(--surface-2)',
+            padding: '20px',
           }}
         >
-          <h3
-            style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Interactive Example
-          </h3>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: '#ffffff',
-                padding: '12px 24px',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}
-            >
-              Primary Button
-            </button>
-            <button
-              type="button"
-              style={{
-                backgroundColor: 'transparent',
-                color: 'var(--color-primary)',
-                padding: '12px 24px',
-                border: '2px solid var(--color-primary)',
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: 'pointer',
-              }}
-            >
-              Secondary Button
-            </button>
-            <div
-              style={{
-                padding: '12px 16px',
-                backgroundColor: 'var(--color-success-subtle)',
-                color: 'var(--color-success)',
-                borderRadius: '6px',
-                border: '1px solid var(--color-success)',
-                fontSize: '14px',
-              }}
-            >
-              ✓ Success Message
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px' }}>
+            <div>
+              <p
+                style={{
+                  margin: '0 0 8px',
+                  fontSize: 'var(--fs-xs)',
+                  fontWeight: 'var(--fw-medium)',
+                  color: 'var(--fg3)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Native palette sample
+              </p>
+              <h3
+                style={{
+                  margin: '0 0 8px',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'var(--fs-2xl)',
+                  lineHeight: 'var(--lh-tight)',
+                  color: 'var(--fg1)',
+                }}
+              >
+                Warm surfaces with one accent
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: '52ch',
+                  fontSize: 'var(--fs-sm)',
+                  lineHeight: 'var(--lh-normal)',
+                  color: 'var(--fg2)',
+                }}
+              >
+                New code should read directly from --bg, --surface, --fg1, and --accent. This is the
+                layer that will remain once the alias cleanup lands.
+              </p>
             </div>
             <div
               style={{
-                padding: '12px 16px',
-                backgroundColor: 'var(--color-error-subtle)',
-                color: 'var(--color-error)',
-                borderRadius: '6px',
-                border: '1px solid var(--color-error)',
-                fontSize: '14px',
+                alignSelf: 'start',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--accent-subtle)',
+                color: 'var(--accent)',
+                padding: '6px 10px',
+                fontSize: 'var(--fs-xs)',
+                fontWeight: 'var(--fw-medium)',
               }}
             >
-              ✕ Error Message
+              authoritative
             </div>
           </div>
         </div>
-
-        <div
-          style={{
-            marginTop: '32px',
-            padding: '24px',
-            backgroundColor: 'var(--color-surface)',
-            borderRadius: '8px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <h3
-            style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            Accessibility
-          </h3>
-          <ul
-            style={{
-              listStyle: 'disc',
-              paddingLeft: '24px',
-              color: 'var(--color-text-secondary)',
-              lineHeight: '1.8',
-            }}
-          >
-            <li>
-              All text colors meet WCAG AA contrast requirements (4.5:1 for normal text, 3:1 for
-              large text)
-            </li>
-            <li>Interactive elements (buttons, links) maintain 3:1 contrast against backgrounds</li>
-            <li>Focus rings are clearly visible in both light and dark modes</li>
-            <li>Success/error states use both color and icons for accessibility</li>
-          </ul>
-        </div>
-      </div>
-    );
-  },
+      </DemoPanel>
+    </StoryFrame>
+  ),
 };
