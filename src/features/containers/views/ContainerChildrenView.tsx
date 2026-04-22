@@ -66,15 +66,15 @@ export function ContainerChildrenView({
         <CircleNotch
           className="icon icon-2xl"
           style={{
-            color: 'var(--color-primary)',
+            color: 'var(--accent)',
             animation: 'spin 1s linear infinite',
           }}
         />
         <p
           style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-base)',
-            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-base)',
+            color: 'var(--fg2)',
           }}
         >
           Loading children...
@@ -108,15 +108,15 @@ export function ContainerChildrenView({
         <FolderOpen
           size={64}
           style={{
-            color: 'var(--color-text-secondary)',
+            color: 'var(--fg2)',
             opacity: 0.4,
           }}
         />
         <p
           style={{
-            fontFamily: 'var(--typography-body-font)',
-            fontSize: 'var(--font-size-base)',
-            color: 'var(--color-text-secondary)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'var(--fs-base)',
+            color: 'var(--fg2)',
           }}
         >
           {emptyMessage}
@@ -132,10 +132,10 @@ export function ContainerChildrenView({
         <div style={{ marginBottom: 'var(--spacing-6)' }}>
           <h2
             style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h3-size)',
+              fontWeight: 'var(--type-h3-weight)',
+              color: 'var(--fg1)',
               margin: '0 0 var(--spacing-4) 0',
             }}
           >
@@ -158,7 +158,7 @@ export function ContainerChildrenView({
                   display: 'flex',
                   alignItems: 'center',
                   padding: 'var(--spacing-4)',
-                  backgroundColor: 'var(--color-background-secondary)',
+                  backgroundColor: 'var(--surface)',
                   borderRadius: '4px',
                   gap: 'var(--spacing-3)',
                   cursor: 'pointer',
@@ -169,20 +169,20 @@ export function ContainerChildrenView({
                   handleRowKeyDown(event, () => onContainerClick(container));
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface)';
                 }}
               >
-                <FolderOpen size={24} style={{ color: 'var(--color-primary)' }} />
+                <FolderOpen size={24} style={{ color: 'var(--accent)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{
-                      fontFamily: 'var(--typography-heading-font)',
-                      fontSize: 'var(--font-size-lg)',
-                      fontWeight: 'var(--typography-h4-weight)',
-                      color: 'var(--color-text-primary)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--fs-md)',
+                      fontWeight: 'var(--type-h4-weight)',
+                      color: 'var(--fg1)',
                       margin: 0,
                     }}
                   >
@@ -191,9 +191,9 @@ export function ContainerChildrenView({
                   {container.description && (
                     <p
                       style={{
-                        fontFamily: 'var(--typography-body-font)',
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'var(--fs-sm)',
+                        color: 'var(--fg2)',
                         margin: 'var(--spacing-1) 0 0 0',
                       }}
                     >
@@ -202,9 +202,9 @@ export function ContainerChildrenView({
                   )}
                   <p
                     style={{
-                      fontFamily: 'var(--typography-body-font)',
-                      fontSize: 'var(--font-size-xs)',
-                      color: 'var(--color-text-secondary)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'var(--fs-xs)',
+                      color: 'var(--fg2)',
                       margin: 'var(--spacing-1) 0 0 0',
                     }}
                   >
@@ -248,10 +248,10 @@ export function ContainerChildrenView({
         <div>
           <h2
             style={{
-              fontFamily: 'var(--typography-heading-font)',
-              fontSize: 'var(--typography-h3-size)',
-              fontWeight: 'var(--typography-h3-weight)',
-              color: 'var(--color-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontSize: 'var(--type-h3-size)',
+              fontWeight: 'var(--type-h3-weight)',
+              color: 'var(--fg1)',
               margin: '0 0 var(--spacing-4) 0',
             }}
           >
@@ -274,7 +274,7 @@ export function ContainerChildrenView({
                   display: 'flex',
                   alignItems: 'center',
                   padding: 'var(--spacing-4)',
-                  backgroundColor: 'var(--color-background-secondary)',
+                  backgroundColor: 'var(--surface)',
                   borderRadius: '4px',
                   gap: 'var(--spacing-3)',
                   cursor: 'pointer',
@@ -285,20 +285,20 @@ export function ContainerChildrenView({
                   handleRowKeyDown(event, () => onStoryClick(story));
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-background-tertiary)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface-hover)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--color-background-secondary)';
+                  e.currentTarget.style.backgroundColor = 'var(--surface)';
                 }}
               >
-                <FileText size={24} style={{ color: 'var(--color-accent)' }} />
+                <FileText size={24} style={{ color: 'var(--accent)' }} />
                 <div style={{ flex: 1 }}>
                   <h3
                     style={{
-                      fontFamily: 'var(--typography-heading-font)',
-                      fontSize: 'var(--font-size-lg)',
-                      fontWeight: 'var(--typography-h4-weight)',
-                      color: 'var(--color-text-primary)',
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'var(--fs-md)',
+                      fontWeight: 'var(--type-h4-weight)',
+                      color: 'var(--fg1)',
                       margin: 0,
                     }}
                   >
@@ -306,9 +306,9 @@ export function ContainerChildrenView({
                   </h3>
                   <p
                     style={{
-                      fontFamily: 'var(--typography-body-font)',
-                      fontSize: 'var(--font-size-sm)',
-                      color: 'var(--color-text-secondary)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'var(--fs-sm)',
+                      color: 'var(--fg2)',
                       margin: 'var(--spacing-1) 0 0 0',
                     }}
                   >

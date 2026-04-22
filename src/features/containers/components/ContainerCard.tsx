@@ -131,7 +131,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
           <div
             style={{
               flexShrink: 0,
-              color: 'var(--color-primary)',
+              color: 'var(--accent)',
               display: 'flex',
               alignItems: 'center',
             }}
@@ -141,10 +141,10 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
           <div style={{ flex: 1, minWidth: 0 }}>
             <h3
               style={{
-                fontFamily: 'var(--typography-heading-font)',
-                fontSize: 'var(--font-size-lg)',
-                fontWeight: 'var(--font-weight-semibold)',
-                color: 'var(--color-text-primary)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'var(--fs-md)',
+                fontWeight: 'var(--fw-semibold)',
+                color: 'var(--fg1)',
                 margin: 0,
                 marginBottom: 'var(--spacing-1)',
                 overflow: 'hidden',
@@ -159,17 +159,17 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
                 display: 'flex',
                 alignItems: 'center',
                 gap: 'var(--spacing-2)',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-secondary)',
+                fontSize: 'var(--fs-sm)',
+                color: 'var(--fg2)',
               }}
             >
               <span
                 style={{
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  backgroundColor: 'var(--color-primary-bg)',
-                  color: 'var(--color-primary)',
-                  fontWeight: 'var(--font-weight-medium)',
+                  backgroundColor: 'var(--accent-subtle)',
+                  color: 'var(--accent)',
+                  fontWeight: 'var(--fw-medium)',
                 }}
               >
                 {formatContainerType(container.containerType)}
@@ -182,11 +182,11 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
         {container.description && (
           <p
             style={{
-              fontFamily: 'var(--typography-body-font)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
+              fontFamily: 'var(--font-body)',
+              fontSize: 'var(--fs-sm)',
+              color: 'var(--fg2)',
               margin: 0,
-              lineHeight: 'var(--typography-body-line-height)',
+              lineHeight: 'var(--type-body-lh)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               display: '-webkit-box',
@@ -205,7 +205,7 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
             alignItems: 'center',
             justifyContent: 'space-between',
             paddingTop: 'var(--spacing-2)',
-            borderTop: '1px solid var(--color-border)',
+            borderTop: '1px solid var(--border)',
           }}
         >
           {/* Left: Stats */}
@@ -214,8 +214,8 @@ export function ContainerCard({ container, childCount, onClick, onDelete }: Cont
               display: 'flex',
               alignItems: 'center',
               gap: 'var(--spacing-3)',
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
+              fontSize: 'var(--fs-xs)',
+              color: 'var(--fg2)',
             }}
           >
             {childCount && (
