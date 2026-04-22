@@ -1,8 +1,8 @@
 ---
 title: Ink & Paper migration cleanup
-status: active
+status: completed
 createdAt: '2026-04-22T20:27:03.154Z'
-updatedAt: '2026-04-22T20:27:03.154Z'
+updatedAt: '2026-04-22T21:42:00.000Z'
 ---
 
 Finish the legacy-theme → Ink & Paper design system migration. Retire the alias layer entirely (not keep it long-term), sync Storybook / docs / contributor guidance, fix the editor reading surface, and split agent guidance into a loadable skill.
