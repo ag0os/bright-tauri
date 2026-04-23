@@ -19,7 +19,9 @@ Keep Bright's UI aligned with the Ink & Paper system: warm ink surfaces, a singl
 
 ## Alias-retirement status
 
-**aliases frozen, migration in progress — do not introduce `var(--color-*)`, `var(--typography-*)`, `var(--font-family-*)`, `var(--font-size-*)`, `var(--line-height-*)`, or `var(--font-weight-*)`.** New code uses native Ink & Paper tokens only. Stage 5 removes the legacy alias layer.
+**Aliases retired — migration complete.** The legacy `--color-*`, `--typography-*`, `--font-family-*`, `--font-size-*`, `--line-height-*`, and `--font-weight-*` tokens no longer exist. Using any of them will silently render with invalid values. New and existing code uses native Ink & Paper tokens only (`--fg1`, `--accent`, `--bg`, `--surface`, `--fs-*`, `--lh-*`, `--radius-*`, etc.).
+
+A CI guard in `npm run lint:tokens` (wired into `npm run lint`) fails the build if any alias is reintroduced.
 
 ## Theme modes
 
