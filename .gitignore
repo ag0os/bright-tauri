@@ -29,3 +29,7 @@ storybook-static
 # Cosmonauts — local-only agent artifacts
 missions/sessions
 missions/reviews
+missions/archive/sessions
+
+# Stray agent session logs
+/*.jsonl
