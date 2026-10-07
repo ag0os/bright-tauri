@@ -6,13 +6,22 @@ Guidance for AI coding agents working in this repository.
 
 **bright-tauri** — a Tauri v2 desktop app for writers and creators to develop series of books, scripts, and stories. Writers build a **universe** (characters, locations, vehicles, custom elements) that provides context for AI-assisted writing, voice dictation, and a rich-text editor.
 
-**Current phase**: Foundation Complete → Frontend Development. Backend (~95%) and design system (100%) are done. Next up: chapter/child-story management UI, version & snapshot UI, history timeline and diff viewer. AI integration and voice dictation are not yet started.
+**Current phase**: the core writing loop works end to end: universes, containers, stories, the Lexical editor with autosave, named versions, snapshot history with restore, elements with templates, settings, and the Ink & Paper design system. Diff/compare is still a stub.
 
-See `docs/ui-navigation.md`, `docs/implementation-plan.md`, and `docs/decisions/` for current product direction and ADRs.
+**Roadmap to v1**:
+- **M1** — data safety and correctness bugs.
+- **M2** — close the CRUD gaps (universe edit/delete, story status, stories inside containers, element relationships).
+- **M3** — writing experience (editor sidebars, word targets, focus mode, shortcuts).
+- **M4** — versioning polish, including snapshot preview and diff/compare.
+- **M5** — packaging and export.
+
+AI assistance and voice dictation come after v1; neither has code yet.
+
+See `docs/ui-navigation.md` for product direction and `docs/decisions/` for ADRs. `docs/implementation-plan.md` is historical (its Phase 1 is done).
 
 ## Stack
 
-- **Frontend**: React 19 + TypeScript (~5.8), Vite 7, Zustand, Lexical editor, dnd-kit, Phosphor + Lucide icons, custom token-first design system, Storybook
+- **Frontend**: React 19 + TypeScript (~5.8), Vite 7, Zustand, Lexical editor, Phosphor icons, custom token-first design system, Storybook
 - **Backend**: Rust (Tauri 2), SQLite via `rusqlite` (bundled), `ts-rs` for auto-generated TS types, `uuid`, `chrono`
 - **Testing**: Vitest + React Testing Library + jsdom; Playwright available
 
@@ -43,10 +52,10 @@ cd src-tauri && cargo test --lib   # runs Rust tests AND regenerates src/types/*
 
 ### Frontend layout (`src/`)
 - `features/{universe,containers,stories,elements,settings}` — feature-first modules
-- `pages/` — top-level routes/screens
+- `shared/navigation/` — route registry and screen routing (Zustand route stack)
 - `design-system/{tokens,organisms,templates,stories}` — token-first design system (see `docs/design-system.md`)
 - `editor/` — Lexical-based editor
-- `shared/`, `test/`, `test-utils/`
+- `shared/` (components, hooks, stores, config), `test/`, `test-utils/`
 - `types/` — **auto-generated from Rust via ts-rs. Do not edit.**
 
 ### Backend layout (`src-tauri/src/`)
@@ -68,7 +77,7 @@ cd src-tauri && cargo test --lib   # runs Rust tests AND regenerates src/types/*
 - `StoryVersion` — named alternate versions (e.g., "Alternate Ending") with independent content
 - `StorySnapshot` — automatic save points per version for history/undo, created on character-count or time threshold
 
-### Element templates (`src/config/element-templates.json`)
+### Element templates (`src/shared/config/element-templates.json`)
 
 Core fields `name`, `description`, `details` exist for every element. Templates (Character, Location, Vehicle, Item, Organization, Creature, Event, Concept) are **suggestions, not requirements** — writers pick, skip, or extend attributes freely.
 
@@ -120,6 +129,7 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 - **Schema changes**: the Container/Story split required a clean-slate DB drop. Future schema changes should add a proper migration in `src-tauri/src/db/migrations.rs`.
 - **Crate name quirk**: the Rust library crate is `bright_tauri_lib` (the `_lib` suffix avoids a Windows conflict — see `src-tauri/Cargo.toml`).
 - Dev server is pinned to `http://localhost:1420` (`tauri.conf.json`).
+- **macOS SDK workaround**: Rust builds fail to link against the CommandLineTools MacOSX27.0 SDK (`tapi error … unknown architecture arm64e.x1`). Until the toolchain catches up, export `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk` before `cargo test`, `npm run tauri dev`, or `npm run tauri build`.
 
 ## Key docs
 
