@@ -129,7 +129,6 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 - **Schema changes**: the Container/Story split required a clean-slate DB drop. Future schema changes should add a proper migration in `src-tauri/src/db/migrations.rs`.
 - **Crate name quirk**: the Rust library crate is `bright_tauri_lib` (the `_lib` suffix avoids a Windows conflict — see `src-tauri/Cargo.toml`).
 - Dev server is pinned to `http://localhost:1420` (`tauri.conf.json`).
-- **macOS SDK workaround**: Rust builds fail to link against the CommandLineTools MacOSX27.0 SDK (`tapi error … unknown architecture arm64e.x1`). Until the toolchain catches up, export `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk` before `cargo test`, `npm run tauri dev`, or `npm run tauri build`.
 
 ## Key docs
 
