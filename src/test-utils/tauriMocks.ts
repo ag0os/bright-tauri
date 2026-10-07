@@ -43,11 +43,5 @@ export const clearMockCommands = (): void => {
  * Add your default mocks here as you develop more components
  */
 export const setupDefaultMocks = (): void => {
-  // Example: Mock the greet command
-  registerMockCommand('greet', async (args) => {
-    const name = (args?.name as string) || 'World';
-    return `Hello, ${name}! You've been greeted from Rust!`;
-  });
-
-  // Add more default mocks as needed
+  // Register default mocks here as stories need them
 };
