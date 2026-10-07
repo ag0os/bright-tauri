@@ -6,7 +6,9 @@ Accepted
 
 ## Date
 
-2025-01-14
+2026-01-14
+
+> Year corrected on 2026-10-07. It was recorded as 2025-01-14, which predates the repository (first commit 2025-10-02). This ADR and its implementation plan were committed on 2026-01-15 (`933f78d`).
 
 ## Context
 
