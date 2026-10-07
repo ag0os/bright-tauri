@@ -16,7 +16,7 @@
     "test:run": "vitest run",
     "lint": "biome check . && npm run lint:tokens",
     "lint:fix": "biome check --write .",
-    "lint:tokens": "! rg -q 'var\\(--(color|typography|font-family|font-size|line-height|font-weight)-' src",
+    "lint:tokens": "sh scripts/lint-tokens.sh",
     "format": "biome format --write .",
     "lint:rust": "cd src-tauri && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings",
     "lint:rust:fix": "cd src-tauri && cargo fmt --all && cargo clippy --all-targets --fix --allow-dirty --allow-staged -- -D warnings",

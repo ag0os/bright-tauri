@@ -14,6 +14,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Tauri v2 links against WebKitGTK/GTK on Linux; ripgrep powers lint:tokens.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            file \
+            libayatana-appindicator3-dev \
+            libgtk-3-dev \
+            librsvg2-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            pkg-config \
+            ripgrep
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -22,12 +38,13 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
 
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
@@ -41,3 +58,20 @@ jobs:
 
       - name: Run lint
         run: npm run lint:all
+
+      - name: Run frontend tests
+        run: npm run test:run
+
+      - name: Run Rust tests
+        working-directory: src-tauri
+        run: cargo test
+
+      # cargo test regenerates src/types via ts-rs; a diff means the committed types are stale.
+      - name: Check generated TS types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- src/types)" ]; then
+            git status --short -- src/types
+            git diff -- src/types
+            echo "src/types is stale: run 'cd src-tauri && cargo test --lib' and commit the result" >&2
+            exit 1
+          fi
