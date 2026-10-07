@@ -1,5 +1,7 @@
 # Implementation Plan: Database-Only Versioning
 
+> **Status (2026-10-07):** Complete, except compare/diff, which was deferred by design (`StoryCompare` is a stub). Kept as a record of the design.
+
 > Based on [ADR 002: Database-Only Versioning](../decisions/002-database-only-versioning.md)
 
 ## Overview

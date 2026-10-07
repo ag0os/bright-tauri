@@ -75,7 +75,7 @@ cd src-tauri && cargo test --lib   # runs Rust tests AND regenerates src/types/*
 
 **Database-Only Versioning (DBV)** — see `docs/decisions/002-database-only-versioning.md`:
 - `StoryVersion` — named alternate versions (e.g., "Alternate Ending") with independent content
-- `StorySnapshot` — automatic save points per version for history/undo, created on character-count or time threshold
+- `StorySnapshot` — automatic save points per version for history/undo, created on a character-count threshold or when leaving the editor
 
 ### Element templates (`src/shared/config/element-templates.json`)
 

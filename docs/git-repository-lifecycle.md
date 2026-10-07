@@ -1,3 +1,5 @@
+> **Superseded** by [ADR 002: Database-Only Versioning](./decisions/002-database-only-versioning.md). Git was removed from Bright; this document is kept for history only and describes no current code.
+
 # Git Repository Initialization Lifecycle
 
 This document describes the lifecycle of Git repositories in the Bright application, including initialization rules, ownership patterns, transaction handling, and cleanup procedures.

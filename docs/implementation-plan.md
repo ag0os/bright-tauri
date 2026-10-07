@@ -1,5 +1,7 @@
 # Implementation Plan - UI Navigation
 
+> **Status (2026-10-07):** Historical. Phase 1 is done. The design rules below (Lucide icons, Elevated Shadow cards, etc.) are superseded by the Ink & Paper design system (`docs/design-system.md`). For the current roadmap see `AGENTS.md`.
+
 **Last Updated**: 2025-10-31
 **Status**: Ready for Implementation
 **Related Doc**: [UI Navigation Structure](./ui-navigation.md)
