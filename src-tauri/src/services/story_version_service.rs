@@ -46,8 +46,7 @@ pub fn delete_story_version(db: &Database, version_id: &str) -> Result<(), Strin
 
         let new_active = all_versions
             .iter()
-            .filter(|v| v.id != version_id)
-            .next_back()
+            .rfind(|v| v.id != version_id)
             .ok_or_else(|| "No other version to switch to".to_string())?;
 
         StoryRepository::set_active_version(db, &story_id, &new_active.id)

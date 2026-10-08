@@ -227,11 +227,7 @@ mod tests {
         // Simulate the delete_story_version command logic:
         // 1. Switch to another version BEFORE deleting
         let all_versions = StoryVersionRepository::list_by_story(&db, "story-1").unwrap();
-        let new_active = all_versions
-            .iter()
-            .filter(|v| v.id != v1.id)
-            .next_back()
-            .unwrap();
+        let new_active = all_versions.iter().rfind(|v| v.id != v1.id).unwrap();
 
         StoryRepository::set_active_version(&db, "story-1", &new_active.id).unwrap();
         if let Some(latest_snap) = StorySnapshotRepository::get_latest(&db, &new_active.id).unwrap()

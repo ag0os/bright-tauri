@@ -65,15 +65,21 @@ cd src-tauri && cargo test --lib
 
 ```
 src/                    # React frontend
-├── design-system/      #   Token-first design system (tokens, organisms, templates)
-├── types/              #   Auto-generated TypeScript types (from Rust via ts-rs)
+├── features/           #   Feature modules (universe, containers, stories, elements, settings)
+├── editor/             #   Lexical rich-text editor
+├── design-system/      #   Ink & Paper token-first design system (tokens, organisms, templates)
+├── shared/             #   Shared components, hooks, stores, navigation, config
+├── types/              #   Auto-generated TypeScript types (from Rust via ts-rs, do not edit)
 └── test/               #   Test setup and utilities
 
 src-tauri/              # Rust backend
 ├── src/
-│   ├── models/         #   Domain models (Universe, Container, Story, Element)
-│   ├── db/             #   SQLite database and migrations
-│   └── lib.rs          #   Tauri commands and app initialization
+│   ├── commands/       #   #[tauri::command] handlers exposed to the frontend
+│   ├── models/         #   Domain models (Universe, Container, Story, Element, versions, snapshots)
+│   ├── repositories/   #   SQLite CRUD and transactions
+│   ├── services/       #   Domain logic
+│   ├── db/             #   SQLite connection and migrations
+│   └── lib.rs          #   App setup; registers commands in generate_handler![]
 └── Cargo.toml
 ```
 
@@ -84,4 +90,4 @@ src-tauri/              # Rust backend
 - **Elements** are universe entities -- characters, locations, items, etc. They provide context for AI assistance and consistency.
 - **Versions** are named alternate takes on a story. **Snapshots** are automatic save points within a version.
 
-For deeper architectural details, see [CLAUDE.md](./CLAUDE.md).
+For deeper architectural details, see [AGENTS.md](./AGENTS.md).

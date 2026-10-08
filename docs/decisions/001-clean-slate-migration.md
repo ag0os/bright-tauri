@@ -6,7 +6,9 @@ Accepted
 
 ## Date
 
-2024-12-04
+2025-12-19
+
+> Date corrected on 2026-10-07. It was recorded as 2024-12-04, which predates the repository (first commit 2025-10-02). Git history puts the decision on 2025-12-19 (refactor tasks created and the old schema dropped in `681e4ac`); this ADR was committed on 2025-12-22 (`3e9362f`).
 
 ## Context
 

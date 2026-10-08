@@ -291,20 +291,17 @@ Status Bar: 2,543 words  •  Target: 3,000  •  85% complete
 - **Auto-save**: Debounced saves (2-3 seconds after typing stops)
 - **Keyboard Shortcuts**: Hide sidebars, focus mode, etc.
 - **Collapsible UI**: Both sidebars can collapse for full-screen writing
-- **Version Control**: Git auto-commits in background (configurable frequency)
+- **Version Control**: Database-only versioning ([ADR 002](./decisions/002-database-only-versioning.md)). Autosave updates the active snapshot in place; a new snapshot is created automatically by character count or when leaving the editor (configurable in Settings).
 
 ### 1.4 Version History Screen
 
-**Purpose**: Browse Git history, view changes, create/manage variations.
-
-*[To be detailed in future iteration - see Roadmap tasks 23-26]*
+**Purpose**: Browse a story's snapshot history, restore earlier states, and manage named versions. Versioning is database-only ([ADR 002](./decisions/002-database-only-versioning.md)); Git was removed.
 
 Key features:
-- Commit timeline
-- Diff viewer
-- Branch management (variations)
-- Restore previous versions
-- Compare variations side-by-side
+- Named versions per story (e.g. "Original", "Alternate Ending"): create, rename, switch, delete (built, Story Versions screen)
+- Snapshot timeline for the active version (built, Story History screen)
+- Restore a snapshot by moving the story's active-snapshot pointer; nothing is copied (built)
+- Diff viewer and side-by-side compare of snapshots or versions (deferred; `story-compare` is a stub)
 
 ---
 
@@ -518,6 +515,8 @@ Universe Element Detail
 
 ## Implementation Phases
 
+> **Status (2026-10-07):** Phases 1, 2 and 4 are mostly built and the core of Phase 6 (versions and snapshot history) is built. Not built yet: Phase 3 (editor sidebars, element linking), Phase 4 relationship editing (relationships are display-only), Phase 5 Flat/List views (filters and sorting exist), and the Phase 6 diff viewer. Phase 2 drag-and-drop was replaced by up/down reordering, and the "Chapter Manager" is the Container view (ADR 001). Phase 6 "branch/variation management" is now named versions (ADR 002). The current roadmap (M1–M5) lives in `AGENTS.md`.
+
 ### Phase 1: Foundation (Implement First)
 1. Top Bar navigation with universe selector
 2. Stories List screen (Grouped View only)
@@ -571,7 +570,7 @@ All screens use components from the design system (implementation should create 
 1. **Rich Text Editor**: Which library? (TipTap, ProseMirror, Slate, Lexical) > Lexical (React)
 2. **State Management**: Context, Zustand, Redux, or other? > We need to analize this further (Redux or Zustand?)
 3. **Sidebar Behavior**: Should sidebars remember collapsed state per user preference? > yes
-4. **Auto-save Frequency**: How often to commit to Git automatically? > could be use events and callbacks for this maybe?
+4. **Auto-save Frequency**: How often to commit to Git automatically? > Resolved by ADR 002: no Git; autosave updates the active snapshot and new snapshots are created by character count or on leaving the editor
 5. **Element Quick View**: Modal vs slide-out panel for viewing element details from editor? > modal
 6. **Search**: Global search across stories AND elements, or separate per section? > global with filtering
 7. **Keyboard Shortcuts**: Full list of shortcuts to implement > TBD

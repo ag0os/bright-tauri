@@ -1,8 +1,8 @@
 [package]
 name = "bright-tauri"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Bright: a desktop app for writers to develop series of books, scripts, and stories"
+authors = ["Agustin Calabrese"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
