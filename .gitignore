@@ -33,3 +33,8 @@ missions/archive/sessions
 
 # Stray agent session logs
 /*.jsonl
+
+# Local mutation reports, sandbox copies, and incremental cache
+/reports/mutation/
+/.stryker-tmp/
+/stryker-incremental.json

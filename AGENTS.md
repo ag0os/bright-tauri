@@ -37,6 +37,8 @@ npm run tauri build        # native executable
 npm test                   # vitest watch
 npm run test:run           # vitest once (CI)
 npm run test:coverage      # coverage report
+npm run ci                 # shared local and CI checks, including generated type drift
+npm run mutation           # TypeScript mutation report (outside CI)
 npx tsc                    # typecheck only
 
 npm run lint               # Biome lint + format check (frontend)
@@ -121,6 +123,14 @@ This is a focused writing app. Prefer multiple clean, focused screens over one b
 - Prefer `findBy*` and `waitFor` for async UI.
 - Vitest config: `vitest.config.ts`. Setup + Tauri mocks: `src/test/setup.ts`.
 - Example tests: `src/App.test.tsx`, `src/design-system/tokens/atoms/button/Button.test.tsx`.
+
+### The Contract and the checks
+
+Each component's obligations live in `docs/contracts/<component>.md`: an id, a statement, a reason, and its proof (a test named by the id, in `src/test/contract/` for the frontend or `src-tauri/tests/contract/` for the backend, or recorded PR evidence). A component with no Contract file has no Contract; claim no coverage for it. **A PR that adds or changes behavior updates the component's Contract in the same PR.** Decisions and their derivations are in `docs/decisions/`; the Contract points to them and never repeats them.
+
+A bug goes into the Contract first: add the missing obligation, write its test red against the unfixed code (the unfixed code is the mutant that matches the bug, so red is the proof the test kills it), then fix the code, then run `npm run mutation` where the fix is TypeScript and check that no mutant survives or goes uncovered on the lines you fixed, then run `npm run ci`. Label that PR `fix:` if the bug is live in a released build, naming the obligation id. Everything else is `refine:`.
+
+Before you say done, run `npm run ci`: it is the same set CI runs, and a check that could not run is a gap to name, never a pass. Mutation fails only on survivors your PR adds against its merge base; do not edit a baseline to pass. Rust has no mutation tool yet and no health tools are installed: both are named gaps, not passes.
 
 ## Warnings
 
