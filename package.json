@@ -20,7 +20,9 @@
     "format": "biome format --write .",
     "lint:rust": "cd src-tauri && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings",
     "lint:rust:fix": "cd src-tauri && cargo fmt --all && cargo clippy --all-targets --fix --allow-dirty --allow-staged -- -D warnings",
-    "lint:all": "npm run lint && npm run lint:rust"
+    "lint:all": "npm run lint && npm run lint:rust",
+    "ci": "node scripts/ci.mjs",
+    "mutation": "stryker run"
   },
   "dependencies": {
     "@lexical/clipboard": "^0.38.2",
@@ -44,6 +46,8 @@
     "@storybook/addon-onboarding": "^9.1.10",
     "@storybook/addon-vitest": "^9.1.10",
     "@storybook/react-vite": "^9.1.10",
+    "@stryker-mutator/core": "^10.1.1",
+    "@stryker-mutator/vitest-runner": "^10.1.1",
     "@tauri-apps/cli": "^2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
