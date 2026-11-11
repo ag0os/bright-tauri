@@ -1,0 +1,14 @@
+# Paths held for the owner's review. With code-owner review required on main,
+# a pull request that touches any of these waits for @ag0os, whoever opened it.
+
+# The gate: workflows, the checks script, the mutation config
+/.github/                          @ag0os
+/scripts/ci.mjs                    @ag0os
+/stryker.config.mjs                @ag0os
+
+# Stored data: schema migrations
+/src-tauri/src/db/migrations.rs    @ag0os
+
+# Permissions and security
+/src-tauri/capabilities/           @ag0os
+/src-tauri/tauri.conf.json         @ag0os
