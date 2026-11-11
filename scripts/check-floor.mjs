@@ -149,7 +149,7 @@ async function mutationRun(directory, selected, label) {
     rmSync(configFile, { force: true });
   }
 }
-export async function mutationFloor(state) {
+async function mutationFloor(state) {
   const allBase = await subjects(state.directory);
   const allTip = await subjects(root);
   const full = state.changed.some((file) =>

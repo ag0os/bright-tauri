@@ -35,3 +35,67 @@ abandoned bright-checks worktree. No development server needs to be restarted.
 The workflow retains per-change subject manifests and comparison reports for 30
 days, including failed gates. Gate execution errors, incomplete reports, and
 missing subjects fail the check rather than becoming an empty baseline.
+
+## TypeScript health
+
+`npm run check:health` compares knip and dependency-cruiser JSON reports on both
+trees using the tip's pinned tool versions and configuration. Raw reports and
+new findings remain under `reports/checks`. `health:knip` and `health:structure`
+print full local reports, including existing debt.
+
+Knip covers unused files, exports, types and dependencies. Generated bindings
+are excluded because Rust owns their exports. Storybook supplies its runtime entry points through the built-in knip plugin;
+required story exports are not treated as unused. Tests are explicit entry
+points, with entry exports checked. Finding identity is category, file and
+symbol, ignoring source locations; duplicate groups use sorted symbol names.
+An identical finding can mask another identical finding, and renames can flag
+old debt as new. Framework-owned exports are handled by their plugins.
+
+The starter structure rules prohibit cycles, imports from shared or the design
+system into features, imports between feature modules, and generated types
+importing application code. Tests and stories are excluded from the production
+structure graph. Existing navigation-to-feature imports are compared as debt.
+Identity is rule, source, target and sorted cycle members. Both trees use the
+same rules; tightening a rule reports new architecture debt relative to that
+rule's analysis of the base, rather than rejecting historical dependencies.
+
+## Rust mutation
+
+Install `cargo install cargo-mutants --version 27.1.0 --locked` and Rust 1.99.0.
+`npm run mutation:rust` remains a full local report. `check:rust-mutation` selects
+changed Rust source files; changes to Cargo manifests, build setup, `.cargo`,
+or external tests select all Rust files. Removed or renamed files fail closed.
+There is no in-place mutation. Serial scratch runs share a build target cache
+at `src-tauri/target`, including across base and tip; they do not reuse test
+outcomes. Avoid concurrent Cargo or gate runs against that target.
+
+Identity uses path, function, genre, replacement, exact original span and
+trimmed containing lines. Its context and duplicate limits match the TS floor.
+Only newly missed mutants fail the floor; compile failures are unviable mutants.
+Timeouts, baseline failures and incomplete results fail the execution itself.
+Cargo uses locked dependency resolution and may fetch missing crates. Set
+`CARGO_NET_OFFLINE=true` when measuring with an already populated registry cache.
+CI pins the toolchain and tool; reports and subject lists are uploaded with the
+other gate evidence. Timing on macOS is evidence about this machine, not a
+measurement of the Linux CI runner. The workflow allows long full-subject runs
+without silently narrowing them.
+
+Measured locally with Rust 1.99.0 and cargo-mutants 27.1.0: the full four-worker
+run tested 189 mutants in 447.02 seconds (64 caught, 54 missed, 71 unviable,
+zero timeouts). The serial cached floor on
+`src/repositories/story_version.rs` tested 13 mutants on each side in 112.38
+seconds total, including setup (65.52 seconds base, 46.52 seconds tip). Each
+side caught nine mutants and found four unviable ones. The full run overlapped
+TypeScript mutation work; these numbers do not establish Linux CI runtime or
+a worst-case full-infrastructure budget.
+
+Zero-mutant files remain in the subject manifests. Stryker omits their file
+entries in reports; cargo-mutants emits an empty mutant list without an outcome
+report. These documented zero cases are accepted only after successful tool
+execution and source existence checks. Vitest collects coverage from every test
+to include application subjects that have no test importers.
+
+Base worktrees reuse the installed tip node_modules to keep analysis tool versions
+consistent. They do not reconstruct historical npm dependency installations.
+Dependency-induced changes shared by both trees can therefore be masked; compare
+package upgrades with this limitation in mind.
