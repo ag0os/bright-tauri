@@ -22,7 +22,8 @@
     "lint:rust:fix": "cd src-tauri && cargo fmt --all && cargo clippy --all-targets --fix --allow-dirty --allow-staged -- -D warnings",
     "lint:all": "npm run lint && npm run lint:rust",
     "ci": "node scripts/ci.mjs",
-    "mutation": "stryker run"
+    "mutation": "stryker run",
+    "check:mutation": "node scripts/check-floor.mjs"
   },
   "dependencies": {
     "@lexical/clipboard": "^0.38.2",

@@ -1,7 +1,8 @@
 /** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
 export default {
   testRunner: 'vitest',
-  vitest: { configFile: 'vitest.config.ts' },
+  // Collect coverage from all tests, even when a subject has no importers.
+  vitest: { configFile: 'vitest.config.ts', related: false },
   coverageAnalysis: 'perTest',
   // Bound memory usage when each worker loads React, jsdom, and the icon library.
   concurrency: 4,
@@ -22,6 +23,6 @@ export default {
   htmlReporter: { fileName: 'reports/mutation/mutation.html' },
   jsonReporter: { fileName: 'reports/mutation/mutation.json' },
   incrementalFile: 'stryker-incremental.json',
-  // Measurement only. A merge-base survivor gate is a separate, unsettled decision.
+  // Full local runs report all debt; check:mutation enforces the merge-base floor.
   thresholds: { break: 0 },
 };
