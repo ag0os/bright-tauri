@@ -38,7 +38,11 @@ npm test                   # vitest watch
 npm run test:run           # vitest once (CI)
 npm run test:coverage      # coverage report
 npm run ci                 # shared local and CI checks, including generated type drift
-npm run mutation           # TypeScript mutation report (outside CI)
+npm run mutation           # full local TypeScript mutation report
+npm run check:mutation     # changed-subject TypeScript floor against BASE (origin/main)
+npm run check:health       # knip + dependency-cruiser floors against BASE
+npm run check:rust-mutation # changed-file cargo-mutants floor against BASE
+npm run mutation:rust      # full local cargo-mutants report (install 27.1.0 first)
 npx tsc                    # typecheck only
 
 npm run lint               # Biome lint + format check (frontend)
@@ -130,7 +134,7 @@ Each component's obligations live in `docs/contracts/<component>.md`: an id, a s
 
 A bug goes into the Contract first: add the missing obligation, write its test red against the unfixed code (the unfixed code is the mutant that matches the bug, so red is the proof the test kills it), then fix the code, then run `npm run mutation` where the fix is TypeScript and check that no mutant survives or goes uncovered on the lines you fixed, then run `npm run ci`. Label that PR `fix:` if the bug is live in a released build, naming the obligation id. Everything else is `refine:`.
 
-Before you say done, run `npm run ci`: it is the same set CI runs, and a check that could not run is a gap to name, never a pass. Mutation fails only on survivors your PR adds against its merge base; do not edit a baseline to pass. Rust has no mutation tool yet and no health tools are installed: both are named gaps, not passes.
+Before you say done, run `npm run ci`: it is the same set CI runs, and a check that could not run is a gap to name, never a pass. TypeScript mutation fails on survivors or uncovered mutants added against the merge base with `BASE` (default `origin/main`); Rust mutation uses cargo-mutants 27.1.0 and Rust 1.99.0 and fails on new missed mutants. Removed or renamed subjects and inconclusive results fail closed. Shared TypeScript test infrastructure or mutation configuration selects all subjects; Rust test infrastructure or Cargo configuration selects all Rust source files. Knip and dependency-cruiser fail only on new findings against the same merge base. Do not edit a baseline to pass. Keep mutation and CI runs serial. Full shared-infrastructure runs can exceed the ten-minute target; no subjects are dropped. Weekly full TypeScript reports retain the survivor snapshot. See `docs/checks.md` for identity rules, retained evidence, costs and limits.
 
 ## Warnings
 

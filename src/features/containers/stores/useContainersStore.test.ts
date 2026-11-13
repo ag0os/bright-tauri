@@ -4,7 +4,7 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { act } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Container, ContainerChildren, StorySummary } from '@/types';
 import { useContainersStore } from './useContainersStore';
 
@@ -12,6 +12,8 @@ import { useContainersStore } from './useContainersStore';
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
+
+const CACHE_TEST_TIME = Date.UTC(2025, 0, 1);
 
 // Helper to create mock Container (DBV: no git fields)
 const createMockContainer = (overrides: Partial<Container> = {}): Container => ({
@@ -56,6 +58,7 @@ const createMockStory = (overrides: Partial<StorySummary> = {}): StorySummary =>
 describe('useContainersStore - Optimistic Reordering', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(Date, 'now').mockReturnValue(CACHE_TEST_TIME);
     // Reset store state before each test (including clearing the cache)
     act(() => {
       const store = useContainersStore.getState();
@@ -68,6 +71,10 @@ describe('useContainersStore - Optimistic Reordering', () => {
         childrenLoading: {},
       });
     });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('optimistically updates container order immediately', async () => {
@@ -97,6 +104,9 @@ describe('useContainersStore - Optimistic Reordering', () => {
       const store = useContainersStore.getState();
       store._childrenCache.set('parent', mockChildren);
     });
+
+    // A normal pause must not expire the five-minute cache.
+    vi.mocked(Date.now).mockReturnValue(CACHE_TEST_TIME + 1000);
 
     // Mock successful backend call
     vi.mocked(invoke).mockResolvedValue(undefined);

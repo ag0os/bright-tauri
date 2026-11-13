@@ -9,11 +9,13 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       # Tauri v2 links against WebKitGTK/GTK on Linux; ripgrep powers lint:tokens.
       - name: Install system dependencies
@@ -43,6 +45,7 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.99.0
           components: rustfmt, clippy
 
       - name: Cache Cargo dependencies
@@ -60,5 +63,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Rust mutation tool
+        run: cargo install cargo-mutants --version 27.1.0 --locked
+
       - name: Run checks
         run: npm run ci
+
+      - name: Retain floor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-base-checks
+          path: reports/checks/
+          if-no-files-found: warn
+          retention-days: 30

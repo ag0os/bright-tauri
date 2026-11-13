@@ -9,6 +9,15 @@ function run(command, args, cwd = root) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
+run('node', [
+  '--test',
+  'scripts/check-floor.tests.mjs',
+  'scripts/check-health-floor.tests.mjs',
+  'scripts/check-rust-floor.tests.mjs',
+]);
+run('npm', ['run', 'check:health']);
+run('npm', ['run', 'check:rust-mutation']);
+run('npm', ['run', 'check:mutation']);
 run('tsc', ['--noEmit']);
 run('npm', ['run', 'lint:all']);
 run('npm', ['run', 'test:run']);

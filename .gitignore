@@ -38,3 +38,10 @@ missions/archive/sessions
 /reports/mutation/
 /.stryker-tmp/
 /stryker-incremental.json
+
+# Merge-base gate reports and temporary driver
+/reports/checks/
+/.check-stryker.config.mjs
+
+# Full local Rust mutation reports
+/src-tauri/mutants.out*/

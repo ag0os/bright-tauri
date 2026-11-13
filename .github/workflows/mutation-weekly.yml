@@ -1,0 +1,31 @@
+name: Weekly full mutation snapshot
+
+on:
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run mutation
+      - name: Extract survivor list
+        if: always()
+        run: node scripts/mutation-survivors.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: main-mutation-survivors
+          path: reports/mutation/
+          if-no-files-found: error
+          retention-days: 90

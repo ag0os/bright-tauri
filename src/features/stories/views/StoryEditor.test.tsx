@@ -220,9 +220,11 @@ describe('StoryEditor', () => {
         expect(screen.getByText('Test Story')).toBeInTheDocument();
       });
 
-      expect(mockGetStory).toHaveBeenCalledTimes(1);
-      expect(richTextEditorMountCount).toBe(1);
-      expect(richTextEditorUnmountCount).toBe(0);
+      await waitFor(() => {
+        expect(mockGetStory).toHaveBeenCalledTimes(1);
+        expect(richTextEditorMountCount).toBe(1);
+        expect(richTextEditorUnmountCount).toBe(0);
+      });
 
       await act(async () => {
         screen.getByTestId('editor-change').click();
@@ -232,9 +234,11 @@ describe('StoryEditor', () => {
         expect(screen.getByText('2 words')).toBeInTheDocument();
       });
 
-      expect(mockGetStory).toHaveBeenCalledTimes(1);
-      expect(richTextEditorMountCount).toBe(1);
-      expect(richTextEditorUnmountCount).toBe(0);
+      await waitFor(() => {
+        expect(mockGetStory).toHaveBeenCalledTimes(1);
+        expect(richTextEditorMountCount).toBe(1);
+        expect(richTextEditorUnmountCount).toBe(0);
+      });
     });
 
     it('handles empty activeSnapshot content gracefully', async () => {
@@ -372,41 +376,62 @@ describe('StoryEditor', () => {
     it('renders back button that calls goBack', async () => {
       renderWithProviders(<StoryEditor />);
 
-      await waitFor(() => {
-        expect(screen.getByLabelText('Go back')).toBeInTheDocument();
+      const button = await screen.findByRole('button', { name: 'Go back' });
+      await act(async () => {
+        button.click();
       });
+      expect(mockGoBack).toHaveBeenCalledTimes(1);
     });
 
     it('renders history button that navigates to story-history', async () => {
       renderWithProviders(<StoryEditor />);
 
-      await waitFor(() => {
-        expect(screen.getByLabelText('View history')).toBeInTheDocument();
+      const button = await screen.findByRole('button', { name: 'View history' });
+      await act(async () => {
+        button.click();
       });
+      expect(mockNavigate).toHaveBeenCalledWith({ screen: 'story-history', storyId: 'story-1' });
     });
 
     it('renders settings button that navigates to story-settings', async () => {
       renderWithProviders(<StoryEditor />);
 
-      await waitFor(() => {
-        expect(screen.getByLabelText('Story settings')).toBeInTheDocument();
+      const button = await screen.findByRole('button', { name: 'Story settings' });
+      await act(async () => {
+        button.click();
       });
+      expect(mockNavigate).toHaveBeenCalledWith({ screen: 'story-settings', storyId: 'story-1' });
     });
 
     it('renders versions button that navigates to story-versions', async () => {
       renderWithProviders(<StoryEditor />);
 
-      await waitFor(() => {
-        expect(screen.getByLabelText('Manage versions')).toBeInTheDocument();
+      const versionsButton = await screen.findByRole('button', { name: 'Manage versions' });
+      await act(async () => {
+        versionsButton.click();
       });
+      expect(mockNavigate).toHaveBeenCalledWith({ screen: 'story-versions', storyId: 'story-1' });
     });
   });
 
   describe('Word Count', () => {
     it('calculates and displays word count from content', async () => {
+      setupMocks({
+        ...mockStory,
+        activeSnapshot: {
+          ...mockStory.activeSnapshot,
+          content: JSON.stringify({
+            root: {
+              children: [
+                { children: [{ text: '  Initial content' }, { text: 'from snapshot  ' }] },
+              ],
+            },
+          }),
+        },
+      });
       renderWithProviders(<StoryEditor />);
 
-      // Initial content "Initial content from snapshot" = 4 words
+      // Node boundaries and surrounding whitespace still produce four words.
       await waitFor(() => {
         expect(screen.getByText('4 words')).toBeInTheDocument();
       });
